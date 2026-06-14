@@ -1,0 +1,314 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL_PRISMA")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Plan {
+  STARTER
+  GROWTH
+  PRO
+}
+
+enum PlanStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum LeadStatus {
+  PENDING
+  CALLING
+  CALL_FAILED
+  NO_ANSWER
+  FAQ_ONLY
+  BOOKED
+  REMINDED
+  VISITED
+  NO_SHOW
+  FOLLOWUP_D1
+  FOLLOWUP_D2
+  FOLLOWUP_D3
+  REBOOKED
+  COLD
+  CONVERTED
+}
+
+enum CallType {
+  QUALIFICATION
+  BOOKING_REMINDER
+  FOLLOWUP_D1
+  FOLLOWUP_D3
+}
+
+enum CallStatus {
+  INITIATED
+  RINGING
+  ANSWERED
+  COMPLETED
+  NO_ANSWER
+  FAILED
+  BUSY
+}
+
+enum BookingStatus {
+  CONFIRMED
+  REMINDED
+  VISITED
+  NO_SHOW
+  RESCHEDULED
+  CANCELLED
+}
+
+// ─────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  resetToken        String?  @unique
+  resetTokenExpiresAt DateTime?
+  createdAt    DateTime @default(now())
+  clients      Client[]
+}
+
+model Client {
+  id           String    @id @default(cuid())
+  adminId      String?
+  admin        Admin?    @relation(fields: [adminId], references: [id])
+
+  // Business
+  businessName String
+  ownerName    String
+  email        String    @unique
+  phone        String
+  city         String
+  zone         String?
+  territory    Territory?
+
+  // Auth
+  passwordHash String
+  resetToken        String?  @unique
+  resetTokenExpiresAt DateTime?
+
+  // Exotel
+  exotelSid    String?
+  exotelNumber String?
+
+  // Pipecat agent config
+  agentId      String?   @unique
+  callScript   Json?
+
+  // Language
+  language     String    @default("hinglish")
+
+  // WhatsApp
+  ownerWhatsapp String
+
+  // Plan
+  plan          Plan         @default(GROWTH)
+  planStatus    PlanStatus   @default(TRIAL)
+  trialEndsAt   DateTime?
+  razorpaySubId String?
+
+  // Usage
+  callsThisMonth  Int @default(0)
+  callsLimit      Int @default(300)
+
+  // Lead sources config
+  leadSources     Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads              Lead[]
+  calls              Call[]
+  bookings           Booking[]
+  webhookSources     WebhookSource[]
+  ownerNotifications OwnerNotification[]
+}
+
+model Territory {
+  id       String  @id @default(cuid())
+  city     String
+  zone     String?
+  tier     Int
+  clientId String? @unique
+  client   Client? @relation(fields: [clientId], references: [id])
+  locked   Boolean @default(false)
+
+  @@unique([city, zone])
+}
+
+model Lead {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  // Identity
+  name     String
+  phone    String
+  email    String?
+  source   String
+
+  // Raw inbound payload (stored for debugging)
+  rawPayload Json
+
+  // Qualification (filled after AI call)
+  budget        String?
+  location      String?
+  timeline      String?
+  propertyType  String?
+  bedrooms      String?
+  callLanguage  String?
+  sentiment     String?
+
+  // Lifecycle
+  score         Int        @default(0)
+  status        LeadStatus @default(PENDING)
+  callAttempts  Int        @default(0)
+  maxAttempts   Int        @default(3)
+  nextRetryAt   DateTime?
+
+  // Booking
+  bookingId     String?  @unique
+  booking       Booking? @relation(fields: [bookingId], references: [id])
+
+  // Follow-up tracking
+  followupD1At  DateTime?
+  followupD2At  DateTime?
+  followupD3At  DateTime?
+
+  // Timestamps
+  receivedAt    DateTime @default(now())
+  firstCalledAt DateTime?
+  bookedAt      DateTime?
+  visitedAt     DateTime?
+  coldAt        DateTime?
+  convertedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  calls               Call[]
+  customerNotifications CustomerNotification[]
+  ownerNotifications   OwnerNotification[]
+}
+
+model Call {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+  leadId   String
+  lead     Lead   @relation(fields: [leadId], references: [id])
+
+  // Exotel / Pipecat identifiers
+  exotelCallSid  String? @unique
+  pipecatSession String? @unique
+
+  // Call metadata
+  type       CallType
+  direction  String   @default("outbound")
+  duration   Int?
+  status     CallStatus @default(INITIATED)
+
+  // AI outputs
+  transcript    String?
+  summary       String?
+  recordingUrl  String?
+
+  // Extracted qualification (filled by DeepSeek after call ends)
+  extractedData Json?
+
+  // Notification sent
+  ownerNotified    Boolean @default(false)
+  customerNotified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Booking {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+  lead     Lead?
+
+  // Booking details
+  visitDate       DateTime
+  visitTime       String
+  propertyAddress String
+  propertyName    String?
+  notes           String?
+
+  // Status
+  status        BookingStatus @default(CONFIRMED)
+  confirmedAt   DateTime      @default(now())
+  reminderSentAt DateTime?
+  visitedAt     DateTime?
+  noShowAt      DateTime?
+
+  // Source call
+  sourceCallId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerNotifications OwnerNotification[]
+}
+
+model CustomerNotification {
+  id       String @id @default(cuid())
+  leadId   String
+  lead     Lead   @relation(fields: [leadId], references: [id])
+
+  type     String
+  channel  String
+  message  String
+  status   String   @default("sent")
+  waMessageId String?
+
+  sentAt   DateTime @default(now())
+}
+
+model OwnerNotification {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+  bookingId String?
+  booking  Booking? @relation(fields: [bookingId], references: [id])
+  leadId    String?
+  lead     Lead?   @relation(fields: [leadId], references: [id])
+
+  type     String
+  message  String
+  status   String   @default("sent")
+  waMessageId String?
+
+  sentAt   DateTime @default(now())
+}
+
+model WebhookSource {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  name     String
+  type     String
+  token    String  @unique @default(cuid())
+  parserConfig Json
+  active   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+}

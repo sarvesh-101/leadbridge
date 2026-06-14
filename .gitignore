@@ -1,0 +1,65 @@
+# ─── Environment ──────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+server/.env
+backend/.env
+
+# ─── Dependencies ─────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Build Output ─────────────────────────────────────────────
+dist/
+.next/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+build/
+*.tsbuildinfo
+
+# ─── IDE & Editor ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Logs & Runtime ───────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+backend_uvicorn.log
+
+# ─── Test & Coverage ──────────────────────────────────────────
+coverage/
+.coverage
+htmlcov/
+.vitest/
+
+# ─── Docker ───────────────────────────────────────────────────
+docker/data/
+docker/postgres-data/
+docker/redis-data/
+
+# ─── OS ───────────────────────────────────────────────────────
+*.exe
+*.dll
+*.so
+*.dylib
+nul
+
+# ─── Prisma ───────────────────────────────────────────────────
+server/node_modules/.prisma/
+
+# ─── Misc ─────────────────────────────────────────────────────
+*.tgz
+*.zip
+tmp/
+temp/

@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 10 10 15;
+    --foreground: 240 240 248;
+    --card: 17 17 24;
+    --card-foreground: 240 240 248;
+    --popover: 17 17 24;
+    --popover-foreground: 240 240 248;
+    --primary: 239 84% 67%;
+    --primary-foreground: 240 240 248;
+    --secondary: 26 26 36;
+    --secondary-foreground: 240 240 248;
+    --muted: 26 26 36;
+    --muted-foreground: 107 107 138;
+    --accent: 239 84% 67%;
+    --accent-foreground: 240 240 248;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 240 240 248;
+    --border: 42 42 58;
+    --input: 26 26 36;
+    --ring: 239 84% 67%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 10 10 15;
+    --foreground: 240 240 248;
+    --card: 17 17 24;
+    --card-foreground: 240 240 248;
+    --popover: 17 17 24;
+    --popover-foreground: 240 240 248;
+    --primary: 239 84% 67%;
+    --primary-foreground: 240 240 248;
+    --secondary: 26 26 36;
+    --secondary-foreground: 240 240 248;
+    --muted: 26 26 36;
+    --muted-foreground: 107 107 138;
+    --accent: 239 84% 67%;
+    --accent-foreground: 240 240 248;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 240 240 248;
+    --border: 42 42 58;
+    --input: 26 26 36;
+    --ring: 239 84% 67%;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2A2A3A transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #2A2A3A;
+    border-radius: 3px;
+  }
+
+  body {
+    background-color: #0A0A0F;
+    color: #F0F0F8;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    background-color: rgba(79, 110, 247, 0.3);
+    color: #F0F0F8;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .caption {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6B6B8A;
+  }
+
+  .hero-text {
+    font-family: 'Clash Display', Inter, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(56px, 8vw, 96px);
+    letter-spacing: -0.04em;
+    color: #F0F0F8;
+  }
+
+  .h1-text {
+    font-family: 'Clash Display', Inter, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(36px, 5vw, 56px);
+    letter-spacing: -0.03em;
+    color: #F0F0F8;
+  }
+
+  .h2-text {
+    font-family: 'Clash Display', Inter, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: #F0F0F8;
+  }
+
+  .h3-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: #F0F0F8;
+  }
+
+  .body-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    color: #6B6B8A;
+  }
+
+  .small-text {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    color: #6B6B8A;
+  }
+
+  .mono-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    font-size: 13px;
+  }
+
+  .glass-card {
+    background-color: #111118;
+    border: 1px solid #2A2A3A;
+    border-radius: 0.5rem;
+  }
+
+  .surface-card {
+    background-color: #1A1A24;
+    border: 1px solid #2A2A3A;
+    border-radius: 0.5rem;
+  }
+
+  .brand-glow {
+    box-shadow: 0 0 32px #4F6EF740;
+  }
+
+  .brand-border-glow {
+    border-color: #4F6EF7;
+    box-shadow: 0 0 16px #4F6EF740;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

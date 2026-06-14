@@ -1,0 +1,104 @@
+import { FastifyInstance, FastifyRequest } from "fastify";
+
+export default async function clientDashboardRoutes(fastify: FastifyInstance) {
+  fastify.addHook("preHandler", fastify.authenticate);
+
+  fastify.get("/dashboard", async (request: FastifyRequest) => {
+    const clientId = request.clientId!;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [
+      todayLeads,
+      todayCalls,
+      todayBookings,
+      monthLeads,
+      monthCalls,
+      monthBookings,
+      totalLeads,
+      leadsBySource,
+      leadsByStatus,
+      recentActivity,
+      activeFollowups,
+    ] = await Promise.all([
+      fastify.prisma.lead.count({ where: { clientId, receivedAt: { gte: startOfToday } } }),
+      fastify.prisma.call.count({ where: { clientId, createdAt: { gte: startOfToday } } }),
+      fastify.prisma.booking.count({ where: { clientId, createdAt: { gte: startOfToday } } }),
+      fastify.prisma.lead.count({ where: { clientId, receivedAt: { gte: startOfMonth } } }),
+      fastify.prisma.call.count({ where: { clientId, createdAt: { gte: startOfMonth } } }),
+      fastify.prisma.booking.count({ where: { clientId, createdAt: { gte: startOfMonth } } }),
+      fastify.prisma.lead.count({ where: { clientId } }),
+      fastify.prisma.lead.groupBy({
+        by: ["source"],
+        where: { clientId },
+        _count: { id: true },
+      }),
+      fastify.prisma.lead.groupBy({
+        by: ["status"],
+        where: { clientId },
+        _count: { id: true },
+      }),
+      fastify.prisma.lead.findMany({
+        where: { clientId },
+        orderBy: { updatedAt: "desc" },
+        take: 10,
+        include: { booking: { select: { visitDate: true, visitTime: true } } },
+      }),
+      fastify.prisma.lead.count({
+        where: {
+          clientId,
+          status: { in: ["FOLLOWUP_D1", "FOLLOWUP_D2", "FOLLOWUP_D3"] },
+        },
+      }),
+    ]);
+
+    // Calculate rates
+    const qualifiedLeads = await fastify.prisma.lead.count({
+      where: { clientId, status: { in: ["BOOKED", "VISITED", "CONVERTED", "REBOOKED"] } },
+    });
+    const visitedLeads = await fastify.prisma.lead.count({
+      where: { clientId, status: { in: ["VISITED", "CONVERTED"] } },
+    });
+    const convertedLeads = await fastify.prisma.lead.count({
+      where: { clientId, status: "CONVERTED" },
+    });
+
+    const qualifiedRate = monthLeads > 0 ? Math.round((qualifiedLeads / monthLeads) * 100) : 0;
+    const bookingRate = qualifiedLeads > 0 ? Math.round((monthBookings / qualifiedLeads) * 100) : 0;
+    const showRate = monthBookings > 0 ? Math.round((visitedLeads / monthBookings) * 100) : 0;
+    const conversionRate = visitedLeads > 0 ? Math.round((convertedLeads / visitedLeads) * 100) : 0;
+
+    // Today's upcoming bookings
+    const todayBookingsList = await fastify.prisma.booking.findMany({
+      where: {
+        clientId,
+        visitDate: { gte: startOfToday, lt: new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000) },
+        status: { in: ["CONFIRMED", "REMINDED"] },
+      },
+      include: { lead: { select: { name: true, phone: true } } },
+      orderBy: { visitTime: "asc" },
+    });
+
+    return {
+      stats: {
+        todayLeads,
+        todayCalls,
+        todayBookings,
+        monthLeads,
+        monthCalls,
+        monthBookings,
+        qualifiedRate,
+        bookingRate,
+        showRate,
+        conversionRate,
+        activeFollowups,
+        totalLeads,
+      },
+      leadsBySource,
+      leadsByStatus,
+      recentActivity,
+      todayBookings: todayBookingsList,
+    };
+  });
+}
