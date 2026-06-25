@@ -3,7 +3,6 @@
 .env.local
 .env.*.local
 server/.env
-backend/.env
 
 # ─── Dependencies ─────────────────────────────────────────────
 node_modules/
