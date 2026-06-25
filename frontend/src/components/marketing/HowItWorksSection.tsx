@@ -49,6 +49,17 @@ export default function HowItWorksSection() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [gsapReady, setGsapReady] = useState(false);
+  const [gsapTimedOut, setGsapTimedOut] = useState(false);
+
+  // Fallback: if GSAP hasn't activated within 3 seconds, show vertical layout
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!gsapReady) {
+        setGsapTimedOut(true);
+      }
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [gsapReady]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -236,7 +247,67 @@ export default function HowItWorksSection() {
     );
   }
 
-  // Desktop: horizontal scroll
+  // Desktop: horizontal scroll (fallback to vertical on GSAP timeout)
+  if (gsapTimedOut) {
+    return (
+      <section className="relative py-16 bg-[#0A0A0F]">
+        <h2 className="h1-text text-center px-4 mb-12">How It Works</h2>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="space-y-8">
+            {slides.map((slide, i) => (
+              <div key={i} className="relative p-6 rounded-lg bg-[#111118] border border-[#2A2A3A]">
+                <span className="text-[48px] font-display font-bold text-[#3A3A52] leading-none block mb-3">
+                  {slide.number}
+                </span>
+                <h3 className="text-[20px] font-display font-bold text-[#F0F0F8] mb-2">
+                  {slide.title}
+                </h3>
+                <p className="text-[14px] text-[#6B6B8A] mb-4">{slide.body}</p>
+                {slide.logos && (
+                  <div className="flex flex-wrap gap-2">
+                    {slide.logos.map((logo) => (
+                      <div key={logo} className="px-3 py-1.5 rounded border border-[#2A2A3A] bg-[#1A1A24] text-[12px] text-[#6B6B8A]">{logo}</div>
+                    ))}
+                  </div>
+                )}
+                {slide.hasWaveform && (
+                  <div className="flex items-end gap-[2px] h-6 mt-3">
+                    {Array.from({ length: 20 }).map((_, j) => (
+                      <div key={j} className="w-[2px] bg-[#4F6EF7] rounded-full" style={{ height: `${Math.random() * 80 + 20}%` }} />
+                    ))}
+                  </div>
+                )}
+                {slide.transcript && (
+                  <div className="space-y-1 mt-3">
+                    {slide.transcript.slice(0, 4).map((msg, j) => (
+                      <div key={j} className="flex gap-2 items-start">
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${msg.speaker === "AI" ? "bg-[#1A1A24] text-[#4F6EF7]" : "bg-[#4F6EF740] text-[#4F6EF7]"}`}>{msg.speaker}</span>
+                        <span className="text-[12px] text-[#F0F0F8]">{msg.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {slide.typewriterText && (
+                  <div className="p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] max-w-[280px] mt-3">
+                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#2A2A3A]">
+                      <div className="w-6 h-6 rounded-full bg-[#22D3A5]/20 flex items-center justify-center">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#22D3A5"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                      </div>
+                      <span className="text-[12px] font-semibold text-[#F0F0F8]">WhatsApp</span>
+                    </div>
+                    {slide.typewriterText.split("\n").slice(0, 6).map((line, j) => (
+                      <p key={j} className="text-[12px] text-[#F0F0F8]" style={{ fontWeight: line.includes(":") ? 400 : 600 }}>{line}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       ref={sectionRef}
@@ -248,8 +319,8 @@ export default function HowItWorksSection() {
         <div className="h-screen flex items-center justify-center">
           <div className="text-center">
             <span className="text-[120px] font-display font-bold text-[#3A3A52] leading-none block mb-4">01</span>
-            <h2 className="h1-text mb-4">Loading experience...</h2>
-            <p className="text-[18px] text-[#6B6B8A] max-w-[480px] mx-auto">Scroll to begin</p>
+            <h2 className="h1-text mb-4">How It Works</h2>
+            <p className="text-[18px] text-[#6B6B8A] max-w-[480px] mx-auto">Scroll down to explore</p>
           </div>
         </div>
       )}

@@ -11,6 +11,13 @@ datasource db {
 // ENUMS
 // ─────────────────────────────────────────────
 
+enum PhoneSetupStatus {
+  PENDING
+  NUMBER_PURCHASED
+  NUMBER_CONNECTED
+  LIVE
+}
+
 enum Plan {
   STARTER
   GROWTH
@@ -102,13 +109,19 @@ model Client {
   resetToken        String?  @unique
   resetTokenExpiresAt DateTime?
 
-  // Exotel
+  // Exotel (legacy — replaced by Omnidimension)
   exotelSid    String?
   exotelNumber String?
 
-  // Pipecat agent config
-  agentId      String?   @unique
-  callScript   Json?
+  // Omnidimension AI Voice Agent
+  omnidimensionAgentId Int?     @unique
+  omniAgentId         String?  @unique  // OmniDimension agent UUID (string format)
+  omniPhoneNumberId   Int?             // OmniDimension phone number ID
+  omniPhoneNumber     String?          // E.164 phone number
+  phoneSetupStatus    PhoneSetupStatus @default(PENDING)
+  callScript          Json?
+  knowledgeBase       String?          // Broker's property knowledge for the AI agent
+  agentVoiceId        String?          // ElevenLabs voice ID
 
   // Language
   language     String    @default("hinglish")
@@ -129,6 +142,10 @@ model Client {
   // Lead sources config
   leadSources     Json @default("[]")
 
+  // Onboarding tracking
+  onboardingComplete Boolean @default(false)
+  onboardingStep     Int     @default(0) // 0=not started, 1-6=steps, 7=done
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -136,7 +153,14 @@ model Client {
   calls              Call[]
   bookings           Booking[]
   webhookSources     WebhookSource[]
+  integrations       Integration[]
   ownerNotifications OwnerNotification[]
+  campaigns          Campaign[]
+  subscriptions      Subscription[]
+  invoices           Invoice[]
+  payments           Payment[]
+  auditLogs          AuditLog[]
+  waitlistEntries    WaitlistEntry[]
 }
 
 model Territory {
@@ -148,7 +172,39 @@ model Territory {
   client   Client? @relation(fields: [clientId], references: [id])
   locked   Boolean @default(false)
 
+  // Waitlist for when territory is taken
+  waitlistEntries WaitlistEntry[]
+
   @@unique([city, zone])
+}
+
+model WaitlistEntry {
+  id         String   @id @default(cuid())
+  territoryId String
+  territory  Territory @relation(fields: [territoryId], references: [id])
+
+  // Contact info from the person wanting this territory
+  name       String
+  email      String
+  phone      String
+  businessName String
+  city       String
+  zone       String?
+
+  // Status
+  notified   Boolean  @default(false)
+  notifiedAt DateTime?
+  expiresAt  DateTime?
+
+  // If they claimed it later, link to client
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id])
+  claimedAt         DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([territoryId])
+  @@index([email])
 }
 
 model Lead {
@@ -213,9 +269,10 @@ model Call {
   leadId   String
   lead     Lead   @relation(fields: [leadId], references: [id])
 
-  // Exotel / Pipecat identifiers
-  exotelCallSid  String? @unique
-  pipecatSession String? @unique
+  // Exotel / Pipecat (legacy — replaced by Omnidimension)
+  exotelCallSid       String? @unique
+  omnidimensionCallId String? @unique
+  pipecatSession      String? @unique
 
   // Call metadata
   type       CallType
@@ -299,6 +356,314 @@ model OwnerNotification {
   sentAt   DateTime @default(now())
 }
 
+// ─────────────────────────────────────────────
+// CAMPAIGN ENUMS
+// ─────────────────────────────────────────────
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum CampaignType {
+  FOLLOW_UP
+  RE_ENGAGEMENT
+  NO_SHOW_RECOVERY
+  WELCOME
+  PROMOTIONAL
+  CUSTOM
+}
+
+enum TaskAction {
+  CALL
+  WHATSAPP
+  SMS
+  EMAIL
+  DELAY
+  CONDITION
+  WEBHOOK
+  UPDATE_LEAD_STATUS
+  ASSIGN_LEAD
+  UPDATE_SCORE
+  TAG_LEAD
+  CUSTOM
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION ENUMS
+// ─────────────────────────────────────────────
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+  TRIAL
+  PENDING
+}
+
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  clientId  String
+  client    Client             @relation(fields: [clientId], references: [id])
+
+  // Plan
+  planName     String
+  planTier     String
+  billingCycle BillingCycle    @default(MONTHLY)
+  status       SubscriptionStatus @default(PENDING)
+
+  // Pricing
+  amount       Float
+  currency     String           @default("INR")
+  totalAmount  Float
+
+  // Period
+  startDate    DateTime
+  endDate      DateTime
+  trialEndDate DateTime?
+  cancelledAt  DateTime?
+
+  // Features & Limits
+  features Json @default("{}")
+  limits   Json @default("{}")
+
+  // Provider (Razorpay)
+  provider                String  @default("razorpay")
+  providerSubscriptionId  String?
+
+  // Auto-renew
+  autoRenew        Boolean @default(true)
+  gracePeriodDays  Int     @default(7)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices Invoice[]
+}
+
+model Invoice {
+  id       String       @id @default(cuid())
+  clientId String
+  client   Client       @relation(fields: [clientId], references: [id])
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  // Invoice details
+  invoiceNumber String       @unique
+  status        InvoiceStatus @default(SENT)
+  description   String?
+
+  // Billing
+  amount      Float
+  totalAmount Float
+  currency    String        @default("INR")
+
+  // Period
+  periodStart DateTime?
+  periodEnd   DateTime?
+
+  // Dates
+  issueDate DateTime
+  dueDate   DateTime
+  paidAt    DateTime?
+
+  // Billing info
+  billingName    String?
+  billingEmail   String?
+  billingPhone   String?
+  gstNumber      String?
+
+  // Provider
+  providerInvoiceId String?
+  invoiceUrl        String?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments Payment[]
+}
+
+model Payment {
+  id       String        @id @default(cuid())
+  clientId String
+  client   Client        @relation(fields: [clientId], references: [id])
+  invoiceId String?
+  invoice   Invoice?     @relation(fields: [invoiceId], references: [id])
+
+  // Payment details
+  amount        Float
+  currency      String        @default("INR")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?
+
+  // Provider
+  provider           String  @default("razorpay")
+  providerPaymentId  String?
+  providerOrderId    String?
+  providerSignature  String?
+
+  // Transaction
+  transactionId String?  @unique
+  receiptUrl    String?
+
+  // Refund
+  refundId     String?
+  refundAmount Float    @default(0)
+  refundReason String?
+  refundedAt   DateTime?
+
+  errorLog String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Campaign {
+  id        String         @id @default(cuid())
+  clientId  String
+  client    Client         @relation(fields: [clientId], references: [id])
+
+  // Details
+  name        String
+  description String?
+  campaignType CampaignType @default(CUSTOM)
+  status      CampaignStatus @default(DRAFT)
+
+  // Targeting
+  targetLeadSources  Json     @default("[]")
+  targetLeadStatuses Json     @default("[]")
+  targetLocations    Json     @default("[]")
+  targetTags         Json     @default("[]")
+  targetMinScore     Int      @default(0)
+  targetMaxScore     Int      @default(100)
+
+  // Schedule
+  startDate          DateTime?
+  endDate            DateTime?
+  timezone           String   @default("Asia/Kolkata")
+  workingHoursStart  String   @default("09:00")
+  workingHoursEnd    String   @default("18:00")
+  workingDays        Json     @default("[1,2,3,4,5,6]")
+
+  // Performance
+  leadsProcessed     Int      @default(0)
+  leadsTargeted      Int      @default(0)
+  callsMade          Int      @default(0)
+  messagesSent       Int      @default(0)
+  appointmentsBooked Int      @default(0)
+  conversions        Int      @default(0)
+
+  // Metadata
+  tags               Json     @default("[]")
+
+  // Timestamps
+  activatedAt        DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tasks CampaignTask[]
+}
+
+model CampaignTask {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // Task details
+  name   String
+  action TaskAction
+  order  Int
+
+  // Action configuration (varies by action type)
+  config Json @default("{}")
+
+  // Delay
+  delayAfterPreviousHours   Int @default(0)
+  delayAfterPreviousMinutes Int @default(0)
+
+  // Conditional logic
+  isCondition       Boolean @default(false)
+  conditionField    String?
+  conditionOperator String?
+  conditionValue    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// INTEGRATION ENUMS
+// ─────────────────────────────────────────────
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  DISCONNECTED
+}
+
+model Integration {
+  id       String  @id @default(cuid())
+  clientId String
+  client   Client  @relation(fields: [clientId], references: [id])
+
+  // Provider
+  provider    String
+  name        String
+  description String?
+  status      IntegrationStatus @default(INACTIVE)
+
+  // Credentials (encrypted at rest by application layer)
+  credentials Json @default("{}")
+  apiKey      String?
+  apiSecret   String?
+
+  // Settings
+  settings      Json    @default("{}")
+  syncFrequency String  @default("manual")
+
+  // Sync metrics
+  lastSyncAt       DateTime?
+  nextSyncAt       DateTime?
+  totalSynced      Int     @default(0)
+  totalErrors      Int     @default(0)
+  lastErrorMessage String?
+  lastErrorAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model WebhookSource {
   id       String @id @default(cuid())
   clientId String
@@ -311,4 +676,40 @@ model WebhookSource {
   active   Boolean @default(true)
 
   createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG MODEL
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+
+  // Who
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id])
+  userId    String?
+  adminId   String?
+
+  // What
+  action        String
+  resourceType  String
+  resourceId    String?
+  changes       Json     @default("{}")
+
+  // Context
+  ipAddress   String?
+  userAgent   String?
+  status      String   @default("success")  // success | failure
+  errorMessage String?
+
+  // Metadata
+  metadata    Json     @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
 }

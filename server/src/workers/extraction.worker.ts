@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { PrismaClient, LeadStatus, Prisma } from "@prisma/client";
 import { config } from "../config";
+import { logger } from "../utils/logger";
 import { ExtractionJob, enqueueNotification, enqueueReminder, enqueueFollowup } from "./queues";
 import { extractFromTranscript } from "../services/deepseek.service";
 import { emitStatusChange, emitBookingCreated } from "../services/websocket.service";
@@ -27,6 +28,41 @@ const extractionWorker = new Worker<ExtractionJob>(
       where: { id: callId },
       data: { extractedData: extractedData as unknown as Prisma.InputJsonValue },
     });
+
+    // Skip booking creation if webhook handler already processed this
+    // (lead already has a bookingId or status is already BOOKED)
+    if (lead.bookingId || lead.status === "BOOKED" || lead.status === "REBOOKED") {
+      job.log(`Lead ${leadId} already has a booking or is ${lead.status} — skipping booking creation`);
+
+      // Still update extracted data on the call
+      await prisma.lead.update({
+        where: { id: leadId },
+        data: {
+          budget: extractedData.budget || lead.budget,
+          location: extractedData.location || lead.location,
+          timeline: extractedData.timeline || lead.timeline,
+          propertyType: extractedData.propertyType || lead.propertyType,
+          bedrooms: extractedData.bedrooms || lead.bedrooms,
+          callLanguage: extractedData.language || lead.callLanguage,
+          sentiment: extractedData.sentiment || lead.sentiment,
+        },
+      });
+
+      await prisma.call.update({
+        where: { id: callId },
+        data: { summary: extractedData.summary },
+      });
+
+      await emitStatusChange(leadId, lead.status, clientId, {
+        extracted: true,
+        qualified: extractedData.qualified,
+        sentiment: extractedData.sentiment,
+        summary: extractedData.summary,
+      });
+
+      const { score } = await scoreLead(leadId);
+      return { newStatus: lead.status, bookingId: lead.bookingId, score };
+    }
 
     let newStatus: string;
     let bookingId: string | null = null;
@@ -151,7 +187,20 @@ const extractionWorker = new Worker<ExtractionJob>(
 );
 
 extractionWorker.on("failed", (job, error) => {
-  console.error(`Extraction worker job ${job?.id} failed:`, error.message);
+  logger.error({ jobId: job?.id, err: error.message }, "Extraction worker job failed");
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  await extractionWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  await extractionWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
 });
 
 export default extractionWorker;

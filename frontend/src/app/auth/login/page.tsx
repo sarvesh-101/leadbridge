@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
 
 type Role = "client" | "admin";
 
+// Google OAuth Client ID from env (optional — only shows button if set)
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
 export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
@@ -20,6 +23,54 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Google One Tap / Sign-In button
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || !googleBtnRef.current) return;
+
+    // Load Google Identity Services library if not already loaded
+    if ((window as any).google?.accounts) {
+      renderGoogleButton();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = renderGoogleButton;
+    document.body.appendChild(script);
+
+    function renderGoogleButton() {
+      if (!googleBtnRef.current) return;
+      (window as any).google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredential,
+      });
+      (window as any).google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: "outline",
+        size: "large",
+        width: googleBtnRef.current.offsetWidth || 360,
+        text: "signin_with",
+        shape: "pill",
+      });
+    }
+  }, [GOOGLE_CLIENT_ID]);
+
+  const handleGoogleCredential = async (response: { credential: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.post("/auth/google", { credential: response.credential }, { skipAuth: true });
+      login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Google Sign-In failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +210,21 @@ export default function LoginPage() {
                 <>Sign In <ArrowRight className="w-4 h-4" /></>
               )}
             </button>
+
+            {/* Google Sign-In */}
+            {GOOGLE_CLIENT_ID && (
+              <>
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[#2A2A3A]" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-[#111118] px-2 text-[#6B6B8A]">or continue with</span>
+                  </div>
+                </div>
+                <div ref={googleBtnRef} className="flex justify-center" />
+              </>
+            )}
           </form>
 
           <div className="mt-5 text-center">

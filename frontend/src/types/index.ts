@@ -42,6 +42,59 @@ export const LEAD_STATUS_COLORS: Record<LeadStatus, string> = {
   CONVERTED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
 };
 
+export type CampaignStatus = "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "ARCHIVED";
+export type CampaignType = "FOLLOW_UP" | "RE_ENGAGEMENT" | "NO_SHOW_RECOVERY" | "WELCOME" | "PROMOTIONAL" | "CUSTOM";
+export type TaskAction =
+  | "CALL" | "WHATSAPP" | "SMS" | "EMAIL" | "DELAY" | "CONDITION"
+  | "WEBHOOK" | "UPDATE_LEAD_STATUS" | "ASSIGN_LEAD" | "UPDATE_SCORE" | "TAG_LEAD" | "CUSTOM";
+
+export interface CampaignTask {
+  id: string;
+  campaignId: string;
+  name: string;
+  action: TaskAction;
+  order: number;
+  config?: Record<string, unknown>;
+  delayAfterPreviousHours?: number;
+  delayAfterPreviousMinutes?: number;
+  isCondition?: boolean;
+  conditionField?: string;
+  conditionOperator?: string;
+  conditionValue?: string;
+  createdAt: string;
+}
+
+export interface Campaign {
+  id: string;
+  clientId: string;
+  name: string;
+  description?: string;
+  campaignType: CampaignType;
+  status: CampaignStatus;
+  targetLeadSources?: string[];
+  targetLeadStatuses?: string[];
+  targetLocations?: string[];
+  targetTags?: string[];
+  targetMinScore?: number;
+  targetMaxScore?: number;
+  leadsTargeted: number;
+  leadsProcessed: number;
+  callsMade: number;
+  messagesSent: number;
+  appointmentsBooked: number;
+  conversions: number;
+  startDate?: string;
+  endDate?: string;
+  workingHoursStart?: string;
+  workingHoursEnd?: string;
+  workingDays?: number[];
+  activatedAt?: string;
+  completedAt?: string;
+  tasks: CampaignTask[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type Plan = "STARTER" | "GROWTH" | "PRO";
 export type PlanStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELLED";
 export type CallType = "QUALIFICATION" | "BOOKING_REMINDER" | "FOLLOWUP_D1" | "FOLLOWUP_D3";

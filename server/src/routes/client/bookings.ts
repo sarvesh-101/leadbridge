@@ -71,6 +71,43 @@ export default async function clientBookingRoutes(fastify: FastifyInstance) {
     return { booking: updatedBooking };
   });
 
+  // ─── Reschedule Booking ─────────────────────────────────────────
+  fastify.patch("/bookings/:id/reschedule", async (request: FastifyRequest<{
+    Params: { id: string };
+    Body: { visitDate: string; visitTime: string };
+  }>, reply: FastifyReply) => {
+    const booking = await fastify.prisma.booking.findFirst({
+      where: { id: request.params.id, clientId: request.clientId },
+      include: { lead: true },
+    });
+
+    if (!booking) {
+      return reply.status(404).send({ error: "Booking not found" });
+    }
+
+    const newDate = new Date(request.body.visitDate);
+    if (isNaN(newDate.getTime())) {
+      return reply.status(400).send({ error: "Invalid visitDate format. Use YYYY-MM-DD." });
+    }
+
+    const [updatedBooking, _lead] = await Promise.all([
+      fastify.prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          visitDate: newDate,
+          visitTime: request.body.visitTime,
+          status: "RESCHEDULED",
+        },
+      }),
+      fastify.prisma.lead.update({
+        where: { bookingId: booking.id },
+        data: { status: "REBOOKED" },
+      }),
+    ]);
+
+    return { booking: updatedBooking };
+  });
+
   // ─── Cancel Booking ───────────────────────────────────────────
   fastify.patch("/bookings/:id/cancel", async (request: FastifyRequest<{
     Params: { id: string };

@@ -1,27 +1,57 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "../../components/shared/Sidebar";
 import { TopBar } from "../../components/shared/TopBar";
+import { ErrorBoundary } from "../../components/shared/ErrorBoundary";
 import { useUIStore } from "../../stores/ui.store";
 import { wsClient } from "../../lib/websocket";
 import { useAuthStore } from "../../stores/auth.store";
+import { api } from "../../lib/api";
+import { Loader2 } from "lucide-react";
 import { Toaster } from "sonner";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { isAuthenticated } = useAuthStore();
+  const [setupCheckDone, setSetupCheckDone] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Load user profile data once and always show the dashboard
+    if (isAuthenticated && !pathname.startsWith("/setup") && !pathname.startsWith("/auth")) {
+      api.get("/me")
+        .then(() => {
+          setSetupCheckDone(true);
+        })
+        .catch(() => {
+          // If /me fails, still render dashboard (likely network issue)
+          setSetupCheckDone(true);
+        });
+    } else {
+      setSetupCheckDone(true);
+    }
+  }, [isAuthenticated, pathname]);
+
+  useEffect(() => {
+    if (isAuthenticated && setupCheckDone) {
       wsClient.connect();
     }
     return () => {
       wsClient.disconnect();
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, setupCheckDone]);
+
+  // Show loading spinner briefly while checking profile on dashboard routes
+  if (!setupCheckDone && isAuthenticated && !pathname.startsWith("/setup") && !pathname.startsWith("/auth")) {
+    return (
+      <div className="h-screen bg-[#0A0A0F] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-[#4F6EF7] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#0A0A0F]">
@@ -34,7 +64,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar />
         <main className="flex-1 overflow-y-auto p-6 bg-[#0A0A0F]">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
 

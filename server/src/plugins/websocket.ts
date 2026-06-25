@@ -24,26 +24,53 @@ export function getConnectedClientsCount(): number {
 }
 
 const websocketPlugin = fp(async (fastify: FastifyInstance) => {
-  // Subscribe to Redis pub/sub for lead events (optional in dev)
+  // ─── Redis Pub/Sub Health Monitor ──────────────────────────
+  // Maintains a heartbeat check so we can detect Redis failures early.
   let subClient: Redis | null = null;
-  if (config.NODE_ENV !== "development" || config.REDIS_URL !== "redis://localhost:6379") {
+  let redisHealthy = false;
+  let redisHealthCheckInterval: ReturnType<typeof setInterval> | null = null;
+
+  async function connectRedisPubSub(): Promise<Redis | null> {
     try {
-      subClient = new Redis(config.REDIS_URL, {
+      const client = new Redis(config.REDIS_URL, {
         maxRetriesPerRequest: null,
-        enableReadyCheck: false,
+        enableReadyCheck: true,
         lazyConnect: true,
-      });
-      await subClient.connect();
-
-      subClient.subscribe("lead:events", (err) => {
-        if (err) {
-          logger.error({ err }, "Failed to subscribe to lead:events");
-          return;
-        }
-        logger.info("WS: Subscribed to lead:events Redis channel");
+        retryStrategy: (times: number) => {
+          if (times > 5) {
+            logger.error("WS: Redis connection failed after 5 retries — giving up");
+            return null; // Stop retrying
+          }
+          return Math.min(times * 200, 2000); // Exponential backoff: 200ms, 400ms, 800ms...
+        },
       });
 
-      subClient.on("message", (channel: string, message: string) => {
+      client.on("connect", () => {
+        redisHealthy = true;
+        logger.info("WS: Redis connected");
+      });
+
+      client.on("error", (err: Error) => {
+        redisHealthy = false;
+        logger.warn({ err: err.message }, "WS: Redis connection error");
+      });
+
+      client.on("end", () => {
+        redisHealthy = false;
+        logger.warn("WS: Redis connection closed");
+      });
+
+      client.on("reconnecting", () => {
+        logger.info("WS: Redis reconnecting...");
+      });
+
+      await client.connect();
+
+      // Subscribe to lead events channel
+      await client.subscribe("lead:events");
+      logger.info("WS: Subscribed to lead:events Redis channel");
+
+      client.on("message", (channel: string, message: string) => {
         if (channel !== "lead:events") return;
 
         try {
@@ -67,13 +94,41 @@ const websocketPlugin = fp(async (fastify: FastifyInstance) => {
           logger.error({ err: err.message }, "WS: Failed to process message");
         }
       });
+
+      // Start periodic health check
+      redisHealthCheckInterval = setInterval(async () => {
+        try {
+          await client.ping();
+          if (!redisHealthy) {
+            redisHealthy = true;
+            logger.info("WS: Redis health recovered");
+          }
+        } catch {
+          redisHealthy = false;
+          logger.warn("WS: Redis health check failed");
+        }
+      }, 30000); // Every 30 seconds
+
+      return client;
     } catch (err) {
       logger.warn({ err }, "WS: Redis unavailable — running without pub/sub");
-      subClient = null;
+      return null;
     }
-  } else {
-    logger.warn("WS: Redis not configured — running without pub/sub");
   }
+
+  // Connect with retry support
+  try {
+    subClient = await connectRedisPubSub();
+  } catch {
+    subClient = null;
+  }
+
+  // Expose Redis health status for the health endpoint
+  fastify.decorate("wsRedisHealthy", {
+    getter() {
+      return redisHealthy;
+    },
+  });
 
   // WebSocket route
   fastify.get("/ws", { websocket: true }, (socket, request) => {
@@ -143,8 +198,22 @@ const websocketPlugin = fp(async (fastify: FastifyInstance) => {
     });
   });
 
+  // Expose connected clients count for metrics
+  fastify.decorate("getConnectedClients", {
+    getter() {
+      let count = 0;
+      for (const sockets of clients.values()) {
+        count += sockets.size;
+      }
+      return count;
+    },
+  });
+
   // Cleanup
   fastify.addHook("onClose", async () => {
+    if (redisHealthCheckInterval) {
+      clearInterval(redisHealthCheckInterval);
+    }
     if (subClient) {
       subClient.unsubscribe();
       subClient.quit();

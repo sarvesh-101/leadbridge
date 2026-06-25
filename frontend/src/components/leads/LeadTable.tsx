@@ -14,6 +14,9 @@ import {
   ChevronDown, ChevronUp, ChevronsUpDown, MoreHorizontal,
   Calendar,
 } from "lucide-react";
+import { Pagination } from "../shared/Pagination";
+import { EmptyState } from "../shared/EmptyState";
+
 import { cn, formatDate, formatCurrency } from "../../lib/utils";
 import { LeadStatusBadge } from "../shared/LeadStatusBadge";
 import { CallingPulse, CallingWaveform } from "./CallingPulse";
@@ -260,8 +263,11 @@ export function LeadTable({
             })}
             {leads.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-[#6B6B8A] text-[13px]">
-                  No leads found. New leads will appear here when they come in.
+                <td colSpan={columns.length} className="px-4 py-4">
+                  <EmptyState
+                    title="No leads found"
+                    description="New leads will appear here when they come in. Try adjusting your filters."
+                  />
                 </td>
               </tr>
             )}
@@ -270,47 +276,14 @@ export function LeadTable({
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-[13px] text-[#6B6B8A]">
-            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}
-          </p>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
-              className="px-3 py-1.5 rounded-lg text-[13px] border border-[#2A2A3A] bg-[#111118] text-[#6B6B8A] hover:bg-[#1A1A24] hover:text-[#F0F0F8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Previous
-            </button>
-            {[...Array(Math.min(totalPages, 5))].map((_, i) => {
-              const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
-              if (pageNum > totalPages) return null;
-              return (
-                <button
-                  key={pageNum}
-                  onClick={() => onPageChange(pageNum)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-[13px] border transition-colors",
-                    pageNum === page
-                      ? "border-[#4F6EF7] bg-[#4F6EF7]/10 text-[#4F6EF7]"
-                      : "border-[#2A2A3A] bg-[#111118] text-[#6B6B8A] hover:bg-[#1A1A24] hover:text-[#F0F0F8]"
-                  )}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= totalPages}
-              className="px-3 py-1.5 rounded-lg text-[13px] border border-[#2A2A3A] bg-[#111118] text-[#6B6B8A] hover:bg-[#1A1A24] hover:text-[#F0F0F8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        loading={loading}
+      />
     </div>
   );
 }

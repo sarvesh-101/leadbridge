@@ -1,9 +1,17 @@
 """LeadFlow AI OS - Application Configuration"""
 
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import Optional, List
 import os
 from functools import lru_cache
+
+
+def _parse_csv(v: str | List[str]) -> List[str]:
+    """Parse a comma-separated string into a list, stripping whitespace."""
+    if isinstance(v, str):
+        return [item.strip() for item in v.split(",") if item.strip()]
+    return v
 
 
 class Settings(BaseSettings):
@@ -18,11 +26,12 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8000
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "https://leadflow.ai",
-    ]
+    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000", "https://leadflow.ai"]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v):
+        return _parse_csv(v)
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/leadflow_ai"
@@ -57,7 +66,7 @@ class Settings(BaseSettings):
     # AI Services
     DEEPSEEK_API_KEY: Optional[str] = None
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com/v1"
-    DEEPSEEK_MODEL: str = "deepseek-chat"
+    DEEPSEEK_MODEL: str = "deepseek-v4-flash"
     DEEPGRAM_API_KEY: Optional[str] = None
     CARTESIA_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
@@ -98,14 +107,18 @@ class Settings(BaseSettings):
 
     # File Upload
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB
-    ALLOWED_FILE_TYPES: List[str] = [
-        "csv", "xlsx", "pdf", "mp3", "wav", "ogg", "txt"
-    ]
+    ALLOWED_FILE_TYPES: List[str] = ["csv", "xlsx", "pdf", "mp3", "wav", "ogg", "txt"]
+
+    @field_validator("ALLOWED_FILE_TYPES", mode="before")
+    @classmethod
+    def parse_allowed_file_types(cls, v):
+        return _parse_csv(v)
 
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = True
+        extra = "ignore"
 
 
 @lru_cache()

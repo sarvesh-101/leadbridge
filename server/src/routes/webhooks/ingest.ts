@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Prisma } from "@prisma/client";
 import { parseLead, parseWithMapping } from "../../utils/lead-parser";
 import { enqueueCall } from "../../workers/queues";
+import { emitNewLead } from "../../services/websocket.service";
 
 /**
  * Lead Ingestion Webhook — receives leads from portals.
@@ -112,6 +113,9 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       attempt: 1,
     });
 
+    // Publish WebSocket event for real-time dashboard update
+    await emitNewLead(lead.id, lead.name, source.name, client.id).catch(() => {});
+
     return reply.status(200).send({ lead, duplicate: false });
   });
 
@@ -182,6 +186,9 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       callType: "QUALIFICATION",
       attempt: 1,
     });
+
+    // Publish WebSocket event
+    await emitNewLead(lead.id, lead.name, source.name, source.clientId).catch(() => {});
 
     return reply.status(200).send({ lead, duplicate: false });
   });

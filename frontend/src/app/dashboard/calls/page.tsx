@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Phone, Clock } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { CallCard } from "@/components/calls/CallCard";
 import { RecordingPlayer } from "@/components/calls/RecordingPlayer";
 import { api } from "@/lib/api";
@@ -96,10 +97,11 @@ export default function CallsPage() {
             <div key={i} className="h-[72px] rounded-lg bg-[#111118] border border-[#2A2A3A] animate-pulse" />
           ))
         ) : calls.length === 0 ? (
-          <div className="text-center py-12">
-            <Phone className="w-10 h-10 mx-auto mb-3 text-[#3A3A52]" />
-            <p className="text-[14px] text-[#6B6B8A]">No calls found</p>
-          </div>
+          <EmptyState
+            icon={Phone}
+            title="No calls found"
+            description="Calls will appear here once leads start coming in"
+          />
         ) : (
           calls.map((call, i) => (
             <motion.div

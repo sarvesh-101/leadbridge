@@ -13,22 +13,14 @@
  */
 
 import { PrismaClient } from "@prisma/client";
-import axios from "axios";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { chatCompletion } from "./openrouter.service";
 import { sendTextMessage } from "./whatsapp.service";
 import { enqueueCall, enqueueNotification } from "../workers/queues";
 import { emitStatusChange } from "./websocket.service";
 
 const prisma = new PrismaClient();
-const deepseekApi = axios.create({
-  baseURL: config.DEEPSEEK_BASE_URL,
-  headers: {
-    Authorization: `Bearer ${config.DEEPSEEK_API_KEY}`,
-    "Content-Type": "application/json",
-  },
-  timeout: 15000,
-});
 
 interface ChatbotResponse {
   intent: "CONFIRM_APPOINTMENT" | "RESCHEDULE" | "CANCEL" | "INTERESTED" | "GENERAL";
@@ -62,8 +54,8 @@ export async function handleIncomingMessage(
   const client = lead.client;
   const booking = lead.booking;
 
-  // Build context for DeepSeek
-  const contextMessages = [
+  // Build context for the AI model
+  const contextMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
     {
       role: "system",
       content: `You are a helpful real estate assistant for ${client.businessName}. 
@@ -100,15 +92,12 @@ Respond with JSON:
   ];
 
   try {
-    const response = await deepseekApi.post("/chat/completions", {
-      model: config.DEEPSEEK_MODEL,
-      messages: contextMessages,
-      temperature: 0.7,
-      max_tokens: 512,
-    });
+    const result = await chatCompletion(
+      contextMessages,
+      { temperature: 0.7, max_tokens: 512, timeout: 15000 }
+    );
 
-    const content = response.data.choices[0]?.message?.content || "";
-    const parsed: ChatbotResponse = JSON.parse(content.replace(/```json/g, "").replace(/```/g, "").trim());
+    const parsed: ChatbotResponse = JSON.parse(result.content.replace(/```json/g, "").replace(/```/g, "").trim());
 
     // Send reply via WhatsApp
     await sendTextMessage({

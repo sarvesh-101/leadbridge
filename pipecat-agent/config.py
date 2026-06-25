@@ -13,7 +13,7 @@ class PipecatConfig(BaseSettings):
     # DeepSeek LLM
     deepseek_api_key: Optional[str] = None
     deepseek_base_url: str = "https://api.deepseek.com/v1"
-    deepseek_model: str = "deepseek-chat"
+    deepseek_model: str = "deepseek-v4-flash"
 
     # Deepgram STT
     deepgram_api_key: Optional[str] = None

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn, formatDate } from "@/lib/utils";
 import { api } from "@/lib/api";
-import { Search, MessageSquare, Phone, Mail, Check, Clock, X } from "lucide-react";
+import { Search, MessageSquare, Phone, Mail, Check, Clock, X, Inbox } from "lucide-react";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -158,7 +159,7 @@ export default function MessagesPage() {
             </motion.div>
           ))
         ) : (
-          <div className="text-center py-12 text-gray-500 text-sm">No messages found</div>
+          <EmptyState icon={Inbox} title="No messages found" description="Messages from calls and notifications will appear here" />
         )}
       </div>
     </div>

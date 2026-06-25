@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, Users, Phone, Calendar, BarChart3,
-  Settings, CreditCard, MessageSquare, Globe,
+  Settings, CreditCard, MessageSquare, Globe, Link as LinkIcon,
   ChevronLeft, ChevronRight, Building2, LogOut, Zap,
+  Activity, Webhook,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuthStore } from "../../stores/auth.store";
@@ -26,8 +27,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Calls", href: "/dashboard/calls", icon: <Phone className="w-5 h-5" /> },
   { label: "Bookings", href: "/dashboard/bookings", icon: <Calendar className="w-5 h-5" /> },
   { label: "Messages", href: "/dashboard/messages", icon: <MessageSquare className="w-5 h-5" /> },
+  { label: "Campaigns", href: "/dashboard/campaigns", icon: <Zap className="w-5 h-5" /> },
   { label: "Analytics", href: "/dashboard/analytics", icon: <BarChart3 className="w-5 h-5" /> },
   { label: "Territories", href: "/dashboard/territories", icon: <Globe className="w-5 h-5" /> },
+  { label: "Integrations", href: "/dashboard/integrations", icon: <LinkIcon className="w-5 h-5" /> },
   { label: "Settings", href: "/dashboard/settings", icon: <Settings className="w-5 h-5" /> },
   { label: "Billing", href: "/dashboard/billing", icon: <CreditCard className="w-5 h-5" /> },
 ];
@@ -36,7 +39,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Clients", href: "/admin/clients", icon: <Building2 className="w-5 h-5" /> },
   { label: "Territories", href: "/admin/territories", icon: <Globe className="w-5 h-5" /> },
-  { label: "Calls", href: "/admin/calls", icon: <Phone className="w-5 h-5" /> },
+  { label: "Queues", href: "/admin/queues", icon: <Activity className="w-5 h-5" /> },
+  { label: "Webhooks", href: "/admin/webhooks", icon: <Webhook className="w-5 h-5" /> },
 ];
 
 interface SidebarProps {

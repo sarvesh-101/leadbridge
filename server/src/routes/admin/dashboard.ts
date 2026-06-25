@@ -60,22 +60,6 @@ export default async function adminDashboardRoutes(fastify: FastifyInstance) {
     };
   });
 
-  fastify.get("/admin/territories", async (_request: FastifyRequest) => {
-    const territories = await fastify.prisma.territory.findMany({
-      include: { client: { select: { businessName: true, ownerName: true } } },
-      orderBy: [{ tier: "asc" }, { city: "asc" }],
-    });
-    return { territories };
-  });
-
-  fastify.get("/admin/territories/available", async (_request: FastifyRequest) => {
-    const territories = await fastify.prisma.territory.findMany({
-      where: { locked: false, clientId: null },
-      orderBy: [{ tier: "asc" }, { city: "asc" }],
-    });
-    return { territories };
-  });
-
   fastify.get("/admin/calls", async (request: FastifyRequest) => {
     const { page = "1", limit = "20" } = request.query as Record<string, string>;
     const skip = (parseInt(page) - 1) * parseInt(limit);

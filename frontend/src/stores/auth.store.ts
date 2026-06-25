@@ -1,19 +1,29 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  role: "admin" | "client";
+  name?: string;
+  businessName?: string;
+  ownerName?: string;
+  phone?: string;
+  plan?: "STARTER" | "GROWTH" | "PRO";
+  planStatus?: "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELLED";
+  city?: string;
+  zone?: string;
+  callsThisMonth?: number;
+  callsLimit?: number;
+  picture?: string;
+}
+
 interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
-  user: {
-    id: string;
-    email: string;
-    role: "admin" | "client";
-    name?: string;
-    businessName?: string;
-    plan?: string;
-  } | null;
+  user: UserProfile | null;
   isAuthenticated: boolean;
-  login: (tokens: { accessToken: string; refreshToken: string; user: any }) => void;
+  login: (tokens: { accessToken: string; refreshToken: string; user: UserProfile }) => void;
   logout: () => void;
   setAccessToken: (token: string) => void;
 }

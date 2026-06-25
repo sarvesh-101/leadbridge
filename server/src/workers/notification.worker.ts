@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
+import { logger } from "../utils/logger";
 import { NotificationJob } from "./queues";
 import { sendTextMessage } from "../services/whatsapp.service";
 import {
@@ -240,7 +241,20 @@ const notificationWorker = new Worker<NotificationJob>(
 );
 
 notificationWorker.on("failed", (job, error) => {
-  console.error(`Notification worker job ${job?.id} failed:`, error.message);
+  logger.error({ jobId: job?.id, err: error.message }, "Notification worker job failed");
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  await notificationWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  await notificationWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
 });
 
 export default notificationWorker;

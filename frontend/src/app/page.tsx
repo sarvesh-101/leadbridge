@@ -189,31 +189,40 @@ export default function LandingPage() {
             {[
               {
                 title: "Product",
-                links: ["Features", "Pricing", "Territories", "API"],
+                links: [
+                  { label: "How It Works", href: "#how-it-works" },
+                  { label: "Pricing", href: "#pricing" },
+                  { label: "Territories", href: "#territories" },
+                  { label: "API", href: "/docs" },
+                ],
               },
               {
                 title: "Company",
-                links: ["About", "Blog", "Careers", "Contact"],
+                links: [
+                  { label: "About", href: "#" },
+                  { label: "Blog", href: "#" },
+                  { label: "Careers", href: "#" },
+                  { label: "Contact", href: "#" },
+                ],
               },
               {
                 title: "Legal",
                 links: [
                   { label: "Privacy", href: "/legal/privacy" },
                   { label: "Terms", href: "/legal/terms" },
-                  { label: "GDPR", href: "#" },
                 ],
               },
             ].map((col) => (
               <div key={col.title}>
                 <h4 className="caption mb-4">{col.title}</h4>
                 <ul className="space-y-2">
-                  {col.links.map((link: any) => (
-                    <li key={link.label || link}>
+                  {col.links.map((link: { label: string; href: string }) => (
+                    <li key={link.label}>
                       <Link
-                        href={link.href || "#"}
+                        href={link.href}
                         className="text-[13px] text-[#6B6B8A] hover:text-[#F0F0F8] transition-colors"
                       >
-                        {link.label || link}
+                        {link.label}
                       </Link>
                     </li>
                   ))}

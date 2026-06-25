@@ -26,10 +26,15 @@ async function refreshAccessToken(): Promise<string | null> {
     }
 
     const data = await res.json();
+    const currentUser = useAuthStore.getState().user;
+    if (!currentUser) {
+      useAuthStore.getState().logout();
+      return null;
+    }
     login({
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
-      user: useAuthStore.getState().user,
+      user: currentUser,
     });
     return data.accessToken;
   } catch {
@@ -92,8 +97,15 @@ export const api = {
   get: <T = any>(endpoint: string, options?: FetchOptions) =>
     apiFetch<T>(endpoint, { ...options, method: "GET" }),
 
-  post: <T = any>(endpoint: string, body?: any, options?: FetchOptions) =>
-    apiFetch<T>(endpoint, { ...options, method: "POST", body: JSON.stringify(body) }),
+  post: <T = any>(endpoint: string, body?: any, options?: FetchOptions) => {
+    const isFormData = body instanceof FormData;
+    return apiFetch<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: isFormData ? body : JSON.stringify(body),
+      headers: isFormData ? { ...(options?.headers as Record<string, string>) } : undefined,
+    });
+  },
 
   patch: <T = any>(endpoint: string, body?: any, options?: FetchOptions) =>
     apiFetch<T>(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),

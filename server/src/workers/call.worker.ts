@@ -1,9 +1,9 @@
 import { Worker } from "bullmq";
 import { PrismaClient, LeadStatus } from "@prisma/client";
 import { config } from "../config";
+import { logger } from "../utils/logger";
 import { CallJob, enqueueCall, enqueueNotification } from "./queues";
-import { initiateOutboundCall } from "../services/exotel.service";
-import { startCallSession } from "../services/pipecat.service";
+import { dispatchCall } from "../services/omnidimension.service";
 import { emitCallStarted, emitCallEnded, emitStatusChange } from "../services/websocket.service";
 
 const prisma = new PrismaClient();
@@ -64,32 +64,37 @@ const callWorker = new Worker<CallJob>(
     await emitStatusChange(leadId, newStatus, clientId, { callId: call.id, callType });
 
     try {
-      const exotelResponse = await initiateOutboundCall({
-        from: client.exotelNumber || config.EXOTEL_CALLER_ID || "",
-        to: lead.phone, callType, clientId, leadId, attempt,
+      const agentId = client.omnidimensionAgentId;
+
+      if (!agentId) {
+        throw new Error(`Client ${clientId} has no omnidimensionAgentId configured`);
+      }
+
+      // Build call context with lead and client info for the Omnidimension agent
+      const callContext = {
+        lead_name: lead.name,
+        lead_phone: lead.phone,
+        business_name: client.businessName,
+        owner_name: client.ownerName,
+        call_type: callType,
+        lead_id: leadId,
+        client_id: clientId,
+        language: client.language,
+        call_attempt: attempt,
+      };
+
+      const omnidimResponse = await dispatchCall({
+        agentId,
+        toNumber: lead.phone,
+        callContext,
       });
 
       await prisma.call.update({
         where: { id: call.id },
-        data: { exotelCallSid: exotelResponse.callSid },
+        data: { omnidimensionCallId: String(omnidimResponse.requestId) },
       });
 
-      try {
-        await startCallSession({
-          leadId, clientId, callType, exotelCallSid: exotelResponse.callSid,
-          toNumber: lead.phone, fromNumber: client.exotelNumber || config.EXOTEL_CALLER_ID || "",
-          clientConfig: {
-            businessName: client.businessName, ownerName: client.ownerName,
-            language: client.language, callScript: client.callScript as Record<string, unknown> | null,
-            agentId: client.agentId,
-          },
-          leadInfo: { name: lead.name, phone: lead.phone },
-        });
-      } catch (pipecatError: any) {
-        job.log(`Pipecat session warning: ${pipecatError.message}`);
-      }
-
-      return { callId: call.id, exotelCallSid: exotelResponse.callSid };
+      return { callId: call.id, omnidimensionCallId: omnidimResponse.requestId };
     } catch (error: any) {
       await prisma.call.update({
         where: { id: call.id },
@@ -129,7 +134,20 @@ callWorker.on("completed", async (job) => {
 });
 
 callWorker.on("failed", (job, error) => {
-  console.error(`Call worker job ${job?.id} failed:`, error.message);
+  logger.error({ jobId: job?.id, err: error.message }, "Call worker job failed");
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  await callWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  await callWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
 });
 
 export default callWorker;

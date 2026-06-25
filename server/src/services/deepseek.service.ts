@@ -1,20 +1,11 @@
-import axios from "axios";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { chatCompletion } from "./openrouter.service";
 
 /**
- * DeepSeek V3 service — post-call transcript analysis and extraction.
- * Uses OpenAI-compatible API interface.
+ * AI-powered post-call analysis service.
+ * Uses OpenRouter (Qwen3 / Llama 3.3 / Llama 3.2) with automatic model fallback.
  */
-
-const deepseekApi = axios.create({
-  baseURL: config.DEEPSEEK_BASE_URL,
-  headers: {
-    Authorization: `Bearer ${config.DEEPSEEK_API_KEY}`,
-    "Content-Type": "application/json",
-  },
-  timeout: 30000,
-});
 
 export interface ExtractedData {
   qualified: boolean;
@@ -54,22 +45,19 @@ export async function extractFromTranscript(transcript: string): Promise<Extract
 }`;
 
   try {
-    const response = await deepseekApi.post("/chat/completions", {
-      model: config.DEEPSEEK_MODEL,
-      messages: [
+    const result = await chatCompletion(
+      [
         { role: "system", content: systemPrompt },
         { role: "user", content: transcript },
       ],
-      temperature: 0.1,
-      max_tokens: 1024,
-    });
+      { temperature: 0.1, max_tokens: 1024 }
+    );
 
-    const content = response.data.choices[0]?.message?.content || "";
-    const parsed = JSON.parse(content.replace(/```json/g, "").replace(/```/g, "").trim()) as ExtractedData;
+    const parsed = JSON.parse(result.content.replace(/```json/g, "").replace(/```/g, "").trim()) as ExtractedData;
 
     logger.info(
-      { qualified: parsed.qualified, bookingRequested: parsed.bookingRequested, sentiment: parsed.sentiment },
-      "DeepSeek extraction completed"
+      { qualified: parsed.qualified, bookingRequested: parsed.bookingRequested, sentiment: parsed.sentiment, model: result.model },
+      "AI extraction completed"
     );
 
     return parsed;
@@ -122,17 +110,15 @@ Write a natural Hinglish script that:
 Return ONLY the script text, no explanation.`;
 
   try {
-    const response = await deepseekApi.post("/chat/completions", {
-      model: config.DEEPSEEK_MODEL,
-      messages: [
+    const result = await chatCompletion(
+      [
         { role: "system", content: "You are a professional real estate call script writer." },
         { role: "user", content: prompt },
       ],
-      temperature: 0.7,
-      max_tokens: 2048,
-    });
+      { temperature: 0.7, max_tokens: 2048 }
+    );
 
-    return response.data.choices[0]?.message?.content || "";
+    return result.content;
   } catch (error: any) {
     logger.error({ err: error.message }, "Script generation failed");
     throw new Error("Failed to generate call script");

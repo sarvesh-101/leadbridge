@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Prisma } from "@prisma/client";
 
@@ -15,7 +16,7 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
 
   // ─── Update Profile ───────────────────────────────────────────
   fastify.patch("/me", async (request: FastifyRequest<{ Body: Record<string, unknown> }>, reply: FastifyReply) => {
-    const allowedFields = ["ownerWhatsapp", "language", "leadSources"];
+    const allowedFields = ["ownerWhatsapp", "language", "leadSources", "phoneSetupStatus"];
     const updates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {
@@ -84,6 +85,99 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
     });
 
     return reply.status(201).send({ source });
+  });
+
+  // ─── Update Webhook Source ────────────────────────────────────
+  // Ported from FastAPI: PUT /integrations/webhooks/{webhook_id}
+  fastify.patch("/settings/webhooks/:id", async (request: FastifyRequest<{
+    Params: { id: string };
+    Body: Record<string, unknown>;
+  }>, reply: FastifyReply) => {
+    const webhook = await fastify.prisma.webhookSource.findFirst({
+      where: { id: request.params.id, clientId: request.clientId },
+    });
+
+    if (!webhook) {
+      return reply.status(404).send({ error: "Webhook source not found" });
+    }
+
+    const updatable = ["name", "type", "parserConfig", "active"];
+    const data = Object.fromEntries(
+      updatable.filter((k) => k in request.body).map((k) => [k, (request.body as Record<string, unknown>)[k]])
+    );
+
+    if (Object.keys(data).length === 0) {
+      return reply.status(400).send({ error: "No valid fields to update" });
+    }
+
+    const updated = await fastify.prisma.webhookSource.update({
+      where: { id: webhook.id },
+      data: data as any,
+    });
+
+    return { webhook: updated };
+  });
+
+  // ─── Regenerate Webhook Token ─────────────────────────────────
+  // Ported from FastAPI: POST /integrations/webhooks/{webhook_id}/regenerate-secret
+  fastify.post("/settings/webhooks/:id/regenerate", async (
+    request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply
+  ) => {
+    const webhook = await fastify.prisma.webhookSource.findFirst({
+      where: { id: request.params.id, clientId: request.clientId },
+    });
+
+    if (!webhook) {
+      return reply.status(404).send({ error: "Webhook source not found" });
+    }
+
+    const newToken = crypto.randomUUID();
+
+    const updated = await fastify.prisma.webhookSource.update({
+      where: { id: webhook.id },
+      data: { token: newToken },
+    });
+
+    return {
+      message: "Webhook token regenerated",
+      token: updated.token,
+      webhookUrl: `/api/v1/webhooks/ingest/${updated.token}`,
+    };
+  });
+
+  // ─── Test Webhook Source ───────────────────────────────────────
+  // Ported from FastAPI: POST /integrations/webhooks/{webhook_id}/test
+  fastify.post("/settings/webhooks/:id/test", async (
+    request: FastifyRequest<{ Params: { id: string }; Body: { payload?: Record<string, unknown> } }>, reply: FastifyReply
+  ) => {
+    const webhook = await fastify.prisma.webhookSource.findFirst({
+      where: { id: request.params.id, clientId: request.clientId },
+    });
+
+    if (!webhook) {
+      return reply.status(404).send({ error: "Webhook source not found" });
+    }
+
+    // Simulate a test lead ingestion
+    const testPayload = request.body.payload || {
+      name: "Test Lead",
+      phone: "9876543210",
+      email: "test@example.com",
+      source: webhook.name,
+    };
+
+    return {
+      status: "success",
+      message: "Test webhook processed successfully",
+      webhook: {
+        id: webhook.id,
+        name: webhook.name,
+        type: webhook.type,
+        token: webhook.token,
+        webhookUrl: `/api/v1/webhooks/ingest/${webhook.token}`,
+      },
+      payload: testPayload,
+    };
   });
 
   // ─── Delete Webhook Source ────────────────────────────────────

@@ -11,14 +11,14 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  backend-tests:
-    name: Backend Tests
+  server-tests:
+    name: TypeScript Server Tests
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: leadflow_ai_test
+          POSTGRES_DB: leadbridge_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
@@ -41,33 +41,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
-          cache: "pip"
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
 
       - name: Install dependencies
         run: |
-          cd backend
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx
+          cd server
+          npm ci
+          npx prisma generate
 
-      - name: Run tests
+      - name: Run unit tests (vitest)
         run: |
-          cd backend
-          pytest -v --cov=app --cov-report=xml
+          cd server
+          npm test -- --reporter=verbose
         env:
-          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/leadflow_ai_test
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key
-          ENVIRONMENT: test
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          file: backend/coverage.xml
-          fail_ci_if_error: false
+          DATABASE_URL_PRISMA: postgresql://postgres:postgres@localhost:5432/leadbridge_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: ci-test-secret-key-that-is-at-least-32-chars-long
+          JWT_REFRESH_SECRET: ci-test-refresh-secret-that-is-at-least-32-chars
+          OMNIDIM_API_KEY: ci-test-omni-key
+          ENCRYPTION_KEY: ci-test-encryption-key-12345
 
   frontend-lint:
     name: Frontend Lint & Type Check
@@ -106,19 +103,29 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build backend image
+      - name: Build server image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: docker/Dockerfile
+          context: ./server
+          file: ./server/Dockerfile
           push: false
-          tags: leadflow-backend:test
+          tags: leadbridge-server:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: leadbridge-frontend:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy:
     name: Deploy to Production
-    needs: [backend-tests, frontend-lint, docker-build]
+    needs: [server-tests, frontend-lint, docker-build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -134,15 +141,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push backend
+      - name: Build and push server image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: docker/Dockerfile
+          context: ./server
+          file: ./server/Dockerfile
           push: true
           tags: |
-            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/backend:latest
-            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/backend:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/server:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/server:${{ github.sha }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ github.sha }}
+
+      - name: Run Prisma migrations
+        run: |
+          cd server
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL_PRISMA: ${{ secrets.PROD_DATABASE_URL }}
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -151,7 +175,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
-            cd /opt/leadflow-ai
+            cd /opt/leadbridge
             docker compose pull
             docker compose up -d --remove-orphans
             docker system prune -f

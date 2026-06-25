@@ -22,26 +22,32 @@ const envSchema = z.object({
   // Redis
   REDIS_URL: z.string().default("redis://localhost:6379"),
 
-  // Exotel
+  // Omnidimension — AI Voice Agent Platform
+  OMNIDIM_API_KEY: z.string(),
+  OMNIDIM_BASE_URL: z.string().default("https://backend.omnidim.io/api/v1"),
+
+  // Exotel (legacy — kept for backward compatibility)
   EXOTEL_API_KEY: z.string().optional(),
   EXOTEL_API_TOKEN: z.string().optional(),
   EXOTEL_SID: z.string().optional(),
   EXOTEL_SUBDOMAIN: z.string().default("api.exotel.com"),
   EXOTEL_CALLER_ID: z.string().optional(),
 
-  // Pipecat
+  // Pipecat (legacy — kept for backward compatibility)
   PIPECAT_SERVICE_URL: z.string().default("http://localhost:8000"),
   PIPECAT_SECRET: z.string().default("change-me"),
 
-  // DeepSeek
+  // LLM Provider (OpenAI-compatible API — works with OpenRouter, DeepSeek, etc.)
+  // Used for post-call transcript extraction, WhatsApp chatbot, and script generation.
+  // Default: Qwen3 Next 80B A3B Instruct via OpenRouter (free, fast, multilingual)
   DEEPSEEK_API_KEY: z.string().optional(),
-  DEEPSEEK_BASE_URL: z.string().default("https://api.deepseek.com/v1"),
-  DEEPSEEK_MODEL: z.string().default("deepseek-chat"),
+  DEEPSEEK_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
+  DEEPSEEK_MODEL: z.string().default("qwen/qwen3-next-80b-a3b-instruct:free"),
 
-  // Deepgram
+  // Deepgram (legacy — replaced by Omnidimension)
   DEEPGRAM_API_KEY: z.string().optional(),
 
-  // Cartesia
+  // Cartesia (legacy — replaced by Omnidimension)
   CARTESIA_API_KEY: z.string().optional(),
   CARTESIA_VOICE_ID: z.string().optional(),
 
@@ -68,8 +74,16 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   FROM_EMAIL: z.string().default("noreply@leadbridge.com"),
 
+  // Google OAuth
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+
   // Cron
   CRON_SECRET: z.string().default("change-me-cron-secret"),
+
+  // Encryption (for credential storage at rest)
+  // Optional in development; defaults to JWT_SECRET-based derivation if not set
+  ENCRYPTION_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

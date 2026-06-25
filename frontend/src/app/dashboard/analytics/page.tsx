@@ -30,12 +30,12 @@ export default function AnalyticsPage() {
   }
 
   const metrics = [
-    { label: "Leads Received", value: stats?.monthLeads ?? 0, change: "+12.5%", trend: "up" as const, icon: Users, color: "bg-blue-500" },
-    { label: "Calls Made", value: stats?.monthCalls ?? 0, change: "+8.2%", trend: "up" as const, icon: Phone, color: "bg-amber-500" },
-    { label: "Qualification Rate", value: `${stats?.qualifiedRate ?? 0}%`, change: "+15.3%", trend: "up" as const, icon: Target, color: "bg-purple-500" },
-    { label: "Booking Rate", value: `${stats?.bookingRate ?? 0}%`, change: "+23.1%", trend: "up" as const, icon: Calendar, color: "bg-emerald-500" },
-    { label: "Show Rate", value: `${stats?.showRate ?? 0}%`, change: "+5.4%", trend: "up" as const, icon: TrendingUp, color: "bg-indigo-500" },
-    { label: "Conversion Rate", value: `${stats?.conversionRate ?? 0}%`, change: "+5.4%", trend: "up" as const, icon: Target, color: "bg-rose-500" },
+    { label: "Leads Received", value: stats?.monthLeads ?? 0, icon: Users, color: "bg-blue-500" },
+    { label: "Calls Made", value: stats?.monthCalls ?? 0, icon: Phone, color: "bg-amber-500" },
+    { label: "Qualification Rate", value: `${stats?.qualifiedRate ?? 0}%`, icon: Target, color: "bg-purple-500" },
+    { label: "Booking Rate", value: `${stats?.bookingRate ?? 0}%`, icon: Calendar, color: "bg-emerald-500" },
+    { label: "Show Rate", value: `${stats?.showRate ?? 0}%`, icon: TrendingUp, color: "bg-indigo-500" },
+    { label: "Conversion Rate", value: `${stats?.conversionRate ?? 0}%`, icon: Target, color: "bg-rose-500" },
   ];
 
   // Build funnel from actual lead status distribution
@@ -88,8 +88,8 @@ export default function AnalyticsPage() {
                   <span className="text-xs text-gray-500">{m.label}</span>
                 </div>
                 <div className="text-lg font-bold text-white">{m.value}</div>
-                <span className={cn("flex items-center gap-1 text-xs mt-1", m.trend === "up" ? "text-green-400" : "text-red-400")}>
-                  {m.trend === "up" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}{m.change}
+                <span className="text-xs text-gray-500 mt-1">
+                  {m.label.includes("Rate") ? "of total leads" : "this month"}
                 </span>
               </>
             )}

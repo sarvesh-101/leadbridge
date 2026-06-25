@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { PrismaClient, LeadStatus } from "@prisma/client";
 import { config } from "../config";
+import { logger } from "../utils/logger";
 import { ReminderJob, enqueueCall, enqueueNotification } from "./queues";
 
 const prisma = new PrismaClient();
@@ -88,7 +89,20 @@ const reminderWorker = new Worker<ReminderJob>(
 );
 
 reminderWorker.on("failed", (job, error) => {
-  console.error(`Reminder worker job ${job?.id} failed:`, error.message);
+  logger.error({ jobId: job?.id, err: error.message }, "Reminder worker job failed");
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  await reminderWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  await reminderWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
 });
 
 export default reminderWorker;

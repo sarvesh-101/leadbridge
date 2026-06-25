@@ -9,7 +9,9 @@ import { verifyWebhookSignature } from "../../services/razorpay.service";
  * All requests are HMAC-SHA256 verified.
  */
 export default async function razorpayWebhookRoutes(fastify: FastifyInstance) {
-  fastify.post<{ Body: Record<string, unknown> }>("/webhooks/razorpay", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post<{ Body: Record<string, unknown> }>("/webhooks/razorpay", {
+    config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
     const signature = request.headers["x-razorpay-signature"] as string;
     const payload = JSON.stringify(request.body);
 

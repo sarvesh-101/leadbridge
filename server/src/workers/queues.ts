@@ -14,6 +14,7 @@ export const QUEUE_NAMES = {
   FOLLOWUP: "followup",
   REMINDER: "reminder",
   EXTRACTION: "extraction",
+  WEBHOOK_RETRY: "webhook-retry",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -59,6 +60,7 @@ let _notificationQueue: Queue | null | undefined;
 let _followupQueue: Queue | null | undefined;
 let _reminderQueue: Queue | null | undefined;
 let _extractionQueue: Queue | null | undefined;
+let _webhookRetryQueue: Queue | null | undefined;
 
 function getCallQueue() {
   if (_callQueue === undefined) _callQueue = createQueue(QUEUE_NAMES.CALL, 3, 5000);
@@ -79,6 +81,10 @@ function getReminderQueue() {
 function getExtractionQueue() {
   if (_extractionQueue === undefined) _extractionQueue = createQueue(QUEUE_NAMES.EXTRACTION, 3, 3000);
   return _extractionQueue;
+}
+function getWebhookRetryQueue() {
+  if (_webhookRetryQueue === undefined) _webhookRetryQueue = createQueue(QUEUE_NAMES.WEBHOOK_RETRY, 5, 2000);
+  return _webhookRetryQueue;
 }
 
 // ─────────────────────────────────────
@@ -174,7 +180,22 @@ export async function enqueueExtraction(job: ExtractionJob, delayMs?: number) {
   );
 }
 
+export interface WebhookRetryJob {
+  payload: Record<string, unknown>;
+  retryCount: number;
+}
+
+export async function enqueueWebhookRetry(payload: Record<string, unknown>, delayMs: number = 2000) {
+  const q = getWebhookRetryQueue();
+  if (!q) { logger.warn({}, "Redis unavailable — webhook retry not queued"); return; }
+  return q.add(
+    `webhook-retry:${payload.call_sid || payload.call_id || Date.now()}`,
+    { payload, retryCount: 0 } as WebhookRetryJob,
+    { delay: delayMs }
+  );
+}
+
 export async function closeAllQueues() {
-  const queues = [_callQueue, _notificationQueue, _followupQueue, _reminderQueue, _extractionQueue].filter(Boolean) as Queue[];
+  const queues = [_callQueue, _notificationQueue, _followupQueue, _reminderQueue, _extractionQueue, _webhookRetryQueue].filter(Boolean) as Queue[];
   await Promise.all(queues.map((q) => q.close()));
 }

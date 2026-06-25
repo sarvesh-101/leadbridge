@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { PrismaClient, LeadStatus } from "@prisma/client";
 import { config } from "../config";
+import { logger } from "../utils/logger";
 import { FollowupJob, enqueueCall, enqueueNotification, enqueueFollowup } from "./queues";
 import { isInFollowup } from "../utils/lifecycle";
 import { emitStatusChange } from "../services/websocket.service";
@@ -112,7 +113,20 @@ const followupWorker = new Worker<FollowupJob>(
 );
 
 followupWorker.on("failed", (job, error) => {
-  console.error(`Followup worker job ${job?.id} failed:`, error.message);
+  logger.error({ jobId: job?.id, err: error.message }, "Followup worker job failed");
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  await followupWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  await followupWorker.close();
+  await prisma.$disconnect();
+  process.exit(0);
 });
 
 export default followupWorker;

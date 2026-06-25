@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import { QueryProvider } from "../lib/query-client";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -45,7 +46,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className="min-h-screen bg-[#0A0A0F] text-[#F0F0F8] antialiased">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
         <Toaster
           position="top-right"
           richColors

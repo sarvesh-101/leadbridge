@@ -1,17 +1,18 @@
-# LeadFlow AI OS - Docker Compose Configuration
+# LeadBridge — Production Docker Compose
+# Fastify TypeScript server + BullMQ workers + PostgreSQL + Redis + Nginx
+
 services:
   # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
-    container_name: leadflow-postgres
+    container_name: leadbridge-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: leadflow_ai
+      POSTGRES_DB: leadbridge
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     ports:
       - "5432:5432"
     healthcheck:
@@ -20,12 +21,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - leadflow-network
+      - leadbridge-network
 
   # Redis Cache & Queue
   redis:
     image: redis:7-alpine
-    container_name: leadflow-redis
+    container_name: leadbridge-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redispass}
     volumes:
@@ -38,128 +39,212 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - leadflow-network
+      - leadbridge-network
 
-  # FastAPI Backend
-  backend:
+  # Fastify TypeScript Server (API + WebSocket)
+  server:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    container_name: leadflow-backend
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-server
     restart: unless-stopped
     env_file:
-      - ../backend/.env
+      - ../server/.env
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadflow_ai
-      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/0
-      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/1
-      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/2
-      ENVIRONMENT: production
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+      FRONTEND_URL: http://localhost:3001
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     ports:
-      - "8000:8000"
-    volumes:
-      - backend_media:/app/media
-      - ../backend:/app
+      - "3000:3000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
     networks:
-      - leadflow-network
+      - leadbridge-network
 
-  # Celery Worker
-  celery_worker:
+  # BullMQ Workers
+  worker-call:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    container_name: leadflow-celery-worker
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-worker-call
     restart: unless-stopped
-    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
+    command: npx tsx src/workers/call.worker.ts
     env_file:
-      - ../backend/.env
+      - ../server/.env
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadflow_ai
-      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/0
-      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/1
-      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/2
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ../backend:/app
     networks:
-      - leadflow-network
+      - leadbridge-network
 
-  # Celery Beat (Scheduler)
-  celery_beat:
+  worker-notification:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    container_name: leadflow-celery-beat
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-worker-notification
     restart: unless-stopped
-    command: celery -A app.workers.celery_app beat --loglevel=info
+    command: npx tsx src/workers/notification.worker.ts
     env_file:
-      - ../backend/.env
+      - ../server/.env
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadflow_ai
-      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/1
-      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-redispass}@redis:6379/2
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ../backend:/app
     networks:
-      - leadflow-network
+      - leadbridge-network
+
+  worker-followup:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-worker-followup
+    restart: unless-stopped
+    command: npx tsx src/workers/followup.worker.ts
+    env_file:
+      - ../server/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - leadbridge-network
+
+  worker-reminder:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-worker-reminder
+    restart: unless-stopped
+    command: npx tsx src/workers/reminder.worker.ts
+    env_file:
+      - ../server/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - leadbridge-network
+
+  worker-extraction:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-worker-extraction
+    restart: unless-stopped
+    command: npx tsx src/workers/extraction.worker.ts
+    env_file:
+      - ../server/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - leadbridge-network
+
+  worker-webhook-retry:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: leadbridge-worker-webhook-retry
+    restart: unless-stopped
+    command: npx tsx src/workers/webhook-retry.worker.ts
+    env_file:
+      - ../server/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      DATABASE_URL_PRISMA: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - leadbridge-network
 
   # Next.js Frontend
   frontend:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    container_name: leadflow-frontend
+    container_name: leadbridge-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
-      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     depends_on:
-      - backend
+      - server
     ports:
-      - "3000:3000"
+      - "3001:3000"
     networks:
-      - leadflow-network
+      - leadbridge-network
 
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
-    container_name: leadflow-nginx
+    container_name: leadbridge-nginx
     restart: unless-stopped
     volumes:
+      - ../infrastructure/nginx/leadflow.conf:/etc/nginx/conf.d/leadbridge.conf
       - ../infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ../infrastructure/nginx/leadflow.conf:/etc/nginx/conf.d/leadflow.conf
+      - ../infrastructure/nginx/ssl:/etc/nginx/ssl
     ports:
       - "80:80"
       - "443:443"
     depends_on:
-      - backend
+      - server
       - frontend
     networks:
-      - leadflow-network
+      - leadbridge-network
 
   # Prometheus Monitoring
   prometheus:
     image: prom/prometheus:latest
-    container_name: leadflow-prometheus
+    container_name: leadbridge-prometheus
     restart: unless-stopped
     volumes:
       - ../infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
@@ -167,12 +252,12 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - leadflow-network
+      - leadbridge-network
 
   # Grafana Dashboard
   grafana:
     image: grafana/grafana:latest
-    container_name: leadflow-grafana
+    container_name: leadbridge-grafana
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
@@ -181,19 +266,18 @@ services:
       - grafana_data:/var/lib/grafana
       - ../infrastructure/monitoring/grafana-dashboards:/etc/grafana/provisioning/dashboards
     ports:
-      - "3001:3000"
+      - "3002:3000"
     depends_on:
       - prometheus
     networks:
-      - leadflow-network
+      - leadbridge-network
 
 volumes:
   postgres_data:
   redis_data:
-  backend_media:
   prometheus_data:
   grafana_data:
 
 networks:
-  leadflow-network:
+  leadbridge-network:
     driver: bridge

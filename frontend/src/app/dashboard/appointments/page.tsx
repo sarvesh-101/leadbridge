@@ -7,6 +7,8 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Plus, Download, Calendar as CalendarIcon, Search, Clock, MapPin, MoreHorizontal } from "lucide-react";
 import { exportToCSV, EXPORT_HEADERS } from "@/lib/csv-export";
+import { Pagination } from "@/components/shared/Pagination";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 export default function AppointmentsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -146,26 +148,22 @@ export default function AppointmentsPage() {
             </motion.div>
           ))
         ) : (
-          <div className="text-center py-12 text-gray-500 text-sm">
-            {search ? "No appointments match your search" : "No appointments yet"}
-          </div>
+          <EmptyState
+            title={search ? "No appointments match your search" : "No appointments yet"}
+            description={search ? "Try a different search term" : "Appointments will appear here when leads book visits"}
+          />
         )}
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-            className="px-3 py-1.5 text-sm rounded-lg bg-white/5 border border-white/10 text-gray-400 disabled:opacity-50 hover:bg-white/10">
-            Previous
-          </button>
-          <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-            className="px-3 py-1.5 text-sm rounded-lg bg-white/5 border border-white/10 text-gray-400 disabled:opacity-50 hover:bg-white/10">
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={20}
+        onPageChange={setPage}
+        loading={loading}
+      />
     </div>
   );
 }

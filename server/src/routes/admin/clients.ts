@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
@@ -124,15 +125,119 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
   });
 
   // ─── Update Client ────────────────────────────────────────────
+  // SAFE: Only whitelisted fields can be updated — prevents mass-assignment
+  const CLIENT_UPDATABLE_FIELDS = [
+    "businessName", "ownerName", "email", "phone", "city", "zone",
+    "language", "ownerWhatsapp", "planStatus", "plan", "callsLimit",
+    "onboardingComplete", "onboardingStep", "callScript", "knowledgeBase",
+    "agentVoiceId", "leadSources", "omnidimensionAgentId", "omniAgentId",
+    "omniPhoneNumberId", "omniPhoneNumber", "phoneSetupStatus",
+  ] as const;
+
   fastify.patch("/admin/clients/:id", async (request: FastifyRequest<{
     Params: { id: string };
     Body: Record<string, unknown>;
   }>, reply: FastifyReply) => {
+    // Only allow whitelisted fields — prevents overwriting passwordHash, adminId, etc.
+    const data = Object.fromEntries(
+      CLIENT_UPDATABLE_FIELDS
+        .filter((k) => k in request.body)
+        .map((k) => [k, request.body[k]])
+    );
+
+    if (Object.keys(data).length === 0) {
+      return reply.status(400).send({ error: "No valid fields to update" });
+    }
+
     const client = await fastify.prisma.client.update({
       where: { id: request.params.id },
-      data: request.body as any, // Admin update — intentional broad cast
+      data: data as any,
     });
     return { client };
+  });
+
+  // ─── Update Client Status ──────────────────────────────────────
+  // Ported from FastAPI: PATCH /admin/clients/{tenant_id}/status
+  fastify.patch("/admin/clients/:id/status", async (request: FastifyRequest<{
+    Params: { id: string };
+    Body: { status?: string; plan?: string; callsLimit?: number; notes?: string };
+  }>, reply: FastifyReply) => {
+    const client = await fastify.prisma.client.findUnique({
+      where: { id: request.params.id },
+    });
+
+    if (!client) {
+      return reply.status(404).send({ error: "Client not found" });
+    }
+
+    const updateData: Record<string, unknown> = {};
+
+    const { status, plan, callsLimit, notes } = request.body;
+
+    const validStatuses = ["TRIAL", "ACTIVE", "PAST_DUE", "CANCELLED"];
+    if (status && validStatuses.includes(status)) {
+      updateData.planStatus = status;
+    } else if (status) {
+      return reply.status(400).send({
+        error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    const validPlans = ["STARTER", "GROWTH", "PRO"];
+    if (plan && validPlans.includes(plan)) {
+      updateData.plan = plan;
+    } else if (plan) {
+      return reply.status(400).send({
+        error: `Invalid plan. Must be one of: ${validPlans.join(", ")}`,
+      });
+    }
+
+    if (callsLimit !== undefined) {
+      updateData.callsLimit = callsLimit;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return reply.status(400).send({ error: "No valid fields to update" });
+    }
+
+    const updated = await fastify.prisma.client.update({
+      where: { id: request.params.id },
+      data: updateData,
+    });
+
+    return {
+      message: `Client '${updated.businessName}' updated`,
+      status: updated.planStatus,
+      plan: updated.plan,
+    };
+  });
+
+  // ─── Reset Client Password ─────────────────────────────────────
+  // Ported from FastAPI: POST /admin/clients/{tenant_id}/reset-password
+  fastify.post("/admin/clients/:id/reset-password", async (request: FastifyRequest<{
+    Params: { id: string };
+  }>, reply: FastifyReply) => {
+    const client = await fastify.prisma.client.findUnique({
+      where: { id: request.params.id },
+    });
+
+    if (!client) {
+      return reply.status(404).send({ error: "Client not found" });
+    }
+
+    const tempPassword = crypto.randomUUID().split("-").pop() + "A1!";
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+    await fastify.prisma.client.update({
+      where: { id: client.id },
+      data: { passwordHash },
+    });
+
+    return {
+      message: `Password reset for ${client.email}`,
+      temporaryPassword: tempPassword,
+      userEmail: client.email,
+    };
   });
 
   // ─── Delete Client (soft-deactivate) ──────────────────────────

@@ -2,10 +2,17 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { Resend } from "resend";
+import { OAuth2Client } from "google-auth-library";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../plugins/auth";
 import { config } from "../config";
 
 const resend = config.RESEND_API_KEY ? new Resend(config.RESEND_API_KEY) : null;
+
+// Google OAuth client (only initialized if GOOGLE_CLIENT_ID is set)
+let googleClient: OAuth2Client | null = null;
+if (config.GOOGLE_CLIENT_ID) {
+  googleClient = new OAuth2Client(config.GOOGLE_CLIENT_ID);
+}
 
 export default async function authRoutes(fastify: FastifyInstance) {
   // ─── Register (create client) ─────────────────────────────────
@@ -224,6 +231,96 @@ export default async function authRoutes(fastify: FastifyInstance) {
   }, async (_request: FastifyRequest, _reply: FastifyReply) => {
     // In a production system, invalidate the refresh token here
     return { message: "Logged out successfully" };
+  });
+
+  // ─── Google Sign-In ───────────────────────────────────────────
+  fastify.post("/auth/google", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["credential"],
+        properties: {
+          credential: { type: "string" },
+        },
+      },
+    },
+  }, async (request: FastifyRequest<{ Body: { credential: string } }>, reply: FastifyReply) => {
+    if (!googleClient) {
+      return reply.status(400).send({ error: "Google Sign-In is not configured. Set GOOGLE_CLIENT_ID in .env" });
+    }
+
+    try {
+      // Verify the Google ID token
+      const ticket = await googleClient.verifyIdToken({
+        idToken: request.body.credential,
+        audience: config.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        return reply.status(400).send({ error: "Failed to get user info from Google" });
+      }
+
+      const googleEmail = payload.email;
+      const googleName = payload.name || payload.email.split("@")[0];
+      const googlePicture = payload.picture;
+
+      // Find or create the client
+      let client = await fastify.prisma.client.findUnique({ where: { email: googleEmail } });
+
+      if (!client) {
+        // Auto-create account from Google profile
+        const randomPassword = crypto.randomBytes(24).toString("hex");
+        const passwordHash = await bcrypt.hash(randomPassword, 12);
+
+        client = await fastify.prisma.client.create({
+          data: {
+            businessName: `${googleName}'s Business`,
+            ownerName: googleName,
+            email: googleEmail,
+            phone: "",
+            city: "",
+            ownerWhatsapp: "",
+            passwordHash,
+            plan: "GROWTH",
+            planStatus: "TRIAL",
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            callsLimit: 100,
+            leadSources: ["manual"],
+            adminId: null,
+          },
+        });
+      }
+
+      // Generate tokens
+      const accessToken = generateAccessToken({
+        sub: client.id,
+        role: "client",
+        clientId: client.id,
+      });
+      const refreshToken = generateRefreshToken({ sub: client.id, role: "client" });
+
+      return {
+        accessToken,
+        refreshToken,
+        user: {
+          id: client.id,
+          businessName: client.businessName,
+          ownerName: client.ownerName,
+          email: client.email,
+          phone: client.phone,
+          role: "client",
+          plan: client.plan,
+          planStatus: client.planStatus,
+          callsThisMonth: client.callsThisMonth,
+          callsLimit: client.callsLimit,
+          city: client.city,
+          picture: googlePicture,
+        },
+      };
+    } catch (err: any) {
+      return reply.status(401).send({ error: "Invalid Google credential" });
+    }
   });
 
   // ─── Forgot Password ─────────────────────────────────────────
