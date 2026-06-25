@@ -148,7 +148,6 @@ PENDING → CALLING → FAQ_ONLY ──→ COLD
 
 - **Docker** & **Docker Compose** (for PostgreSQL, Redis, and services)
 - **Node.js** 18+ & **npm** / **pnpm**
-- **Python** 3.11+ & **pip**
 - **Git**
 
 ### 1. Clone & Install
@@ -167,10 +166,6 @@ npm install
 # Install frontend dependencies
 cd ../frontend
 npm install
-
-# Install Python backend dependencies
-cd ../backend
-pip install -r requirements.txt
 ```
 
 ### 2. Start Infrastructure
@@ -202,13 +197,7 @@ cd server
 npm run dev
 # → http://localhost:3000
 
-# Terminal 2 — Python Backend (FastAPI)
-cd backend
-cp ../.env .env
-uvicorn app.main:app --reload --port 8000
-# → http://localhost:8000/docs
-
-# Terminal 3 — Frontend (Next.js)
+# Terminal 2 — Frontend (Next.js)
 cd frontend
 npm run dev
 # → http://localhost:3001
@@ -227,46 +216,6 @@ curl http://localhost:3000/health
 
 ```
 leadbridge/
-├── backend/                    # Python FastAPI Backend
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── routes/         # API route handlers
-│   │   │   │   ├── admin.py        # Admin panel endpoints
-│   │   │   │   ├── analytics.py    # Analytics & reporting
-│   │   │   │   ├── appointments.py # Booking management
-│   │   │   │   ├── auth.py         # Authentication
-│   │   │   │   ├── calls.py        # Call management
-│   │   │   │   ├── campaigns.py    # Campaign workflows
-│   │   │   │   ├── integrations.py # Third-party integrations
-│   │   │   │   ├── leads.py        # Lead CRUD & analytics
-│   │   │   │   ├── subscriptions.py# Plan & billing
-│   │   │   │   └── territories.py  # Territory exclusivity
-│   │   │   └── v1/             # API v1 router aggregator
-│   │   ├── core/
-│   │   │   ├── config.py       # Pydantic settings
-│   │   │   ├── database.py     # SQLAlchemy async engine
-│   │   │   └── security.py     # JWT, RBAC, encryption
-│   │   ├── middleware/
-│   │   │   └── auth.py         # Auth middleware & rate limiter
-│   │   ├── models/            # SQLAlchemy ORM models
-│   │   │   ├── ai_config.py   # AI agent configuration
-│   │   │   ├── appointment.py # Appointment/booking model
-│   │   │   ├── audit.py       # Audit logging
-│   │   │   ├── call.py        # Call & recording models
-│   │   │   ├── campaign.py    # Campaign & task models
-│   │   │   ├── integration.py # Integration & webhook models
-│   │   │   ├── lead.py        # Lead, status, activity models
-│   │   │   ├── message.py     # WhatsApp message logs
-│   │   │   ├── notification.py# In-app notification model
-│   │   │   ├── subscription.py# Subscription, invoice, payment
-│   │   │   ├── tenant.py      # Multi-tenant organization
-│   │   │   ├── territory.py   # Territory exclusivity model
-│   │   │   └── user.py        # User & role models
-│   │   ├── schemas/           # Pydantic request/response schemas
-│   │   ├── workers/           # Celery async tasks
-│   │   ├── main.py            # FastAPI application entry point
-│   └── requirements.txt
-│
 ├── server/                     # TypeScript Fastify Server
 │   ├── prisma/
 │   │   └── schema.prisma      # Database schema (11 models)
@@ -402,66 +351,38 @@ leadbridge/
 
 ## 📖 API Reference
 
-### FastAPI Backend (`/api/v1`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/login` | Login with email/password |
-| POST | `/auth/register` | Register new tenant & admin |
-| POST | `/auth/refresh` | Refresh access token |
-| GET | `/auth/me` | Current user profile |
-| GET | `/auth/tenant` | Current tenant info |
-| POST | `/auth/change-password` | Change password |
-| GET | `/leads/` | List leads (paginated, filterable) |
-| POST | `/leads/` | Create lead |
-| GET | `/leads/{id}` | Get lead details |
-| PUT | `/leads/{id}` | Update lead |
-| DELETE | `/leads/{id}` | Soft delete lead |
-| POST | `/leads/{id}/assign` | Assign to user |
-| POST | `/leads/{id}/score` | Update AI score |
-| POST | `/leads/import/csv` | Bulk CSV import |
-| POST | `/leads/bulk` | Bulk actions |
-| GET | `/leads/analytics/summary` | Lead analytics |
-| GET | `/calls/` | List calls |
-| POST | `/calls/initiate` | Initiate AI call |
-| GET | `/calls/{id}` | Get call details |
-| GET | `/appointments/` | List appointments |
-| POST | `/appointments/` | Create appointment |
-| GET | `/campaigns/` | List campaigns |
-| POST | `/campaigns/` | Create campaign |
-| POST | `/campaigns/{id}/activate` | Activate campaign |
-| POST | `/campaigns/{id}/pause` | Pause campaign |
-| GET | `/territories/` | List territories |
-| GET | `/territories/available` | Available territories |
-| POST | `/territories/purchase` | Purchase territory |
-| GET | `/integrations/providers` | Available providers |
-| GET | `/integrations/` | User integrations |
-| POST | `/integrations/` | Create integration |
-| POST | `/integrations/{id}/test` | Test connection |
-| POST | `/integrations/{id}/sync` | Trigger sync |
-| GET | `/admin/clients` | List clients (super admin) |
-| PATCH | `/admin/clients/{id}/status` | Update tenant status |
-| GET | `/admin/analytics/dashboard` | Platform analytics |
-| GET | `/admin/audit-logs` | Browse audit logs |
-| GET | `/analytics/dashboard` | Dashboard stats |
-| GET | `/analytics/conversion-funnel` | Funnel data |
-| GET | `/subscriptions/current` | Current subscription |
-| POST | `/subscriptions/create` | Create subscription |
-
-### Fastify Server (`/api/v1` — Alternative API)
+### Fastify Server (`/api/v1`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
 | POST | `/auth/login` | Login |
 | POST | `/auth/register` | Register |
+| POST | `/auth/google` | Google OAuth login |
 | GET | `/leads` | List leads |
 | POST | `/leads` | Create lead |
 | GET | `/leads/{id}` | Get lead |
 | GET | `/calls` | List calls |
-| GET | `/dashboard` | Dashboard data |
-| POST | `/webhooks/ingest` | Lead ingestion webhook |
+| GET | `/calls/{id}` | Get call details |
+| GET | `/dashboard` | Dashboard stats |
+| GET | `/bookings` | List bookings |
+| GET | `/messages` | WhatsApp messages |
+| GET | `/campaigns` | List campaigns |
+| GET | `/territories` | List territories |
+| GET | `/territories/available` | Available territories |
+| GET | `/integrations` | List integrations |
+| GET | `/billing/current` | Current subscription |
+| GET | `/settings` | Client settings |
+| GET | `/admin/clients` | List clients |
+| GET | `/admin/dashboard` | Platform dashboard |
+| GET | `/admin/analytics` | Platform analytics |
+| GET | `/admin/audit-logs` | Audit logs |
+| GET | `/admin/queues` | Queue monitoring |
+| GET | `/admin/territories` | Territory management |
+| GET | `/admin/webhooks` | Webhook management |
+| POST | `/webhooks/ingest` | Lead ingestion |
 | POST | `/webhooks/exotel` | Exotel call events |
+| POST | `/webhooks/omnidimension` | Omnidimension call events |
 | POST | `/webhooks/razorpay` | Payment events |
 | POST | `/webhooks/whatsapp` | WhatsApp messages |
 
@@ -503,9 +424,13 @@ docker compose -f docker/docker-compose.yml logs -f backend frontend
 |---------|:----:|-------------|
 | Nginx | 80/443 | Reverse proxy with SSL |
 | Frontend | 3000 | Next.js dashboard |
-| Backend | 8000 | FastAPI API |
-| Celery Worker | — | Async task processing |
-| Celery Beat | — | Scheduled tasks |
+| Server | 3000 | Fastify API + WebSocket |
+| Worker (call) | — | AI call processing |
+| Worker (notification) | — | WhatsApp/Email notifications |
+| Worker (followup) | — | Follow-up sequences |
+| Worker (reminder) | — | Appointment reminders |
+| Worker (extraction) | — | Post-call transcript extraction |
+| Worker (webhook-retry) | — | Webhook failure retries |
 | PostgreSQL | 5432 | Database |
 | Redis | 6379 | Cache & queue |
 | Prometheus | 9090 | Metrics collection |
@@ -530,20 +455,15 @@ docker compose -f docker/docker-compose.yml logs -f backend frontend
 ## 🧪 Testing
 
 ```bash
-# TypeScript server tests
+# TypeScript server tests (96 tests, 0 failing)
 cd server
 npm test              # Vitest unit tests
 npm run typecheck     # TypeScript type checking
 
 # Frontend type checking
 cd frontend
-npm run type-check    # TypeScript checking
+npm run type-check    # TypeScript checking (0 errors)
 npm run lint          # ESLint
-
-# Python backend tests
-cd backend
-pytest               # Pytest unit tests
-pytest --cov         # With coverage report
 ```
 
 ---
@@ -558,9 +478,8 @@ pytest --cov         # With coverage report
 
 ### Development Guidelines
 
-- **Python**: Follow PEP 8, use type hints, async/await for I/O
 - **TypeScript**: Use strict mode, Zod for validation, proper types
-- **Database**: Always use migrations (Alembic for FastAPI, Prisma for Fastify)
+- **Database**: Use Prisma migrations for schema changes
 - **API**: RESTful conventions, consistent error responses
 - **Frontend**: Tailwind CSS, Framer Motion animations, dark theme
 
