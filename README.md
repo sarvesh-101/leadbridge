@@ -1,11 +1,11 @@
 # 🏗️ LeadBridge — AI-Powered Real Estate Lead Conversion Platform
 
-[![Status](https://img.shields.io/badge/Status-Active-success)](https://leadbridge.com)
-[![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://python.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5%2B-blue)](https://typescriptlang.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green)](https://fastapi.tiangolo.com/)
+[![Fastify](https://img.shields.io/badge/Fastify-4.28-brightgreen)](https://fastify.dev)
 [![Prisma](https://img.shields.io/badge/Prisma-5.19-purple)](https://prisma.io)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192)](https://postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D)](https://redis.io)
 
 > **One broker per city. AI calls every lead in 60 seconds.**
 > LeadBridge automates real estate lead qualification, calling, follow-ups, and conversion tracking — from inquiry to site visit.
@@ -16,16 +16,13 @@
 
 - [Overview](#-overview)
 - [Architecture](#-architecture)
-- [Features](#-features)
-- [Quick Start](#-quick-start)
-- [Project Structure](#-project-structure)
-- [Services & Integrations](#-services--integrations)
 - [Lead Lifecycle](#-lead-lifecycle)
-- [API Reference](#-api-reference)
-- [Environment Variables](#-environment-variables)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Quick Start (Local)](#-quick-start-local)
+- [API Key Checklist](#-api-key-checklist)
+- [Deploy to Railway](#-deploy-to-railway)
+- [Deploy with Docker Compose](#-deploy-with-docker-compose)
+- [Project Structure](#-project-structure)
+- [Testing](#-testing)
 
 ---
 
@@ -33,12 +30,13 @@
 
 LeadBridge automates the entire real estate lead follow-up process:
 
-1. **Lead Ingestion** — Captures leads from IndiaMart, MagicBricks, 99Acres, JustDial, Housing.com, Facebook Lead Ads, Google Forms, WhatsApp, and CSV imports
-2. **Instant AI Call** — Within 60 seconds, an AI agent (powered by DeepSeek + Deepgram + Cartesia) calls every new lead for qualification
-3. **Smart Lead Scoring** — Predictive engine scores leads (0-100) based on source, budget, timeline, sentiment, territory match, and response time
-4. **Automated Workflows** — Follow-up sequences via WhatsApp messages, reminder calls, and no-show recovery campaigns
-5. **Visit Tracking** — End-to-end booking management with WhatsApp reminders, Google Sheets sync, and conversion funnel analytics
-6. **Territory Exclusivity** — One agent per geographic territory with monthly subscription model
+1. **Lead Ingestion** — Captures leads from 99acres, MagicBricks, Housing.com, JustDial, Facebook, Google, WhatsApp, and manual entry via webhooks
+2. **Instant AI Call** — Within 60 seconds, an Omnidimension AI agent calls every new lead in Hinglish for qualification
+3. **Smart Lead Scoring** — Predictive engine scores leads (0-100) based on source quality, budget, timeline, sentiment, territory match, and response latency
+4. **Automated Workflows** — Follow-up sequences D1/D2/D3 via calls + WhatsApp messages, no-show recovery, booking reminders
+5. **Multi-Channel Notifications** — WhatsApp primary → SMS fallback (MessageBird) → Email fallback (Resend) chain
+6. **Visit Tracking** — End-to-end booking management with WhatsApp reminders and conversion funnel analytics
+7. **Territory Exclusivity** — One broker per city/zone with tiered subscription model
 
 ### Key Metrics (Industry Benchmarks)
 
@@ -55,99 +53,165 @@ LeadBridge automates the entire real estate lead follow-up process:
 ## 🏛️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Frontend (Next.js 15)                     │
-│            Marketing Site + Dashboard + Admin Panel           │
-└──────────────────┬──────────────────────────────────────────┘
-                   │ REST + WebSocket
-         ┌─────────┴────────────┬──────────────┐
-         ▼                     ▼               ▼
-┌─────────────────┐  ┌─────────────────┐  ┌──────────────────┐
-│  FastAPI Server  │  │  Fastify Server  │  │   Pipecat Agent  │
-│  (Python)        │  │  (TypeScript)    │  │   (Python)       │
-│  [/api/v1]      │  │  [/api/v1]      │  │   AI Voice Calls │
-│  Auth / Leads   │  │  Calls / Webhooks│  │   DeepSeek + STT │
-│  Campaigns      │  │  Queue / Workers │  │   + TTS Pipeline │
-│  Analytics      │  │  Real-time WS    │  │                  │
-└────────┬────────┘  └────────┬─────────┘  └──────────────────┘
-         │                    │
-         └────────┬───────────┘
-                  ▼
-    ┌─────────────────────────┐
-    │     PostgreSQL 16       │
-    │  (Primary Data Store)   │
-    └────────────┬────────────┘
-                 │
-         ┌───────┴───────┐
-         ▼               ▼
-   ┌──────────┐   ┌──────────┐
-   │  Redis   │   │    S3    │
-   │ Queue +  │   │Recording│
-   │  Cache   │   │ Storage │
-   └──────────┘   └──────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         🌐 INTERNET                             │
+│                                                                 │
+│  ┌──────────┐    ┌──────────────┐    ┌───────────────────┐     │
+│  │  Broker   │    │  Lead Portal │    │  WhatsApp / SMS   │     │
+│  │ (Browser) │    │   (Webhook)  │    │  (Customer)       │     │
+│  └────┬─────┘    └──────┬───────┘    └────────┬──────────┘     │
+│       │                 │                     │                 │
+└───────┼─────────────────┼─────────────────────┼─────────────────┘
+        │                 │                     │
+   ┌────┴─────────────────┴─────────────────────┴──────────────┐
+   │                   NGINX (Reverse Proxy)                    │
+   │                 Port 80 → 443 (SSL)                        │
+   └─────────────────────────┬──────────────────────────────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+   ┌────┴─────┐        ┌────┴─────┐         ┌────┴──────────┐
+   │  Next.js │        │ Fastify  │         │   External    │
+   │ Frontend │        │  Server  │         │   Services    │
+   │  :3001   │        │  :3000   │         │               │
+   └──────────┘        └──┬───┬───┘         │  ┌──────────┐ │
+                          │   │             │  │Omnidimen-│ │
+                          │   │             │  │sion AI   │ │
+                    ┌─────┘   └──────┐      │  └──────────┘ │
+                    │                │      │               │
+              ┌─────┴─────┐   ┌──────┴───┐  │  ┌──────────┐ │
+              │  BullMQ   │   │ Prisma   │  │  │ WhatsApp │ │
+              │  Workers  │   │   ORM    │  │  │ Cloud API│ │
+              │           │   │          │  │  └──────────┘ │
+              │ • Call    │   └────┬─────┘  │               │
+              │ • Notify  │        │        │  ┌──────────┐ │
+              │ • Extract │        │        │  │ Razorpay │ │
+              │ • Followup│   ┌────┴─────┐  │  └──────────┘ │
+              │ • Reminder│   │PostgreSQL│  │               │
+              │ • Webhook │   │ (Primary)│  │  ┌──────────┐ │
+              │  Retry    │   └──────────┘  │  │ Resend   │ │
+              └───────────┘                 │  └──────────┘ │
+                                            │               │
+                                       ┌────┴────┐          │
+                                       │  Redis  │          │
+                                       │(Queue + │          │
+                                       │ Cache)  │          │
+                                       └─────────┘          │
+                                            │               │
+                                       ┌────┴────┐          │
+                                       │  SMS    │          │
+                                       │Message- │          │
+                                       │ Bird)   │          │
+                                       └─────────┘          │
+                                            │               │
+                                       ┌────┴──────────┐    │
+                                       │Supabase       │    │
+                                       │(Recording     │    │
+                                       │  Storage)     │    │
+                                       └───────────────┘    │
+                                                            │
+                                       ┌──────────────┐     │
+                                       │  Prometheus  │     │
+                                       │  + Grafana   │     │
+                                       └──────────────┘     │
+                               └──────────────────────────────┘
+```
 
-External Services:
-  📞 Exotel (Telephony)
-  💬 WhatsApp Cloud API
-  💳 Razorpay (Subscriptions)
-  📧 Resend (Email)
-  🤖 DeepSeek (LLM)
-  🎤 Deepgram (STT)
-  🗣️ Cartesia (TTS)
+### Data Flow — A Lead's Journey
+
+```
+1. LEAD ARRIVES  → Fastify /webhooks/ingest → PostgreSQL
+2. CALL QUEUED   → BullMQ (via Redis) → Call Worker picks up
+3. AI CALL MADE  → Omnidimension API → calls lead's phone
+4. CALL ENDS     → Omnidimension webhook → extraction worker
+5. QUALIFIED?    → Booking created → Lead status updated
+6. NOTIFICATIONS → WhatsApp (primary) → SMS fallback → Email fallback
+7. BROKER SEES   → Next.js dashboard + WebSocket real-time updates
+8. FOLLOW-UPS    → Cron → BullMQ followup worker D1→D2→D3→COLD
+```
+
+### Tech Stack
+
+```
+Frontend:    Next.js 15 (App Router) + TypeScript + Tailwind + Framer Motion + GSAP
+Backend:     Fastify + TypeScript + Prisma ORM + Zod validation
+Queue:       BullMQ (backed by Redis)
+Database:    PostgreSQL 16
+Cache:       Redis 7
+Voice AI:    Omnidimension (primary) | Exotel (legacy fallback)
+Messaging:   WhatsApp Cloud API → fallback MessageBird SMS → fallback Resend Email
+Payments:    Razorpay (subscriptions)
+Storage:     Supabase (call recordings)
+Monitoring:  Prometheus + Grafana
+Deploy:      Railway / Docker Compose (VPS)
 ```
 
 ---
 
-## ✨ Features
+## 🔄 Lead Lifecycle
 
-### 🤖 AI Calling Engine
-- Outbound AI calls to leads within 60 seconds of ingestion
-- Multi-language support (Hindi, English, Hinglish)
-- Sentiment analysis & real-time qualification
-- Automatic appointment booking via natural conversation
-- Smart follow-up scheduling based on lead behavior
+### Status Flow
 
-### 📊 Predictive Lead Scoring
-8-factor scoring model (0-100):
-| Factor | Weight | Description |
-|--------|:------:|-------------|
-| Source Quality | 20% | 99Acres > MagicBricks > JustDial > Manual |
-| Time-to-Call | 15% | Faster response = higher score |
-| Budget Range | 15% | Within 20% of average deal |
-| Timeline Urgency | 20% | Immediate > 1-3 months > browsing |
-| Property Type | 10% | Most common type = bonus |
-| Call Hour | 10% | Business hours preferred |
-| Territory Match | 10% | Broker's area = bonus |
-| Sentiment | ±10 | Positive = +10, Negative = -15 |
-
-### 🔄 Lead Lifecycle Automation
 ```
-PENDING → CALLING → FAQ_ONLY ──→ COLD
-                   → BOOKED ──→ REMINDED ──→ VISITED ──→ CONVERTED
-                                  → NO_SHOW ──→ FOLLOWUP_D1 → D2 → D3 → REBOOKED
+                    ┌──────────┐
+                    │  PENDING │  (New lead received)
+                    └────┬─────┘
+                         │ AI call initiated within 60s
+                    ┌────▼─────┐
+                    │  CALLING │
+                    └────┬─────┘
+                         │
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+        ┌─────────┐ ┌────────┐ ┌────────┐
+        │NO_ANSWER│ │FAQ_ONLY│ │ BOOKED │
+        └────┬────┘ └───┬────┘ └───┬────┘
+             │          │          │ WhatsApp reminder sent 24h before
+             ▼          ▼          ▼
+       ┌──────────┐ ┌────────┐ ┌─────────┐
+       │CALL_FAIL │ │  COLD  │ │ REMINDED│
+       └────┬─────┘ └────────┘ └────┬────┘
+            │ Retry (3x)            │
+            ▼                 ┌─────┴──────┐
+     ┌──────────────┐         ▼            ▼
+     │FOLLOWUP_D1/  │   ┌────────┐   ┌──────────┐
+     │D2/D3/REBOOKED│   │VISITED │   │ NO_SHOW  │  (no-show detected by cron)
+     └──────┬───────┘   └───┬────┘   └────┬─────┘
+            │               │             │
+            └────────► ┌──────────┐ ┌──────────┐
+                       │CONVERTED │ │FOLLOWUP_ │
+                       └──────────┘ │D1/D2/D3  │
+                                    └──────────┘
+                                         │
+                                    ┌────▼─────┐
+                                    │  COLD    │  (after 3 follow-ups)
+                                    └──────────┘
 ```
 
-### 🗺️ Territory Exclusivity System
-- City/zone-based territory assignments
-- Tiered pricing (Metro, Tier-2, Tier-3)
-- Automatic waitlist for occupied territories
-- Monthly subscription per territory
-- One broker per territory exclusivity
+### Auto-Transitions
 
-### 💬 Multi-Channel Communication
-- WhatsApp notifications (appointment confirmations, reminders, follow-ups)
-- AI call summaries delivered to broker's WhatsApp
-- WhatsApp chatbot for lead interaction
-- Email notifications via Resend
+| From | To | Trigger | Timing |
+|------|:--:|:-------:|:------:|
+| PENDING | CALLING | New lead created | < 60s |
+| NO_ANSWER | Retry (3x max) | Exponential backoff (2hr, 4hr, 8hr) | Configurable |
+| CALL_FAILED | Retry (3x max) | Same as NO_ANSWER | Configurable |
+| BOOKED | REMINDED | 24h before visit | Cron job |
+| REMINDED | VISITED | Broker confirms | Manual |
+| REMINDED | NO_SHOW | No-show detected | Cron (24h after visit) |
+| NO_SHOW | FOLLOWUP_D1 | No-show recovery | Smart-scheduled |
+| FOLLOWUP_D1 | FOLLOWUP_D2 | D1 call completed | +24h |
+| FOLLOWUP_D2 | FOLLOWUP_D3 | D2 WhatsApp sent | +48h |
+| FOLLOWUP_D3 | COLD | No response after D3 | +72h |
+| VISITED | CONVERTED | Broker confirms deal | Manual |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Local)
 
 ### Prerequisites
 
-- **Docker** & **Docker Compose** (for PostgreSQL, Redis, and services)
-- **Node.js** 18+ & **npm** / **pnpm**
+- **Node.js** 18+ (22 recommended)
+- **Docker** & **Docker Compose** (for PostgreSQL + Redis)
 - **Git**
 
 ### 1. Clone & Install
@@ -156,43 +220,50 @@ PENDING → CALLING → FAQ_ONLY ──→ COLD
 git clone <repository-url>
 cd leadbridge
 
-# Copy environment file
-cp .env.example .env
-
-# Install server dependencies
+# Server dependencies
 cd server
 npm install
 
-# Install frontend dependencies
+# Frontend dependencies
 cd ../frontend
 npm install
 ```
 
-### 2. Start Infrastructure
+### 2. Start Infrastructure (PostgreSQL + Redis)
 
 ```bash
-# Start PostgreSQL and Redis
+cd ..
 docker compose -f docker/docker-compose.yml up -d postgres redis
 ```
 
-### 3. Database Setup
+### 3. Environment Variables
 
 ```bash
-# TypeScript/Prisma server
-cd server
-cp ../.env .env          # Edit with your DB credentials
-npx prisma generate
-npx prisma db push        # Creates tables from schema
+cp server/.env.example server/.env
+# Edit server/.env — at minimum set:
+#   JWT_SECRET, JWT_REFRESH_SECRET, OMNIDIM_API_KEY
+#   DATABASE_URL, REDIS_URL
 
-# Seed default admin (auto-created on first run):
-# Email: admin@leadbridge.com
-# Password: random (check server logs on first start)
+cp frontend/.env.example frontend/.env.local
+# Edit frontend/.env.local with your backend URL
 ```
 
-### 4. Launch Services
+### 4. Database Setup
 
 ```bash
-# Terminal 1 — TypeScript Server (API + WebSocket)
+cd server
+npx prisma generate
+npx prisma db push     # Creates tables
+
+# First run auto-creates:
+#   Admin email: admin@leadbridge.com
+#   Admin password: <random> — check server logs!
+```
+
+### 5. Launch
+
+```bash
+# Terminal 1 — Server (API + WebSocket)
 cd server
 npm run dev
 # → http://localhost:3000
@@ -203,12 +274,125 @@ npm run dev
 # → http://localhost:3001
 ```
 
-### 5. Verify Installation
+### 6. Verify
 
 ```bash
 curl http://localhost:3000/health
-# {"status":"healthy","app":"LeadBridge","version":"1.0.0"}
+# → {"status":"healthy","app":"LeadBridge","version":"1.0.0"}
 ```
+
+### 7. Run Full Stack with Docker Compose
+
+```bash
+# Start everything (server, workers, frontend, monitoring)
+docker compose -f docker/docker-compose.yml up -d
+
+# Check logs
+docker compose -f docker/docker-compose.yml logs -f server
+
+# Verify health
+curl http://localhost:3000/health
+```
+
+---
+
+## 🔐 API Key Checklist
+
+| # | Service | What For | Pricing | Signup | Keys Needed |
+|:-|:--------|:---------|:--------|:-------|:------------|
+| 1 | **Omnidimension** | AI voice calls (core) | Free to start, pay-as-you-go | [omnidim.io](https://omnidim.io) | `OMNIDIM_API_KEY` |
+| 2 | **PostgreSQL** | Database | Supabase: **free 500MB** | [supabase.com](https://supabase.com) | `DATABASE_URL` |
+| 3 | **Redis** | Queue + cache | Upstash: **free 256MB** | [upstash.com](https://upstash.com) | `REDIS_URL` |
+| 4 | **WhatsApp Cloud** | Notifications | **Free** (message costs only) | [developers.facebook.com](https://developers.facebook.com) | `WHATSAPP_TOKEN`, `PHONE_ID`, `VERIFY_TOKEN` |
+| 5 | **MessageBird** | SMS fallback | Pay-as-you-go (~₹0.5/SMS) | [messagebird.com](https://messagebird.com) | `MESSAGEBIRD_API_KEY` |
+| 6 | **Razorpay** | Payments (subscriptions) | **Free** (2% per tx) | [razorpay.com](https://razorpay.com) | `RAZORPAY_KEY_ID`, `KEY_SECRET`, plans |
+| 7 | **Resend** | Email fallback | **Free** (100/day) | [resend.com](https://resend.com) | `RESEND_API_KEY` |
+| 8 | **Supabase** | Recording storage (not the database — we use our own Postgres) | **Free** (1GB storage) | [supabase.com](https://supabase.com) | `SUPABASE_URL`, `SERVICE_KEY` |
+
+### 🔴 Required (server won't start without these)
+
+```
+JWT_SECRET              — generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+JWT_REFRESH_SECRET      — generate same way
+OMNIDIM_API_KEY         — from omnidim.io dashboard
+DATABASE_URL            — from Supabase or Railway
+REDIS_URL               — from Upstash or Railway
+```
+
+### 🟢 Optional (add as you configure each feature)
+
+```
+WHATSAPP_TOKEN, WHATSAPP_PHONE_ID, WHATSAPP_VERIFY_TOKEN
+MESSAGEBIRD_API_KEY
+RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
+RESEND_API_KEY
+ENCRYPTION_KEY          — optional, defaults to JWT_SECRET derivation
+```
+
+---
+
+## ☁️ Deploy to Railway
+
+### Prerequisites
+- GitHub repo with the code pushed
+- [Railway account](https://railway.app) ($5/mo Hobby plan)
+
+### Step 1: Create Project
+1. Go to [railway.app/dashboard](https://railway.app/dashboard)
+2. Click **New Project** → **Deploy from GitHub repo**
+3. Select your `leadbridge` repo
+4. Railway auto-detects Node.js → runs build automatically
+
+### Step 2: Add Databases
+Click **New** → **Database** → add both:
+- **PostgreSQL** — copy the `DATABASE_URL`
+- **Redis** — copy the `REDIS_URL`
+
+### Step 3: Set Environment Variables
+In the server service's **Variables** tab:
+
+| Variable | Value |
+|:---------|:------|
+| `NODE_ENV` | `production` |
+| `PORT` | `3000` |
+| `JWT_SECRET` | *(random 64-char hex)* |
+| `JWT_REFRESH_SECRET` | *(random 64-char hex)* |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+| `DATABASE_URL_PRISMA` | `${{Postgres.DATABASE_URL}}` |
+| `DIRECT_URL` | `${{Postgres.DATABASE_URL}}` |
+| `REDIS_URL` | `${{Redis.REDIS_URL}}` |
+| `OMNIDIM_API_KEY` | *(from omnidim.io)* |
+| `FRONTEND_URL` | *(your Railway domain)* |
+
+### Step 4: Add Frontend Service
+Click **New** → **GitHub Repo** → same repo → in service **Settings**, set **Root Directory** to `frontend`
+
+Railway will use the `frontend/package.json` and run `npm run build` automatically. Add a `frontend/railway.json` for custom build control if needed.
+
+Variables for frontend:
+```
+NEXT_PUBLIC_API_URL = https://server-domain.railway.app/api/v1
+NEXT_PUBLIC_WS_URL  = wss://server-domain.railway.app
+NEXT_PUBLIC_APP_URL = https://frontend-domain.railway.app
+```
+
+### Step 5: Generate Domains
+- Server: **Networking** → **Generate Domain**
+- Frontend: **Networking** → **Generate Domain**
+
+### Step 6: Run Migrations
+```bash
+# In Railway dashboard → server service → Shell
+npx prisma db push
+```
+
+### Step 7: Verify
+```bash
+curl https://your-server-domain.railway.app/health
+# → {"status":"healthy","app":"LeadBridge","version":"1.0.0"}
+```
+
+**Total time: ~20 minutes.**
 
 ---
 
@@ -216,255 +400,100 @@ curl http://localhost:3000/health
 
 ```
 leadbridge/
-├── server/                     # TypeScript Fastify Server
+├── server/                          # Fastify TypeScript Server
 │   ├── prisma/
-│   │   └── schema.prisma      # Database schema (11 models)
+│   │   └── schema.prisma           # 18 models: Lead, Call, Booking, Client, etc.
 │   ├── src/
-│   │   ├── config.ts          # Zod-validated env config
-│   │   ├── index.ts           # Server entry point
-│   │   ├── create-admin.ts    # First-run admin seeder
-│   │   ├── plugins/           # Fastify plugins
-│   │   ├── routes/            # Route handlers
-│   │   │   ├── admin/         # Admin routes
-│   │   │   ├── client/        # Client/broker routes
-│   │   │   └── webhooks/      # External webhook handlers
-│   │   ├── services/          # Business logic services
-│   │   ├── utils/             # Utilities & helpers
-│   │   ├── workers/           # BullMQ queue workers
-│   │   └── cron/              # Scheduled job handlers
+│   │   ├── config.ts               # Zod-validated environment config
+│   │   ├── index.ts                # Server entry point + graceful shutdown
+│   │   ├── plugins/                # Fastify plugins (auth, prisma, redis, ws, rate-limit)
+│   │   ├── routes/
+│   │   │   ├── admin/              # Admin routes (dashboard, clients, analytics, etc.)
+│   │   │   ├── client/             # Client routes (leads, calls, bookings, etc.)
+│   │   │   └── webhooks/           # Webhook handlers (ingest, omnidimension, razorpay, etc.)
+│   │   ├── services/               # Business logic (scoring, omnidimension, whatsapp, etc.)
+│   │   ├── utils/                  # Utilities (encryption, phone, lifecycle, templates)
+│   │   ├── workers/                # BullMQ workers (call, notification, extraction, etc.)
+│   │   └── cron/                   # Cron jobs (cleanup, no-show, reports)
+│   ├── Dockerfile
+│   ├── vitest.config.ts
 │   └── package.json
 │
-├── frontend/                   # Next.js 15 Frontend
+├── frontend/                        # Next.js 15 Frontend
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── auth/          # Login, register, reset password
-│   │   │   ├── dashboard/     # All dashboard pages
-│   │   │   ├── admin/         # Admin portal
-│   │   │   ├── legal/         # Terms, Privacy
-│   │   │   └── page.tsx       # Landing/marketing page
-│   │   ├── components/        # Reusable React components
-│   │   │   ├── admin/         # Admin components
-│   │   │   ├── calls/         # Call cards, recording player
-│   │   │   ├── canvas/        # Three.js globe
-│   │   │   ├── dashboard/     # Charts, activity feed
-│   │   │   ├── leads/         # Lead table, filters, detail panel
-│   │   │   ├── marketing/     # Landing page sections
-│   │   │   └── shared/        # Sidebar, TopBar, badges, etc.
-│   │   ├── lib/               # API client, utilities, WebSocket
-│   │   ├── stores/            # Zustand state management
-│   │   └── types/             # TypeScript type definitions
+│   │   │   ├── page.tsx            # Marketing landing page (8 sections)
+│   │   │   ├── auth/               # Login, register, forgot/reset password
+│   │   │   ├── dashboard/          # 11 dashboard pages
+│   │   │   ├── admin/              # 6 admin pages
+│   │   │   ├── setup/              # Onboarding wizard
+│   │   │   └── legal/              # Privacy, terms
+│   │   ├── components/
+│   │   │   ├── marketing/          # Landing page sections
+│   │   │   ├── leads/              # Lead table, filters, detail panel
+│   │   │   ├── dashboard/          # Charts, activity feed, stats
+│   │   │   ├── calls/              # Call cards, recording player
+│   │   │   ├── canvas/             # Three.js globe
+│   │   │   ├── admin/              # Onboarding wizard
+│   │   │   └── shared/             # Sidebar, TopBar, badges, pagination
+│   │   ├── lib/                    # API client, WebSocket, CSV export
+│   │   ├── stores/                 # Zustand stores (auth, UI)
+│   │   └── types/                  # TypeScript types
 │   └── package.json
 │
-├── pipecat-agent/              # Python AI Voice Agent
-│   ├── config.py
-│   ├── main.py                 # Pipecat pipeline (DeepSeek + Deepgram + Cartesia)
-│   └── requirements.txt
-│
-├── docker/                     # Docker Compose & Dockerfiles
-│   ├── docker-compose.yml      # Full stack (10 services)
-│   └── Dockerfile
-│
-├── infrastructure/             # Infrastructure as Code
-│   └── nginx/
-│       └── leadflow.conf       # Nginx with SSL, rate limiting, WS
-│
-├── .env.example                # All environment variables documented
-├── .github/
-│   └── workflows/
-│       └── ci-cd.yml           # GitHub Actions pipeline
-└── README.md                   # This file
+├── docker/                          # Docker Compose (12 services)
+├── infrastructure/                  # Nginx, Prometheus, Grafana configs
+├── .github/workflows/               # GitHub Actions CI/CD
+└── DEPLOYMENT.md                    # Full deployment guide
 ```
 
----
+### Server Routes
 
-## 🔌 Services & Integrations
+| Area | Routes | Description |
+|:-----|:-------|:------------|
+| **Auth** | `/auth/login`, `/register`, `/google`, `/forgot-password`, `/reset-password` | Authentication |
+| **Client** | `/leads`, `/calls`, `/bookings`, `/dashboard`, `/messages`, `/campaigns`, `/territories`, `/integrations`, `/settings`, `/billing`, `/voice` | Broker APIs |
+| **Admin** | `/admin/dashboard`, `/clients`, `/analytics`, `/territories`, `/queues`, `/webhooks`, `/audit-logs` | Platform admin |
+| **Webhooks** | `/webhooks/ingest`, `/omnidimension`, `/exotel`, `/razorpay`, `/whatsapp` | External integrations |
 
-| Service | Purpose | Status | Docs |
-|---------|---------|:------:|------|
-| **PostgreSQL 16** | Primary database | ✅ Required | — |
-| **Redis 7** | Queue & cache | ✅ Required | — |
-| **Exotel** | Telephony (outbound calls) | ⚪ Optional | [API Docs](https://developer.exotel.com/) |
-| **Pipecat** | AI voice agent pipeline | ⚪ Optional | [GitHub](https://github.com/pipecat-ai/pipecat) |
-| **DeepSeek** | LLM for call reasoning | ⚪ Optional | [Platform](https://platform.deepseek.com/) |
-| **Deepgram** | Speech-to-text (Nova-2) | ⚪ Optional | [Console](https://console.deepgram.com/) |
-| **Cartesia** | Text-to-speech voices | ⚪ Optional | [Website](https://cartesia.ai/) |
-| **WhatsApp Cloud API** | WhatsApp messaging | ⚪ Optional | [Dev Center](https://developers.facebook.com/) |
-| **Razorpay** | Subscription payments | ⚪ Optional | [Dashboard](https://razorpay.com) |
-| **Resend** | Email delivery | ⚪ Optional | [Website](https://resend.com) |
-| **Supabase** | File storage (recordings) | ⚪ Optional | [Dashboard](https://supabase.com) |
+### BullMQ Workers
 
-> **Note**: The platform runs in development mode with only PostgreSQL and Redis.
-> External services can be added later by configuring their environment variables.
-
----
-
-## 🔄 Lead Lifecycle
-
-### Status Flow Diagram
-
-```
-                    ┌──────────┐
-                    │  PENDING │ (New lead received)
-                    └────┬─────┘
-                         │ AI call initiated
-                    ┌────▼─────┐
-                    │  CALLING │
-                    └────┬─────┘
-                         │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
-        ┌─────────┐ ┌────────┐ ┌────────┐
-        │NO_ANSWER│ │FAQ_ONLY│ │ BOOKED │
-        └────┬────┘ └───┬────┘ └───┬────┘
-             │          │          │ WhatsApp reminder
-             ▼          ▼          ▼
-       ┌──────────┐ ┌────────┐ ┌─────────┐
-       │CALL_     │ │  COLD  │ │ REMINDED│
-       │FAILED    │ └────────┘ └────┬────┘
-       └────┬─────┘                 │
-            │ Retry           ┌─────┴──────┐
-            ▼                  ▼            ▼
-     ┌──────────────┐   ┌────────┐   ┌──────────┐
-     │FOLLOWUP_D1/  │   │VISITED │   │ NO_SHOW  │
-     │D2/D3/REBOOKED│   └───┬────┘   └────┬─────┘
-     └──────┬───────┘       │             │
-            │               ▼             ▼
-            └────────► ┌──────────┐ ┌──────────┐
-                       │CONVERTED │ │FOLLOWUP_ │
-                       └──────────┘ │D1/D2/D3  │
-                                    └──────────┘
-```
-
-### Auto-Transitions
-
-| From | To | Trigger | Delay |
-|------|:--:|:-------:|:-----:|
-| PENDING | CALLING | New lead created | < 60s |
-| NO_ANSWER | CALL_FAILED | Retry exhausted | 30 min × 3 attempts |
-| NO_SHOW | FOLLOWUP_D1 | No-show detected | Smart optimal time |
-| BOOKED | REMINDED | 24h before visit | 24h before |
-| REMINDED | VISITED | Broker confirms | Manual |
-| VISITED | CONVERTED | Broker confirms | Manual |
-| FOLLOWUP_D3 | COLD | No response | 7 days |
-
----
-
-## 📖 API Reference
-
-### Fastify Server (`/api/v1`)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/auth/login` | Login |
-| POST | `/auth/register` | Register |
-| POST | `/auth/google` | Google OAuth login |
-| GET | `/leads` | List leads |
-| POST | `/leads` | Create lead |
-| GET | `/leads/{id}` | Get lead |
-| GET | `/calls` | List calls |
-| GET | `/calls/{id}` | Get call details |
-| GET | `/dashboard` | Dashboard stats |
-| GET | `/bookings` | List bookings |
-| GET | `/messages` | WhatsApp messages |
-| GET | `/campaigns` | List campaigns |
-| GET | `/territories` | List territories |
-| GET | `/territories/available` | Available territories |
-| GET | `/integrations` | List integrations |
-| GET | `/billing/current` | Current subscription |
-| GET | `/settings` | Client settings |
-| GET | `/admin/clients` | List clients |
-| GET | `/admin/dashboard` | Platform dashboard |
-| GET | `/admin/analytics` | Platform analytics |
-| GET | `/admin/audit-logs` | Audit logs |
-| GET | `/admin/queues` | Queue monitoring |
-| GET | `/admin/territories` | Territory management |
-| GET | `/admin/webhooks` | Webhook management |
-| POST | `/webhooks/ingest` | Lead ingestion |
-| POST | `/webhooks/exotel` | Exotel call events |
-| POST | `/webhooks/omnidimension` | Omnidimension call events |
-| POST | `/webhooks/razorpay` | Payment events |
-| POST | `/webhooks/whatsapp` | WhatsApp messages |
-
----
-
-## 🔐 Environment Variables
-
-See [`.env.example`](.env.example) for the complete list of all 70+ configuration variables.
-
-**Minimum Required (Development):**
-```
-JWT_SECRET=<random-32-chars>
-JWT_REFRESH_SECRET=<random-32-chars>
-ENCRYPTION_KEY=<random-16-chars>
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/leadflow_ai
-REDIS_URL=redis://:redispass@localhost:6379/0
-```
-
----
-
-## 🐳 Deployment
-
-### Docker Compose (Full Stack)
-
-```bash
-# Start all services
-docker compose -f docker/docker-compose.yml up -d
-
-# Check status
-docker compose -f docker/docker-compose.yml ps
-
-# View logs
-docker compose -f docker/docker-compose.yml logs -f backend frontend
-```
-
-### Services Started
-
-| Service | Port | Description |
-|---------|:----:|-------------|
-| Nginx | 80/443 | Reverse proxy with SSL |
-| Frontend | 3000 | Next.js dashboard |
-| Server | 3000 | Fastify API + WebSocket |
-| Worker (call) | — | AI call processing |
-| Worker (notification) | — | WhatsApp/Email notifications |
-| Worker (followup) | — | Follow-up sequences |
-| Worker (reminder) | — | Appointment reminders |
-| Worker (extraction) | — | Post-call transcript extraction |
-| Worker (webhook-retry) | — | Webhook failure retries |
-| PostgreSQL | 5432 | Database |
-| Redis | 6379 | Cache & queue |
-| Prometheus | 9090 | Metrics collection |
-| Grafana | 3001 | Dashboards |
-
-### Production Checklist
-
-- [ ] Set strong `JWT_SECRET`, `JWT_REFRESH_SECRET`, `ENCRYPTION_KEY`
-- [ ] Configure SSL certificates in `infrastructure/nginx/`
-- [ ] Set `ENVIRONMENT=production` and `NODE_ENV=production`
-- [ ] Use managed PostgreSQL (AWS RDS, Supabase, etc.)
-- [ ] Use managed Redis (Upstash, Redis Cloud, etc.)
-- [ ] Set up Sentry for error tracking
-- [ ] Configure external service credentials
-- [ ] Run database migrations with Alembic/Prisma
-- [ ] Set up monitoring alerts (Grafana)
-- [ ] Enable rate limiting
-- [ ] Regular database backups
+| Worker | Queue | Purpose | Concurrency |
+|:-------|:------|:--------|:-----------:|
+| `call.worker.ts` | `call` | Dispatch outbound AI calls | 5 |
+| `notification.worker.ts` | `notification` | Send WhatsApp/SMS/Email | 5 |
+| `extraction.worker.ts` | `extraction` | Extract lead data from transcripts | 5 |
+| `followup.worker.ts` | `followup` | D1/D2/D3 follow-up sequences | 5 |
+| `reminder.worker.ts` | `reminder` | Booking day reminders | 5 |
+| `webhook-retry.worker.ts` | `webhook-retry` | Retry failed webhook deliveries | 5 |
 
 ---
 
 ## 🧪 Testing
 
 ```bash
-# TypeScript server tests (96 tests, 0 failing)
+# Server — 96 tests, 0 failing
 cd server
-npm test              # Vitest unit tests
-npm run typecheck     # TypeScript type checking
+npm test                    # Vitest unit tests
+npm run typecheck           # TypeScript checks (0 errors)
 
-# Frontend type checking
+# Frontend
 cd frontend
-npm run type-check    # TypeScript checking (0 errors)
-npm run lint          # ESLint
+npx tsc --noEmit            # TypeScript checks (0 errors)
 ```
+
+Test breakdown:
+| Suite | Tests | Description |
+|:------|:-----:|:------------|
+| `lifecycle.test.ts` | 27 | Lead status state machine transitions |
+| `phone.test.ts` | 13 | Indian phone number normalization |
+| `lead-parser.test.ts` | 11 | Portal webhook payload parsing |
+| `encryption.test.ts` | 18 | Credential encryption/decryption |
+| `analytics.test.ts` | 7 | Dashboard analytics computations |
+| `scoring.test.ts` | 5 | Predictive lead scoring engine |
+| `smart-scheduler.test.ts` | 4 | Smart follow-up scheduling |
+| `territory.test.ts` | 11 | Territory assignment + waitlist logic |
+| `e2e-lead-lifecycle.test.ts` | 8 (skipped) | End-to-end lifecycle (needs DB) |
 
 ---
 
@@ -478,16 +507,16 @@ npm run lint          # ESLint
 
 ### Development Guidelines
 
-- **TypeScript**: Use strict mode, Zod for validation, proper types
-- **Database**: Use Prisma migrations for schema changes
-- **API**: RESTful conventions, consistent error responses
-- **Frontend**: Tailwind CSS, Framer Motion animations, dark theme
+- **TypeScript**: Strict mode, Zod for validation, prefer typed access over `as any`
+- **Database**: Prisma migrations for schema changes; run `npx prisma db push` after changes
+- **API**: RESTful conventions, consistent error responses with `{ error: string }`
+- **Frontend**: Tailwind CSS, Framer Motion animations, dark theme (#0A0A0F base)
 
 ---
 
 ## 📄 License
 
-Copyright © 2024 LeadBridge. All rights reserved.
+Copyright © 2024-2026 LeadBridge. All rights reserved.
 
 This project contains proprietary software. Unauthorized copying, distribution, or use is prohibited.
 
@@ -495,17 +524,13 @@ This project contains proprietary software. Unauthorized copying, distribution, 
 
 ## 🙏 Acknowledgments
 
-- **Pipecat AI** — Voice agent pipeline framework
-- **DeepSeek** — Primary LLM for AI call reasoning
-- **Deepgram** — Nova-2 speech-to-text model
-- **Cartesia** — Sonic text-to-speech voices
-- **Exotel** — Indian telephony infrastructure
-- **BullMQ** — Redis-backed job queues
-- **Prisma** — TypeScript ORM with excellent DX
-- **FastAPI** — High-performance Python async framework
+- **Omnidimension** — AI voice agent platform for outbound calls
+- **BullMQ** — Redis-backed job queues for reliable background processing
+- **Prisma** — TypeScript ORM with excellent developer experience
+- **Fastify** — High-performance Node.js HTTP server
 - **Next.js** — React framework with SSR
 - **Tailwind CSS** — Utility-first styling
 - **Framer Motion** — Animation library
-- **Three.js** — 3D WebGL graphics
-- **GSAP** — Professional-grade animations
-- **TanStack Table** — Headless table with virtual scrolling
+- **GSAP** — Professional-grade scroll animations
+- **Three.js** — 3D WebGL globe visualization
+- **Recharts** — Composable charting library
