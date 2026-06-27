@@ -49,16 +49,18 @@ nano .env
 # Required (set these before starting)
 JWT_SECRET=<random-64-chars>
 JWT_REFRESH_SECRET=<random-64-chars>
-ENCRYPTION_KEY=<random-32-chars>
-DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/leadflow_ai
-DATABASE_URL_PRISMA=postgresql://user:pass@host:5432/leadflow_ai
+OMNIDIM_API_KEY=<your-omnidimension-api-key>
+DATABASE_URL=postgresql://user:pass@host:5432/leadbridge
+DATABASE_URL_PRISMA=postgresql://user:pass@host:5432/leadbridge
 REDIS_URL=redis://:password@host:6379
 
 # Optional — add as you configure each service
-EXOTEL_API_KEY=...
-DEEPSEEK_API_KEY=...
 WHATSAPP_TOKEN=...
+WHATSAPP_PHONE_ID=...
+MESSAGEBIRD_API_KEY=...
+ENCRYPTION_KEY=...
 RAZORPAY_KEY_ID=...
+RESEND_API_KEY=...
 ```
 
 ## 3. Deploy with Docker Compose
@@ -75,10 +77,8 @@ curl http://localhost/health
 The compose file starts:
 - **Nginx** (port 80/443) — reverse proxy with SSL
 - **Frontend** (internal) — Next.js SSR
-- **Backend** (port 8000) — FastAPI
 - **TypeScript Server** (port 3000) — Fastify API + WebSocket
-- **Celery Worker** — background job processing
-- **Celery Beat** — scheduled tasks (reminders, follow-ups)
+- **BullMQ Workers** (5 workers) — call dispatch, notifications, follow-ups, reminders, extraction, webhook retry
 - **PostgreSQL** — primary database
 - **Redis** — queue + cache
 - **Prometheus + Grafana** — monitoring
@@ -98,22 +98,22 @@ systemctl enable --now certbot.timer
 
 ## 5. External Services Setup
 
-### 5.1 Exotel (Telephony)
-1. Sign up at [exotel.com](https://exotel.com)
+### 5.1 Omnidimension (AI Voice Agent — Primary Telephony)
+1. Sign up at [omnidimension.ai](https://omnidimension.ai)
 2. Get API key from dashboard
-3. Set `EXOTEL_API_KEY`, `EXOTEL_API_TOKEN`, `EXOTEL_SID`
-4. Set up webhook URL: `https://leadbridge.com/api/v1/webhooks/exotel/call-events`
+3. Set `OMNIDIM_API_KEY` in `.env`
+4. Configure webhook URL: `https://leadbridge.com/api/v1/webhooks/omnidimension`
 
-### 5.2 DeepSeek (AI Agent)
-1. Sign up at [platform.deepseek.com](https://platform.deepseek.com)
-2. Create API key
-3. Set `DEEPSEEK_API_KEY` in `.env`
-
-### 5.3 WhatsApp Cloud API
+### 5.2 WhatsApp Cloud API
 1. Go to [developers.facebook.com](https://developers.facebook.com)
 2. Create WhatsApp Business App
 3. Set up webhook: `https://leadbridge.com/api/v1/webhooks/whatsapp`
 4. Set `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_VERIFY_TOKEN`
+
+### 5.3 MessageBird (SMS Fallback)
+1. Sign up at [messagebird.com](https://messagebird.com)
+2. Get API key
+3. Set `MESSAGEBIRD_API_KEY` in `.env`
 
 ### 5.4 Razorpay (Payments)
 1. Sign up at [razorpay.com](https://razorpay.com)
@@ -164,7 +164,7 @@ Pre-configured dashboards:
 
 ```bash
 # Daily database backup (add to crontab)
-0 3 * * * pg_dump -Fc leadflow_ai > /backups/leadflow_ai_$(date +\%Y\%m\%d).dump
+0 3 * * * pg_dump -Fc leadbridge > /backups/leadbridge_$(date +\%Y\%m\%d).dump
 
 # Keep last 30 days
 0 4 * * * find /backups -name "*.dump" -mtime +30 -delete
@@ -188,5 +188,5 @@ docker compose -f docker/docker-compose.yml down
 docker compose -f docker/docker-compose.yml up -d --build
 
 # Database rollback (if needed)
-pg_restore -d leadflow_ai /backups/leadflow_ai_20240101.dump
+pg_restore -d leadbridge /backups/leadbridge_20240101.dump
 ```

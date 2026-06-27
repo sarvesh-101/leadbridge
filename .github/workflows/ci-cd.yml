@@ -1,4 +1,4 @@
-name: LeadFlow AI OS CI/CD
+name: LeadBridge CI/CD
 
 on:
   push:
