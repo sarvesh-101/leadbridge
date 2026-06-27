@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -18,11 +18,7 @@ export default function AdminClientDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (params.id) loadClient();
-  }, [params.id]);
-
-  async function loadClient() {
+  const loadClient = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`/admin/clients/${params.id}`);
@@ -33,7 +29,11 @@ export default function AdminClientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [params.id, router]);
+
+  useEffect(() => {
+    if (params.id) loadClient();
+  }, [params.id, loadClient]);
 
   async function handleResetPassword() {
     setActionLoading("reset-pwd");

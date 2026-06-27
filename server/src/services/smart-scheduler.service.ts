@@ -20,15 +20,20 @@ const prisma = new PrismaClient();
 const PEAK_HOURS = {
   weekday: { morning: [9, 10, 11], afternoon: [14, 15, 16], evening: [18, 19, 20] },
   weekend: { morning: [10, 11, 12], afternoon: [15, 16, 17], evening: [17, 18, 19] },
-};
-
-// Source-specific optimal hours (different portals have different lead patterns)
+};// Source-specific optimal hours (different portals have different lead patterns)
 const SOURCE_PEAK_HOURS: Record<string, number[]> = {
   "99acres": [10, 11, 15, 16, 19, 20],
   magicbricks: [9, 10, 14, 15, 18, 19],
   housing: [10, 12, 15, 17, 19],
   justdial: [11, 12, 16, 17, 18],
   manual: [10, 11, 12, 15, 16],
+  "99 acres": [10, 11, 15, 16, 19, 20],
+  "99-acres": [10, 11, 15, 16, 19, 20],
+  "magic bricks": [9, 10, 14, 15, 18, 19],
+  "magic-bricks": [9, 10, 14, 15, 18, 19],
+  "housing.com": [10, 12, 15, 17, 19],
+  "just dial": [11, 12, 16, 17, 18],
+  "just-dial": [11, 12, 16, 17, 18],
 };
 
 /**

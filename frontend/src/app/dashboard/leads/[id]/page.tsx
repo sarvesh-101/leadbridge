@@ -23,21 +23,20 @@ export default function LeadDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
   useEffect(() => {
-    if (params.id) loadLead();
-  }, [params.id]);
-
-  async function loadLead() {
-    setLoading(true);
-    try {
-      const data = await api.get(`/leads/${params.id}`);
-      setLead(data);
-    } catch (err: any) {
-      toast.error("Failed to load lead");
-      router.push("/dashboard/leads");
-    } finally {
-      setLoading(false);
+    async function loadLead() {
+      setLoading(true);
+      try {
+        const data = await api.get(`/leads/${params.id}`);
+        setLead(data);
+      } catch (err: any) {
+        toast.error("Failed to load lead");
+        router.push("/dashboard/leads");
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+    if (params.id) loadLead();
+  }, [params.id, router]);
 
   const fmt = (d: string | undefined | null) => {
     if (!d) return "—";

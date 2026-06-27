@@ -81,6 +81,10 @@ const envSchema = z.object({
   // Cron
   CRON_SECRET: z.string().default("change-me-cron-secret"),
 
+  // MessageBird (SMS fallback for WhatsApp)
+  MESSAGEBIRD_API_KEY: z.string().optional(),
+  SMS_SENDER_ID: z.string().default("LeadBrg"),
+
   // Encryption (for credential storage at rest)
   // Optional in development; defaults to JWT_SECRET-based derivation if not set
   ENCRYPTION_KEY: z.string().optional(),

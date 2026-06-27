@@ -1,11 +1,15 @@
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { callWithCircuitBreaker, getCircuitState } from "../utils/circuit-breaker";
 
 /**
  * Omnidimension service — dispatches AI-powered outbound calls
  * and retrieves call logs via the Omnidimension REST API.
  *
  * Docs: https://docs.omnidim.io/docs/api-reference/calls/dispatchCall
+ *
+ * Circuit breaker: After 5 consecutive failures, calls fail fast
+ * for 5 minutes to avoid wasting resources on a dead endpoint.
  */
 
 const OMNIDIM_BASE = config.OMNIDIM_BASE_URL;
@@ -58,45 +62,48 @@ export async function dispatchCall(params: DispatchCallParams): Promise<{
 }> {
   const url = `${OMNIDIM_BASE}/calls/dispatch`;
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.OMNIDIM_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        agent_id: params.agentId,
-        to_number: params.toNumber,
-        from_number_id: params.fromNumberId,
-        call_context: params.callContext,
-      }),
-    });
+  return callWithCircuitBreaker(
+    "omnidimension",
+    async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.OMNIDIM_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          agent_id: params.agentId,
+          to_number: params.toNumber,
+          from_number_id: params.fromNumberId,
+          call_context: params.callContext,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`Omnidimension API error ${response.status}: ${errorBody}`);
-    }
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Omnidimension API error ${response.status}: ${errorBody}`);
+      }
 
-    const data = (await response.json()) as DispatchCallResponse;
+      const data = (await response.json()) as DispatchCallResponse;
 
-    logger.info(
-      { requestId: data.requestId, status: data.status, to: params.toNumber },
-      "Omnidimension call dispatched"
-    );
+      logger.info(
+        { requestId: data.requestId, status: data.status, to: params.toNumber },
+        "Omnidimension call dispatched"
+      );
 
-    return {
-      success: data.success,
-      requestId: data.requestId,
-      status: data.status,
-    };
-  } catch (error: any) {
-    logger.error(
-      { err: error.message, to: params.toNumber, agentId: params.agentId },
-      "Omnidimension dispatch failed"
-    );
-    throw new Error(`Omnidimension call failed: ${error.message}`);
-  }
+      return {
+        success: data.success,
+        requestId: data.requestId,
+        status: data.status,
+      };
+    },
+    // Fallback when circuit is open — return simulated response
+    () => ({
+      success: false,
+      requestId: -1,
+      status: "circuit_open",
+    })
+  );
 }
 
 /**
@@ -128,6 +135,13 @@ export async function getCallLog(callLogId: number): Promise<CallLogResponse | n
     logger.error({ callLogId, err: error.message }, "Failed to fetch Omnidimension call log");
     return null;
   }
+}
+
+/**
+ * Get the current circuit breaker state for monitoring.
+ */
+export function getOmnidimensionCircuitState() {
+  return getCircuitState("omnidimension");
 }
 
 export type { DispatchCallParams, CallLogResponse };

@@ -42,32 +42,31 @@ export default function SetupPage() {
 
   // Check current setup status on mount
   useEffect(() => {
-    loadSetupStatus();
-  }, []);
+    const loadSetupStatus = async () => {
+      try {
+        const [meRes, phonesRes] = await Promise.all([
+          api.get<any>("/me"),
+          api.get<any>("/voice/phone-numbers").catch(() => ({ numbers: [] })),
+        ]);
+        setPhoneNumbers(phonesRes.numbers || []);
+        setPhoneSetupStatus(meRes.client?.phoneSetupStatus || "PENDING");
+        setAgentId(meRes.client?.omniAgentId ? parseInt(meRes.client.omniAgentId) : null);
+        setAgentName(meRes.client?.businessName ? `${meRes.client.businessName} AI Agent` : "");
 
-  const loadSetupStatus = async () => {
-    try {
-      const [meRes, phonesRes] = await Promise.all([
-        api.get<any>("/me"),
-        api.get<any>("/voice/phone-numbers").catch(() => ({ numbers: [] })),
-      ]);
-      setPhoneNumbers(phonesRes.numbers || []);
-      setPhoneSetupStatus(meRes.client?.phoneSetupStatus || "PENDING");
-      setAgentId(meRes.client?.omniAgentId ? parseInt(meRes.client.omniAgentId) : null);
-      setAgentName(meRes.client?.businessName ? `${meRes.client.businessName} AI Agent` : "");
-
-      if (meRes.client?.phoneSetupStatus === "LIVE") {
-        // Already fully set up — redirect to dashboard
-        router.push("/dashboard");
-      } else if (meRes.client?.phoneSetupStatus === "NUMBER_CONNECTED") {
-        setCurrentStep(4); // Skip to test call
-      } else if (meRes.client?.omniAgentId) {
-        setCurrentStep(3); // Skip to phone setup
+        if (meRes.client?.phoneSetupStatus === "LIVE") {
+          // Already fully set up — redirect to dashboard
+          router.push("/dashboard");
+        } else if (meRes.client?.phoneSetupStatus === "NUMBER_CONNECTED") {
+          setCurrentStep(4); // Skip to test call
+        } else if (meRes.client?.omniAgentId) {
+          setCurrentStep(3); // Skip to phone setup
+        }
+      } catch {
+        // Not authenticated or error — ignore
       }
-    } catch {
-      // Not authenticated or error — ignore
-    }
-  };
+    };
+    loadSetupStatus();
+  }, [router]);
 
   // ─── Step 1: Welcome — nothing to configure ──────────────────
 

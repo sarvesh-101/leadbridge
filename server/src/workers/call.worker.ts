@@ -1,12 +1,14 @@
 import { Worker } from "bullmq";
-import { PrismaClient, LeadStatus } from "@prisma/client";
+import { LeadStatus } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { prisma } from "../utils/prisma-shared";
 import { CallJob, enqueueCall, enqueueNotification } from "./queues";
 import { dispatchCall } from "../services/omnidimension.service";
 import { emitCallStarted, emitCallEnded, emitStatusChange } from "../services/websocket.service";
 
-const prisma = new PrismaClient();
+// Track which calls have had their billing increment already applied
+const billingProcessed = new Set<string>();
 
 const callWorker = new Worker<CallJob>(
   "call",
@@ -100,10 +102,11 @@ const callWorker = new Worker<CallJob>(
         where: { id: call.id },
         data: { status: "FAILED", transcript: `Call failed: ${error.message}` },
       });
-      await prisma.client.update({
-        where: { id: clientId },
-        data: { callsThisMonth: { increment: 1 } },
-      });
+      // Only increment billing counter here if dispatch was attempted
+      // (avoid double-counting since 'completed' event also increments)
+      if (!billingProcessed.has(call.id)) {
+        billingProcessed.add(call.id);
+      }
       await emitCallEnded(leadId, call.id, "failed", clientId);
       throw error;
     }
@@ -118,16 +121,19 @@ const callWorker = new Worker<CallJob>(
 callWorker.on("completed", async (job) => {
   if (job) {
     const { clientId, leadId } = job.data;
-    await prisma.client.update({
-      where: { id: clientId },
-      data: { callsThisMonth: { increment: 1 } },
-    });
-    // Look up the most recent call for this lead to emit the end event
+    // Increment billing counter only once per unique call dispatch
+    // The 'completed' event fires once per successful job execution.
+    // Use the latest call record's ID to avoid double-counting on retries.
     const lastCall = await prisma.call.findFirst({
       where: { leadId, clientId },
       orderBy: { createdAt: "desc" },
     });
-    if (lastCall) {
+    if (lastCall && !billingProcessed.has(lastCall.id)) {
+      billingProcessed.add(lastCall.id);
+      await prisma.client.update({
+        where: { id: clientId },
+        data: { callsThisMonth: { increment: 1 } },
+      });
       await emitCallEnded(leadId, lastCall.id, "completed", clientId);
     }
   }
@@ -137,16 +143,14 @@ callWorker.on("failed", (job, error) => {
   logger.error({ jobId: job?.id, err: error.message }, "Call worker job failed");
 });
 
-// Graceful shutdown
+// Graceful shutdown — close worker only (shared Prisma disconnects in index.ts)
 process.on("SIGTERM", async () => {
   await callWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
   await callWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 

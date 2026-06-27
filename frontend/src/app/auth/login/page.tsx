@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,6 +24,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const googleBtnRef = useRef<HTMLDivElement>(null);
+
+  const handleGoogleCredential = useCallback(async (response: { credential: string }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.post("/auth/google", { credential: response.credential }, { skipAuth: true });
+      login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Google Sign-In failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [login, router]);
 
   // Initialize Google One Tap / Sign-In button
   useEffect(() => {
@@ -56,21 +70,7 @@ export default function LoginPage() {
         shape: "pill",
       });
     }
-  }, [GOOGLE_CLIENT_ID]);
-
-  const handleGoogleCredential = async (response: { credential: string }) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.post("/auth/google", { credential: response.credential }, { skipAuth: true });
-      login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Google Sign-In failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [handleGoogleCredential]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

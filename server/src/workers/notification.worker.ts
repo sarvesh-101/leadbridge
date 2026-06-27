@@ -4,6 +4,9 @@ import { config } from "../config";
 import { logger } from "../utils/logger";
 import { NotificationJob } from "./queues";
 import { sendTextMessage } from "../services/whatsapp.service";
+import { sendSms } from "../services/sms.service";
+import { sendEmail } from "../services/email.service";
+import { canSendToRecipient } from "../utils/whatsapp-rate-limiter";
 import {
   bookingConfirmationCustomer,
   bookingConfirmedOwner,
@@ -173,12 +176,49 @@ const notificationWorker = new Worker<NotificationJob>(
       return { skipped: true, reason: "No template" };
     }
 
-    // Send via WhatsApp
-    const waMessageId = await sendTextMessage({
+    // ─── Rate limiting: wait until allowed to send to this recipient ──
+    await canSendToRecipient(toNumber);
+
+    // ─── Primary: Send via WhatsApp ─────────────────────────────────
+    let waMessageId = await sendTextMessage({
       to: toNumber,
       text: messageText,
       recipientType: recipient,
     });
+
+    // ─── Fallback 1: Send via SMS if WhatsApp failed ───────────────
+    if (!waMessageId && config.MESSAGEBIRD_API_KEY) {
+      job.log(`WhatsApp failed for ${recipient} — falling back to SMS`);
+
+      const smsText = messageText.length > 700
+        ? messageText.substring(0, 697) + "..."
+        : messageText;
+
+      const smsSent = await sendSms(toNumber, smsText);
+      if (smsSent) {
+        waMessageId = "sms-fallback";
+        notificationChannel = "sms";
+        job.log(`SMS fallback sent to ${toNumber}`);
+      } else {
+        job.log(`SMS fallback also failed for ${toNumber}`);
+      }
+    }
+
+    // ─── Fallback 2: Send via Email if WhatsApp + SMS both failed ──
+    if (!waMessageId && recipient === "owner" && config.RESEND_API_KEY && client?.email) {
+      job.log(`WhatsApp+SMS failed for owner — falling back to email`);
+
+      const emailSent = await sendEmail({
+        to: client.email,
+        subject: `[LeadBridge] ${type.replace(/_/g, " ")}`,
+        text: messageText,
+      });
+      if (emailSent) {
+        waMessageId = "email-fallback";
+        notificationChannel = "email";
+        job.log(`Email fallback sent to ${client.email}`);
+      }
+    }
 
     // Create notification record
     if (recipient === "customer") {
@@ -195,21 +235,16 @@ const notificationWorker = new Worker<NotificationJob>(
       });
 
       // Mark call as customer notified
-      const lastCall = await prisma.call.findFirst({
-        where: { leadId },
-        orderBy: { createdAt: "desc" },
+      await prisma.call.updateMany({
+        where: { leadId, customerNotified: false },
+        data: { customerNotified: true },
       });
-      if (lastCall) {
-        await prisma.call.update({
-          where: { id: lastCall.id },
-          data: { customerNotified: true },
-        });
-      }
     } else {
       await prisma.ownerNotification.create({
         data: {
           clientId,
           bookingId: bookingId || undefined,
+          leadId: leadId || undefined,
           type: notificationType,
           message: messageText,
           status: waMessageId ? "sent" : "failed",
@@ -219,16 +254,10 @@ const notificationWorker = new Worker<NotificationJob>(
       });
 
       // Mark call as owner notified
-      const lastCall = await prisma.call.findFirst({
-        where: { leadId },
-        orderBy: { createdAt: "desc" },
+      await prisma.call.updateMany({
+        where: { leadId, ownerNotified: false },
+        data: { ownerNotified: true },
       });
-      if (lastCall) {
-        await prisma.call.update({
-          where: { id: lastCall.id },
-          data: { ownerNotified: true },
-        });
-      }
     }
 
     return { waMessageId, type: notificationType, recipient };

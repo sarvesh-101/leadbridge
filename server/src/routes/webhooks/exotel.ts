@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { enqueueCall, enqueueExtraction, enqueueNotification, enqueueFollowup } from "../../workers/queues";
+import { shouldRetry, getRetryDelay } from "../../utils/retry-delay";
 
 /**
  * Exotel Webhook Handler — receives call lifecycle events.
@@ -75,10 +76,12 @@ export default async function exotelWebhookRoutes(fastify: FastifyInstance) {
           data: { status: "NO_ANSWER" },
         });
 
+        const attempts = (lead.callAttempts || 0);
+        const maxAttempts = lead.maxAttempts || 3;
+
         // Retry or mark final
-        if (call.type === "QUALIFICATION" && (lead.callAttempts || 0) < (lead.maxAttempts || 3)) {
-          // Retry with increasing delay
-          const delayMs = lead.callAttempts === 1 ? 2 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000; // 2hr / 4hr
+        if (shouldRetry(attempts, maxAttempts)) {
+          const delayMs = getRetryDelay(attempts);
           await enqueueCall({
             leadId: lead.id,
             clientId: call.clientId,
@@ -115,9 +118,12 @@ export default async function exotelWebhookRoutes(fastify: FastifyInstance) {
           data: { status: status === "busy" ? "BUSY" : "FAILED" },
         });
 
+        const attempts = (lead.callAttempts || 0);
+        const maxAttempts = lead.maxAttempts || 3;
+
         // Same retry logic as no-answer
-        if ((lead.callAttempts || 0) < (lead.maxAttempts || 3)) {
-          const delayMs = lead.callAttempts === 1 ? 2 * 60 * 60 * 1000 : 4 * 60 * 60 * 1000;
+        if (shouldRetry(attempts, maxAttempts)) {
+          const delayMs = getRetryDelay(attempts);
           await enqueueCall({
             leadId: lead.id,
             clientId: call.clientId,

@@ -1,13 +1,12 @@
 import { Worker } from "bullmq";
-import { PrismaClient, LeadStatus, Prisma } from "@prisma/client";
+import { LeadStatus, Prisma } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { prisma } from "../utils/prisma-shared";
 import { ExtractionJob, enqueueNotification, enqueueReminder, enqueueFollowup } from "./queues";
 import { extractFromTranscript } from "../services/deepseek.service";
 import { emitStatusChange, emitBookingCreated } from "../services/websocket.service";
 import { scoreLead } from "../services/scoring.service";
-
-const prisma = new PrismaClient();
 
 const extractionWorker = new Worker<ExtractionJob>(
   "extraction",
@@ -190,16 +189,14 @@ extractionWorker.on("failed", (job, error) => {
   logger.error({ jobId: job?.id, err: error.message }, "Extraction worker job failed");
 });
 
-// Graceful shutdown
+// Graceful shutdown — close worker only (shared Prisma disconnects in index.ts)
 process.on("SIGTERM", async () => {
   await extractionWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
   await extractionWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 

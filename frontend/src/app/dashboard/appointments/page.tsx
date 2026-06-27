@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { cn, getStatusColor, formatDate, formatPhone } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Download, Calendar as CalendarIcon, Search, Clock, MapPin, MoreHorizontal } from "lucide-react";
+import { Download, Calendar as CalendarIcon, Search, Clock, MapPin } from "lucide-react";
 import { exportToCSV, EXPORT_HEADERS } from "@/lib/csv-export";
 import { Pagination } from "@/components/shared/Pagination";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -19,23 +19,22 @@ export default function AppointmentsPage() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
+    async function loadBookings() {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({ page: String(page), limit: "20" });
+        if (filter !== "all") params.set("status", filter.toUpperCase());
+        const data = await api.get(`/bookings?${params}`);
+        setBookings(data.bookings || []);
+        setTotal(data.total || 0);
+      } catch (err) {
+        console.error("Failed to load bookings:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
     loadBookings();
   }, [page, filter]);
-
-  async function loadBookings() {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(page), limit: "20" });
-      if (filter !== "all") params.set("status", filter.toUpperCase());
-      const data = await api.get(`/bookings?${params}`);
-      setBookings(data.bookings || []);
-      setTotal(data.total || 0);
-    } catch (err) {
-      console.error("Failed to load bookings:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const filtered = search
     ? bookings.filter((b: any) =>

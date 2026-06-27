@@ -42,6 +42,7 @@ import adminQueueRoutes from "./routes/admin/queues";
 import adminWebhookRoutes from "./routes/admin/webhooks";
 import metricsRoutes from "./routes/metrics";
 import { registerCronJobs } from "./cron/scheduler";
+import { isRedisAvailable } from "./workers/queues";
 
 export async function buildServer() {
   const server = Fastify({
@@ -82,11 +83,29 @@ export async function buildServer() {
     // Check Redis health (from websocket plugin)
     const wsRedisHealthy = (server as any).wsRedisHealthy !== false;
 
+    // Check queue health (from queues.ts)
+    const queuesHealthy = isRedisAvailable();
+
+    // Check WhatsApp config
+    const whatsappConfigured = !!(config.WHATSAPP_TOKEN) && !!(config.WHATSAPP_PHONE_ID);
+
+    // Check Omnidimension config
+    const omnidimensionConfigured = !!(config.OMNIDIM_API_KEY);
+
+    // Check MessageBird config (SMS fallback)
+    const smsConfigured = !!(config.MESSAGEBIRD_API_KEY);
+
     const checks = {
       database: dbHealthy ? ("healthy" as const) : ("unhealthy" as const),
       redis: wsRedisHealthy ? ("healthy" as const) : ("degraded" as const),
+      queues: queuesHealthy ? ("healthy" as const) : ("unhealthy" as const),
       websocket: {
         connectedClients: (server as any).getConnectedClients || 0,
+      },
+      integrations: {
+        whatsapp: whatsappConfigured ? ("configured" as const) : ("not-configured" as const),
+        omnidimension: omnidimensionConfigured ? ("configured" as const) : ("not-configured" as const),
+        sms_fallback: smsConfigured ? ("configured" as const) : ("not-configured" as const),
       },
     };
 

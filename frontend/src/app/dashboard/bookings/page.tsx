@@ -18,20 +18,21 @@ export default function BookingsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
-  useEffect(() => { loadBookings(); }, [page, filter]);
-
-  async function loadBookings() {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(page), limit: "20" });
-      if (filter !== "all") params.set("status", filter.toUpperCase());
-      const data = await api.get(`/bookings?${params}`);
-      setBookings(data.bookings || []);
-      setTotal(data.total || 0);
-    } catch (err) {
-      console.error("Failed to load bookings:", err);
-    } finally { setLoading(false); }
-  }
+  useEffect(() => {
+    async function loadBookings() {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({ page: String(page), limit: "20" });
+        if (filter !== "all") params.set("status", filter.toUpperCase());
+        const data = await api.get(`/bookings?${params}`);
+        setBookings(data.bookings || []);
+        setTotal(data.total || 0);
+      } catch (err) {
+        console.error("Failed to load bookings:", err);
+      } finally { setLoading(false); }
+    }
+    loadBookings();
+  }, [page, filter]);
 
   const filtered = search
     ? bookings.filter((b: any) =>

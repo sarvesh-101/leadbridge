@@ -130,54 +130,86 @@ export interface ExtractionJob {
 // Helper: Add jobs with proper typing
 // ─────────────────────────────────────
 
-export async function enqueueCall(job: CallJob, delayMs?: number) {
+/**
+ * Redis health tracking — exposed via the /health endpoint.
+ * Allows external monitoring to detect when queues are degraded.
+ */
+export function isRedisAvailable(): boolean {
+  return redisAvailable !== false;
+}
+
+export function getRedisAvailable(): boolean | null {
+  return redisAvailable;
+}
+
+export async function enqueueCall(job: CallJob, delayMs?: number): Promise<boolean> {
   const q = getCallQueue();
-  if (!q) { logger.warn({ job }, "Redis unavailable — call not queued"); return; }
-  return q.add(
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — call NOT queued! Purchased leads will not be called.");
+    return false;
+  }
+  await q.add(
     `call:${job.leadId}:${job.callType}:${job.attempt}`,
     job,
     { delay: delayMs ?? 0 }
   );
+  return true;
 }
 
-export async function enqueueNotification(job: NotificationJob, delayMs?: number) {
+export async function enqueueNotification(job: NotificationJob, delayMs?: number): Promise<boolean> {
   const q = getNotificationQueue();
-  if (!q) { logger.warn({ job }, "Redis unavailable — notification not queued"); return; }
-  return q.add(
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — notification NOT queued! Critical alerts will not be delivered.");
+    return false;
+  }
+  await q.add(
     `notify:${job.type}:${job.leadId}`,
     job,
     { delay: delayMs ?? 0 }
   );
+  return true;
 }
 
-export async function enqueueFollowup(job: FollowupJob, delayMs?: number) {
+export async function enqueueFollowup(job: FollowupJob, delayMs?: number): Promise<boolean> {
   const q = getFollowupQueue();
-  if (!q) { logger.warn({ job }, "Redis unavailable — followup not queued"); return; }
-  return q.add(
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — followup NOT queued! Follow-up sequence will not run.");
+    return false;
+  }
+  await q.add(
     `followup:D${job.day}:${job.leadId}`,
     job,
     { delay: delayMs ?? 0 }
   );
+  return true;
 }
 
-export async function enqueueReminder(job: ReminderJob, delayMs?: number) {
+export async function enqueueReminder(job: ReminderJob, delayMs?: number): Promise<boolean> {
   const q = getReminderQueue();
-  if (!q) { logger.warn({ job }, "Redis unavailable — reminder not queued"); return; }
-  return q.add(
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — reminder NOT queued! Booking reminders will not be sent.");
+    return false;
+  }
+  await q.add(
     `reminder:${job.bookingId}`,
     job,
     { delay: delayMs ?? 0 }
   );
+  return true;
 }
 
-export async function enqueueExtraction(job: ExtractionJob, delayMs?: number) {
+export async function enqueueExtraction(job: ExtractionJob, delayMs?: number): Promise<boolean> {
   const q = getExtractionQueue();
-  if (!q) { logger.warn({ job }, "Redis unavailable — extraction not queued"); return; }
-  return q.add(
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — extraction NOT queued! Posts-call analysis will not run.");
+    return false;
+  }
+  await q.add(
     `extract:${job.callId}`,
     job,
     { delay: delayMs ?? 0 }
   );
+  return true;
 }
 
 export interface WebhookRetryJob {

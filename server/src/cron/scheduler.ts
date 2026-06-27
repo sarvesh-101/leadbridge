@@ -13,6 +13,7 @@ import { detectNoShows } from "./noshow-detector";
 import { checkTrialExpiry } from "./trial-expiry";
 import { generateMonthlyReports } from "./monthly-report";
 import { runSheetsSync } from "./sheets-sync.cron";
+import { runDataCleanup } from "./data-cleanup";
 
 export function registerCronJobs() {
   logger.info("Registering cron jobs...");
@@ -58,6 +59,17 @@ export function registerCronJobs() {
       logger.info({ totalSynced: result.totalSynced, totalErrors: result.totalErrors }, "Cron: Sheets sync complete");
     } catch (error: any) {
       logger.error({ err: error.message }, "Cron: Sheets sync failed");
+    }
+  });
+
+  // ─── Weekly Data Cleanup — Every Sunday at 2:00 AM ────────
+  cron.schedule("0 2 * * 0", async () => {
+    logger.info("Cron: Running weekly data cleanup...");
+    try {
+      const result = await runDataCleanup();
+      logger.info(result, "Cron: Data cleanup complete");
+    } catch (error: any) {
+      logger.error({ err: error.message }, "Cron: Data cleanup failed");
     }
   });
 

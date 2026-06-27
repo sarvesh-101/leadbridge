@@ -260,6 +260,7 @@ model Lead {
   calls               Call[]
   customerNotifications CustomerNotification[]
   ownerNotifications   OwnerNotification[]
+  scoreHistory         LeadScoreHistory[]
 }
 
 model Call {
@@ -337,6 +338,22 @@ model CustomerNotification {
   waMessageId String?
 
   sentAt   DateTime @default(now())
+}
+
+model LeadScoreHistory {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  score     Int
+  factors   Json     @default("{}")
+  source    String   @default("auto")  // "auto" | "manual"
+  reason    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+  @@index([createdAt])
 }
 
 model OwnerNotification {

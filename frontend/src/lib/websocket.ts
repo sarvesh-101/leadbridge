@@ -12,6 +12,12 @@ const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
 const MAX_RECONNECT_ATTEMPTS = 10;
 
+/**
+ * Polling fallback interval (used when WebSocket is unavailable).
+ * Polls the leads endpoint every 15 seconds for real-time updates.
+ */
+const POLLING_INTERVAL_MS = 15000;
+
 class WebSocketClient {
   private ws: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -20,6 +26,11 @@ class WebSocketClient {
   private url = "";
   private reconnectAttempts = 0;
   private connectionId = 0;
+
+  // Polling fallback state
+  private pollingTimer: ReturnType<typeof setInterval> | null = null;
+  private lastPollTimestamp = "";
+  private isPolling = false;
 
   connect() {
     const { accessToken } = useAuthStore.getState();
@@ -37,10 +48,10 @@ class WebSocketClient {
       this.ws = new WebSocket(this.url);
 
       this.ws.onopen = () => {
-        // Ignore if a newer connection attempt superseded this one
         if (connId !== this.connectionId) return;
         this.isConnecting = false;
-        this.reconnectAttempts = 0; // Reset on successful connection
+        this.reconnectAttempts = 0;
+        this.stopPolling(); // Stop polling when WS connects
         console.log("[WS] Connected");
       };
 
@@ -59,9 +70,11 @@ class WebSocketClient {
         this.isConnecting = false;
         console.log(`[WS] Disconnected (code: ${event.code}, attempt: ${this.reconnectAttempts})`);
 
-        // Don't reconnect on intentional close (code 1000) or auth reject (4001)
         if (event.code !== 1000 && event.code !== 4001) {
           this.scheduleReconnect();
+        } else {
+          // Intentional close — start polling as fallback
+          this.startPolling();
         }
       };
 
@@ -83,6 +96,7 @@ class WebSocketClient {
       this.reconnectTimer = null;
     }
     this.reconnectAttempts = 0;
+    this.stopPolling();
     if (this.ws) {
       this.ws.close(1000, "Client disconnecting");
       this.ws = null;
@@ -101,6 +115,65 @@ class WebSocketClient {
     };
   }
 
+  /**
+   * Start polling as fallback when WebSocket is unavailable.
+   * Uses a lightweight endpoint to check for recent lead changes.
+   */
+  startPolling() {
+    if (this.isPolling) return;
+    this.isPolling = true;
+    console.log("[WS] WebSocket unavailable — starting polling fallback");
+
+    this.pollingTimer = setInterval(async () => {
+      try {
+        const { accessToken, isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated || !accessToken) {
+          this.stopPolling();
+          return;
+        }
+
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+        const params = new URLSearchParams({
+          limit: "10",
+          ...(this.lastPollTimestamp ? { updatedSince: this.lastPollTimestamp } : {}),
+        });
+
+        const response = await fetch(`${apiBase}/leads?${params}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          this.lastPollTimestamp = new Date().toISOString();
+
+          // Emit events for any new/changed leads
+          if (data.leads?.length) {
+            data.leads.forEach((lead: any) => {
+              this.notifyHandlers("lead.status_changed", {
+                event: "lead.status_changed",
+                data: { leadId: lead.id, newStatus: lead.status },
+                timestamp: new Date().toISOString(),
+              });
+            });
+          }
+        }
+      } catch {
+        // Silently retry on next interval
+      }
+    }, POLLING_INTERVAL_MS);
+  }
+
+  /**
+   * Stop polling fallback.
+   */
+  stopPolling() {
+    if (this.pollingTimer) {
+      clearInterval(this.pollingTimer);
+      this.pollingTimer = null;
+    }
+    this.isPolling = false;
+  }
+
   private notifyHandlers(event: string, data: WebSocketEvent) {
     const handlers = this.handlers.get(event);
     if (handlers) {
@@ -116,7 +189,8 @@ class WebSocketClient {
 
   private scheduleReconnect() {
     if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-      console.warn(`[WS] Max reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached — giving up`);
+      console.warn(`[WS] Max reconnect attempts (${MAX_RECONNECT_ATTEMPTS}) reached — switching to polling`);
+      this.startPolling();
       return;
     }
 

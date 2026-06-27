@@ -20,7 +20,7 @@
     "worker:notification": "tsx src/workers/notification.worker.ts",
     "worker:followup": "tsx src/workers/followup.worker.ts",
     "worker:reminder": "tsx src/workers/reminder.worker.ts",
-"worker:webhook-retry": "tsx src/workers/webhook-retry.worker.ts"
+    "worker:webhook-retry": "tsx src/workers/webhook-retry.worker.ts"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
@@ -41,6 +41,7 @@
     "googleapis": "^140.0.1",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
+    "messagebird": "^4.0.1",
     "nanoid": "^3.3.7",
     "node-cron": "^4.2.1",
     "pino": "^9.3.2",

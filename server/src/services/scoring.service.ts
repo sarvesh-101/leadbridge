@@ -21,7 +21,34 @@ import { logger } from "../utils/logger";
 
 const prisma = new PrismaClient();
 
+/**
+ * Track a score change in the lead score history.
+ * Called automatically by scoreLead().
+ */
+async function trackScoreHistory(
+  leadId: string,
+  score: number,
+  factors: Record<string, number>,
+  source: "auto" | "manual" = "auto",
+  reason?: string
+): Promise<void> {
+  try {
+    await prisma.leadScoreHistory.create({
+      data: {
+        leadId,
+        score,
+        factors: factors as any,
+        source,
+        reason: reason || null,
+      },
+    });
+  } catch (error: any) {
+    logger.warn({ leadId, err: error.message }, "Failed to track score history");
+  }
+}
+
 // Source quality scores based on Indian real estate market data
+// Keys are normalized to lowercase for case-insensitive matching
 const SOURCE_QUALITY: Record<string, number> = {
   "99acres": 85,
   magicbricks: 82,
@@ -34,7 +61,22 @@ const SOURCE_QUALITY: Record<string, number> = {
   manual: 40,
   website: 65,
   email: 30,
+  "99 acres": 85,
+  "99-acres": 85,
+  "magic bricks": 82,
+  "magic-bricks": 82,
+  "housing.com": 78,
+  "just dial": 60,
+  "just-dial": 60,
 };
+
+/**
+ * Normalize a source name to match against the scoring map.
+ * Handles case differences, extra spaces, and common variations.
+ */
+function normalizeSourceName(rawSource: string): string {
+  return rawSource.toLowerCase().trim();
+}
 
 const TIMELINE_SCORES: Record<string, number> = {
   immediate: 95,
@@ -81,7 +123,8 @@ export async function scoreLead(leadId: string): Promise<{
   let weightSum = 0;
 
   // 1. Source quality (weight: 20%)
-  const sourceScore = SOURCE_QUALITY[lead.source] || 40;
+  const normalizedSource = normalizeSourceName(lead.source);
+  const sourceScore = SOURCE_QUALITY[normalizedSource] || SOURCE_QUALITY[lead.source] || 40;
   factors.source = sourceScore * 0.2;
   totalScore += sourceScore * 0.2;
   weightSum += 0.2;
@@ -166,6 +209,9 @@ export async function scoreLead(leadId: string): Promise<{
     where: { id: leadId },
     data: { score: finalScore },
   });
+
+  // Track score history for trend analysis
+  await trackScoreHistory(leadId, finalScore, factors);
 
   return { score: finalScore, factors };
 }

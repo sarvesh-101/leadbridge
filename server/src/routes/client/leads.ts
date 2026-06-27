@@ -8,7 +8,7 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
   // ─── List Leads ───────────────────────────────────────────────
   fastify.get("/leads", async (request: FastifyRequest, reply: FastifyReply) => {
     const clientId = request.clientId!;
-    const { page = "1", limit = "20", status, source, search, from, to, qualified } =
+    const { page = "1", limit = "20", status, source, search, from, to, qualified, updatedSince } =
       request.query as Record<string, string>;
 
     const where: Record<string, unknown> = { clientId };
@@ -29,6 +29,12 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
       where.receivedAt = {};
       if (from) (where.receivedAt as Record<string, unknown>).gte = new Date(from);
       if (to) (where.receivedAt as Record<string, unknown>).lte = new Date(to);
+    }
+
+    // Filter by updatedSince — used by frontend WebSocket polling fallback
+    // Uses Lead.updatedAt to detect status changes on existing leads
+    if (updatedSince) {
+      where.updatedAt = { gte: new Date(updatedSince) };
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -85,6 +91,12 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
           email: { type: "string" },
           source: { type: "string", default: "manual" },
         },
+      },
+    },
+    config: {
+      rateLimit: {
+        max: 30, // Max 30 manual leads per minute per user
+        timeWindow: "1 minute",
       },
     },
   }, async (request: FastifyRequest<{ Body: { name: string; phone: string; email?: string; source?: string } }>, reply: FastifyReply) => {

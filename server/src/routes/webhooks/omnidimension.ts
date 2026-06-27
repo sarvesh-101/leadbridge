@@ -5,6 +5,8 @@ import {
 } from "../../workers/queues";
 import { emitStatusChange, emitBookingCreated, emitCallEnded } from "../../services/websocket.service";
 import { config } from "../../config";
+import { isDuplicate, markProcessed } from "../../utils/webhook-idempotency";
+import { shouldRetry, getRetryDelay } from "../../utils/retry-delay";
 
 /**
  * Omnidimension Webhook Handler — THE MOST CRITICAL FILE IN THE CODEBASE.
@@ -34,6 +36,16 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
 
     if (!callLogId) {
       return reply.status(200).send({ error: "Missing call_sid" });
+    }
+
+    // ─── Idempotency check ────────────────────────────────────────
+    // Skip idempotency for in-progress/ringing events (they're benign duplicates)
+    if (callStatus !== "in-progress" && callStatus !== "ringing") {
+      const duplicate = await isDuplicate(fastify, "omnidimension", callLogId, 3600);
+      if (duplicate) {
+        fastify.log.warn({ callLogId, callStatus }, "Duplicate webhook event — skipping");
+        return reply.status(200).send({ received: true, duplicate: true });
+      }
     }
 
     // Find the call record
@@ -96,9 +108,8 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
         const attempts = lead.callAttempts + 1;
         const maxAttempts = lead.maxAttempts || 3;
 
-        if (attempts < maxAttempts) {
-          // Retry with exponential delay: 2h → 4h for subsequent attempts
-          const delayMs = attempts === 1 ? 2 * 3600 * 1000 : 4 * 3600 * 1000;
+        if (shouldRetry(attempts, maxAttempts)) {
+          const delayMs = getRetryDelay(attempts);
           await enqueueCall({
             leadId: lead.id,
             clientId: call.clientId,
@@ -196,6 +207,9 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
           transcript: (callReport?.full_conversation as string) || "",
         });
 
+        // ─── Mark webhook as processed (idempotency) ────────────
+        await markProcessed(fastify, "omnidimension", callLogId, 3600);
+
         // ─── Publish WebSocket event ─────────────────────────────
         const outcome = (ext.call_outcome || ext.callOutcome || "unknown") as string;
         await emitCallEnded(lead.id, call.id, outcome, call.clientId);
@@ -246,31 +260,34 @@ async function handleQualificationOutcome(
       return;
     }
 
-    const booking = await fastify.prisma.booking.create({
-      data: {
-        clientId,
-        visitDate,
-        visitTime: bookingTime || "11:00 AM",
-        propertyAddress: "",
-        propertyName: null,
-        status: "CONFIRMED",
-        sourceCallId: call.id,
-      },
-    });
-
-    await fastify.prisma.lead.update({
-      where: { id: lead.id },
-      data: {
-        status: "BOOKED",
-        bookingId: booking.id,
-        bookedAt: new Date(),
-        budget: ext.budget || lead.budget,
-        location: ext.location || lead.location,
-        timeline: ext.timeline || lead.timeline,
-        propertyType: ext.property_type || lead.propertyType,
-        bedrooms: ext.bedrooms || lead.bedrooms,
-        sentiment: ext.sentiment || lead.sentiment,
-      },
+    // ─── Interactive transaction: atomically create booking + link lead ─
+    const booking = await fastify.prisma.$transaction(async (tx) => {
+      const b = await tx.booking.create({
+        data: {
+          clientId,
+          visitDate,
+          visitTime: bookingTime || "11:00 AM",
+          propertyAddress: "",
+          propertyName: null,
+          status: "CONFIRMED",
+          sourceCallId: call.id,
+        },
+      });
+      await tx.lead.update({
+        where: { id: lead.id },
+        data: {
+          status: "BOOKED",
+          bookingId: b.id,
+          bookedAt: new Date(),
+          budget: ext.budget || lead.budget,
+          location: ext.location || lead.location,
+          timeline: ext.timeline || lead.timeline,
+          propertyType: ext.property_type || lead.propertyType,
+          bedrooms: ext.bedrooms || lead.bedrooms,
+          sentiment: ext.sentiment || lead.sentiment,
+        },
+      });
+      return b;
     });
 
     const reminderTime = new Date(visitDate);
@@ -384,20 +401,22 @@ async function handleFollowupD1Outcome(
 
   if (bookingRequested && bookingDate) {
     d1Status = "REBOOKED";
-    const booking = await fastify.prisma.booking.create({
-      data: {
-        clientId,
-        visitDate: new Date(bookingDate),
-        visitTime: ext.booking_time || ext.bookingTime || "11:00 AM",
-        propertyAddress: "",
-        status: "CONFIRMED",
-        sourceCallId: call.id,
-      },
-    });
-
-    await fastify.prisma.lead.update({
-      where: { id: lead.id },
-      data: { status: "REBOOKED", bookingId: booking.id, bookedAt: new Date() },
+    const d1Booking = await fastify.prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.create({
+        data: {
+          clientId,
+          visitDate: new Date(bookingDate),
+          visitTime: ext.booking_time || ext.bookingTime || "11:00 AM",
+          propertyAddress: "",
+          status: "CONFIRMED",
+          sourceCallId: call.id,
+        },
+      });
+      await tx.lead.update({
+        where: { id: lead.id },
+        data: { status: "REBOOKED", bookingId: booking.id, bookedAt: new Date() },
+      });
+      return booking;
     });
 
     await enqueueNotification({
@@ -456,20 +475,23 @@ async function handleFollowupD3Outcome(
 
   if (bookingRequested && bookingDate) {
     d3Status = "REBOOKED";
-    const booking = await fastify.prisma.booking.create({
-      data: {
-        clientId,
-        visitDate: new Date(bookingDate),
-        visitTime: ext.booking_time || ext.bookingTime || "11:00 AM",
-        propertyAddress: "",
-        status: "CONFIRMED",
-        sourceCallId: call.id,
-      },
-    });
-
-    await fastify.prisma.lead.update({
-      where: { id: lead.id },
-      data: { status: "REBOOKED", bookingId: booking.id, bookedAt: new Date() },
+    // Interactive transaction — ensures booking + lead are atomically linked
+    const d3Booking = await fastify.prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.create({
+        data: {
+          clientId,
+          visitDate: new Date(bookingDate),
+          visitTime: ext.booking_time || ext.bookingTime || "11:00 AM",
+          propertyAddress: "",
+          status: "CONFIRMED",
+          sourceCallId: call.id,
+        },
+      });
+      await tx.lead.update({
+        where: { id: lead.id },
+        data: { status: "REBOOKED", bookingId: booking.id, bookedAt: new Date() },
+      });
+      return booking;
     });
 
     await enqueueNotification({

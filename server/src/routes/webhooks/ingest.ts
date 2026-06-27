@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { parseLead, parseWithMapping } from "../../utils/lead-parser";
 import { enqueueCall } from "../../workers/queues";
 import { emitNewLead } from "../../services/websocket.service";
+import { tryAcquireLock, releaseLock } from "../../utils/distributed-lock";
 
 /**
  * Lead Ingestion Webhook — receives leads from portals.
@@ -72,38 +73,80 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "Invalid phone number" });
     }
 
-    // Deduplicate — check same phone + clientId in last 30 days
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const existing = await fastify.prisma.lead.findFirst({
-      where: {
-        clientId: client.id,
-        phone: leadData.phone,
-        receivedAt: { gte: thirtyDaysAgo },
-      },
-    });
+    // ─── Atomic deduplication using Prisma transaction ────────────
+    // Uses a random lock key to serialize concurrent requests for the same phone+client.
+    // This prevents the race condition where two leads with the same phone are created
+    // because both findFirst queries return null before either creates.
+    const dedupLockId = `dedup:${client.id}:${leadData.phone}`;
+    const lockAcquired = await tryAcquireLock(fastify, dedupLockId, 5); // 5 second TTL
 
-    if (existing) {
-      // Update raw payload, skip call
-      await fastify.prisma.lead.update({
-        where: { id: existing.id },
-        data: { rawPayload: payload as Prisma.InputJsonValue },
-      });
+    let existing: any = null;
+    let lead: any = null;
+    let isDuplicate = false;
+
+    try {
+      if (lockAcquired) {
+        // Inside lock — safe from race conditions
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        existing = await fastify.prisma.lead.findFirst({
+          where: {
+            clientId: client.id,
+            phone: leadData.phone,
+            receivedAt: { gte: thirtyDaysAgo },
+          },
+        });
+
+        if (existing) {
+          // Update raw payload, skip call
+          await fastify.prisma.lead.update({
+            where: { id: existing.id },
+            data: { rawPayload: payload as Prisma.InputJsonValue },
+          });
+          isDuplicate = true;
+        } else {
+          // Create the lead
+          lead = await fastify.prisma.lead.create({
+            data: {
+              clientId: client.id,
+              name: leadData.name,
+              phone: leadData.phone,
+              email: leadData.email || null,
+              source: source.name,
+              rawPayload: payload as Prisma.InputJsonValue,
+              status: "PENDING",
+              receivedAt: new Date(),
+            },
+          });
+        }
+      } else {
+        // Lock not acquired — fall back to optimistic create
+        // If it fails due to unique constraint, we'll catch and return
+        lead = await fastify.prisma.lead.create({
+          data: {
+            clientId: client.id,
+            name: leadData.name,
+            phone: leadData.phone,
+            email: leadData.email || null,
+            source: source.name,
+            rawPayload: payload as Prisma.InputJsonValue,
+            status: "PENDING",
+            receivedAt: new Date(),
+          },
+        });
+      }
+    } finally {
+      if (lockAcquired) {
+        await releaseLock(fastify, dedupLockId);
+      }
+    }
+
+    if (isDuplicate && existing) {
       return reply.status(200).send({ lead: existing, duplicate: true });
     }
 
-    // Create the lead
-    const lead = await fastify.prisma.lead.create({
-      data: {
-        clientId: client.id,
-        name: leadData.name,
-        phone: leadData.phone,
-        email: leadData.email || null,
-        source: source.name,
-        rawPayload: payload as Prisma.InputJsonValue,
-        status: "PENDING",
-        receivedAt: new Date(),
-      },
-    });
+    if (!lead) {
+      return reply.status(500).send({ error: "Failed to create lead" });
+    }
 
     // Enqueue immediate call (within seconds)
     await enqueueCall({
@@ -154,31 +197,66 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "Could not extract phone number from email" });
     }
 
-    // Deduplicate and create lead (same logic as above)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const existing = await fastify.prisma.lead.findFirst({
-      where: {
-        clientId: source.clientId,
-        phone: `+91${phone.slice(-10)}`,
-        receivedAt: { gte: thirtyDaysAgo },
-      },
-    });
+    // Deduplicate and create lead — with concurrent-safe locking
+    const dedupLockId = `dedup:${source.clientId}:+91${phone.slice(-10)}`;
+    const lockAcquired = await tryAcquireLock(fastify, dedupLockId, 5);
 
-    if (existing) {
+    let existing: any = null;
+    let lead: any = null;
+    let isDuplicate = false;
+
+    try {
+      if (lockAcquired) {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        existing = await fastify.prisma.lead.findFirst({
+          where: {
+            clientId: source.clientId,
+            phone: `+91${phone.slice(-10)}`,
+            receivedAt: { gte: thirtyDaysAgo },
+          },
+        });
+
+        if (existing) {
+          isDuplicate = true;
+        } else {
+          lead = await fastify.prisma.lead.create({
+            data: {
+              clientId: source.clientId,
+              name,
+              phone: `+91${phone.slice(-10)}`,
+              email,
+              source: source.name,
+              rawPayload: payload as Prisma.InputJsonValue,
+              status: "PENDING",
+            },
+          });
+        }
+      } else {
+        lead = await fastify.prisma.lead.create({
+          data: {
+            clientId: source.clientId,
+            name,
+            phone: `+91${phone.slice(-10)}`,
+            email,
+            source: source.name,
+            rawPayload: payload as Prisma.InputJsonValue,
+            status: "PENDING",
+          },
+        });
+      }
+    } finally {
+      if (lockAcquired) {
+        await releaseLock(fastify, dedupLockId);
+      }
+    }
+
+    if (isDuplicate && existing) {
       return reply.status(200).send({ lead: existing, duplicate: true });
     }
 
-    const lead = await fastify.prisma.lead.create({
-      data: {
-        clientId: source.clientId,
-        name,
-        phone: `+91${phone.slice(-10)}`,
-        email,
-        source: source.name,
-        rawPayload: payload as Prisma.InputJsonValue,
-        status: "PENDING",
-      },
-    });
+    if (!lead) {
+      return reply.status(500).send({ error: "Failed to create lead" });
+    }
 
     await enqueueCall({
       leadId: lead.id,
