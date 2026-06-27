@@ -175,7 +175,7 @@ Pre-configured dashboards:
 | Bottleneck | Solution |
 |:-----------|:---------|
 | High API traffic | Add more Fastify replicas behind Nginx |
-| Slow AI calls | Increase Celery worker count |
+| Slow AI calls | Increase BullMQ worker concurrency |
 | Database load | Add PgBouncer for connection pooling |
 | Queue backlog | Scale Redis to larger tier |
 | File storage | Add CDN for call recordings |
