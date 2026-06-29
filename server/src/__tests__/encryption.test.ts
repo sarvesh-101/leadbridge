@@ -13,7 +13,7 @@ describe("Encryption Utility", () => {
   // ─── Basic Roundtrip ─────────────────────────────────────
 
   it("encrypts and decrypts an API key correctly", () => {
-    const original = "sk_live_abcdef1234567890";
+    const original = "test_key_abcdef1234567890";
     const encrypted = encrypt(original);
     const decrypted = decrypt(encrypted);
 
@@ -23,7 +23,7 @@ describe("Encryption Utility", () => {
   });
 
   it("produces different ciphertext each time for the same plaintext", () => {
-    const original = "sk_live_test_key";
+    const original = "test_key_demo_value";
     const encrypted1 = encrypt(original);
     const encrypted2 = encrypt(original);
 
@@ -41,7 +41,7 @@ describe("Encryption Utility", () => {
   });
 
   it("handles special characters in secrets", () => {
-    const original = "sk_live_!@#$%^&*()_+-=[]{}|;':\",./<>?~`abc123";
+    const original = "test_key_!@#$%^&*()_+-=[]{}|;':\",./<>?~`abc123";
     const encrypted = encrypt(original);
     expect(decrypt(encrypted)).toBe(original);
   });
@@ -66,7 +66,7 @@ describe("Encryption Utility", () => {
   // ─── Backward Compatibility ──────────────────────────────
 
   it("returns plaintext as-is when decrypting unencrypted data (backward compat)", () => {
-    const legacyData = "sk_live_plaintext_key_not_encrypted";
+    const legacyData = "test_plaintext_key_not_encrypted";
     // This should not throw and return the original value
     expect(decrypt(legacyData)).toBe(legacyData);
   });
@@ -86,7 +86,7 @@ describe("Encryption Utility", () => {
 
   it("isEncrypted returns false for plaintext shorter than 44 chars", () => {
     expect(isEncrypted("abc")).toBe(false);
-    expect(isEncrypted("sk_live_key")).toBe(false);
+    expect(isEncrypted("demo_key")).toBe(false);
     expect(isEncrypted("")).toBe(false);
   });
 
@@ -109,7 +109,7 @@ describe("Encryption Utility", () => {
   // ─── Integration-style: Roundtrip with realistic credentials ─
 
   it("handles IndiaMart-style API key roundtrip", () => {
-    const original = "IM_LIVE_ABCDEF1234567890abcdef";
+    const original = "IM_TEST_ABCDEF1234567890abcdef";
     const encrypted = encrypt(original);
     expect(decrypt(encrypted)).toBe(original);
   });
@@ -133,7 +133,7 @@ describe("Encryption Utility", () => {
       "a",
       "hello",
       "api_key_123",
-      "sk_live_very_long_key_that_goes_on_and_on_and_on_and_on_and_on_and_on_and_on",
+      "test_key_very_long_value_that_goes_on_and_on_and_on_and_on_and_on_and_on_and_on",
       "{\"client_id\":\"123\",\"client_secret\":\"abc\"}",
     ];
 
