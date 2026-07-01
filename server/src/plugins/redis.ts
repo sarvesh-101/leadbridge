@@ -16,12 +16,6 @@ declare module "fastify" {
  * In development mode, gracefully handles Redis being unavailable.
  */
 const redisPlugin = fp(async (fastify: FastifyInstance) => {
-  if (config.NODE_ENV === "development" && config.REDIS_URL === "redis://localhost:6379") {
-    fastify.log.warn("Redis not configured — running without Redis. Some features (caching, pub/sub) will be unavailable.");
-    fastify.decorate("redis", null);
-    return;
-  }
-
   const redis = new Redis(config.REDIS_URL, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
