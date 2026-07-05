@@ -28,12 +28,7 @@ const webhookRetryWorker = new Worker<WebhookRetryJob>(
 
     // Try to find the call record now — it should exist if the delay was enough
     const call = await prisma.call.findFirst({
-      where: {
-        OR: [
-          { omnidimensionCallId: callLogId },
-          { exotelCallSid: callLogId },
-        ],
-      },
+      where: { omnidimensionCallId: callLogId },
       include: { lead: true },
     });
 

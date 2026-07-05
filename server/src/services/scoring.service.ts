@@ -37,7 +37,7 @@ async function trackScoreHistory(
       data: {
         leadId,
         score,
-        factors: factors as any,
+        factors: factors as unknown as any,
         source,
         reason: reason || null,
       },
@@ -261,6 +261,343 @@ export async function getTopLeads(
  * Predict which leads are likely to convert this week.
  * Returns leads with score > 70 that are in BOOKED or REMINDED state.
  */
+/**
+ * Analyze scoring accuracy by comparing past predictions to actual outcomes.
+ * Computes precision, recall, and calibration metrics.
+ */
+export async function calculateScoringAccuracy(
+  clientId: string
+): Promise<{
+  totalLeads: number;
+  highScoreCount: number;
+  convertedFromHighScore: number;
+  accuracy: number;
+  precision: number;
+  recall: number;
+  calibration: { scoreBand: string; leads: number; converted: number; rate: number }[];
+  topFactorPerformance: { factor: string; avgScore: number; conversionRate: number }[];
+}> {
+  // Analyze leads with score history and a terminal outcome (CONVERTED or COLD)
+  const leads = await prisma.lead.findMany({
+    where: {
+      clientId,
+      status: { in: ["CONVERTED", "COLD", "VISITED"] },
+      scoreHistory: { some: {} },
+    },
+    include: {
+      scoreHistory: { orderBy: { createdAt: "desc" }, take: 1 },
+    },
+  });
+
+  const totalLeads = leads.length;
+  const converted = leads.filter((l) => l.status === "CONVERTED");
+  const highScoreThreshold = 70;
+
+  // High-score leads that converted = true positives
+  const highScore = leads.filter((l) => (l.scoreHistory[0]?.score || l.score) >= highScoreThreshold);
+  const highScoreConverted = highScore.filter((l) => l.status === "CONVERTED");
+  const lowScoreConverted = converted.filter(
+    (l) => (l.scoreHistory[0]?.score || l.score) < highScoreThreshold
+  );
+
+  const accuracy = totalLeads > 0 ? Math.round((highScoreConverted.length / totalLeads) * 100) : 0;
+  const precision = highScore.length > 0 ? Math.round((highScoreConverted.length / highScore.length) * 100) : 0;
+  const recall = converted.length > 0 ? Math.round((highScoreConverted.length / converted.length) * 100) : 0;
+
+  // Calibration bands
+  const bands = [
+    { label: "0-20", min: 0, max: 20 },
+    { label: "21-40", min: 21, max: 40 },
+    { label: "41-60", min: 41, max: 60 },
+    { label: "61-80", min: 61, max: 80 },
+    { label: "81-100", min: 81, max: 100 },
+  ];
+
+  const calibration = bands.map((band) => {
+    const inBand = leads.filter((l) => {
+      const s = l.scoreHistory[0]?.score || l.score;
+      return s >= band.min && s <= band.max;
+    });
+    return {
+      scoreBand: band.label,
+      leads: inBand.length,
+      converted: inBand.filter((l) => l.status === "CONVERTED").length,
+      rate: inBand.length > 0
+        ? Math.round((inBand.filter((l) => l.status === "CONVERTED").length / inBand.length) * 100)
+        : 0,
+    };
+  });
+
+  // Factor-level performance analysis
+  // Look at the factors stored in score history and compare to conversion outcomes
+  const factorNames = ["source", "latency", "timeline", "budget", "propertyType", "callHour", "territory", "sentiment"];
+  const topFactorPerformance = factorNames.map((factor) => {
+    const withFactor = leads.filter((l) => {
+      const factors = l.scoreHistory[0]?.factors as Record<string, number> | null;
+      return factors && factor in factors;
+    });
+    const avgScore = withFactor.length > 0
+      ? Math.round(withFactor.reduce((sum, l) => sum + (l.scoreHistory[0]?.score || l.score), 0) / withFactor.length)
+      : 0;
+    return {
+      factor,
+      avgScore,
+      conversionRate: withFactor.length > 0
+        ? Math.round((withFactor.filter((l) => l.status === "CONVERTED").length / withFactor.length) * 100)
+        : 0,
+    };
+  });
+
+  return {
+    totalLeads,
+    highScoreCount: highScore.length,
+    convertedFromHighScore: highScoreConverted.length,
+    accuracy,
+    precision,
+    recall,
+    calibration,
+    topFactorPerformance,
+  };
+}
+
+/**
+ * Recalibrate scoring weights based on historical conversion data.
+ * Analyzes which factors best predicted actual conversions and adjusts weights accordingly.
+ * Returns recommended weight adjustments (not applied — for broker review).
+ */
+export async function recalibrateWeights(
+  clientId: string
+): Promise<{
+  currentWeights: Record<string, number>;
+  recommendedWeights: Record<string, number>;
+  changes: Record<string, { from: number; to: number; reason: string }>;
+  confidence: string;
+  requiresMoreData: boolean;
+}> {
+  const currentWeights: Record<string, number> = {
+    source: 0.2,
+    latency: 0.15,
+    timeline: 0.2,
+    budget: 0.15,
+    propertyType: 0.1,
+    callHour: 0.1,
+    territory: 0.1,
+  };
+
+  const analysis = await calculateScoringAccuracy(clientId);
+
+  if (analysis.totalLeads < 20) {
+    return {
+      currentWeights,
+      recommendedWeights: currentWeights,
+      changes: {},
+      confidence: "low",
+      requiresMoreData: true,
+    };
+  }
+
+  // For each factor, compute how well its average score correlates with conversion
+  // Higher conversion rate for a factor = weight that factor more
+  const totalConversionRate = analysis.totalLeads > 0
+    ? (analysis.calibration.reduce((sum, b) => sum + b.converted, 0) / analysis.totalLeads) * 100
+    : 0;
+
+  const factorPerformance = analysis.topFactorPerformance;
+  const avgConversionRate = factorPerformance.reduce((sum, f) => sum + f.conversionRate, 0) / factorPerformance.length;
+
+  // Compute adjusted weights based on how much each factor's conversion rate deviates from average
+  const recommendedWeights: Record<string, number> = { ...currentWeights };
+  const changes: Record<string, { from: number; to: number; reason: string }> = {};
+
+  for (const fp of factorPerformance) {
+    const currentWeight = currentWeights[fp.factor] || 0;
+    if (currentWeight === 0) continue;
+
+    // If a factor's conversion rate is above average, increase its weight relative to the deviation
+    const deviation = fp.conversionRate - avgConversionRate;
+    if (Math.abs(deviation) > 5) {
+      const adjustment = Math.round((deviation / 100) * 0.5 * 100) / 100;
+      const newWeight = Math.max(0.05, Math.min(0.35, currentWeight + adjustment));
+      recommendedWeights[fp.factor] = Math.round(newWeight * 100) / 100;
+
+      if (Math.abs(newWeight - currentWeight) > 0.01) {
+        changes[fp.factor] = {
+          from: currentWeight,
+          to: newWeight,
+          reason: deviation > 0
+            ? `Above-average conversion rate (${fp.conversionRate}%) — increase weight`
+            : `Below-average conversion rate (${fp.conversionRate}%) — decrease weight`,
+        };
+      }
+    }
+  }
+
+  // Normalize weights to sum to 1.0
+  const weightSum = Object.values(recommendedWeights).reduce((a, b) => a + b, 0);
+  if (weightSum > 0) {
+    for (const key of Object.keys(recommendedWeights)) {
+      recommendedWeights[key] = Math.round((recommendedWeights[key] / weightSum) * 100) / 100;
+    }
+  }
+
+  const confidence = analysis.totalLeads >= 100 ? "high" : analysis.totalLeads >= 50 ? "medium" : "low";
+
+  return {
+    currentWeights,
+    recommendedWeights,
+    changes,
+    confidence,
+    requiresMoreData: false,
+  };
+}
+
+/**
+ * Track a conversion outcome against the last score prediction.
+ * Called when a lead is marked as CONVERTED or COLD.
+ */
+export async function recordScoringOutcome(
+  leadId: string,
+  outcome: "converted" | "cold" | "visited"
+): Promise<void> {
+  try {
+    const lastScore = await prisma.leadScoreHistory.findFirst({
+      where: { leadId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!lastScore) return;
+
+    // Track prediction vs outcome in the score history reason field
+    const predictionCorrect =
+      (outcome === "converted" && lastScore.score >= 70) ||
+      (outcome === "cold" && lastScore.score < 40);
+
+    await prisma.leadScoreHistory.create({
+      data: {
+        leadId,
+        score: lastScore.score,
+        factors: lastScore.factors as any,
+        source: "auto",
+        reason: `OUTCOME:${outcome}|PREDICTION_CORRECT:${predictionCorrect}|SCORE_AT_PREDICTION:${lastScore.score}`,
+      },
+    });
+
+    logger.info({ leadId, outcome, score: lastScore.score, predictionCorrect }, "Scoring outcome recorded");
+  } catch (error: any) {
+    logger.warn({ leadId, err: error.message }, "Failed to record scoring outcome");
+  }
+}
+
+/**
+ * Get scoring explainability insights for a lead.
+ * Returns human-readable explanations with factor contributions.
+ */
+export async function getScoringInsights(leadId: string): Promise<{
+  score: number;
+  level: string;
+  factors: { name: string; label: string; contribution: number; percentage: number; description: string }[];
+  trend: { direction: string; change: number; reason: string };
+  explanation: string;
+  accuracyConfidence: string;
+}> {
+  const lead = await prisma.lead.findUnique({
+    where: { id: leadId },
+    include: {
+      scoreHistory: { orderBy: { createdAt: "desc" }, take: 5 },
+    },
+  });
+
+  if (!lead) {
+    return {
+      score: 0,
+      level: "unknown",
+      factors: [],
+      trend: { direction: "stable", change: 0, reason: "No data" },
+      explanation: "Lead not found",
+      accuracyConfidence: "low",
+    };
+  }
+
+  const { score, factors } = await scoreLead(lead.id);
+
+  const factorLabels: Record<string, { label: string; description: string }> = {
+    source: { label: "Source Quality", description: "Score based on where the lead came from (e.g., 99acres, JustDial)" },
+    latency: { label: "Response Speed", description: "How quickly the lead was contacted after coming in" },
+    timeline: { label: "Timeline Urgency", description: "How urgently the lead wants to buy" },
+    budget: { label: "Budget Fit", description: "How well the lead's budget matches typical deals" },
+    propertyType: { label: "Property Match", description: "Whether the lead's property preference is in demand" },
+    callHour: { label: "Call Timing", description: "Whether the call happened during business hours" },
+    territory: { label: "Territory Match", description: "Whether the lead's location matches your service area" },
+    sentiment: { label: "Call Sentiment", description: "Positive/negative sentiment detected during AI call" },
+  };
+
+  const totalFactorScore = Object.entries(factors)
+    .filter(([k]) => k !== "sentiment" && k !== "error")
+    .reduce((sum, [, v]) => sum + Math.abs(v), 0);
+
+  const factorList = Object.entries(factors)
+    .filter(([k]) => k !== "error")
+    .map(([name, value]) => {
+      const meta = factorLabels[name] || { label: name, description: "" };
+      return {
+        name,
+        label: meta.label,
+        contribution: Math.round(value * 100) / 100,
+        percentage: totalFactorScore > 0
+          ? Math.round((Math.abs(value) / totalFactorScore) * 100)
+          : 0,
+        description: meta.description,
+      };
+    })
+    .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+
+  // Trend analysis
+  const history = lead.scoreHistory;
+  let trendDirection = "stable";
+  let trendChange = 0;
+  let trendReason = "Score has remained consistent";
+
+  if (history.length >= 2) {
+    const oldest = history[history.length - 1].score;
+    const latest = history[0].score;
+    trendChange = latest - oldest;
+    if (trendChange > 5) {
+      trendDirection = "improving";
+      trendReason = "Score has improved, indicating increased engagement";
+    } else if (trendChange < -5) {
+      trendDirection = "declining";
+      trendReason = "Score has decreased, suggesting waning interest";
+    }
+  }
+
+  const level = score >= 70 ? "high" : score >= 40 ? "moderate" : "low";
+  const topFactor = factorList[0];
+  const explanation = `This lead has ${level} conversion probability (${score}/100). ` +
+    `The strongest factor is "${topFactor?.label || "overall assessment"}" contributing ${topFactor?.percentage || 0}% of the score. ` +
+    (level === "high"
+      ? "Prioritize for follow-up and site visit scheduling."
+      : level === "moderate"
+      ? "Continue nurturing with targeted WhatsApp messages and a follow-up call."
+      : "Consider re-engagement campaigns or re-qualification.");
+
+  // Accuracy confidence based on how many leads have been scored in this account
+  const totalScored = await prisma.leadScoreHistory.groupBy({
+    by: ["leadId"],
+    where: { lead: { clientId: lead.clientId } },
+    _count: { leadId: true },
+  });
+  const accuracyConfidence = totalScored.length >= 100 ? "high" : totalScored.length >= 30 ? "medium" : "low";
+
+  return {
+    score,
+    level,
+    factors: factorList,
+    trend: { direction: trendDirection, change: trendChange, reason: trendReason },
+    explanation,
+    accuracyConfidence,
+  };
+}
+
 export async function predictWeeklyConversions(
   clientId: string
 ): Promise<{ likelyToConvert: number; totalValue: string; leads: Array<{ name: string; score: number; status: string }> }> {

@@ -80,6 +80,76 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
       orderBy: { visitTime: "asc" },
     });
 
+    // ─── Real Daily Chart Data (last 30 days) ────────────────
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get daily lead counts
+    const dailyLeads = await fastify.prisma.lead.groupBy({
+      by: ["receivedAt"],
+      where: {
+        clientId,
+        receivedAt: { gte: thirtyDaysAgo },
+      },
+      _count: { id: true },
+    });
+
+    // Get daily call counts
+    const dailyCalls = await fastify.prisma.call.groupBy({
+      by: ["createdAt"],
+      where: {
+        clientId,
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      _count: { id: true },
+    });
+
+    // Get daily booking counts
+    const dailyBookings = await fastify.prisma.booking.groupBy({
+      by: ["createdAt"],
+      where: {
+        clientId,
+        createdAt: { gte: thirtyDaysAgo },
+      },
+      _count: { id: true },
+    });
+
+    // Build a map of date -> counts for the last 30 days
+    const dailyMap = new Map<string, { leads: number; calls: number; bookings: number }>();
+
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const key = d.toISOString().split("T")[0]; // YYYY-MM-DD
+      dailyMap.set(key, { leads: 0, calls: 0, bookings: 0 });
+    }
+
+    // Fill in actual counts
+    for (const lead of dailyLeads) {
+      const key = lead.receivedAt.toISOString().split("T")[0];
+      if (dailyMap.has(key)) {
+        dailyMap.get(key)!.leads += lead._count.id;
+      }
+    }
+    for (const call of dailyCalls) {
+      const key = call.createdAt.toISOString().split("T")[0];
+      if (dailyMap.has(key)) {
+        dailyMap.get(key)!.calls += call._count.id;
+      }
+    }
+    for (const booking of dailyBookings) {
+      const key = booking.createdAt.toISOString().split("T")[0];
+      if (dailyMap.has(key)) {
+        dailyMap.get(key)!.bookings += booking._count.id;
+      }
+    }
+
+    // Sort by date ascending
+    const dailyActivity = Array.from(dailyMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, counts]) => ({
+        date,
+        ...counts,
+      }));
+
     return {
       stats: {
         todayLeads,
@@ -99,6 +169,7 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
       leadsByStatus,
       recentActivity,
       todayBookings: todayBookingsList,
+      dailyActivity,
     };
   });
 }

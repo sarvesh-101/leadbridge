@@ -15,6 +15,7 @@ export const QUEUE_NAMES = {
   REMINDER: "reminder",
   EXTRACTION: "extraction",
   WEBHOOK_RETRY: "webhook-retry",
+  EMAIL_CAMPAIGN: "email-campaign",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -61,6 +62,7 @@ let _followupQueue: Queue | null | undefined;
 let _reminderQueue: Queue | null | undefined;
 let _extractionQueue: Queue | null | undefined;
 let _webhookRetryQueue: Queue | null | undefined;
+let _emailCampaignQueue: Queue | null | undefined;
 
 function getCallQueue() {
   if (_callQueue === undefined) _callQueue = createQueue(QUEUE_NAMES.CALL, 3, 5000);
@@ -86,6 +88,10 @@ function getWebhookRetryQueue() {
   if (_webhookRetryQueue === undefined) _webhookRetryQueue = createQueue(QUEUE_NAMES.WEBHOOK_RETRY, 5, 2000);
   return _webhookRetryQueue;
 }
+function getEmailCampaignQueue() {
+  if (_emailCampaignQueue === undefined) _emailCampaignQueue = createQueue(QUEUE_NAMES.EMAIL_CAMPAIGN, 3, 5000);
+  return _emailCampaignQueue;
+}
 
 // ─────────────────────────────────────
 // Job Type Definitions
@@ -105,6 +111,23 @@ export interface NotificationJob {
   type: string;
   bookingId?: string;
   data: Record<string, string>;
+}
+
+export interface CampaignEmailJob {
+  campaignId: string;
+  clientId: string;
+  leadId: string;
+  leadName: string;
+  leadEmail: string;
+  location: string | null;
+  businessName: string;
+  subject: string;
+  body: string;
+}
+
+export interface CampaignWinnerCheckJob {
+  campaignId: string;
+  clientId: string;
 }
 
 export interface FollowupJob {
@@ -227,7 +250,35 @@ export async function enqueueWebhookRetry(payload: Record<string, unknown>, dela
   );
 }
 
+export async function enqueueCampaignEmail(job: CampaignEmailJob, delayMs?: number): Promise<boolean> {
+  const q = getEmailCampaignQueue();
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — campaign email NOT queued!");
+    return false;
+  }
+  await q.add(
+    `campaign:${job.campaignId}:${job.leadId}`,
+    job,
+    { delay: delayMs ?? 0 }
+  );
+  return true;
+}
+
+export async function enqueueCampaignWinnerCheck(job: CampaignWinnerCheckJob, delayMs: number): Promise<boolean> {
+  const q = getEmailCampaignQueue();
+  if (!q) {
+    logger.error({ job }, "Redis unavailable — campaign winner check NOT queued!");
+    return false;
+  }
+  await q.add(
+    `campaign-winner:${job.campaignId}`,
+    job,
+    { delay: delayMs }
+  );
+  return true;
+}
+
 export async function closeAllQueues() {
-  const queues = [_callQueue, _notificationQueue, _followupQueue, _reminderQueue, _extractionQueue, _webhookRetryQueue].filter(Boolean) as Queue[];
+  const queues = [_callQueue, _notificationQueue, _followupQueue, _reminderQueue, _extractionQueue, _webhookRetryQueue, _emailCampaignQueue].filter(Boolean) as Queue[];
   await Promise.all(queues.map((q) => q.close()));
 }

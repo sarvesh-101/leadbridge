@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { sendEmail } from "../services/email.service";
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ const prisma = new PrismaClient();
  * For each active client:
  * 1. Aggregates previous month's stats (leads, calls, bookings, conversions)
  * 2. Resets callsThisMonth counter
- * 3. Sends email with report summary via Resend
+ * 3. Sends email with report summary via SMTP (with Resend fallback)
  */
 export async function generateMonthlyReports(): Promise<{ reportsGenerated: number }> {
   const now = new Date();
@@ -80,27 +81,18 @@ export async function generateMonthlyReports(): Promise<{ reportsGenerated: numb
       `— The LeadBridge Team`,
     ].join("\n");
 
-    // Send email via Resend
+    // Send email via shared email service (SMTP primary, Resend fallback)
     try {
-      const emailResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${config.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: `LeadBridge Reports <${config.FROM_EMAIL}>`,
-          to: [client.email],
-          subject: `📊 LeadBridge Monthly Report — ${month}`,
-          text: reportText,
-        }),
+      const emailSent = await sendEmail({
+        to: client.email,
+        subject: `📊 LeadBridge Monthly Report — ${month}`,
+        text: reportText,
       });
 
-      if (emailResponse.ok) {
+      if (emailSent) {
         logger.info({ clientId: client.id, month }, "Monthly report email sent");
       } else {
-        const err = await emailResponse.text();
-        logger.error({ clientId: client.id, err }, "Failed to send monthly report email");
+        logger.error({ clientId: client.id, month }, "Failed to send monthly report email");
       }
     } catch (error: any) {
       logger.error({ err: error.message, clientId: client.id }, "Failed to send monthly report email");

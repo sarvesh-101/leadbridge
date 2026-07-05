@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { sendEmail } from "../services/email.service";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,7 @@ const prisma = new PrismaClient();
  *
  * For each match:
  * 1. Sets planStatus = PAST_DUE (stops processing new leads)
- * 2. Sends trial expiry email via Resend
+ * 2. Sends trial expiry email via SMTP (with Resend fallback)
  */
 export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: number }> {
   const now = new Date();
@@ -37,19 +38,12 @@ export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: 
 
     paused++;
 
-    // Send trial expiry email via Resend
+    // Send trial expiry email via shared email service (SMTP primary, Resend fallback)
     try {
-      const emailResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${config.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: `LeadBridge <${config.FROM_EMAIL}>`,
-          to: [client.email],
-          subject: "Your LeadBridge trial has expired — upgrade to continue",
-          text: `Hi ${client.ownerName},
+      const emailSent = await sendEmail({
+        to: client.email,
+        subject: "Your LeadBridge trial has expired — upgrade to continue",
+        text: `Hi ${client.ownerName},
 
 Your LeadBridge trial period has ended.
 
@@ -66,15 +60,13 @@ Upgrade here: ${config.FRONTEND_URL}/dashboard/billing
 Questions? Reply to this email.
 
 — The LeadBridge Team`,
-        }),
       });
 
-      if (emailResponse.ok) {
+      if (emailSent) {
         emailsSent++;
         logger.info({ clientId: client.id, email: client.email }, "Trial expiry email sent");
       } else {
-        const err = await emailResponse.text();
-        logger.error({ clientId: client.id, err }, "Failed to send trial expiry email");
+        logger.error({ clientId: client.id }, "Failed to send trial expiry email");
       }
     } catch (error: any) {
       logger.error({ err: error.message, clientId: client.id }, "Failed to send trial expiry email");

@@ -4,6 +4,7 @@ import {
 } from "../../services/omnidimension-agents.service";
 import {
   listPhoneNumbers, attachPhoneNumber, detachPhoneNumber,
+  purchasePhoneNumber,
 } from "../../services/omnidimension-phone.service";
 import {
   listKnowledgeDocs, uploadKnowledgeDoc, attachKnowledgeDoc,
@@ -156,6 +157,18 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
   fastify.get("/voice/phone-numbers", async () => {
     const numbers = await listPhoneNumbers();
     return { numbers };
+  });
+
+  /** Purchase a new phone number (falls back gracefully if API not available) */
+  fastify.post("/voice/phone-numbers/purchase", async (
+    request: FastifyRequest<{ Body: { region?: string; areaCode?: string; provider?: string } }>, reply: FastifyReply
+  ) => {
+    const result = await purchasePhoneNumber({
+      region: request.body.region,
+      areaCode: request.body.areaCode,
+      provider: request.body.provider,
+    });
+    return result;
   });
 
   /** Attach a phone number to an agent */

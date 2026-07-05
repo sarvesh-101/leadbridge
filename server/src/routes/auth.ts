@@ -1,12 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { Resend } from "resend";
 import { OAuth2Client } from "google-auth-library";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../plugins/auth";
 import { config } from "../config";
-
-const resend = config.RESEND_API_KEY ? new Resend(config.RESEND_API_KEY) : null;
+import { sendEmail } from "../services/email.service";
 
 // Google OAuth client (only initialized if GOOGLE_CLIENT_ID is set)
 let googleClient: OAuth2Client | null = null;
@@ -364,53 +362,53 @@ export default async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    // Send email via Resend
-    if (resend) {
-      fastify.log.info({ email }, "Sending password reset email");
-      const resetUrl = `${config.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
+    // Send email via shared email service (SMTP primary, Resend fallback)
+    fastify.log.info({ email }, "Sending password reset email");
+    const resetUrl = `${config.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
-      try {
-        await resend.emails.send({
-          from: `LeadFlow AI <${config.FROM_EMAIL}>`,
-          to: email,
-          subject: "Reset your LeadFlow AI password",
-          html: `
-            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-              <div style="text-align: center; margin-bottom: 32px;">
-                <div style="display: inline-flex; align-items: center; gap: 8px;">
-                  <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
-                  <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadFlow AI</span>
-                </div>
+    try {
+      const emailSent = await sendEmail({
+        to: email,
+        subject: "Reset your LeadBridge password",
+        text: `You requested a password reset. Click here to reset: ${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+              <div style="display: inline-flex; align-items: center; gap: 8px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
+                <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
               </div>
-              <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Reset your password</h1>
-              <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
-                We received a request to reset the password for your LeadFlow AI account.
-                Click the button below to set a new password. This link expires in 1 hour.
-              </p>
-              <div style="text-align: center; margin-bottom: 24px;">
-                <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #6366F1, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
-                  Reset Password
-                </a>
-              </div>
-              <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
-                If you didn't request this, you can safely ignore this email.
-                Your password will not be changed.
-              </p>
-              <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-              <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-                LeadFlow AI — Never Lose Another Lead Again
-              </p>
             </div>
-          `,
-        });
-      } catch (err: any) {
-        fastify.log.error({ err }, "Failed to send password reset email");
+            <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Reset your password</h1>
+            <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+              We received a request to reset the password for your LeadBridge account.
+              Click the button below to set a new password. This link expires in 1 hour.
+            </p>
+            <div style="text-align: center; margin-bottom: 24px;">
+              <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
+                Reset Password
+              </a>
+            </div>
+            <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+              If you didn't request this, you can safely ignore this email.
+              Your password will not be changed.
+            </p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+            <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+              LeadBridge — Never Lose Another Lead Again
+            </p>
+          </div>
+        `,
+      });
+
+      if (!emailSent) {
+        fastify.log.warn(
+          "No email provider configured — password reset token stored but email not sent. " +
+          "Set SMTP_* vars in your environment to enable password reset emails."
+        );
       }
-    } else {
-      fastify.log.warn(
-        "RESEND_API_KEY not configured — password reset token stored but email not sent. " +
-        "Set RESEND_API_KEY in your environment to enable password reset emails."
-      );
+    } catch (err: any) {
+      fastify.log.error({ err }, "Failed to send password reset email");
     }
 
     return { message: "If an account with that email exists, a reset link has been sent." };

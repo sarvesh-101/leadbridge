@@ -205,7 +205,7 @@ const notificationWorker = new Worker<NotificationJob>(
     }
 
     // ─── Fallback 2: Send via Email if WhatsApp + SMS both failed ──
-    if (!waMessageId && recipient === "owner" && config.RESEND_API_KEY && client?.email) {
+    if (!waMessageId && recipient === "owner" && client?.email) {
       job.log(`WhatsApp+SMS failed for owner — falling back to email`);
 
       const emailSent = await sendEmail({

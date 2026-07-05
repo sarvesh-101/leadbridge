@@ -17,6 +17,7 @@ export async function detectNoShows(): Promise<{ processed: number }> {
 
   for (const booking of candidateBookings) {
     const [time, modifier] = booking.visitTime.split(" ");
+    // eslint-disable-next-line prefer-const
     let [hours, minutes] = time.split(":").map(Number);
     if (modifier?.toLowerCase() === "pm" && hours !== 12) hours += 12;
     if (modifier?.toLowerCase() === "am" && hours === 12) hours = 0;

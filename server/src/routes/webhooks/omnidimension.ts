@@ -49,13 +49,8 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
     }
 
     // Find the call record
-    let call = await fastify.prisma.call.findFirst({
-      where: {
-        OR: [
-          { omnidimensionCallId: callLogId },
-          { exotelCallSid: callLogId },
-        ],
-      },
+    const call = await fastify.prisma.call.findFirst({
+      where: { omnidimensionCallId: callLogId },
       include: { lead: true, client: true },
     });
 

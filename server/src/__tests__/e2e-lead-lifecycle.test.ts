@@ -39,13 +39,14 @@ describeDb("E2E: Full Lead Lifecycle", () => {
 
   afterAll(async () => {
     // Cleanup test data in reverse dependency order
-    try { await prisma.call.deleteMany({ where: { leadId: { startsWith: TEST_PREFIX } } }); } catch {}
-    try { await prisma.booking.deleteMany({ where: { clientId: testClientId } }); } catch {}
-    try { await prisma.customerNotification.deleteMany({ where: { leadId: { startsWith: TEST_PREFIX } } }); } catch {}
-    try { await prisma.ownerNotification.deleteMany({ where: { clientId: testClientId } }); } catch {}
-    try { await prisma.lead.deleteMany({ where: { id: { startsWith: TEST_PREFIX } } }); } catch {}
-    try { await prisma.client.deleteMany({ where: { id: { startsWith: TEST_PREFIX } } }); } catch {}
-    try { await prisma.webhookSource.deleteMany({ where: { clientId: testClientId } }); } catch {}
+    // Cleanup test data — individual catches so one failure doesn't block others
+    try { await prisma.call.deleteMany({ where: { leadId: { startsWith: TEST_PREFIX } } }); } catch { /* noop */ }
+    try { await prisma.booking.deleteMany({ where: { clientId: testClientId } }); } catch { /* noop */ }
+    try { await prisma.customerNotification.deleteMany({ where: { leadId: { startsWith: TEST_PREFIX } } }); } catch { /* noop */ }
+    try { await prisma.ownerNotification.deleteMany({ where: { clientId: testClientId } }); } catch { /* noop */ }
+    try { await prisma.lead.deleteMany({ where: { id: { startsWith: TEST_PREFIX } } }); } catch { /* noop */ }
+    try { await prisma.client.deleteMany({ where: { id: { startsWith: TEST_PREFIX } } }); } catch { /* noop */ }
+    try { await prisma.webhookSource.deleteMany({ where: { clientId: testClientId } }); } catch { /* noop */ }
     await prisma.$disconnect();
   });
 

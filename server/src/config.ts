@@ -26,30 +26,12 @@ const envSchema = z.object({
   OMNIDIM_API_KEY: z.string(),
   OMNIDIM_BASE_URL: z.string().default("https://backend.omnidim.io/api/v1"),
 
-  // Exotel (legacy — kept for backward compatibility)
-  EXOTEL_API_KEY: z.string().optional(),
-  EXOTEL_API_TOKEN: z.string().optional(),
-  EXOTEL_SID: z.string().optional(),
-  EXOTEL_SUBDOMAIN: z.string().default("api.exotel.com"),
-  EXOTEL_CALLER_ID: z.string().optional(),
-
-  // Pipecat (legacy — kept for backward compatibility)
-  PIPECAT_SERVICE_URL: z.string().default("http://localhost:8000"),
-  PIPECAT_SECRET: z.string().default("change-me"),
-
   // LLM Provider (OpenAI-compatible API — works with OpenRouter, DeepSeek, etc.)
   // Used for post-call transcript extraction, WhatsApp chatbot, and script generation.
   // Default: Qwen3 Next 80B A3B Instruct via OpenRouter (free, fast, multilingual)
   DEEPSEEK_API_KEY: z.string().optional(),
   DEEPSEEK_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
   DEEPSEEK_MODEL: z.string().default("qwen/qwen3-next-80b-a3b-instruct:free"),
-
-  // Deepgram (legacy — replaced by Omnidimension)
-  DEEPGRAM_API_KEY: z.string().optional(),
-
-  // Cartesia (legacy — replaced by Omnidimension)
-  CARTESIA_API_KEY: z.string().optional(),
-  CARTESIA_VOICE_ID: z.string().optional(),
 
   // WhatsApp Cloud API
   WHATSAPP_TOKEN: z.string().optional(),
@@ -70,9 +52,18 @@ const envSchema = z.object({
   SUPABASE_SERVICE_KEY: z.string().optional(),
   SUPABASE_RECORDINGS_BUCKET: z.string().default("call-recordings"),
 
-  // Resend
-  RESEND_API_KEY: z.string().optional(),
+  // Email (SMTP — works with AWS SES, SendGrid, Gmail, any SMTP provider)
+  // If SMTP_* vars are not set, falls back to Resend API (RESEND_API_KEY)
+  SMTP_HOST: z.string().default("email-smtp.ap-south-1.amazonaws.com"),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_SECURE: z.coerce.boolean().default(false),
   FROM_EMAIL: z.string().default("noreply@leadbridge.com"),
+  FROM_NAME: z.string().default("LeadBridge"),
+
+  // Resend (fallback if SMTP not configured)
+  RESEND_API_KEY: z.string().optional(),
 
   // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),

@@ -1,17 +1,24 @@
 /**
- * Email Notification Service — third notification channel using Resend.
+ * Email Notification Service — uses Nodemailer + SMTP with Resend fallback.
  *
- * Used as a secondary fallback (after WhatsApp → SMS) for critical alerts:
- * - Booking confirmations
- * - No-show alerts
- * - Monthly reports (already uses Resend directly)
- * - Trial expiry (already uses Resend directly)
+ * Primary: SMTP (works with AWS SES, SendGrid, Gmail, Mailgun, any SMTP)
+ *   - SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS
+ *   - Cost: AWS SES ~$0.10 per 1000 emails ($5/50K)
+ *   - Cost: SendGrid $19.95/mo for 50K
  *
- * Environment:
- *   RESEND_API_KEY  (required for email to work)
- *   FROM_EMAIL      (sender address, default "noreply@leadbridge.com")
+ * Fallback: Resend HTTP API (if SMTP not configured)
+ *   - RESEND_API_KEY
+ *   - Free: 100/day, Paid: $10/mo for 50K
+ *
+ * Used for:
+ *   - Booking confirmations (customer + owner)
+ *   - No-show alerts
+ *   - Password resets / team invitations
+ *   - Monthly reports
+ *   - Trial expiry notifications
  */
 
+import nodemailer from "nodemailer";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 
@@ -22,17 +29,109 @@ interface SendEmailParams {
   html?: string;
 }
 
+let smtpTransporter: nodemailer.Transporter | null = null;
+
+function getSmtpTransporter(): nodemailer.Transporter | null {
+  if (smtpTransporter) return smtpTransporter;
+
+  // SMTP requires at minimum a host and credentials
+  if (!config.SMTP_HOST || !config.SMTP_USER || !config.SMTP_PASS) {
+    return null;
+  }
+
+  try {
+    smtpTransporter = nodemailer.createTransport({
+      host: config.SMTP_HOST,
+      port: config.SMTP_PORT,
+      secure: config.SMTP_SECURE,
+      auth: {
+        user: config.SMTP_USER,
+        pass: config.SMTP_PASS,
+      },
+    });
+    return smtpTransporter;
+  } catch (error: any) {
+    logger.error({ err: error.message }, "Failed to create SMTP transport");
+    return null;
+  }
+}
+
+const smtpConfigured = (): boolean => {
+  return !!(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS);
+};
+
+const resendConfigured = (): boolean => {
+  return !!config.RESEND_API_KEY;
+};
+
 /**
- * Send a transactional email via Resend API.
+ * Send a transactional email.
+ * Primary: SMTP (nodemailer). Fallback: Resend HTTP API.
  *
- * @returns true if the email was sent successfully, false otherwise
+ * @returns true if sent successfully, false otherwise
  */
 export async function sendEmail(params: SendEmailParams): Promise<boolean> {
-  if (!config.RESEND_API_KEY) {
-    logger.warn({ to: params.to }, "RESEND_API_KEY not configured — email not sent");
+  if (!smtpConfigured() && !resendConfigured()) {
+    logger.warn(
+      { to: params.to },
+      "No email provider configured — set SMTP_* vars or RESEND_API_KEY"
+    );
     return false;
   }
 
+  // Primary: SMTP via nodemailer
+  if (smtpConfigured()) {
+    return sendViaSmtp(params);
+  }
+
+  // Fallback: Resend HTTP API
+  return sendViaResend(params);
+}
+
+/**
+ * Send via SMTP (nodemailer) — works with AWS SES, SendGrid, Gmail, etc.
+ */
+async function sendViaSmtp(params: SendEmailParams): Promise<boolean> {
+  const transporter = getSmtpTransporter();
+  if (!transporter) {
+    logger.warn({ to: params.to }, "SMTP not configured — skipping");
+    return false;
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"${config.FROM_NAME}" <${config.FROM_EMAIL}>`,
+      to: params.to,
+      subject: params.subject,
+      text: params.text,
+      ...(params.html ? { html: params.html } : {}),
+    });
+
+    logger.info(
+      { to: params.to, messageId: info.messageId, subject: params.subject },
+      "Email sent via SMTP"
+    );
+    return true;
+  } catch (error: any) {
+    logger.error(
+      { err: error.message, to: params.to, subject: params.subject },
+      "SMTP email send failed"
+    );
+
+    // If SMTP fails and Resend is available, try Resend as fallback
+    if (resendConfigured()) {
+      logger.info({ to: params.to }, "Falling back to Resend");
+      return sendViaResend(params);
+    }
+
+    return false;
+  }
+}
+
+/**
+ * Send via Resend HTTP API (fallback).
+ */
+async function sendViaResend(params: SendEmailParams): Promise<boolean> {
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -41,7 +140,7 @@ export async function sendEmail(params: SendEmailParams): Promise<boolean> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `LeadBridge <${config.FROM_EMAIL}>`,
+        from: `${config.FROM_NAME} <${config.FROM_EMAIL}>`,
         to: [params.to],
         subject: params.subject,
         text: params.text,

@@ -16,7 +16,7 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
 
   // ─── Update Profile ───────────────────────────────────────────
   fastify.patch("/me", async (request: FastifyRequest<{ Body: Record<string, unknown> }>, reply: FastifyReply) => {
-    const allowedFields = ["ownerWhatsapp", "language", "leadSources", "phoneSetupStatus"];
+    const allowedFields = ["ownerWhatsapp", "language", "leadSources", "phoneSetupStatus", "ownerName", "businessName", "phone", "name", "city", "zone"];
     const updates: Record<string, unknown> = {};
 
     for (const field of allowedFields) {

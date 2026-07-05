@@ -7,6 +7,11 @@ import bcrypt from "bcryptjs";
 import { config } from "./config";
 import { logger } from "./utils/logger";
 
+// ─── Request ID generation ────────────────────────────────────
+function generateRequestId(): string {
+  return crypto.randomUUID();
+}
+
 // Plugin imports
 import prismaPlugin from "./plugins/prisma";
 import redisPlugin from "./plugins/redis";
@@ -31,8 +36,27 @@ import clientIntegrationRoutes from "./routes/client/integrations";
 import clientTerritoryRoutes from "./routes/client/territories";
 import clientVoiceRoutes from "./routes/client/voice";
 import clientMessagesRoutes from "./routes/client/messages";
+import clientPropertyRoutes from "./routes/client/properties";
+import csvImportRoutes from "./routes/client/csv-import";
+import teamRoutes from "./routes/client/team";
+import documentRoutes from "./routes/client/documents";
+import paymentLinkRoutes from "./routes/client/payment-links";
+import transcriptSearchRoutes from "./routes/client/transcript-search";
+import notificationPreferenceRoutes from "./routes/client/notification-preferences";
+import reportBuilderRoutes from "./routes/client/report-builder";
+import sheetsSyncRoutes from "./routes/client/sheets-sync";
+import roiAnalyticsRoutes from "./routes/client/roi-analytics";
+import notificationRoutes from "./routes/client/notifications";
+import emailCampaignRoutes from "./routes/client/email-campaigns";
+import smsCampaignRoutes from "./routes/client/sms-campaigns";
+import templateRoutes from "./routes/client/templates";
+import abTestingRoutes from "./routes/client/ab-testing";
+import propertySuggestionRoutes from "./routes/client/property-suggestions";
+import referralRoutes from "./routes/client/referrals";
+import calendarSyncRoutes from "./routes/client/calendar-sync";
+import territoryComparisonRoutes from "./routes/admin/territory-comparison";
 import ingestWebhookRoutes from "./routes/webhooks/ingest";
-import exotelWebhookRoutes from "./routes/webhooks/exotel";
+
 import omnidimensionWebhookRoutes from "./routes/webhooks/omnidimension";
 import razorpayWebhookRoutes from "./routes/webhooks/razorpay";
 import whatsappWebhookRoutes from "./routes/webhooks/whatsapp";
@@ -40,9 +64,12 @@ import webhookSourcesRoutes from "./routes/webhooks/sources";
 import adminAuditLogRoutes from "./routes/admin/audit-logs";
 import adminQueueRoutes from "./routes/admin/queues";
 import adminWebhookRoutes from "./routes/admin/webhooks";
+import customerRoutes from "./routes/customer";
 import metricsRoutes from "./routes/metrics";
 import { registerCronJobs } from "./cron/scheduler";
 import { isRedisAvailable } from "./workers/queues";
+import { getCircuitState } from "./utils/circuit-breaker";
+import trackingRoutes from "./routes/tracking";
 
 export async function buildServer() {
   const server = Fastify({
@@ -51,6 +78,13 @@ export async function buildServer() {
       transport: config.NODE_ENV !== "production" ? { target: "pino-pretty" } : undefined,
     },
     bodyLimit: 10 * 1024 * 1024, // 10MB
+  });
+
+  // ─── Request ID Middleware ──────────────────────────────
+  server.addHook("onRequest", async (request, reply) => {
+    const requestId = generateRequestId();
+    reply.header("X-Request-Id", requestId);
+    (request as any).requestId = requestId;
   });
 
   // ─── Register Plugins ──────────────────────────────────────
@@ -124,6 +158,79 @@ export async function buildServer() {
     };
   });
 
+  // ─── Detailed Integration Health ─────────────────────────
+  server.get("/health/integrations", async () => {
+    const circuitState = getCircuitState("omnidimension");
+
+    const integrations = {
+      whatsapp: {
+        configured: !!(config.WHATSAPP_TOKEN) && !!(config.WHATSAPP_PHONE_ID),
+        missingVars: buildMissingList([
+          ["WHATSAPP_TOKEN", config.WHATSAPP_TOKEN],
+          ["WHATSAPP_PHONE_ID", config.WHATSAPP_PHONE_ID],
+          ["WHATSAPP_VERIFY_TOKEN", config.WHATSAPP_VERIFY_TOKEN],
+        ]),
+      },
+      sms: {
+        configured: !!(config.MESSAGEBIRD_API_KEY),
+        type: "MessageBird (WhatsApp fallback)",
+        missingVars: buildMissingList([
+          ["MESSAGEBIRD_API_KEY", config.MESSAGEBIRD_API_KEY],
+        ]),
+      },
+      email: {
+        configured: !!(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS) || !!(config.RESEND_API_KEY),
+        primary: config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS ? "SMTP" : "Resend (fallback)",
+        missingVars: buildMissingList([
+          ["SMTP_HOST", config.SMTP_HOST],
+          ["SMTP_USER", config.SMTP_USER],
+          ["SMTP_PASS", config.SMTP_PASS],
+          ["RESEND_API_KEY", config.RESEND_API_KEY],
+        ]),
+      },
+      omnidimension: {
+        configured: !!(config.OMNIDIM_API_KEY),
+        circuitState: circuitState.state,
+        circuitFailureCount: circuitState.failureCount,
+        circuitCooldownRemainingMs: circuitState.cooldownRemainingMs,
+        missingVars: buildMissingList([
+          ["OMNIDIM_API_KEY", config.OMNIDIM_API_KEY],
+        ]),
+      },
+      razorpay: {
+        configured: !!(
+          config.RAZORPAY_KEY_ID &&
+          config.RAZORPAY_KEY_SECRET &&
+          config.RAZORPAY_PLAN_STARTER
+        ),
+        missingVars: buildMissingList([
+          ["RAZORPAY_KEY_ID", config.RAZORPAY_KEY_ID],
+          ["RAZORPAY_KEY_SECRET", config.RAZORPAY_KEY_SECRET],
+          ["RAZORPAY_PLAN_STARTER", config.RAZORPAY_PLAN_STARTER],
+          ["RAZORPAY_PLAN_GROWTH", config.RAZORPAY_PLAN_GROWTH],
+          ["RAZORPAY_PLAN_PRO", config.RAZORPAY_PLAN_PRO],
+        ]),
+      },
+      redis: {
+        available: isRedisAvailable(),
+      },
+    };
+
+    const unconfigured = (Object.entries(integrations) as [string, Record<string, unknown>][])
+      .filter(([, v]) => v.configured === false && "missingVars" in v)
+      .map(([name]) => name);
+
+    return {
+      status: unconfigured.length === 0 ? "all-configured" : "missing-configuration",
+      unconfigured,
+      integrations,
+    };
+  });
+
+  function buildMissingList(vars: [string, string | undefined][]): string[] {
+    return vars.filter(([, val]) => !val).map(([name]) => name);
+  }
+
   // Prometheus metrics (registered at root level for Prometheus scrape)
   await server.register(metricsRoutes);
 
@@ -154,11 +261,35 @@ export async function buildServer() {
   await server.register(clientTerritoryRoutes, { prefix: apiPrefix });
   await server.register(clientVoiceRoutes, { prefix: apiPrefix });
   await server.register(clientMessagesRoutes, { prefix: apiPrefix });
+  await server.register(clientPropertyRoutes, { prefix: apiPrefix });
+  await server.register(csvImportRoutes, { prefix: apiPrefix });
+  await server.register(teamRoutes, { prefix: apiPrefix });
+  await server.register(documentRoutes, { prefix: apiPrefix });
+  await server.register(paymentLinkRoutes, { prefix: apiPrefix });
+  await server.register(transcriptSearchRoutes, { prefix: apiPrefix });
+  await server.register(notificationPreferenceRoutes, { prefix: apiPrefix });
+  await server.register(reportBuilderRoutes, { prefix: apiPrefix });
+  await server.register(sheetsSyncRoutes, { prefix: apiPrefix });
+  await server.register(roiAnalyticsRoutes, { prefix: apiPrefix });
+  await server.register(emailCampaignRoutes, { prefix: apiPrefix });
+  await server.register(abTestingRoutes, { prefix: apiPrefix });
+  await server.register(smsCampaignRoutes, { prefix: apiPrefix });
+  await server.register(templateRoutes, { prefix: apiPrefix });
+  await server.register(notificationRoutes, { prefix: apiPrefix });
+  await server.register(calendarSyncRoutes, { prefix: apiPrefix });
+  await server.register(territoryComparisonRoutes, { prefix: apiPrefix });
+  await server.register(propertySuggestionRoutes, { prefix: apiPrefix });
+  await server.register(referralRoutes, { prefix: apiPrefix });
   await server.register(webhookSourcesRoutes, { prefix: apiPrefix });
+
+  // Customer portal routes (auth via OTP)
+  await server.register(customerRoutes, { prefix: apiPrefix });
+
+  // Tracking routes (no auth — used by email tracking pixel and redirects)
+  await server.register(trackingRoutes, { prefix: apiPrefix });
 
   // Webhooks (no auth — token or signature based)
   await server.register(ingestWebhookRoutes, { prefix: apiPrefix });
-  await server.register(exotelWebhookRoutes, { prefix: apiPrefix });
   await server.register(omnidimensionWebhookRoutes, { prefix: apiPrefix });
   await server.register(razorpayWebhookRoutes, { prefix: apiPrefix });
   await server.register(whatsappWebhookRoutes, { prefix: apiPrefix });
@@ -254,6 +385,11 @@ async function start() {
 
     // Register cron jobs (non-blocking — runs alongside the server)
     registerCronJobs();
+
+    // Start campaign worker (processes queued campaign emails)
+    import("./workers/campaign.worker").catch((err) => {
+      logger.error({ err: err.message }, "Failed to start campaign worker");
+    });
 
     await server.listen({ port: config.PORT, host: "0.0.0.0" });
     logger.info(`LeadBridge server running on port ${config.PORT}`);

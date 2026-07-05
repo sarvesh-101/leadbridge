@@ -1,253 +1,222 @@
-/**
- * Messages API Route
- *
- * GET /api/v1/messages — Returns real message logs from the database:
- *   - OwnerNotification — WhatsApp messages sent to broker (owner)
- *   - CustomerNotification — WhatsApp messages sent to leads
- *   - Call records with transcripts (phone calls)
- *
- * Previously the frontend was fabricating message data from calls + leads.
- * This endpoint provides a clean, paginated, filterable message history.
- */
-
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { sendTextMessage } from "../../services/whatsapp.service";
 
-interface MessagesQuery {
-  page?: string;
-  limit?: string;
-  channel?: "all" | "whatsapp" | "phone";
-  search?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-}
+export default async function clientMessageRoutes(fastify: FastifyInstance) {
+  fastify.addHook("preHandler", fastify.authenticate);
 
-export default async function messagesRoutes(fastify: FastifyInstance) {
-  // ─── List Messages ─────────────────────────────────────────
-  fastify.get("/messages", async (request: FastifyRequest<{ Querystring: MessagesQuery }>, reply: FastifyReply) => {
-    const clientId = request.clientId;
-    const {
-      page = "1",
-      limit = "30",
-      channel = "all",
-      search,
-      status,
-      startDate,
-      endDate,
-    } = request.query;
+  // ─── List Conversations ────────────────────────────────────────
+  fastify.get("/messages/conversations", async (request: FastifyRequest) => {
+    const clientId = request.clientId!;
+    const { search } = request.query as Record<string, string>;
 
-    const take = parseInt(limit);
-    // Fetch a generous batch from each source so client-side sorting/searching works
-    const FETCH_BATCH = 200;
-
-    const dateFilter: Record<string, unknown> = {};
-    if (startDate) dateFilter.gte = new Date(startDate);
-    if (endDate) dateFilter.lte = new Date(endDate);
-
-    const hasDateFilter = Object.keys(dateFilter).length > 0;
-
-    // Build Prisma where clauses
-    const ownerWhere: Record<string, unknown> = { clientId };
-    if (status) ownerWhere.status = status;
-    if (hasDateFilter) ownerWhere.sentAt = dateFilter;
-
-    const customerWhere: Record<string, unknown> = {
-      lead: { clientId },
-    };
-    if (status) customerWhere.status = status;
-    if (hasDateFilter) customerWhere.sentAt = dateFilter;
-
-    const callWhere: Record<string, unknown> = { clientId };
-    if (status) callWhere.status = status;
-    if (hasDateFilter) callWhere.createdAt = dateFilter;
-
-    // ─── Fetch all 3 sources in parallel ──────────────────
-    const [ownerNotifications, customerNotifications, calls] = await Promise.all([
-      channel === "all" || channel === "whatsapp"
-        ? fastify.prisma.ownerNotification.findMany({
-            where: ownerWhere,
-            include: { lead: { select: { name: true, phone: true } } },
-            orderBy: { sentAt: "desc" },
-            take: FETCH_BATCH,
-          })
-        : ([] as any[]),
-
-      channel === "all" || channel === "whatsapp"
-        ? fastify.prisma.customerNotification.findMany({
-            where: customerWhere,
-            include: { lead: { select: { name: true, phone: true } } },
-            orderBy: { sentAt: "desc" },
-            take: FETCH_BATCH,
-          })
-        : ([] as any[]),
-
-      channel === "all" || channel === "phone"
-        ? fastify.prisma.call.findMany({
-            where: callWhere,
-            include: { lead: { select: { name: true, phone: true } } },
-            orderBy: { createdAt: "desc" },
-            take: FETCH_BATCH,
-          })
-        : ([] as any[]),
-    ]);
-
-    // ─── Normalize into unified message format ─────────────
-    const messages: Array<{
-      id: string;
-      type: "whatsapp" | "phone";
-      direction: "outbound" | "inbound";
-      recipientType: "owner" | "customer";
-      recipientName: string | null;
-      recipientPhone: string | null;
-      content: string;
-      status: string;
-      template: string | null;
-      duration: number | null;
-      sentAt: string;
-    }> = [];
-
-    for (const n of ownerNotifications) {
-      messages.push({
-        id: `on-${n.id}`,
-        type: "whatsapp",
-        direction: "outbound",
-        recipientType: "owner",
-        recipientName: null,
-        recipientPhone: null,
-        content: n.message || "",
-        status: n.status,
-        template: n.type,
-        duration: null,
-        sentAt: n.sentAt.toISOString(),
-      });
+    // Get all leads with their latest notification
+    const where: Record<string, unknown> = { clientId };
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search } },
+      ];
     }
 
-    for (const n of customerNotifications) {
-      messages.push({
-        id: `cn-${n.id}`,
-        type: "whatsapp",
-        direction: "outbound",
-        recipientType: "customer",
-        recipientName: (n as any).lead?.name || null,
-        recipientPhone: null,
-        content: n.message || "",
-        status: n.status,
-        template: n.type,
-        duration: null,
-        sentAt: n.sentAt.toISOString(),
+    const leads = await fastify.prisma.lead.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        status: true,
+        source: true,
+        score: true,
+        customerNotifications: {
+          orderBy: { sentAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            type: true,
+            channel: true,
+            message: true,
+            status: true,
+            sentAt: true,
+          },
+        },
+        _count: {
+          select: { customerNotifications: true },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: 50,
+    });
+
+    // Format conversations
+    const conversations = leads
+      .filter((l) => l.customerNotifications.length > 0 || l.phone)
+      .map((l) => ({
+        leadId: l.id,
+        name: l.name,
+        phone: l.phone,
+        status: l.status,
+        source: l.source,
+        score: l.score,
+        lastMessage: l.customerNotifications[0] || null,
+        messageCount: l._count.customerNotifications,
+      }))
+      .sort((a, b) => {
+        if (!a.lastMessage) return 1;
+        if (!b.lastMessage) return -1;
+        return new Date(b.lastMessage.sentAt).getTime() - new Date(a.lastMessage.sentAt).getTime();
       });
+
+    return { conversations };
+  });
+
+  // ─── Get Conversation (message thread for a specific lead) ────
+  fastify.get("/messages/conversations/:leadId", async (request: FastifyRequest<{
+    Params: { leadId: string };
+  }>) => {
+    const clientId = request.clientId!;
+    const { leadId } = request.params;
+
+    const lead = await fastify.prisma.lead.findFirst({
+      where: { id: leadId, clientId },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        status: true,
+        source: true,
+        score: true,
+        email: true,
+        customerNotifications: {
+          orderBy: { sentAt: "asc" },
+          take: 100,
+        },
+        calls: {
+          where: { transcript: { not: null } },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: {
+            id: true,
+            type: true,
+            status: true,
+            duration: true,
+            summary: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    if (!lead) {
+      return { conversation: null, messages: [] };
     }
-
-    for (const c of calls) {
-      messages.push({
-        id: `call-${c.id}`,
-        type: "phone",
-        direction: (c.direction as "outbound" | "inbound") || "outbound",
-        recipientType: "customer",
-        recipientName: (c as any).lead?.name || null,
-        recipientPhone: (c as any).lead?.phone || null,
-        content: c.summary || c.transcript || `Call duration: ${c.duration || 0}s`,
-        status: c.status,
-        template: c.type,
-        duration: c.duration || null,
-        sentAt: c.createdAt.toISOString(),
-      });
-    }
-
-    // Sort by sentAt descending
-    messages.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
-
-    // Apply search filter to merged results
-    const filtered = search
-      ? messages.filter(
-          (m) =>
-            m.recipientName?.toLowerCase().includes(search.toLowerCase()) ||
-            m.recipientPhone?.includes(search) ||
-            m.content.toLowerCase().includes(search.toLowerCase())
-        )
-      : messages;
-
-    // Paginate on the merged + filtered set
-    const skip = (parseInt(page) - 1) * take;
-    const paginated = filtered.slice(skip, skip + take);
 
     return {
-      messages: paginated,
-      total: filtered.length,
-      page: parseInt(page),
-      limit: take,
+      conversation: {
+        leadId: lead.id,
+        name: lead.name,
+        phone: lead.phone,
+        status: lead.status,
+        source: lead.source,
+        score: lead.score,
+        email: lead.email,
+      },
+      messages: lead.customerNotifications.map((n) => ({
+        id: n.id,
+        type: n.type,
+        channel: n.channel,
+        message: n.message,
+        status: n.status,
+        sentAt: n.sentAt.toISOString(),
+        isFromLead: n.type === "INCOMING_WHATSAPP" || n.type === "INCOMING_SMS",
+        isFromBot: n.type === "CHATBOT_REPLY",
+      })),
+      recentCalls: lead.calls,
     };
   });
 
-  // ─── Get Single Message ──────────────────────────────────
-  fastify.get("/messages/:id", async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    const clientId = request.clientId;
-    const { id } = request.params;
+  // ─── Send WhatsApp Message ────────────────────────────────────
+  fastify.post("/messages/send", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["leadId", "message"],
+        properties: {
+          leadId: { type: "string" },
+          message: { type: "string", minLength: 1, maxLength: 4096 },
+        },
+      },
+    },
+    config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
+  }, async (request: FastifyRequest<{
+    Body: { leadId: string; message: string };
+  }>, reply: FastifyReply) => {
+    const clientId = request.clientId!;
+    const { leadId, message } = request.body;
 
-    // Parse the prefix to know which table to query
-    if (id.startsWith("on-")) {
-      const notification = await fastify.prisma.ownerNotification.findUnique({
-        where: { id: id.replace("on-", "") },
-        include: { lead: true, booking: true },
-      });
-      if (!notification || notification.clientId !== clientId) {
-        return reply.status(404).send({ error: "Message not found" });
-      }
-      return {
-        id: `on-${notification.id}`,
-        type: "whatsapp",
-        recipientType: "owner",
-        content: notification.message,
-        status: notification.status,
-        template: notification.type,
-        sentAt: notification.sentAt,
-        lead: notification.lead ? { name: notification.lead.name, phone: notification.lead.phone } : null,
-        booking: notification.booking,
-      };
+    // Verify lead belongs to client
+    const lead = await fastify.prisma.lead.findFirst({
+      where: { id: leadId, clientId },
+    });
+
+    if (!lead) {
+      return reply.status(404).send({ error: "Lead not found" });
     }
 
-    if (id.startsWith("cn-")) {
-      const notification = await fastify.prisma.customerNotification.findUnique({
-        where: { id: id.replace("cn-", "") },
-        include: { lead: true },
-      });
-      if (!notification || notification.lead?.clientId !== clientId) {
-        return reply.status(404).send({ error: "Message not found" });
-      }
-      return {
-        id: `cn-${notification.id}`,
-        type: "whatsapp",
-        recipientType: "customer",
-        content: notification.message,
-        status: notification.status,
-        template: notification.type,
-        sentAt: notification.sentAt,
-        lead: notification.lead ? { name: notification.lead.name, phone: notification.lead.phone } : null,
-      };
+    // Send via WhatsApp
+    const waMessageId = await sendTextMessage({
+      to: lead.phone,
+      text: message,
+      recipientType: "customer",
+    });
+
+    // Log the outgoing message
+    const notification = await fastify.prisma.customerNotification.create({
+      data: {
+        leadId: lead.id,
+        type: "BROKER_REPLY",
+        channel: waMessageId ? "whatsapp" : "sms",
+        message,
+        status: waMessageId ? "sent" : "failed",
+        waMessageId: waMessageId || undefined,
+        sentAt: new Date(),
+      },
+    });
+
+    if (!waMessageId) {
+      return reply.status(500).send({ error: "Failed to send WhatsApp message. Check your WhatsApp configuration." });
     }
 
-    if (id.startsWith("call-")) {
-      const call = await fastify.prisma.call.findUnique({
-        where: { id: id.replace("call-", "") },
-        include: { lead: true },
-      });
-      if (!call || call.clientId !== clientId) {
-        return reply.status(404).send({ error: "Message not found" });
-      }
-      return {
-        id: `call-${call.id}`,
-        type: "phone",
-        content: call.summary || call.transcript,
-        status: call.status,
-        template: call.type,
-        duration: call.duration,
-        direction: call.direction,
-        recordingUrl: call.recordingUrl,
-        sentAt: call.createdAt,
-        lead: call.lead ? { name: call.lead.name, phone: call.lead.phone } : null,
-      };
+    return { message: "Sent", notification };
+  });
+
+  // ─── Mark Conversation as Read ─────────────────────────────────
+  fastify.post("/messages/conversations/:leadId/read", async (request: FastifyRequest<{
+    Params: { leadId: string };
+  }>) => {
+    const clientId = request.clientId!;
+    const { leadId } = request.params;
+
+    // Verify lead belongs to client
+    const lead = await fastify.prisma.lead.findFirst({
+      where: { id: leadId, clientId },
+    });
+
+    if (!lead) {
+      return { error: "Lead not found" };
     }
 
-    return reply.status(404).send({ error: "Message not found" });
+    // Mark all incoming unread messages as read
+    await fastify.prisma.customerNotification.updateMany({
+      where: {
+        leadId,
+        type: "INCOMING_WHATSAPP",
+        status: "received",
+      },
+      data: { status: "read" },
+    });
+
+    return { success: true };
   });
 }

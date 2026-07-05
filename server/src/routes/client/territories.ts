@@ -91,7 +91,81 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
     };
   });
 
-  // ─── Purchase / Claim Territory ────────────────────────────────
+  // ─── Claim Territory (by city/zone — used by onboarding) ──────
+  // POST /territories/claim — looks up or creates a territory by city/zone and assigns it
+  fastify.post("/territories/claim", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["city"],
+        properties: {
+          city: { type: "string" },
+          zone: { type: "string" },
+        },
+      },
+    },
+  }, async (request: FastifyRequest<{
+    Body: { city: string; zone?: string };
+  }>, reply: FastifyReply) => {
+    const { city, zone } = request.body;
+
+    // Check if client already has a territory
+    const existing = await fastify.prisma.client.findUnique({
+      where: { id: request.clientId },
+      include: { territory: true },
+    });
+
+    if (existing?.territory) {
+      return reply.status(409).send({
+        error: "You already have a territory assigned. Release it first to claim a new one.",
+      });
+    }
+
+    // Look for existing territory for this city/zone
+    let territory = await fastify.prisma.territory.findFirst({
+      where: {
+        city: { equals: city, mode: "insensitive" },
+        zone: zone ? { equals: zone, mode: "insensitive" } : undefined,
+        clientId: null,
+        locked: false,
+      },
+    });
+
+    // Create a new territory record if none exists
+    if (!territory) {
+      territory = await fastify.prisma.territory.create({
+        data: {
+          city,
+          zone: zone || null,
+          tier: 2,  // default Tier 2
+        },
+      });
+    }
+
+    // Assign territory to client
+    const [updatedTerritory] = await fastify.prisma.$transaction([
+      fastify.prisma.territory.update({
+        where: { id: territory.id },
+        data: { clientId: request.clientId, locked: true },
+      }),
+      fastify.prisma.client.update({
+        where: { id: request.clientId },
+        data: { city: territory.city, zone: territory.zone },
+      }),
+    ]);
+
+    return {
+      message: `Territory '${updatedTerritory.city}${updatedTerritory.zone ? ` - ${updatedTerritory.zone}` : ""}' claimed`,
+      territory: {
+        id: updatedTerritory.id,
+        city: updatedTerritory.city,
+        zone: updatedTerritory.zone,
+        tier: updatedTerritory.tier,
+      },
+    };
+  });
+
+  // ─── Purchase / Claim Territory (by territoryId) ────────────────
   // Ported from FastAPI: POST /territories/purchase
   fastify.post("/territories/purchase", {
     schema: {

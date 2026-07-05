@@ -107,6 +107,49 @@ export async function detachPhoneNumber(phoneNumberId: number): Promise<boolean>
 }
 
 /**
+ * Purchase a new phone number from a supported provider.
+ * If Omnidimension's purchase API is not available, returns guidance
+ * on how to buy a number externally and import it.
+ */
+export async function purchasePhoneNumber(params: {
+  region?: string;
+  areaCode?: string;
+  provider?: string;
+}): Promise<{ success: boolean; phoneNumber?: PhoneNumber; message: string }> {
+  try {
+    const provider = params.provider || "omnidim";
+    const response = await fetch(`${OMNIDIM_BASE}/phone_number/purchase`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        provider,
+        region: params.region || "india",
+        area_code: params.areaCode,
+      }),
+    });
+
+    if (!response.ok) {
+      const guidance =
+        response.status === 404 || response.status === 501
+          ? "Direct purchase not available via API. Please buy a number at app.omnidim.io, then import it using the 'Import Existing Number' option below."
+          : `API error (${response.status}). Please buy a number at app.omnidim.io.`;
+      return { success: false, message: guidance };
+    }
+
+    const data = (await response.json()) as PhoneNumber;
+    logger.info({ phoneNumber: data.phone_number, provider }, "Phone number purchased");
+    return { success: true, phoneNumber: data, message: "Number purchased!" };
+  } catch (error: any) {
+    logger.error({ err: error.message, params }, "Failed to purchase phone number");
+    return {
+      success: false,
+      message:
+        "Number purchase requires the Omnidimension dashboard. Go to app.omnidim.io → Phone Numbers → Buy Number, then come back and refresh this page.",
+    };
+  }
+}
+
+/**
  * Import an Exotel phone number into Omnidimension.
  */
 export async function importExotelNumber(params: {

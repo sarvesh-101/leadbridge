@@ -312,6 +312,26 @@ export default async function clientCampaignRoutes(fastify: FastifyInstance) {
     return { message: "Task deleted" };
   });
 
+  // ─── Delete Campaign ────────────────────────────────────────────
+  fastify.delete("/campaigns/:id", async (request: FastifyRequest<{
+    Params: { id: string };
+  }>, reply: FastifyReply) => {
+    const campaign = await fastify.prisma.campaign.findFirst({
+      where: { id: request.params.id, clientId: request.clientId },
+    });
+
+    if (!campaign) {
+      return reply.status(404).send({ error: "Campaign not found" });
+    }
+
+    // Tasks cascade-deleted automatically via Prisma schema
+    await fastify.prisma.campaign.delete({
+      where: { id: campaign.id },
+    });
+
+    return { message: "Campaign deleted" };
+  });
+
   // ─── Campaign Analytics ────────────────────────────────────────
   fastify.get("/campaigns/analytics/summary", async (request: FastifyRequest) => {
     const clientId = request.clientId!;
