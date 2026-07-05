@@ -75,6 +75,13 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum PropertyStatus {
+  AVAILABLE
+  BOOKED
+  SOLD
+  OFF_MARKET
+}
+
 // ─────────────────────────────────────────────
 // MODELS
 // ─────────────────────────────────────────────
@@ -108,10 +115,6 @@ model Client {
   passwordHash String
   resetToken        String?  @unique
   resetTokenExpiresAt DateTime?
-
-  // Exotel (legacy — replaced by Omnidimension)
-  exotelSid    String?
-  exotelNumber String?
 
   // Omnidimension AI Voice Agent
   omnidimensionAgentId Int?     @unique
@@ -152,6 +155,7 @@ model Client {
   leads              Lead[]
   calls              Call[]
   bookings           Booking[]
+  properties         Property[]
   webhookSources     WebhookSource[]
   integrations       Integration[]
   ownerNotifications OwnerNotification[]
@@ -161,6 +165,46 @@ model Client {
   payments           Payment[]
   auditLogs          AuditLog[]
   waitlistEntries    WaitlistEntry[]
+  teamMembers        TeamMember[]
+  teamInvitations    TeamMember[] @relation("TeamInvitations")
+  apiKeys            ApiKey[]
+  paymentLinks       PaymentLink[]
+  emailCampaigns     EmailCampaign[]
+  scheduledReports   ScheduledReport[]
+  abTests            ABTest[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Identity
+  email       String
+  name        String
+  passwordHash String?
+
+  // Role: ADMIN — full access, AGENT — manage leads/calls, VIEWER — read-only
+  role   String @default("AGENT")
+  status String @default("PENDING") // PENDING | ACTIVE | DECLINED
+
+  // Invitation tracking
+  invitedById String?
+  invitedBy   Client? @relation("TeamInvitations", fields: [invitedById], references: [id])
+  invitedAt   DateTime @default(now())
+  acceptedAt  DateTime?
+
+  // Auth
+  resetToken        String?  @unique
+  resetTokenExpiresAt DateTime?
+
+  notificationPreferences NotificationPreference[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clientId, email])
+  @@index([email])
 }
 
 model Territory {
@@ -246,6 +290,12 @@ model Lead {
   followupD2At  DateTime?
   followupD3At  DateTime?
 
+  // Customer Portal auth
+  otpCode       String?
+  otpExpiresAt  DateTime?
+  authToken     String?  @unique
+  lastLoginAt   DateTime?
+
   // Timestamps
   receivedAt    DateTime @default(now())
   firstCalledAt DateTime?
@@ -261,6 +311,8 @@ model Lead {
   customerNotifications CustomerNotification[]
   ownerNotifications   OwnerNotification[]
   scoreHistory         LeadScoreHistory[]
+  documents            Document[]
+  paymentLinks         PaymentLink[]
 }
 
 model Call {
@@ -270,10 +322,8 @@ model Call {
   leadId   String
   lead     Lead   @relation(fields: [leadId], references: [id])
 
-  // Exotel / Pipecat (legacy — replaced by Omnidimension)
-  exotelCallSid       String? @unique
+  // Call tracking
   omnidimensionCallId String? @unique
-  pipecatSession      String? @unique
 
   // Call metadata
   type       CallType
@@ -297,6 +347,50 @@ model Call {
   updatedAt DateTime @updatedAt
 }
 
+model Property {
+  id          String         @id @default(cuid())
+  clientId    String
+  client      Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Listing details
+  name        String
+  description String?
+  price       Float?
+  currency    String         @default("INR")
+  bedrooms    Int?
+  bathrooms   Int?
+  area        Float?
+  areaUnit    String         @default("sqft")
+
+  // Location
+  location    String?
+  city        String?
+  zone        String?
+
+  // Status
+  status      PropertyStatus @default(AVAILABLE)
+  featured    Boolean        @default(false)
+
+  // Media & features
+  images      Json           @default("[]")
+  amenities   Json           @default("[]")
+
+  // Metadata
+  tags        Json           @default("[]")
+
+  // AI knowledge sync
+  lastSyncedToAgentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([clientId])
+  @@index([city])
+  @@index([status])
+}
+
 model Booking {
   id       String @id @default(cuid())
   clientId String
@@ -308,6 +402,8 @@ model Booking {
   visitTime       String
   propertyAddress String
   propertyName    String?
+  propertyId      String?
+  property        Property? @relation(fields: [propertyId], references: [id])
   notes           String?
 
   // Status
@@ -370,7 +466,220 @@ model OwnerNotification {
   status   String   @default("sent")
   waMessageId String?
 
+  // Team member who triggered or is responsible for this notification
+  teamMemberId String?
+
   sentAt   DateTime @default(now())
+  readAt   DateTime?
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  // Document metadata
+  type        String   // aadhar, pan, passport, income_proof, bank_statement, property_document, other
+  fileName    String
+  fileSize    Int
+  mimeType    String
+
+  // Storage
+  storagePath String
+  url         String?
+
+  // Verification
+  status      DocumentStatus @default(UPLOADED)
+  verifiedAt  DateTime?
+
+  // Tracking
+  uploadedBy  String   @default("lead")  // lead | broker
+  uploadedAt  DateTime @default(now())
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([status])
+}
+
+enum DocumentStatus {
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  memberId  String
+  member    TeamMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  eventType String   // lead.created, booking.confirmed, etc.
+  channels  Json     @default("[\"whatsapp\",\"in_app\"]")  // Array of channels
+  enabled   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([memberId, eventType])
+  @@index([memberId])
+}
+
+model PaymentLink {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Payment details
+  amount      Float
+  currency    String   @default("INR")
+  description String?
+
+  // Lead info for display
+  leadName    String?
+  leadPhone   String?
+
+  // Status
+  status      String   @default("PENDING")  // PENDING | PAID | EXPIRED | CANCELLED
+  paidAt      DateTime?
+
+  // Payment provider
+  provider          String  @default("razorpay")
+  providerOrderId   String?
+  providerPaymentId String?
+
+  // Sharing
+  shortUrl    String?
+  sentVia     String?   // whatsapp | sms | email
+  sentAt      DateTime?
+
+  // Expiry
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([leadId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// EMAIL CAMPAIGN MODEL
+// ─────────────────────────────────────────────
+
+model EmailCampaign {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  name            String
+  subject         String
+  body            String
+  type            String   @default("EMAIL")  // EMAIL | SMS | TEMPLATE
+  status          String   @default("DRAFT")  // DRAFT | SCHEDULED | SENDING | SENT | FAILED | TEMPLATE
+  totalRecipients Int      @default(0)
+  deliveredCount  Int      @default(0)
+  failedCount     Int      @default(0)
+  openedCount     Int      @default(0)
+  clickedCount    Int      @default(0)
+
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  // A/B testing
+  abTestEnabled Boolean @default(false)
+  abTestData    Json    @default("{}")  // { variantSubject, variantBody, sampleSize, status, winner, aOpens, bClicks, ... }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trackingEvents EmailTrackingEvent[]
+
+  @@index([clientId])
+}
+
+model EmailTrackingEvent {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  leadId   String?
+  leadName String?
+  event    String   // "open" | "click"
+  url      String?  // The clicked URL (null for opens)
+  userAgent String?
+  ipAddress String?
+
+  createdAt DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([campaignId, event])
+}
+
+model ScheduledReport {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  name       String
+  filters    Json     @default("{}")
+  groupBy    Json     @default("{}")
+  frequency  String   // daily | weekly | monthly
+  recipients String[]
+  nextRunAt  DateTime?
+  lastRunAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+}
+
+// ─────────────────────────────────────────────
+// A/B TESTING MODELS
+// ─────────────────────────────────────────────
+
+model ABTest {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  campaignId  String
+  goalMetric  String   // conversion_rate | call_answer_rate | booking_rate | response_rate
+  minSampleSize Int    @default(50)
+  status      String   @default("DRAFT")  // DRAFT | RUNNING | PAUSED | COMPLETED
+
+  // Variants as JSON: [{ name, config, trafficPercent }]
+  variants    Json     @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  results ABTestResult[]
+
+  @@index([clientId])
+}
+
+model ABTestResult {
+  id        String   @id @default(cuid())
+  testId    String
+  test      ABTest   @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  leadId      String
+  variantName String
+  converted   Boolean  @default(false)
+  metadata    Json     @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([testId])
+  @@index([leadId])
 }
 
 // ─────────────────────────────────────────────
@@ -729,4 +1038,31 @@ model AuditLog {
   @@index([action])
   @@index([resourceType])
   @@index([createdAt])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Key identity
+  name        String   // Human-readable label, e.g. "Production", "Staging"
+  keyPrefix   String   // First 8 chars shown in UI: "lbridge_abc..."
+  keyHash     String   // bcrypt hash of the full key
+  scopes      Json     @default("[\"leads:read\",\"properties:read\"]")  // Array of permission strings
+
+  // Rate limiting per key
+  rateLimitPerMinute Int @default(60)
+
+  // Status
+  lastUsedAt   DateTime?
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  revokedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([keyHash])
 }
