@@ -53,6 +53,7 @@ import templateRoutes from "./routes/client/templates";
 import abTestingRoutes from "./routes/client/ab-testing";
 import propertySuggestionRoutes from "./routes/client/property-suggestions";
 import referralRoutes from "./routes/client/referrals";
+import apiKeyRoutes from "./routes/client/api-keys";
 import calendarSyncRoutes from "./routes/client/calendar-sync";
 import territoryComparisonRoutes from "./routes/admin/territory-comparison";
 import ingestWebhookRoutes from "./routes/webhooks/ingest";
@@ -279,6 +280,7 @@ export async function buildServer() {
   await server.register(calendarSyncRoutes, { prefix: apiPrefix });
   await server.register(territoryComparisonRoutes, { prefix: apiPrefix });
   await server.register(propertySuggestionRoutes, { prefix: apiPrefix });
+  await server.register(apiKeyRoutes, { prefix: apiPrefix });
   await server.register(referralRoutes, { prefix: apiPrefix });
   await server.register(webhookSourcesRoutes, { prefix: apiPrefix });
 
