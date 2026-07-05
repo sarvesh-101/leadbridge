@@ -54,12 +54,66 @@ jobs:
           npm ci
           npx prisma generate
 
+      - name: Lint
+        run: |
+          cd server
+          npx eslint src/
+
       - name: Run unit tests (vitest)
         run: |
           cd server
           npm test -- --reporter=verbose
         env:
           DATABASE_URL_PRISMA: postgresql://postgres:postgres@localhost:5432/leadbridge_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: ci-test-secret-key-that-is-at-least-32-chars-long
+          JWT_REFRESH_SECRET: ci-test-refresh-secret-that-is-at-least-32-chars
+          OMNIDIM_API_KEY: ci-test-omni-key
+          ENCRYPTION_KEY: ci-test-encryption-key-12345
+
+  server-e2e:
+    name: E2E Lead Lifecycle Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: leadbridge_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd server
+          npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL_PRISMA: postgresql://postgres:postgres@localhost:5432/leadbridge_e2e
+
+      - name: Run E2E tests (RUN_E2E_TESTS=true)
+        run: |
+          cd server
+          RUN_E2E_TESTS=true npx vitest run src/__tests__/e2e-lead-lifecycle.test.ts --reporter=verbose
+        env:
+          DATABASE_URL_PRISMA: postgresql://postgres:postgres@localhost:5432/leadbridge_e2e
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: ci-test-secret-key-that-is-at-least-32-chars-long
           JWT_REFRESH_SECRET: ci-test-refresh-secret-that-is-at-least-32-chars
@@ -125,7 +179,7 @@ jobs:
 
   deploy:
     name: Deploy to Production
-    needs: [server-tests, frontend-lint, docker-build]
+    needs: [server-tests, server-e2e, frontend-lint, docker-build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:

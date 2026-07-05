@@ -10,3 +10,4 @@ worker-extraction: cd server && node dist/workers/extraction.worker.js
 worker-followup: cd server && node dist/workers/followup.worker.js
 worker-reminder: cd server && node dist/workers/reminder.worker.js
 worker-webhook-retry: cd server && node dist/workers/webhook-retry.worker.js
+worker-campaign: cd server && node dist/workers/campaign.worker.js
