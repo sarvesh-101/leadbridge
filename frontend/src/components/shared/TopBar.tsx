@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Bell, ChevronDown, LogOut, User, Settings } from "lucide-react";
+import { useState, useRef } from "react";
+import { Search, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { useAuthStore } from "../../stores/auth.store";
 import { RealtimeStatusDot } from "./RealtimeStatusDot";
+import { NotificationDropdown } from "./NotificationDropdown";
+import { useRouter } from "next/navigation";
 
 interface TopBarProps {
   onSearch?: (query: string) => void;
@@ -11,7 +13,16 @@ interface TopBarProps {
 
 export function TopBar({ onSearch }: TopBarProps) {
   const { user, logout } = useAuthStore();
+  const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" && searchRef.current?.value.trim()) {
+      router.push(`/dashboard/leads?search=${encodeURIComponent(searchRef.current.value.trim())}`);
+      searchRef.current.value = "";
+    }
+  }
 
   return (
     <header className="h-14 bg-[#111118] border-b border-[#2A2A3A] flex items-center justify-between px-6 shrink-0">
@@ -19,9 +30,11 @@ export function TopBar({ onSearch }: TopBarProps) {
       <div className="relative w-72">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B8A]" />
         <input
+          ref={searchRef}
           type="text"
-          placeholder="Search leads..."
+          placeholder="Search leads... (Enter to go)"
           onChange={(e) => onSearch?.(e.target.value)}
+          onKeyDown={handleSearchKeyDown}
           className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
         />
       </div>
@@ -31,10 +44,7 @@ export function TopBar({ onSearch }: TopBarProps) {
         <RealtimeStatusDot />
 
         {/* Notifications */}
-        <button className="relative p-2 rounded-lg hover:bg-[#1A1A24] transition-colors">
-          <Bell className="w-4 h-4 text-[#6B6B8A]" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#F43F5E]" />
-        </button>
+        <NotificationDropdown />
 
         {/* User menu */}
         <div className="relative">

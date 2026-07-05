@@ -43,7 +43,7 @@ export default function TerritoriesPage() {
       setTerritories(territoriesRes.items);
       setMyTerritory(myRes.territory);
     } catch (err: any) {
-      console.error("Failed to load territories:", err);
+      toast.error("Failed to load territories")
     } finally {
       setLoading(false);
     }

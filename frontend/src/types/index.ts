@@ -141,8 +141,6 @@ export interface Call {
   clientId: string;
   leadId: string;
   lead?: { name: string; phone: string };
-  exotelCallSid?: string;
-  pipecatSession?: string;
   type: CallType;
   direction: string;
   duration?: number;
@@ -167,7 +165,7 @@ export interface Booking {
   reminderSentAt?: string;
   visitedAt?: string;
   noShowAt?: string;
-  lead?: { name: string; phone: string; source: string };
+  lead?: { name: string; phone: string; source: string; score?: number };
 }
 
 export interface CustomerNotification {
@@ -223,6 +221,9 @@ export interface DashboardStats {
   conversionRate: number;
   activeFollowups: number;
   totalLeads: number;
+  leadsByStatus?: Record<string, unknown>[];
+  leadsBySource?: Record<string, unknown>[];
+  recentActivity?: Record<string, unknown>[];
 }
 
 export interface LeadFilterState {
@@ -231,6 +232,32 @@ export interface LeadFilterState {
   source: string[];
   dateFrom: string;
   dateTo: string;
+}
+
+export type PropertyStatus = "AVAILABLE" | "BOOKED" | "SOLD" | "OFF_MARKET";
+
+export interface Property {
+  id: string;
+  clientId: string;
+  name: string;
+  description?: string;
+  price?: number;
+  currency: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  areaUnit: string;
+  location?: string;
+  city?: string;
+  zone?: string;
+  status: PropertyStatus;
+  featured: boolean;
+  images: string[];
+  amenities: string[];
+  tags: string[];
+  lastSyncedToAgentAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WebSocketEvent {

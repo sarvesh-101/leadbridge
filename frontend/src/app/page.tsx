@@ -14,10 +14,18 @@ import ResultsSection from "@/components/marketing/ResultsSection";
 import TerritoryMap from "@/components/marketing/TerritoryMap";
 import PricingSection from "@/components/marketing/PricingSection";
 import CTASection from "@/components/marketing/CTASection";
+import FeatureShowcase from "@/components/marketing/FeatureShowcase";
+import TestimonialsSection from "@/components/marketing/TestimonialsSection";
+import ComparisonSection from "@/components/marketing/ComparisonSection";
+import IntegrationSection from "@/components/marketing/IntegrationSection";
+import ROISection from "@/components/marketing/ROISection";
+import FAQSection from "@/components/marketing/FAQSection";
 
 const navLinks = [
+  { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
   { label: "Results", href: "#results" },
+  { label: "Compare", href: "#comparison" },
   { label: "Territories", href: "#territories" },
   { label: "Pricing", href: "#pricing" },
 ];
@@ -146,6 +154,9 @@ export default function LandingPage() {
       {/* Problem Section */}
       <ProblemSection />
 
+      {/* Features */}
+      <FeatureShowcase />
+
       {/* How It Works */}
       <section id="how-it-works">
         <HowItWorksSection />
@@ -156,10 +167,25 @@ export default function LandingPage() {
         <ResultsSection />
       </section>
 
+      {/* Testimonials */}
+      <TestimonialsSection />
+
+      {/* ROI Comparison */}
+      <ROISection />
+
+      {/* Comparison Table */}
+      <ComparisonSection />
+
+      {/* Integrations */}
+      <IntegrationSection />
+
       {/* Territory Map */}
       <section id="territories">
         <TerritoryMap />
       </section>
+
+      {/* FAQ */}
+      <FAQSection />
 
       {/* Pricing */}
       <section id="pricing">

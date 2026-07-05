@@ -9,9 +9,10 @@ import { Download, Calendar as CalendarIcon, Search, Clock, MapPin } from "lucid
 import { exportToCSV, EXPORT_HEADERS } from "@/lib/csv-export";
 import { Pagination } from "@/components/shared/Pagination";
 import { EmptyState } from "@/components/shared/EmptyState";
+import type { Booking } from "@/types";
 
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -28,22 +29,22 @@ export default function BookingsPage() {
         setBookings(data.bookings || []);
         setTotal(data.total || 0);
       } catch (err) {
-        console.error("Failed to load bookings:", err);
+        toast.error("Failed to load bookings")
       } finally { setLoading(false); }
     }
     loadBookings();
   }, [page, filter]);
 
   const filtered = search
-    ? bookings.filter((b: any) =>
-        b.lead?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        b.lead?.phone?.includes(search) ||
-        b.propertyAddress?.toLowerCase().includes(search.toLowerCase()))
+    ? bookings.filter((b: Booking) =>
+        (b.lead?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+        (b.lead?.phone || '').includes(search) ||
+        (b.propertyAddress || '').toLowerCase().includes(search.toLowerCase()))
     : bookings;
 
   const totalPages = Math.ceil(total / 20);
   const today = new Date().toDateString();
-  const todayCount = bookings.filter((b: any) => new Date(b.visitDate).toDateString() === today).length;
+  const todayCount = bookings.filter((b: Booking) => new Date(b.visitDate).toDateString() === today).length;
 
   return (
     <div className="space-y-6">
@@ -67,8 +68,8 @@ export default function BookingsPage() {
         {[
           { label: "Today", count: todayCount, color: "text-blue-400" },
           { label: "Total", count: total, color: "text-green-400" },
-          { label: "Visited", count: bookings.filter((b: any) => b.status === "VISITED").length, color: "text-emerald-400" },
-          { label: "No Shows", count: bookings.filter((b: any) => b.status === "NO_SHOW").length, color: "text-red-400" },
+          { label: "Visited", count: bookings.filter((b: Booking) => b.status === "VISITED").length, color: "text-emerald-400" },
+          { label: "No Shows", count: bookings.filter((b: Booking) => b.status === "NO_SHOW").length, color: "text-red-400" },
         ].map((s) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1 }}
             className="p-4 rounded-xl bg-white/5 border border-white/10"
@@ -114,7 +115,7 @@ export default function BookingsPage() {
             {[1,2,3,4,5].map(i => <div key={i} className="h-20 bg-white/5 rounded-xl" />)}
           </div>
         ) : filtered.length > 0 ? (
-          filtered.map((apt: any, i: number) => (
+          filtered.map((apt: Booking, i: number) => (
             <motion.div key={apt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
               className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
             >

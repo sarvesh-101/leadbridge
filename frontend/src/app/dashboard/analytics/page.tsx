@@ -4,12 +4,24 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn, formatDate } from "@/lib/utils";
 import { api } from "@/lib/api";
-import { ArrowUp, ArrowDown, TrendingUp, Users, Phone, Calendar, Target } from "lucide-react";
+import { toast } from "sonner"
+import { TrendingUp, Users, Phone, Calendar, Target } from "lucide-react";
+import type { DashboardStats } from "@/types";
+
+interface SourceItem {
+  source: string;
+  _count?: { id: number };
+}
+
+interface StatusItem {
+  status: string;
+  _count?: { id: number };
+}
 
 export default function AnalyticsPage() {
-  const [stats, setStats] = useState<any>(null);
-  const [leadsBySource, setLeadsBySource] = useState<any[]>([]);
-  const [leadsByStatus, setLeadsByStatus] = useState<any[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [leadsBySource, setLeadsBySource] = useState<SourceItem[]>([]);
+  const [leadsByStatus, setLeadsByStatus] = useState<StatusItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +35,7 @@ export default function AnalyticsPage() {
       setLeadsBySource(data.leadsBySource || []);
       setLeadsByStatus(data.leadsByStatus || []);
     } catch (err) {
-      console.error("Failed to load analytics:", err);
+      toast.error("Failed to load analytics")
     } finally {
       setLoading(false);
     }
@@ -47,8 +59,8 @@ export default function AnalyticsPage() {
   };
   const totalLeads = Object.values(leadsByStatus).reduce((sum: number, s: any) => sum + (s._count?.id || 0), 0);
   const funnelStages = leadsByStatus
-    .sort((a: any, b: any) => (statusPriority[a.status] ?? 99) - (statusPriority[b.status] ?? 99))
-    .map((s: any) => ({
+    .sort((a: StatusItem, b: StatusItem) => (statusPriority[a.status] ?? 99) - (statusPriority[b.status] ?? 99))
+    .map((s: StatusItem) => ({
       stage: s.status,
       count: s._count?.id || 0,
       percentage: totalLeads > 0 ? Math.round(((s._count?.id || 0) / totalLeads) * 100) : 0,
@@ -61,7 +73,7 @@ export default function AnalyticsPage() {
     }));
 
   const sourceColors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-cyan-500", "bg-emerald-500", "bg-orange-500", "bg-rose-500"];
-  const maxSourceCount = Math.max(...leadsBySource.map((s: any) => s._count?.id || 0), 1);
+  const maxSourceCount = Math.max(...leadsBySource.map((s: SourceItem) => s._count?.id || 0), 1);
 
   return (
     <div className="space-y-6">
@@ -71,7 +83,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {metrics.map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
             className="p-4 rounded-xl bg-white/5 border border-white/10"
@@ -139,7 +151,7 @@ export default function AnalyticsPage() {
             <div className="animate-pulse space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-5 bg-white/10 rounded" />)}</div>
           ) : leadsBySource.length > 0 ? (
             <div className="space-y-3">
-              {leadsBySource.map((s: any, i: number) => (
+              {leadsBySource.map((s: SourceItem, i: number) => (
                 <div key={s.source} className="flex items-center gap-3">
                   <div className={cn("w-2 h-2 rounded-full", sourceColors[i % sourceColors.length])} />
                   <span className="text-sm text-gray-400 flex-1 capitalize">{s.source}</span>

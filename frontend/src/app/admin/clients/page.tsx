@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Plus, Search, Users, Phone, Calendar, MoreVertical,
   Loader2, Shield, CheckCircle, XCircle, AlertCircle,
@@ -31,6 +32,7 @@ interface AdminClient {
 }
 
 export default function AdminClientsPage() {
+  const router = useRouter();
   const [clients, setClients] = useState<AdminClient[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -145,7 +147,8 @@ export default function AdminClientsPage() {
         <div className="space-y-3">
           {clients.map((client, i) => (
             <motion.div key={client.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
-              className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all relative"
+              className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all relative cursor-pointer"
+              onClick={() => router.push(`/admin/clients/${client.id}`)}
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-leadflow-500/20 to-leadflow-accent/20 flex items-center justify-center shrink-0">
                 <Building2 className="w-5 h-5 text-leadflow-accent" />
@@ -171,7 +174,7 @@ export default function AdminClientsPage() {
                 </div>
               </div>
               <div className="relative shrink-0">
-                <button onClick={() => setOpenMenu(openMenu === client.id ? null : client.id)}
+                <button onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === client.id ? null : client.id); }}
                   className="p-2 rounded-lg hover:bg-white/5 text-gray-400"
                 >
                   {actionLoading === `${client.id}-status` || actionLoading === `${client.id}-pwd` ? (
@@ -186,14 +189,14 @@ export default function AdminClientsPage() {
                     <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl bg-[#1A1A24] border border-white/10 shadow-xl overflow-hidden">
                       <div className="py-1">
                         {["ACTIVE", "TRIAL", "PAST_DUE", "CANCELLED"].map((status) => (
-                          <button key={status} onClick={() => handleStatusChange(client.id, status)}
+                          <button key={status} onClick={(e) => { e.stopPropagation(); handleStatusChange(client.id, status); }}
                             className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/5"
                           >
                             Set {status}
                           </button>
                         ))}
                         <hr className="border-white/10 my-1" />
-                        <button onClick={() => handleResetPassword(client.id)}
+                        <button onClick={(e) => { e.stopPropagation(); handleResetPassword(client.id); }}
                           className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-white/5"
                         >
                           Reset Password

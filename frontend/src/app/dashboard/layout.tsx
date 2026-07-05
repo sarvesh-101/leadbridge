@@ -6,12 +6,14 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "../../components/shared/Sidebar";
 import { TopBar } from "../../components/shared/TopBar";
 import { ErrorBoundary } from "../../components/shared/ErrorBoundary";
+import SystemStatus from "../../components/shared/SystemStatus";
 import { useUIStore } from "../../stores/ui.store";
 import { wsClient } from "../../lib/websocket";
 import { useAuthStore } from "../../stores/auth.store";
 import { api } from "../../lib/api";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "sonner";
+import { initPWA } from "../../lib/pwa";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -38,6 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (isAuthenticated && setupCheckDone) {
       wsClient.connect();
+      initPWA();
     }
     return () => {
       wsClient.disconnect();
@@ -64,9 +67,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar />
         <main className="flex-1 overflow-y-auto p-6 bg-[#0A0A0F]">
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <div className="max-w-7xl mx-auto space-y-4">
+            <SystemStatus />
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </div>
         </main>
       </div>
 

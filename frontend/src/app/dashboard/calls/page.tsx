@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { CallCard } from "@/components/calls/CallCard";
 import { RecordingPlayer } from "@/components/calls/RecordingPlayer";
 import { api } from "@/lib/api";
+import { toast } from "sonner"
 import { cn } from "@/lib/utils";
 import type { Call } from "@/types";
 
@@ -27,7 +28,7 @@ export default function CallsPage() {
       const data = await api.get(`/calls?${params.toString()}`);
       setCalls(data.calls || []);
     } catch (err) {
-      console.error("Failed to load calls:", err);
+      toast.error("Failed to load calls")
     } finally {
       setLoading(false);
     }
@@ -45,7 +46,7 @@ export default function CallsPage() {
   return (
     <div className="space-y-6">
       {/* Header stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-4">
           <p className="caption mb-1">Total Calls</p>
           <p className="text-[24px] font-display font-bold text-[#F0F0F8]">{calls.length}</p>

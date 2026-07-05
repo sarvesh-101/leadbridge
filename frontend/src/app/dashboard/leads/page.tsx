@@ -8,7 +8,7 @@ import { LeadFilters } from "../../../components/leads/LeadFilters";
 import { LeadDetailPanel } from "../../../components/leads/LeadDetailPanel";
 import { api } from "../../../lib/api";
 import { useLeadStatusUpdates } from "../../../lib/websocket";
-import type { Lead, LeadFilterState } from "../../../types";
+import type { Lead, LeadFilterState, LeadStatus } from "../../../types";
 import { useAuthStore } from "../../../stores/auth.store";
 import { exportToCSV, EXPORT_HEADERS } from "../../../lib/csv-export";
 
@@ -40,7 +40,7 @@ export default function LeadsPage() {
       setLeads(data.leads);
       setTotal(data.total);
     } catch (err) {
-      console.error("Failed to load leads:", err);
+      toast.error("Failed to load leads")
     } finally {
       setLoading(false);
     }
@@ -53,10 +53,10 @@ export default function LeadsPage() {
   // Real-time status updates
   useLeadStatusUpdates((leadId, newStatus) => {
     setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, status: newStatus as any } : l))
+      prev.map((l) => (l.id === leadId ? { ...l, status: newStatus as LeadStatus } : l))
     );
     if (selectedLead?.id === leadId) {
-      setSelectedLead((prev) => prev ? { ...prev, status: newStatus as any } : prev);
+      setSelectedLead((prev) => prev ? { ...prev, status: newStatus as LeadStatus } : prev);
     }
   });
 
@@ -69,21 +69,21 @@ export default function LeadsPage() {
             {total} total leads
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => {
               exportToCSV(leads, `leads-export-${new Date().toISOString().split("T")[0]}`, EXPORT_HEADERS.leads);
               toast.success(`${leads.length} leads exported`);
             }}
             disabled={leads.length === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-600 text-gray-300 text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all disabled:opacity-50"
           >
-            <Download className="w-4 h-4" />
-            Export CSV
+            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md">
-            <Plus className="w-4 h-4" />
-            Add Lead
+          <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-all">
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Add Lead</span>
           </button>
         </div>
       </div>

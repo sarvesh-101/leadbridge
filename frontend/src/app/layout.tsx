@@ -24,6 +24,15 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "LeadBridge",
+    statusBarStyle: "black-translucent",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",

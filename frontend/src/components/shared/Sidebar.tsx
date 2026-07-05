@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, Phone, Calendar, BarChart3,
   Settings, CreditCard, MessageSquare, Globe, Link as LinkIcon,
   ChevronLeft, ChevronRight, Building2, LogOut, Zap,
-  Activity, Webhook,
+  Activity, Webhook, UserPlus, Home, RadioTower, Star,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuthStore } from "../../stores/auth.store";
@@ -24,13 +24,19 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Leads", href: "/dashboard/leads", icon: <Users className="w-5 h-5" /> },
+  { label: "Pipeline", href: "/dashboard/leads/pipeline", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Calls", href: "/dashboard/calls", icon: <Phone className="w-5 h-5" /> },
+  { label: "Voice AI", href: "/dashboard/voice", icon: <RadioTower className="w-5 h-5" /> },
   { label: "Bookings", href: "/dashboard/bookings", icon: <Calendar className="w-5 h-5" /> },
+  { label: "Properties", href: "/dashboard/properties", icon: <Home className="w-5 h-5" /> },
   { label: "Messages", href: "/dashboard/messages", icon: <MessageSquare className="w-5 h-5" /> },
   { label: "Campaigns", href: "/dashboard/campaigns", icon: <Zap className="w-5 h-5" /> },
+  { label: "WA Templates", href: "/dashboard/campaigns/whatsapp-templates", icon: <MessageSquare className="w-5 h-5" /> },
   { label: "Analytics", href: "/dashboard/analytics", icon: <BarChart3 className="w-5 h-5" /> },
   { label: "Territories", href: "/dashboard/territories", icon: <Globe className="w-5 h-5" /> },
   { label: "Integrations", href: "/dashboard/integrations", icon: <LinkIcon className="w-5 h-5" /> },
+  { label: "Referrals", href: "/dashboard/referrals", icon: <Star className="w-5 h-5" /> },
+  { label: "Team", href: "/dashboard/team", icon: <UserPlus className="w-5 h-5" /> },
   { label: "Settings", href: "/dashboard/settings", icon: <Settings className="w-5 h-5" /> },
   { label: "Billing", href: "/dashboard/billing", icon: <CreditCard className="w-5 h-5" /> },
 ];

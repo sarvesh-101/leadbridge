@@ -65,8 +65,8 @@ export default function PrivacyPolicyPage() {
             <p className="mb-3">We may share your data with the following third-party service providers:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>AI Processing:</strong> DeepSeek (API) for call summarization and qualification extraction</li>
-              <li><strong>Voice/Audio:</strong> Deepgram for speech-to-text, Cartesia for text-to-speech, Pipecat for voice pipeline</li>
-              <li><strong>Telephony:</strong> Exotel for making and receiving phone calls</li>
+              <li><strong>Voice/AI:</strong> Omnidimension AI agents for voice calls</li>
+              <li><strong>Telephony:</strong> Omnidimension for making and receiving phone calls</li>
               <li><strong>Messaging:</strong> WhatsApp Cloud API for sending messages</li>
               <li><strong>Payments:</strong> Razorpay for subscription billing</li>
               <li><strong>Storage:</strong> Supabase for storing call recordings and files</li>

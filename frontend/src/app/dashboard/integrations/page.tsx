@@ -66,7 +66,7 @@ export default function IntegrationsPage() {
       setIntegrations(integrationsRes.items);
       setHealth(healthRes);
     } catch (err: any) {
-      console.error("Failed to load integrations:", err);
+      toast.error("Failed to load integrations")
     } finally {
       setLoading(false);
     }
