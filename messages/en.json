@@ -1,0 +1,72 @@
+{
+  "common": {
+    "appName": "LeadBridge",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search...",
+    "noData": "No data available",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "calls": "Calls",
+    "messages": "Messages",
+    "analytics": "Analytics",
+    "campaigns": "Campaigns",
+    "properties": "Properties",
+    "bookings": "Bookings",
+    "team": "Team",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "todaysLeads": "Today's Leads",
+    "callsMade": "Calls Made",
+    "visitsBooked": "Visits Booked",
+    "conversion": "Conversion",
+    "thisMonth": "this month",
+    "bookingRate": "booking rate",
+    "recentActivity": "Recent Activity",
+    "hotLeads": "Hot Leads",
+    "todaysVisits": "Today's Visits",
+    "noVisits": "No visits scheduled today"
+  },
+  "leads": {
+    "title": "Leads",
+    "import": "Import Leads",
+    "addLead": "Add Lead",
+    "name": "Name",
+    "phone": "Phone",
+    "source": "Source",
+    "status": "Status",
+    "score": "Score",
+    "budget": "Budget",
+    "location": "Location",
+    "timeline": "Timeline",
+    "calls": "Calls",
+    "messages": "Messages",
+    "noLeads": "No leads yet"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "register": "Register"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "networkError": "Network error. Please try again."
+  }
+}

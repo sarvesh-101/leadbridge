@@ -1,0 +1,72 @@
+{
+  "common": {
+    "appName": "LeadBridge",
+    "loading": "लोड हो रहा है...",
+    "save": "सेव करें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "create": "बनाएं",
+    "search": "खोजें...",
+    "noData": "कोई डेटा उपलब्ध नहीं",
+    "confirm": "पुष्टि करें",
+    "back": "वापस",
+    "next": "अगला",
+    "close": "बंद करें"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "leads": "लीड्स",
+    "calls": "कॉल्स",
+    "messages": "संदेश",
+    "analytics": "एनालिटिक्स",
+    "campaigns": "कैंपेन",
+    "properties": "प्रॉपर्टी",
+    "bookings": "बुकिंग्स",
+    "team": "टीम",
+    "settings": "सेटिंग्स"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "todaysLeads": "आज के लीड्स",
+    "callsMade": "कॉल्स",
+    "visitsBooked": "विज़िट बुक",
+    "conversion": "कन्वर्ज़न",
+    "thisMonth": "इस महीने",
+    "bookingRate": "बुकिंग दर",
+    "recentActivity": "हाल की गतिविधि",
+    "hotLeads": "हॉट लीड्स",
+    "todaysVisits": "आज की विज़िट",
+    "noVisits": "आज कोई विज़िट शेड्यूल नहीं"
+  },
+  "leads": {
+    "title": "लीड्स",
+    "import": "लीड्स इंपोर्ट करें",
+    "addLead": "लीड जोड़ें",
+    "name": "नाम",
+    "phone": "फ़ोन",
+    "source": "स्रोत",
+    "status": "स्थिति",
+    "score": "स्कोर",
+    "budget": "बजट",
+    "location": "लोकेशन",
+    "timeline": "टाइमलाइन",
+    "calls": "कॉल्स",
+    "messages": "संदेश",
+    "noLeads": "अभी तक कोई लीड नहीं"
+  },
+  "auth": {
+    "login": "लॉग इन",
+    "logout": "लॉग आउट",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "register": "रजिस्टर करें"
+  },
+  "errors": {
+    "generic": "कुछ गलत हो गया",
+    "notFound": "नहीं मिला",
+    "unauthorized": "अनधिकृत",
+    "networkError": "नेटवर्क त्रुटि। कृपया पुनः प्रयास करें।"
+  }
+}
