@@ -1,0 +1,10 @@
+{
+  "name": "leadbridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LeadBridge - AI-Powered Real Estate Lead Conversion Platform",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarvesh-101/leadbridge.git"
+  }
+}
