@@ -180,13 +180,12 @@ export async function buildServer() {
         ]),
       },
       email: {
-        configured: !!(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS) || !!(config.RESEND_API_KEY),
-        primary: config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS ? "SMTP" : "Resend (fallback)",
+        configured: !!(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS),
+        type: "Nodemailer (SMTP)",
         missingVars: buildMissingList([
           ["SMTP_HOST", config.SMTP_HOST],
           ["SMTP_USER", config.SMTP_USER],
           ["SMTP_PASS", config.SMTP_PASS],
-          ["RESEND_API_KEY", config.RESEND_API_KEY],
         ]),
       },
       omnidimension: {

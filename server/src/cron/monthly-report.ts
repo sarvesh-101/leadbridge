@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
  * For each active client:
  * 1. Aggregates previous month's stats (leads, calls, bookings, conversions)
  * 2. Resets callsThisMonth counter
- * 3. Sends email with report summary via SMTP (with Resend fallback)
+ * 3. Sends email with report summary via SMTP (Nodemailer)
  */
 export async function generateMonthlyReports(): Promise<{ reportsGenerated: number }> {
   const now = new Date();
@@ -81,7 +81,7 @@ export async function generateMonthlyReports(): Promise<{ reportsGenerated: numb
       `— The LeadBridge Team`,
     ].join("\n");
 
-    // Send email via shared email service (SMTP primary, Resend fallback)
+    // Send email via shared email service (SMTP via Nodemailer)
     try {
       const emailSent = await sendEmail({
         to: client.email,

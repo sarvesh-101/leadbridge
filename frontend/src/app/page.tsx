@@ -219,16 +219,15 @@ export default function LandingPage() {
                   { label: "How It Works", href: "#how-it-works" },
                   { label: "Pricing", href: "#pricing" },
                   { label: "Territories", href: "#territories" },
-                  { label: "API", href: "/docs" },
+                  { label: "How It Works", href: "#how-it-works" },
                 ],
               },
               {
                 title: "Company",
                 links: [
-                  { label: "About", href: "#" },
-                  { label: "Blog", href: "#" },
-                  { label: "Careers", href: "#" },
-                  { label: "Contact", href: "#" },
+                  { label: "Sign In", href: "/auth/login" },
+                  { label: "Register", href: "/auth/register" },
+                  { label: "Contact", href: "mailto:support@leadbridge.com" },
                 ],
               },
               {

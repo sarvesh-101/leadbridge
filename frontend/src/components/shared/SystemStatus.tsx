@@ -44,10 +44,10 @@ const INTEGRATION_META: Record<string, {
     docsLink: "https://dashboard.messagebird.com/en/developers/access",
   },
   email: {
-    label: "Email (Resend)",
+    label: "Email (SMTP / Nodemailer)",
     icon: Mail,
-    description: "Used for password reset emails, booking confirmations, and monthly reports.",
-    docsLink: "https://resend.com",
+    description: "Used for password reset emails, booking confirmations, campaign emails, and monthly reports. Works with any SMTP provider.",
+    docsLink: "https://nodemailer.com/about/",
   },
   omnidimension: {
     label: "Omnidimension AI Voice",

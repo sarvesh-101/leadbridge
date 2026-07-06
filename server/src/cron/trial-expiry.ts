@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
  *
  * For each match:
  * 1. Sets planStatus = PAST_DUE (stops processing new leads)
- * 2. Sends trial expiry email via SMTP (with Resend fallback)
+ * 2. Sends trial expiry email via SMTP (Nodemailer)
  */
 export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: number }> {
   const now = new Date();
@@ -38,7 +38,7 @@ export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: 
 
     paused++;
 
-    // Send trial expiry email via shared email service (SMTP primary, Resend fallback)
+    // Send trial expiry email via shared email service (SMTP via Nodemailer)
     try {
       const emailSent = await sendEmail({
         to: client.email,

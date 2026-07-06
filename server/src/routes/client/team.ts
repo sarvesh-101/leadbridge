@@ -85,7 +85,7 @@ export default async function teamRoutes(fastify: FastifyInstance) {
       },
     });
 
-    // Send invitation email via shared email service (SMTP primary, Resend fallback)
+    // Send invitation email via shared email service (SMTP via Nodemailer)
     const inviteToken = crypto.randomBytes(32).toString("hex");
     const inviteUrl = `${config.FRONTEND_URL}/auth/accept-invite?token=${inviteToken}&email=${encodeURIComponent(email)}`;
 

@@ -1,14 +1,11 @@
 /**
- * Email Notification Service — uses Nodemailer + SMTP with Resend fallback.
+ * Email Notification Service — uses Nodemailer + SMTP.
  *
- * Primary: SMTP (works with AWS SES, SendGrid, Gmail, Mailgun, any SMTP)
+ * SMTP (works with AWS SES, SendGrid, Gmail, Mailgun, Brevo, any SMTP)
  *   - SMTP_HOST / SMTP_PORT / SMTP_USER / SMTP_PASS
- *   - Cost: AWS SES ~$0.10 per 1000 emails ($5/50K)
- *   - Cost: SendGrid $19.95/mo for 50K
- *
- * Fallback: Resend HTTP API (if SMTP not configured)
- *   - RESEND_API_KEY
- *   - Free: 100/day, Paid: $10/mo for 50K
+ *   - Cost: AWS SES ~$0.10 per 1000 emails ($5/50K, 62K/mo free from EC2)
+ *   - Cost: SendGrid $19.95/mo for 50K (100/day free)
+ *   - Cost: Brevo 300/day free, Mailgun 1K/day free
  *
  * Used for:
  *   - Booking confirmations (customer + owner)
@@ -16,6 +13,7 @@
  *   - Password resets / team invitations
  *   - Monthly reports
  *   - Trial expiry notifications
+ *   - Email campaigns
  */
 
 import nodemailer from "nodemailer";
@@ -60,32 +58,22 @@ const smtpConfigured = (): boolean => {
   return !!(config.SMTP_HOST && config.SMTP_USER && config.SMTP_PASS);
 };
 
-const resendConfigured = (): boolean => {
-  return !!config.RESEND_API_KEY;
-};
-
 /**
- * Send a transactional email.
- * Primary: SMTP (nodemailer). Fallback: Resend HTTP API.
+ * Send a transactional email via SMTP (Nodemailer).
+ * Works with AWS SES, SendGrid, Gmail, Mailgun, Brevo, or any SMTP provider.
  *
  * @returns true if sent successfully, false otherwise
  */
 export async function sendEmail(params: SendEmailParams): Promise<boolean> {
-  if (!smtpConfigured() && !resendConfigured()) {
+  if (!smtpConfigured()) {
     logger.warn(
       { to: params.to },
-      "No email provider configured — set SMTP_* vars or RESEND_API_KEY"
+      "SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS"
     );
     return false;
   }
 
-  // Primary: SMTP via nodemailer
-  if (smtpConfigured()) {
-    return sendViaSmtp(params);
-  }
-
-  // Fallback: Resend HTTP API
-  return sendViaResend(params);
+  return sendViaSmtp(params);
 }
 
 /**
@@ -116,57 +104,6 @@ async function sendViaSmtp(params: SendEmailParams): Promise<boolean> {
     logger.error(
       { err: error.message, to: params.to, subject: params.subject },
       "SMTP email send failed"
-    );
-
-    // If SMTP fails and Resend is available, try Resend as fallback
-    if (resendConfigured()) {
-      logger.info({ to: params.to }, "Falling back to Resend");
-      return sendViaResend(params);
-    }
-
-    return false;
-  }
-}
-
-/**
- * Send via Resend HTTP API (fallback).
- */
-async function sendViaResend(params: SendEmailParams): Promise<boolean> {
-  try {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: `${config.FROM_NAME} <${config.FROM_EMAIL}>`,
-        to: [params.to],
-        subject: params.subject,
-        text: params.text,
-        ...(params.html ? { html: params.html } : {}),
-      }),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      logger.error(
-        { err: errorBody, to: params.to, subject: params.subject },
-        "Resend email send failed"
-      );
-      return false;
-    }
-
-    const data = (await response.json()) as { id: string };
-    logger.info(
-      { to: params.to, emailId: data.id, subject: params.subject },
-      "Email sent via Resend"
-    );
-    return true;
-  } catch (error: any) {
-    logger.error(
-      { err: error.message, to: params.to },
-      "Resend email request failed"
     );
     return false;
   }

@@ -10,7 +10,7 @@
 | **Domain name** (e.g., leadbridge.com) | ✅ | ~$10/yr |
 | **PostgreSQL 16** (managed — Supabase, RDS, or self-hosted) | ✅ | ~$0-15/mo |
 | **Redis 7** (managed — Upstash, Redis Cloud, or self-hosted) | ✅ | ~$0-10/mo |
-| **SMTP** (Resend, SendGrid, or AWS SES) | ✅ | ~$0-5/mo |
+| **SMTP** (AWS SES, Mailgun, Brevo, or SendGrid) | ✅ | ~$0-5/mo |
 
 ## 1. Provision Infrastructure
 
@@ -40,7 +40,7 @@ nano .env
 | PostgreSQL | Supabase (free tier) | [supabase.com](https://supabase.com) |
 | Redis | Upstash (free tier) | [upstash.com](https://upstash.com) |
 | File Storage | Supabase Storage | [supabase.com](https://supabase.com) |
-| Email | Resend (free tier) | [resend.com](https://resend.com) |
+| Email | SMTP (Nodemailer) — AWS SES / Mailgun / Brevo / SendGrid | [nodemailer.com](https://nodemailer.com) |
 | Hosting | Railway or Fly.io | [railway.app](https://railway.app) |
 
 ## 2. Environment Variables
@@ -60,7 +60,9 @@ WHATSAPP_PHONE_ID=...
 MESSAGEBIRD_API_KEY=...
 ENCRYPTION_KEY=...
 RAZORPAY_KEY_ID=...
-RESEND_API_KEY=...
+SMTP_HOST=email-smtp.ap-south-1.amazonaws.com
+SMTP_USER=...
+SMTP_PASS=...
 ```
 
 ## 3. Deploy with Docker Compose
@@ -78,7 +80,7 @@ The compose file starts:
 - **Nginx** (port 80/443) — reverse proxy with SSL
 - **Frontend** (internal) — Next.js SSR
 - **TypeScript Server** (port 3000) — Fastify API + WebSocket
-- **BullMQ Workers** (5 workers) — call dispatch, notifications, follow-ups, reminders, extraction, webhook retry
+- **BullMQ Workers** (7 workers) — call dispatch, notifications, follow-ups, reminders, extraction, webhook retry, campaign emails
 - **PostgreSQL** — primary database
 - **Redis** — queue + cache
 - **Prometheus + Grafana** — monitoring

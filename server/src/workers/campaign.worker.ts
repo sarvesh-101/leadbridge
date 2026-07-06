@@ -2,8 +2,8 @@
  * Email Campaign Worker — processes campaign emails asynchronously via BullMQ.
  *
  * This prevents the HTTP request from blocking while sending 1000+ emails.
- * Emails are sent through the shared sendEmail() which uses SMTP (primary)
- * and falls back to Resend only if SMTP is not configured.
+ * Emails are sent through the shared sendEmail() which uses SMTP via Nodemailer.
+ * Configure SMTP_HOST / SMTP_USER / SMTP_PASS for any provider (AWS SES, Mailgun, etc.)
  *
  * Tracking:
  * - Injects a 1x1 tracking pixel for open detection

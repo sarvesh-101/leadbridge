@@ -34,7 +34,7 @@ LeadBridge automates the entire real estate lead follow-up process:
 2. **Instant AI Call** — Within 60 seconds, an Omnidimension AI agent calls every new lead in Hinglish for qualification
 3. **Smart Lead Scoring** — Predictive engine scores leads (0-100) based on source quality, budget, timeline, sentiment, territory match, and response latency
 4. **Automated Workflows** — Follow-up sequences D1/D2/D3 via calls + WhatsApp messages, no-show recovery, booking reminders
-5. **Multi-Channel Notifications** — WhatsApp primary → SMS fallback (MessageBird) → Email fallback (Resend) chain
+5. **Multi-Channel Notifications** — WhatsApp primary → SMS fallback (MessageBird) → Email fallback (SMTP / Nodemailer) chain
 6. **Visit Tracking** — End-to-end booking management with WhatsApp reminders and conversion funnel analytics
 7. **Territory Exclusivity** — One broker per city/zone with tiered subscription model
 
@@ -89,7 +89,7 @@ LeadBridge automates the entire real estate lead follow-up process:
               │ • Followup│   ┌────┴─────┐  │  └──────────┘ │
               │ • Reminder│   │PostgreSQL│  │               │
               │ • Webhook │   │ (Primary)│  │  ┌──────────┐ │
-              │  Retry    │   └──────────┘  │  │ Resend   │ │
+              │  Retry    │   └──────────┘  │  │ SMTP    │ │
               └───────────┘                 │  └──────────┘ │
                                             │               │
                                        ┌────┴────┐          │
@@ -125,7 +125,7 @@ LeadBridge automates the entire real estate lead follow-up process:
 3. AI CALL MADE  → Omnidimension API → calls lead's phone
 4. CALL ENDS     → Omnidimension webhook → extraction worker
 5. QUALIFIED?    → Booking created → Lead status updated
-6. NOTIFICATIONS → WhatsApp (primary) → SMS fallback → Email fallback
+6. NOTIFICATIONS → WhatsApp (primary) → SMS fallback → SMTP Email fallback
 7. BROKER SEES   → Next.js dashboard + WebSocket real-time updates
 8. FOLLOW-UPS    → Cron → BullMQ followup worker D1→D2→D3→COLD
 ```
@@ -139,7 +139,7 @@ Queue:       BullMQ (backed by Redis)
 Database:    PostgreSQL 16
 Cache:       Redis 7
 Voice AI:    Omnidimension (primary) | Exotel (legacy fallback)
-Messaging:   WhatsApp Cloud API → fallback MessageBird SMS → fallback Resend Email
+Messaging:   WhatsApp Cloud API → fallback MessageBird SMS → fallback SMTP Email (Nodemailer)
 Payments:    Razorpay (subscriptions)
 Storage:     Supabase (call recordings)
 Monitoring:  Prometheus + Grafana
@@ -306,7 +306,7 @@ curl http://localhost:3000/health
 | 4 | **WhatsApp Cloud** | Notifications | **Free** (message costs only) | [developers.facebook.com](https://developers.facebook.com) | `WHATSAPP_TOKEN`, `PHONE_ID`, `VERIFY_TOKEN` |
 | 5 | **MessageBird** | SMS fallback | Pay-as-you-go (~₹0.5/SMS) | [messagebird.com](https://messagebird.com) | `MESSAGEBIRD_API_KEY` |
 | 6 | **Razorpay** | Payments (subscriptions) | **Free** (2% per tx) | [razorpay.com](https://razorpay.com) | `RAZORPAY_KEY_ID`, `KEY_SECRET`, plans |
-| 7 | **Resend** | Email fallback | **Free** (100/day) | [resend.com](https://resend.com) | `RESEND_API_KEY` |
+| 7 | **SMTP (Nodemailer)** | Email notifications | **Free** (AWS SES: 62K/mo, Brevo: 300/day) | [nodemailer.com](https://nodemailer.com) | `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` |
 | 8 | **Supabase** | Recording storage (not the database — we use our own Postgres) | **Free** (1GB storage) | [supabase.com](https://supabase.com) | `SUPABASE_URL`, `SERVICE_KEY` |
 
 ### 🔴 Required (server won't start without these)
@@ -325,7 +325,7 @@ REDIS_URL               — from Upstash or Railway
 WHATSAPP_TOKEN, WHATSAPP_PHONE_ID, WHATSAPP_VERIFY_TOKEN
 MESSAGEBIRD_API_KEY
 RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
-RESEND_API_KEY
+SMTP_HOST, SMTP_USER, SMTP_PASS    — for any SMTP provider (AWS SES, Mailgun, Brevo, etc.)
 ENCRYPTION_KEY          — optional, defaults to JWT_SECRET derivation
 ```
 
@@ -466,6 +466,7 @@ leadbridge/
 | `followup.worker.ts` | `followup` | D1/D2/D3 follow-up sequences | 5 |
 | `reminder.worker.ts` | `reminder` | Booking day reminders | 5 |
 | `webhook-retry.worker.ts` | `webhook-retry` | Retry failed webhook deliveries | 5 |
+| `campaign.worker.ts` | `email-campaign` | Send email campaigns | 10 |
 
 ---
 

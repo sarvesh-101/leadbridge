@@ -1,0 +1,56 @@
+{
+  "title": "LeadBridge Overview",
+  "uid": "leadbridge-overview",
+  "version": 1,
+  "panels": [
+    {
+      "title": "Lead Volume (24h)",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "rate(lead_events_total[5m])", "legendFormat": "{{event}}" }]
+    },
+    {
+      "title": "Call Status Breakdown",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "expr": "sum by(status) (call_events_total)" }]
+    },
+    {
+      "title": "Queue Depth",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [{ "expr": "bullmq_queue_depth", "legendFormat": "{{queue}}" }]
+    },
+    {
+      "title": "API Request Rate",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [{ "expr": "rate(http_requests_total[5m])", "legendFormat": "{{method}} {{path}}" }]
+    },
+    {
+      "title": "WebSocket Connections",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 16 },
+      "targets": [{ "expr": "websocket_connections_active" }]
+    },
+    {
+      "title": "Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 16 },
+      "targets": [{ "expr": "rate(http_requests_total{status=~\"5..\"}[5m])" }],
+      "color": { "mode": "thresholds" },
+      "thresholds": { "mode": "absolute", "steps": [{ "value": 0, "color": "green" }, { "value": 1, "color": "red" }] }
+    },
+    {
+      "title": "Circuit Breaker State",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 16 },
+      "targets": [{ "expr": "circuit_breaker_state" }]
+    }
+  ],
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "editable": true,
+  "tags": ["leadbridge", "production"],
+  "schemaVersion": 27
+}

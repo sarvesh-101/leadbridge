@@ -52,8 +52,8 @@ const envSchema = z.object({
   SUPABASE_SERVICE_KEY: z.string().optional(),
   SUPABASE_RECORDINGS_BUCKET: z.string().default("call-recordings"),
 
-  // Email (SMTP — works with AWS SES, SendGrid, Gmail, any SMTP provider)
-  // If SMTP_* vars are not set, falls back to Resend API (RESEND_API_KEY)
+  // Email (SMTP — works with AWS SES, SendGrid, Gmail, Mailgun, any SMTP provider)
+  // Uses Nodemailer. Free tiers: AWS SES (62K/mo), Brevo (300/day), SMTP2GO (1K/mo)
   SMTP_HOST: z.string().default("email-smtp.ap-south-1.amazonaws.com"),
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
@@ -61,9 +61,6 @@ const envSchema = z.object({
   SMTP_SECURE: z.coerce.boolean().default(false),
   FROM_EMAIL: z.string().default("noreply@leadbridge.com"),
   FROM_NAME: z.string().default("LeadBridge"),
-
-  // Resend (fallback if SMTP not configured)
-  RESEND_API_KEY: z.string().optional(),
 
   // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),

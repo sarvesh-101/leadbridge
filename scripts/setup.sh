@@ -1,0 +1,244 @@
+#!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────
+# LeadBridge — Secure Setup Script
+# Run this from the project root to configure environment:
+#   bash scripts/setup.sh
+# ─────────────────────────────────────────────────────────────
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$SCRIPT_DIR"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+echo -e "${CYAN}"
+echo "╔══════════════════════════════════════════════════╗"
+echo "║         LeadBridge — Setup Wizard               ║"
+echo "╚══════════════════════════════════════════════════╝"
+echo -e "${NC}"
+
+# ─── Step 1: Generate secure secrets ──────────────────────
+echo -e "${YELLOW}[1/4] Generating secure secrets...${NC}"
+
+JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+JWT_REFRESH_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+ENCRYPTION_KEY=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
+CRON_SECRET=$(node -e "console.log(require('crypto').randomUUID())")
+
+echo -e "${GREEN}  ✓ JWT secrets generated${NC}"
+echo -e "${GREEN}  ✓ Encryption key generated${NC}"
+echo -e "${GREEN}  ✓ Cron secret generated${NC}"
+
+# ─── Step 2: Gather API keys interactively ────────────────
+echo ""
+echo -e "${YELLOW}[2/4] Collecting API keys (press Enter to skip optional ones)...${NC}"
+echo ""
+
+# Required: Omnidimension
+echo -e "${CYAN}Required: Omnidimension API Key${NC}"
+echo "  Sign up at: https://omnidimension.ai"
+echo "  Get key from: Dashboard → API Keys"
+read -rp "  OMNIDIM_API_KEY: " OMNIDIM_API_KEY
+echo ""
+
+# Required: Database URL (default to local)
+echo -e "${CYAN}Database URL${NC}"
+echo "  Local:    postgresql://postgres:postgres@localhost:5432/leadbridge"
+echo "  Railway:  auto-injected by Railway PostgreSQL plugin"
+echo "  Supabase: postgresql://user:pass@host:5432/postgres"
+read -rp "  DATABASE_URL (Enter for default local): " DATABASE_URL
+DATABASE_URL="${DATABASE_URL:-postgresql://postgres:postgres@localhost:5432/leadbridge}"
+echo ""
+
+# Required: Redis URL (default to local)
+echo -e "${CYAN}Redis URL${NC}"
+echo "  Local:    redis://:redispass@localhost:6379"
+echo "  Railway:  auto-injected by Railway Redis plugin"
+echo "  Upstash:  redis://:password@host:port"
+read -rp "  REDIS_URL (Enter for default local): " REDIS_URL
+REDIS_URL="${REDIS_URL:-redis://:redispass@localhost:6379}"
+echo ""
+
+# Optional: WhatsApp
+echo -e "${CYAN}WhatsApp Cloud API (optional — needed for WhatsApp notifications)${NC}"
+echo "  Setup: https://developers.facebook.com"
+read -rp "  WHATSAPP_TOKEN: " WHATSAPP_TOKEN
+read -rp "  WHATSAPP_PHONE_ID: " WHATSAPP_PHONE_ID
+read -rp "  WHATSAPP_VERIFY_TOKEN: " WHATSAPP_VERIFY_TOKEN
+echo ""
+
+# Optional: SMTP Email
+echo -e "${CYAN}SMTP Email (optional — needed for email campaigns and notifications)${NC}"
+echo "  Providers: AWS SES (62K/mo free), Brevo (300/day free), Mailgun (1K/day free)"
+read -rp "  SMTP_HOST (Enter for default AWS SES): " SMTP_HOST
+SMTP_HOST="${SMTP_HOST:-email-smtp.ap-south-1.amazonaws.com}"
+read -rp "  SMTP_PORT (Enter for default 587): " SMTP_PORT
+SMTP_PORT="${SMTP_PORT:-587}"
+read -rp "  SMTP_USER: " SMTP_USER
+read -rp "  SMTP_PASS: " SMTP_PASS
+read -rp "  FROM_EMAIL (Enter for default noreply@leadbridge.com): " FROM_EMAIL
+FROM_EMAIL="${FROM_EMAIL:-noreply@leadbridge.com}"
+echo ""
+
+# Optional: Razorpay
+echo -e "${CYAN}Razorpay (optional — needed for subscriptions)${NC}"
+echo "  Dashboard: https://razorpay.com"
+read -rp "  RAZORPAY_KEY_ID: " RAZORPAY_KEY_ID
+read -rp "  RAZORPAY_KEY_SECRET: " RAZORPAY_KEY_SECRET
+read -rp "  RAZORPAY_WEBHOOK_SECRET: " RAZORPAY_WEBHOOK_SECRET
+read -rp "  RAZORPAY_PLAN_STARTER: " RAZORPAY_PLAN_STARTER
+read -rp "  RAZORPAY_PLAN_GROWTH: " RAZORPAY_PLAN_GROWTH
+read -rp "  RAZORPAY_PLAN_PRO: " RAZORPAY_PLAN_PRO
+echo ""
+
+# Optional: MessageBird (SMS fallback)
+echo -e "${CYAN}MessageBird (optional — SMS fallback for WhatsApp)${NC}"
+read -rp "  MESSAGEBIRD_API_KEY: " MESSAGEBIRD_API_KEY
+echo ""
+
+# Optional: Supabase (Recording storage)
+echo -e "${CYAN}Supabase (optional — call recording storage)${NC}"
+read -rp "  SUPABASE_URL: " SUPABASE_URL
+read -rp "  SUPABASE_SERVICE_KEY: " SUPABASE_SERVICE_KEY
+echo ""
+
+# ─── Step 3: Write .env file ──────────────────────────────
+
+# Check if server/.env already exists
+if [ -f "server/.env" ]; then
+    echo -e "${YELLOW}  ⚠ server/.env already exists${NC}"
+    read -rp "  Overwrite? (y/N): " OVERWRITE
+    if [ "$OVERWRITE" != "y" ] && [ "$OVERWRITE" != "Y" ]; then
+        echo -e "${YELLOW}  Skipping — existing .env preserved${NC}"
+        echo -e "${YELLOW}  To regenerate: delete server/.env and re-run this script${NC}"
+    else
+        write_env_file
+    fi
+else
+    write_env_file
+fi
+
+write_env_file() {
+echo -e "${YELLOW}[3/4] Writing server/.env...${NC}"
+
+cat > server/.env << ENVEOF
+# ─── Generated by setup.sh on $(date) ─────────────────────
+# ─── Required ─────────────────────────────────────────────
+JWT_SECRET=${JWT_SECRET}
+JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+OMNIDIM_API_KEY=${OMNIDIM_API_KEY}
+DATABASE_URL=${DATABASE_URL}
+DATABASE_URL_PRISMA=${DATABASE_URL}
+REDIS_URL=${REDIS_URL}
+
+# ─── App ──────────────────────────────────────────────────
+NODE_ENV=development
+PORT=3000
+FRONTEND_URL=http://localhost:3001
+
+# ─── WhatsApp Cloud API ───────────────────────────────────
+WHATSAPP_TOKEN=${WHATSAPP_TOKEN}
+WHATSAPP_PHONE_ID=${WHATSAPP_PHONE_ID}
+WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN}
+
+# ─── SMTP (Nodemailer) ────────────────────────────────────
+SMTP_HOST=${SMTP_HOST}
+SMTP_PORT=${SMTP_PORT}
+SMTP_USER=${SMTP_USER}
+SMTP_PASS=${SMTP_PASS}
+FROM_EMAIL=${FROM_EMAIL}
+FROM_NAME=LeadBridge
+
+# ─── Razorpay ─────────────────────────────────────────────
+RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
+RAZORPAY_PLAN_STARTER=${RAZORPAY_PLAN_STARTER}
+RAZORPAY_PLAN_GROWTH=${RAZORPAY_PLAN_GROWTH}
+RAZORPAY_PLAN_PRO=${RAZORPAY_PLAN_PRO}
+
+# ─── Supabase ─────────────────────────────────────────────
+SUPABASE_URL=${SUPABASE_URL}
+SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+
+# ─── MessageBird (SMS) ────────────────────────────────────
+MESSAGEBIRD_API_KEY=${MESSAGEBIRD_API_KEY}
+SMS_SENDER_ID=LeadBrg
+
+# ─── Encryption / Security ────────────────────────────────
+ENCRYPTION_KEY=${ENCRYPTION_KEY}
+CRON_SECRET=${CRON_SECRET}
+
+# ─── LLM / AI Provider (OpenRouter — free Qwen3 model) ───
+# DEEPSEEK_API_KEY=
+# DEEPSEEK_BASE_URL=https://openrouter.ai/api/v1
+# DEEPSEEK_MODEL=qwen/qwen3-next-80b-a3b-instruct:free
+
+# ─── Google OAuth ─────────────────────────────────────────
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+ENVEOF
+
+echo -e "${GREEN}  ✓ server/.env written${NC}"
+}
+
+# ─── Step 4: Write frontend .env.local ────────────────────
+echo -e "${YELLOW}[4/4] Writing frontend/.env.local...${NC}"
+
+# Check if frontend/.env.local already exists
+if [ -f "frontend/.env.local" ]; then
+    echo -e "${YELLOW}  ⚠ frontend/.env.local already exists${NC}"
+    read -rp "  Overwrite? (y/N): " OVERWRITE_FE
+    if [ "$OVERWRITE_FE" != "y" ] && [ "$OVERWRITE_FE" != "Y" ]; then
+        echo -e "${YELLOW}  Skipping — existing .env.local preserved${NC}"
+    else
+        write_frontend_env
+    fi
+else
+    write_frontend_env
+fi
+
+write_frontend_env() {
+cat > frontend/.env.local << ENVEOF
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+NEXT_PUBLIC_WS_URL=ws://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3001
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+ENVEOF
+echo -e "${GREEN}  ✓ frontend/.env.local written${NC}"
+}
+
+# ─── Summary ──────────────────────────────────────────────
+echo ""
+echo -e "${GREEN}╔══════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║         ✅ Setup Complete!                       ║${NC}"
+echo -e "${GREEN}╚══════════════════════════════════════════════════╝${NC}"
+echo ""
+echo -e "  ${CYAN}Next steps:${NC}"
+echo ""
+echo -e "  1. ${YELLOW}Start infrastructure:${NC}"
+echo "     docker compose -f docker/docker-compose.yml up -d postgres redis"
+echo ""
+echo -e "  2. ${YELLOW}Install dependencies:${NC}"
+echo "     cd server && npm install && npx prisma generate && npx prisma db push"
+echo "     cd ../frontend && npm install"
+echo ""
+echo -e "  3. ${YELLOW}Start development servers:${NC}"
+echo "     Terminal 1: cd server && npm run dev"
+echo "     Terminal 2: cd frontend && npm run dev"
+echo ""
+echo -e "  4. ${YELLOW}Or deploy to Railway:${NC}"
+echo "     bash scripts/deploy-railway.sh"
+echo ""
+echo -e "  ${CYAN}Quick start (Windows):${NC}"
+echo "     Just run: start.bat"
+echo ""
+echo -e "${YELLOW}⚠️  If you left any API keys blank, those features will be disabled.${NC}"
+echo -e "${YELLOW}   Review server/.env and add missing keys later.${NC}"
+echo ""

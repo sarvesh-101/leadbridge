@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
               <li><strong>Messaging:</strong> WhatsApp Cloud API for sending messages</li>
               <li><strong>Payments:</strong> Razorpay for subscription billing</li>
               <li><strong>Storage:</strong> Supabase for storing call recordings and files</li>
-              <li><strong>Email:</strong> Resend for transactional emails (password reset, notifications)</li>
+              <li><strong>Email:</strong> SMTP (Nodemailer) for transactional emails (password reset, notifications, campaigns)</li>
             </ul>
           </section>
 

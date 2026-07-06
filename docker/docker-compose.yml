@@ -1,9 +1,16 @@
 # LeadBridge — Production Docker Compose
-# Fastify TypeScript server + BullMQ workers + PostgreSQL + Redis + Nginx
+# Fastify TypeScript server + BullMQ workers + PostgreSQL + Redis + Nginx + Monitoring
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
   # PostgreSQL Database
   postgres:
+    logging: *default-logging
     image: postgres:16-alpine
     container_name: leadbridge-postgres
     restart: unless-stopped
@@ -25,6 +32,7 @@ services:
 
   # Redis Cache & Queue
   redis:
+    logging: *default-logging
     image: redis:7-alpine
     container_name: leadbridge-redis
     restart: unless-stopped
@@ -34,7 +42,7 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-redispass} ping | grep PONG"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -43,6 +51,7 @@ services:
 
   # Fastify TypeScript Server (API + WebSocket)
   server:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
@@ -74,12 +83,13 @@ services:
 
   # BullMQ Workers
   worker-call:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-call
     restart: unless-stopped
-    command: npx tsx src/workers/call.worker.ts
+    command: node dist/workers/call.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -96,12 +106,13 @@ services:
       - leadbridge-network
 
   worker-notification:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-notification
     restart: unless-stopped
-    command: npx tsx src/workers/notification.worker.ts
+    command: node dist/workers/notification.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -118,12 +129,13 @@ services:
       - leadbridge-network
 
   worker-followup:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-followup
     restart: unless-stopped
-    command: npx tsx src/workers/followup.worker.ts
+    command: node dist/workers/followup.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -140,12 +152,13 @@ services:
       - leadbridge-network
 
   worker-reminder:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-reminder
     restart: unless-stopped
-    command: npx tsx src/workers/reminder.worker.ts
+    command: node dist/workers/reminder.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -162,12 +175,13 @@ services:
       - leadbridge-network
 
   worker-extraction:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-extraction
     restart: unless-stopped
-    command: npx tsx src/workers/extraction.worker.ts
+    command: node dist/workers/extraction.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -184,12 +198,13 @@ services:
       - leadbridge-network
 
   worker-webhook-retry:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-webhook-retry
     restart: unless-stopped
-    command: npx tsx src/workers/webhook-retry.worker.ts
+    command: node dist/workers/webhook-retry.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -206,12 +221,13 @@ services:
       - leadbridge-network
 
   worker-campaign:
+    logging: *default-logging
     build:
       context: ../server
       dockerfile: Dockerfile
     container_name: leadbridge-worker-campaign
     restart: unless-stopped
-    command: npx tsx src/workers/campaign.worker.ts
+    command: node dist/workers/campaign.worker.js
     env_file:
       - ../server/.env
     environment:
@@ -229,6 +245,7 @@ services:
 
   # Next.js Frontend
   frontend:
+    logging: *default-logging
     build:
       context: ../frontend
       dockerfile: Dockerfile
@@ -247,6 +264,7 @@ services:
 
   # Nginx Reverse Proxy
   nginx:
+    logging: *default-logging
     image: nginx:alpine
     container_name: leadbridge-nginx
     restart: unless-stopped
@@ -262,8 +280,23 @@ services:
     networks:
       - leadbridge-network
 
+  # PostgreSQL Exporter (Prometheus metrics)
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: leadbridge-postgres-exporter
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/leadbridge?sslmode=disable"
+    logging: *default-logging
+    networks:
+      - leadbridge-network
+
   # Prometheus Monitoring
   prometheus:
+    logging: *default-logging
     image: prom/prometheus:latest
     container_name: leadbridge-prometheus
     restart: unless-stopped
@@ -272,11 +305,14 @@ services:
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
+    depends_on:
+      - postgres-exporter
     networks:
       - leadbridge-network
 
   # Grafana Dashboard
   grafana:
+    logging: *default-logging
     image: grafana/grafana:latest
     container_name: leadbridge-grafana
     restart: unless-stopped

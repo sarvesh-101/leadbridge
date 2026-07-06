@@ -362,7 +362,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    // Send email via shared email service (SMTP primary, Resend fallback)
+    // Send email via shared email service (SMTP via Nodemailer)
     fastify.log.info({ email }, "Sending password reset email");
     const resetUrl = `${config.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
