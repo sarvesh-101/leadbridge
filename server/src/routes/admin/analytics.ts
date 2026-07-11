@@ -50,9 +50,9 @@ export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
 
     // Calculate MRR from active client plans — uses groupBy for efficiency
     const planPrices: Record<string, number> = {
-      STARTER: 1999,
-      GROWTH: 4999,
-      PRO: 9999,
+      STARTER: 18000,
+      GROWTH: 35000,
+      PRO: 60000,
     };
 
     const planCounts = await fastify.prisma.client.groupBy({

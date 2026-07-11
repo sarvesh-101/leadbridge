@@ -35,9 +35,9 @@ export default async function adminDashboardRoutes(fastify: FastifyInstance) {
     });
 
     const planPrices: Record<string, number> = {
-      STARTER: 999,
-      GROWTH: 2499,
-      PRO: 4999,
+      STARTER: 18000,
+      GROWTH: 35000,
+      PRO: 60000,
     };
 
     const totalMRR = activeClientsWithPlans.reduce((sum, c) => sum + (planPrices[c.plan] || 0), 0);

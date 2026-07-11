@@ -2,9 +2,9 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createSubscription, getPlanIds, cancelSubscription as cancelRazorpaySub } from "../../services/razorpay.service";
 
 const PLAN_DEFINITIONS: Record<string, { name: string; monthly: number; yearly: number; users: number; leads: number; calls: number }> = {
-  STARTER: { name: "Starter", monthly: 1999, yearly: 19990, users: 5, leads: 500, calls: 100 },
-  GROWTH: { name: "Growth", monthly: 4999, yearly: 49990, users: 15, leads: 3000, calls: 500 },
-  PRO: { name: "Pro", monthly: 9999, yearly: 99990, users: 50, leads: 50000, calls: 10000 },
+  STARTER: { name: "Starter", monthly: 18000, yearly: 180000, users: 5, leads: 500, calls: 100 },
+  GROWTH: { name: "Growth", monthly: 35000, yearly: 350000, users: 15, leads: 3000, calls: 500 },
+  PRO: { name: "Pro", monthly: 60000, yearly: 600000, users: 50, leads: 50000, calls: 10000 },
 };
 
 export default async function clientBillingRoutes(fastify: FastifyInstance) {
