@@ -31,8 +31,8 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
               "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com",
               "img-src 'self' data: blob: https: http:",
-              // TODO: After deployment, restrict *.railway.app *.vercel.app to actual URLs
-              "connect-src 'self' http://localhost:* ws://localhost:* https://*.railway.app wss://*.railway.app https://*.vercel.app wss://*.vercel.app https://*.ngrok-free.app https://api.deepseek.com https://accounts.google.com ws://localhost:* wss://*.railway.app wss://*.vercel.app wss://*.ngrok-free.app",
+              // TODO: After deployment, restrict *.railway.app *.vercel.app to actual production URLs
+              "connect-src 'self' http://localhost https://*.railway.app https://*.vercel.app https://*.ngrok-free.app https://api.deepseek.com https://accounts.google.com ws://localhost wss://*.railway.app wss://*.vercel.app wss://*.ngrok-free.app",
               "frame-src 'self' https://accounts.google.com",
               "object-src 'none'",
               "base-uri 'self'",
