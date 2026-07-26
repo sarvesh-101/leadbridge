@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { sendEmail } from "../services/email.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * Monthly Report Generator — runs on the 1st of every month at 6:00 AM.

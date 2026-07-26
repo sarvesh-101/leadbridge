@@ -74,7 +74,7 @@ const extractionWorker = new Worker<ExtractionJob>(
           clientId,
           visitDate: new Date(extractedData.bookingDate),
           visitTime: extractedData.bookingTime || "11:00 AM",
-          propertyAddress: "",
+          propertyAddress: extractedData.location || client.city || "To be confirmed",
           propertyName: null,
           status: "CONFIRMED",
           sourceCallId: callId,
@@ -100,7 +100,7 @@ const extractionWorker = new Worker<ExtractionJob>(
       await enqueueNotification({
         recipient: "customer", leadId, clientId, type: "BOOKING_CONFIRMATION", bookingId: booking.id,
         data: {
-          customerName: lead.name, propertyName: "", propertyAddress: "",
+          customerName: lead.name, propertyName: "", propertyAddress: extractedData.location || client.city || "To be confirmed",
           visitDate: extractedData.bookingDate, visitTime: extractedData.bookingTime || "11:00 AM",
           brokerName: client.ownerName, brokerPhone: client.ownerWhatsapp, mapsLink: "",
           businessName: client.businessName,
@@ -163,6 +163,54 @@ const extractionWorker = new Worker<ExtractionJob>(
       where: { id: callId },
       data: { summary: extractedData.summary },
     });
+
+    // ⚡ PLATFORM CREDIT TRACKING: Increment minutesUsed by actual call duration
+    // This ensures the credit-manager shows REAL usage, not estimates.
+    // Call duration is stored in seconds on the Call model (call.duration).
+    if (call.duration && call.duration > 0) {
+      const minutesToAdd = Math.max(1, Math.ceil(call.duration / 60)); // Round up to nearest minute
+      try {
+        // Target the current billing month's PlatformCredit record only
+        // Ensure a record exists first (handles fresh installations where no
+        // admin has visited the credits page yet)
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        const existingCredit = await prisma.platformCredit.findFirst({
+          where: { billingMonth: currentMonth },
+        });
+        if (!existingCredit) {
+          await prisma.platformCredit.create({
+            data: {
+              billingMonth: currentMonth,
+              totalMinutesPurchased: 0,
+              minutesUsed: minutesToAdd,
+              costPerMinute: 460, // ₹4.60 in paise (default)
+              alertThresholdPercent: 20,
+            },
+          });
+        } else {
+          await prisma.platformCredit.updateMany({
+            where: { billingMonth: currentMonth },
+            data: { minutesUsed: { increment: minutesToAdd } },
+          });
+        }
+        // Also create a transaction record for audit trail
+        await prisma.creditTransaction.create({
+          data: {
+            type: "CONSUME",
+            amount: 0,
+            minutes: minutesToAdd,
+            description: `Call ${callId}: ${extractedData.summary?.substring(0, 100) || "Post-call extraction"}`,
+            clientId,
+            callId,
+            metadata: { leadId, status: newStatus, duration: call.duration },
+          },
+        });
+        job.log(`📊 Platform credits updated: +${minutesToAdd} min used (call duration: ${call.duration}s)`);
+      } catch (err: any) {
+        job.log(`⚠️ Failed to update platform credits: ${err.message}`);
+      }
+    }
 
     // ⚡ ADVANCED: Emit WebSocket event for real-time dashboard update
     await emitStatusChange(leadId, newStatus, clientId, {

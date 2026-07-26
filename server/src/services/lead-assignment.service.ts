@@ -11,9 +11,7 @@
  * Falls back to the broker (client owner) if no team members exist.
  */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 interface AssignmentResult {
   assignedTo: string | null;
@@ -61,15 +59,19 @@ export async function assignLead(
   }
 
   // Method 2: Workload-based — find member with fewest active leads
+  // Uses rawPayload as JSON to find assigned leads via Prisma's JSON filter
   const workloads = await Promise.all(
     activeMembers.map(async (member) => {
-      // Count leads assigned to this member (we use a convention: rawPayload.assignedTo)
       const count = await prisma.lead.count({
         where: {
           clientId,
           status: { notIn: ["COLD", "CONVERTED"] },
-          // Use rawPayload.assignedTo to track assignments
-          rawPayload: { path: ["assignedTo"], equals: member.id },
+          // Use rawPayload JSON filtering — Prisma supports JSON array-contains for Postgres
+          // rawPayload is a Json field; we use the -> syntax equivalent via Prisma's string_path
+          rawPayload: {
+            path: ["assignedTo"],
+            equals: member.id,
+          },
         } as any,
       });
       return { member, activeLeads: count };
@@ -145,7 +147,10 @@ export async function getAssignmentSummary(
         where: {
           clientId,
           status: { notIn: ["COLD", "CONVERTED"] },
-          rawPayload: { path: ["assignedTo"], equals: member.id },
+          rawPayload: {
+            path: ["assignedTo"],
+            equals: member.id,
+          },
         } as any,
       });
       return {

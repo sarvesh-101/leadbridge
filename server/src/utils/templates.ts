@@ -3,6 +3,10 @@
  * All messages are plain text under 1024 chars (no template approval needed).
  */
 
+import { config } from "../config";
+
+const PORTAL_URL = `${config.FRONTEND_URL || "https://leadbridge.com"}/customer/login`;
+
 interface CustomerBookingConfirmationData {
   customerName: string;
   propertyName: string;
@@ -29,6 +33,8 @@ export function bookingConfirmationCustomer(data: CustomerBookingConfirmationDat
     `${data.brokerName} aapse milenge. Unka number: ${data.brokerPhone}`,
     ``,
     `Directions: ${data.mapsLink}`,
+    ``,
+    `Manage your booking: ${PORTAL_URL}`,
     ``,
     `Koi sawaal ho toh is number pe WhatsApp karein.`,
     ``,
@@ -93,6 +99,8 @@ export function bookingReminderCustomer(data: BookingReminderCustomerData): stri
     data.mapsLink,
     ``,
     `${data.brokerName} aapka intezaar kar rahe hain. Aane ki confirmation ke liye reply karein.`,
+    ``,
+    `Manage your booking: ${PORTAL_URL}`,
     ``,
     `— ${data.businessName}`,
   ].join("\n");
@@ -201,4 +209,38 @@ export function conversionOwner(data: { leadName: string; dealAmount?: string; d
     ``,
     `View details: ${data.dashboardLink}`,
   ].join("\n");
+}
+
+/**
+ * Get the language-appropriate instruction for the chatbot system prompt.
+ */
+export function getChatbotLanguageInstruction(language: string): string {
+  switch (language) {
+    case "hindi":
+      return "Respond in Hindi (formal Hindi, not Hinglish)";
+    case "english":
+      return "Respond in English";
+    case "hinglish":
+    default:
+      return "Respond in Hinglish (mix Hindi + English naturally)";
+  }
+}
+
+/**
+ * Get a language-appropriate fallback message for the chatbot when AI processing fails.
+ */
+export function getChatbotFallbackMessage(
+  leadName: string,
+  language: string,
+  ownerWhatsapp: string
+): string {
+  switch (language) {
+    case "hindi":
+      return `नमस्ते ${leadName} जी! आपका संदेश प्राप्त हो गया है। मैं जल्द ही आपको उत्तर दूंगा। किसी भी तत्काल समस्या के लिए कृपया ${ownerWhatsapp} पर संपर्क करें। 🙏`;
+    case "english":
+      return `Hello ${leadName}! Your message has been received. I will get back to you shortly. For any urgent matters, please contact ${ownerWhatsapp}. 🙏`;
+    case "hinglish":
+    default:
+      return `Namaste ${leadName} ji! Aapka message mil gaya. Is waqt main aapko jald hi reply karunga. Koi urgent ho toh ${ownerWhatsapp} pe contact karein. 🙏`;
+  }
 }

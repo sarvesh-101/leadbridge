@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner"
-import { TrendingUp, Users, Phone, Calendar, Target } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { TrendingUp, Users, Phone, Calendar, Target, FileBarChart, DollarSign, Gauge } from "lucide-react";
 import type { DashboardStats } from "@/types";
 
 interface SourceItem {
@@ -18,7 +20,17 @@ interface StatusItem {
   _count?: { id: number };
 }
 
+/* ─── Sub-navigation tabs ─────────────────────────────────── */
+
+const ANALYTICS_TABS = [
+  { label: "Overview", href: "/dashboard/analytics", icon: TrendingUp },
+  { label: "Reports", href: "/dashboard/analytics/reports", icon: FileBarChart },
+  { label: "ROI", href: "/dashboard/analytics/roi", icon: DollarSign },
+  { label: "Scoring", href: "/dashboard/analytics/scoring", icon: Gauge },
+];
+
 export default function AnalyticsPage() {
+  const pathname = usePathname();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [leadsBySource, setLeadsBySource] = useState<SourceItem[]>([]);
   const [leadsByStatus, setLeadsByStatus] = useState<StatusItem[]>([]);
@@ -77,9 +89,26 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Analytics</h1>
-        <p className="text-gray-400 mt-1">Detailed performance metrics and insights</p>
+      {/* Sub-navigation */}
+      <div className="flex items-center border-b border-white/10 gap-0 overflow-x-auto">
+        {ANALYTICS_TABS.map((tab) => {
+          const isActive = pathname === tab.href;
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
+                isActive
+                  ? "border-[#4F6EF7] text-[#4F6EF7]"
+                  : "border-transparent text-[#6B6B8A] hover:text-white hover:border-[#6B6B8A]/30"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Metrics Cards */}

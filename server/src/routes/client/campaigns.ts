@@ -24,10 +24,10 @@ export default async function clientCampaignRoutes(fastify: FastifyInstance) {
     const { status, campaignType } = request.query as Record<string, string>;
 
     const where: Record<string, unknown> = { clientId };
-    if (status && CAMPAIGN_STATUSES.includes(status as any)) {
+    if (status && CAMPAIGN_STATUSES.includes(status as typeof CAMPAIGN_STATUSES[number])) {
       where.status = status;
     }
-    if (campaignType && CAMPAIGN_TYPES.includes(campaignType as any)) {
+    if (campaignType && CAMPAIGN_TYPES.includes(campaignType as typeof CAMPAIGN_TYPES[number])) {
       where.campaignType = campaignType;
     }
 
@@ -96,7 +96,7 @@ export default async function clientCampaignRoutes(fastify: FastifyInstance) {
         clientId,
         name,
         description: description || null,
-        campaignType: (campaignType as any) || "CUSTOM",
+        campaignType: (campaignType as unknown as "FOLLOW_UP" | "RE_ENGAGEMENT" | "NO_SHOW_RECOVERY" | "WELCOME" | "PROMOTIONAL" | "CUSTOM") || "CUSTOM",
         targetLeadSources: targetLeadSources ?? [],
         targetLeadStatuses: targetLeadStatuses ?? [],
         targetLocations: targetLocations ?? [],
@@ -163,7 +163,7 @@ export default async function clientCampaignRoutes(fastify: FastifyInstance) {
 
     const updated = await fastify.prisma.campaign.update({
       where: { id: campaign.id },
-      data: data as any,
+      data: data as Record<string, unknown>,
       include: { tasks: { orderBy: { order: "asc" } } },
     });
 
@@ -278,9 +278,9 @@ export default async function clientCampaignRoutes(fastify: FastifyInstance) {
       data: {
         campaignId: campaign.id,
         name,
-        action: action as any,
+        action: action as unknown as "CALL" | "WHATSAPP" | "SMS" | "EMAIL" | "DELAY" | "CONDITION" | "WEBHOOK" | "UPDATE_LEAD_STATUS" | "ASSIGN_LEAD" | "UPDATE_SCORE" | "TAG_LEAD" | "CUSTOM",
         order,
-        config: (config ?? {}) as any,
+        config: (config ?? {}) as unknown as import("@prisma/client").Prisma.InputJsonValue,
         delayAfterPreviousHours: delayAfterPreviousHours ?? 0,
         delayAfterPreviousMinutes: delayAfterPreviousMinutes ?? 0,
         isCondition: isCondition ?? false,

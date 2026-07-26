@@ -56,6 +56,13 @@ export default async function teamRoutes(fastify: FastifyInstance) {
   }, async (request: FastifyRequest<{
     Body: { email: string; name: string; role: "ADMIN" | "AGENT" | "VIEWER" };
   }>, reply: FastifyReply) => {
+    // Plan gate — team invites require GROWTH+
+    const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
+    const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "team");
+    if (!allowed) {
+      return reply.status(403).send(featureGateError("Team invites", plan, requiredPlan));
+    }
+
     const clientId = request.clientId!;
     const { email, name, role } = request.body;
 

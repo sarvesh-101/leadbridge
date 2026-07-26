@@ -3,6 +3,79 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 export default async function clientBookingRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
 
+  // ─── Create Booking (Quick-Add) ──────────────────────────────
+  fastify.post("/bookings", async (request: FastifyRequest<{
+    Body: { name: string; phone: string; visitDate: string; visitTime: string; propertyAddress?: string; notes?: string };
+  }>, reply: FastifyReply) => {
+    const clientId = request.clientId!;
+    const { name, phone, visitDate, visitTime, propertyAddress, notes } = request.body;
+
+    if (!name || !phone || !visitDate) {
+      return reply.status(400).send({ error: "name, phone, and visitDate are required" });
+    }
+
+    // Create or find existing lead by phone
+    let lead = await fastify.prisma.lead.findFirst({
+      where: { clientId, phone },
+    });
+
+    if (!lead) {
+      lead = await fastify.prisma.lead.create({
+        data: {
+          clientId,
+          name,
+          phone,
+          source: "manual",
+          rawPayload: {},
+          status: "BOOKED",
+          bookedAt: new Date(),
+          score: 50,
+          receivedAt: new Date(),
+        },
+      });
+    } else {
+      // Update lead status to rebooked
+      await fastify.prisma.lead.update({
+        where: { id: lead.id },
+        data: { status: "REBOOKED", bookedAt: new Date() },
+      });
+    }
+
+    const visitDateObj = new Date(visitDate);
+    if (isNaN(visitDateObj.getTime())) {
+      return reply.status(400).send({ error: "Invalid visitDate format. Use YYYY-MM-DD." });
+    }
+
+    // Create booking (no leadId field — relation is on Lead.bookingId)
+    const booking = await fastify.prisma.booking.create({
+      data: {
+        clientId,
+        visitDate: visitDateObj,
+        visitTime: visitTime || "11:00 AM",
+        propertyAddress: propertyAddress || "",
+        notes: notes || "",
+        status: "CONFIRMED",
+        confirmedAt: new Date(),
+      },
+    });
+
+    // Link lead to the newly created booking
+    await fastify.prisma.lead.update({
+      where: { id: lead.id },
+      data: { bookingId: booking.id },
+    });
+
+    // Fetch the booking with lead details
+    const enrichedBooking = await fastify.prisma.booking.findUnique({
+      where: { id: booking.id },
+      include: {
+        lead: { select: { name: true, phone: true, source: true, score: true } },
+      },
+    });
+
+    return reply.status(201).send({ booking: enrichedBooking });
+  });
+
   // ─── List Bookings ────────────────────────────────────────────
   fastify.get("/bookings", async (request: FastifyRequest, reply: FastifyReply) => {
     const clientId = request.clientId!;
@@ -90,6 +163,10 @@ export default async function clientBookingRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "Invalid visitDate format. Use YYYY-MM-DD." });
     }
 
+    // Remove any pending reminder job for the old booking date
+    const { cancelReminderJob, enqueueReminder } = await import("../../workers/queues");
+    await cancelReminderJob(booking.id).catch(() => {});
+
     const [updatedBooking, _lead] = await Promise.all([
       fastify.prisma.booking.update({
         where: { id: booking.id },
@@ -104,6 +181,14 @@ export default async function clientBookingRoutes(fastify: FastifyInstance) {
         data: { status: "REBOOKED" },
       }),
     ]);
+
+    // Schedule a NEW reminder for the rescheduled date
+    const newReminderTime = new Date(newDate);
+    newReminderTime.setHours(9, 0, 0, 0);
+    const delayMs = Math.max(0, newReminderTime.getTime() - Date.now());
+    if (delayMs > 0 && booking.lead?.id) {
+      await enqueueReminder({ leadId: booking.lead.id, clientId: request.clientId!, bookingId: booking.id }, delayMs);
+    }
 
     return { booking: updatedBooking };
   });
@@ -121,6 +206,10 @@ export default async function clientBookingRoutes(fastify: FastifyInstance) {
     if (!booking) {
       return reply.status(404).send({ error: "Booking not found" });
     }
+
+    // Remove any pending reminder job from queue
+    const { cancelReminderJob } = await import("../../workers/queues");
+    await cancelReminderJob(booking.id).catch(() => {});
 
     const [updatedBooking, _lead] = await Promise.all([
       fastify.prisma.booking.update({

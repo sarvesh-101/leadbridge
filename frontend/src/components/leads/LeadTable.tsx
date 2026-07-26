@@ -30,6 +30,7 @@ interface LeadTableProps {
   onPageChange: (page: number) => void;
   onLeadClick: (lead: Lead) => void;
   loading?: boolean;
+  onSelectionChange?: (ids: string[]) => void;
 }
 
 export function LeadTable({
@@ -40,9 +41,23 @@ export function LeadTable({
   onPageChange,
   onLeadClick,
   loading,
+  onSelectionChange,
 }: LeadTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
+
+  // Handle row selection changes and notify parent
+  const handleRowSelectionChange = (updater: any) => {
+    const newSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
+    setRowSelection(newSelection);
+    if (onSelectionChange) {
+      const ids = Object.keys(newSelection)
+        .filter((id) => (newSelection as Record<string, boolean>)[id])
+        .map((rowId) => leads[parseInt(rowId)]?.id)
+        .filter(Boolean) as string[];
+      onSelectionChange(ids);
+    }
+  };
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -182,7 +197,7 @@ export function LeadTable({
     columns,
     state: { sorting, rowSelection },
     onSortingChange: setSorting,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: handleRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });

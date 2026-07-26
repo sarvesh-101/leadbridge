@@ -12,6 +12,7 @@ import { useWebSocket } from "../../lib/websocket";
 import { cn } from "../../lib/utils";
 import type { DashboardStats } from "../../types";
 import Link from "next/link";
+import { TrialExpiryBanner } from "../../components/dashboard/TrialExpiryBanner";
 
 type ActivityType = "lead_new" | "call_started" | "call_completed" | "booking_made" | "status_change" | "notification_sent";
 
@@ -44,6 +45,7 @@ export default function DashboardPage() {
   const [todayBookings, setTodayBookings] = useState<BookingItem[]>([]);
   const [hotLeads, setHotLeads] = useState<any[]>([]);
   const [hotLeadsLoading, setHotLeadsLoading] = useState(true);
+  const [planInfo, setPlanInfo] = useState<{ status?: string; tier?: string; trialEndsAt?: string | null }>({});
 
   useEffect(() => {
     loadDashboard();
@@ -55,6 +57,11 @@ export default function DashboardPage() {
       const data = await api.get("/dashboard");
       setStats(data.stats);
       setLeadsByStatus(data.leadsByStatus || []);
+
+      // Plan / trial info
+      if (data.plan) {
+        setPlanInfo(data.plan);
+      }
 
       // Today's bookings
       setTodayBookings(data.todayBookings || []);
@@ -127,6 +134,12 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Trial Expiry Banner */}
+      <TrialExpiryBanner
+        trialEndsAt={planInfo.trialEndsAt}
+        planStatus={planInfo.status}
+      />
+
       {/* Top Stats Row — 4 cards */}
       <motion.div
         initial={{ opacity: 0 }}

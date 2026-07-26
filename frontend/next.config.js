@@ -31,7 +31,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
               "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' http://localhost:3000 https://api.deepseek.com https://accounts.google.com ws: wss:",
+              "connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.railway.app https://*.vercel.app https://*.ngrok-free.app https://*.ngrok.io https://api.deepseek.com https://accounts.google.com ws: wss:",
               "frame-src 'self' https://accounts.google.com",
               "object-src 'none'",
               "base-uri 'self'",

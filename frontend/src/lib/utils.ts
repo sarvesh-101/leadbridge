@@ -12,6 +12,15 @@ export function formatDate(dateStr: string | Date | undefined | null): string {
 
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
+  // For future dates, don't show relative time
+  if (diffMs < 0) {
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
   const diffMins = Math.round(diffMs / 60000);
   const diffHours = Math.round(diffMs / 3600000);
   const diffDays = Math.round(diffMs / 86400000);
@@ -25,6 +34,24 @@ export function formatDate(dateStr: string | Date | undefined | null): string {
     day: "numeric",
     month: "short",
     year: "numeric",
+  });
+}
+
+/**
+ * Formats dates as actual dates (never relative), ideal for appointment/booking display.
+ * Examples: "15 Jul", "15 Jul 2026" (shows year if not current year)
+ */
+export function formatAppointmentDate(dateStr: string | Date | undefined | null): string {
+  if (!dateStr) return "—";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "—";
+  const now = new Date();
+  const showYear = date.getFullYear() !== now.getFullYear();
+  return date.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    ...(showYear ? { year: "numeric" } : {}),
   });
 }
 

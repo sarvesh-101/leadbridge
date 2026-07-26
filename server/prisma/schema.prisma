@@ -138,9 +138,28 @@ model Client {
   trialEndsAt   DateTime?
   razorpaySubId String?
 
+  // Trial-to-paid conversion tracking
+  trialStartedAt     DateTime?
+  convertedFromTrialAt DateTime?
+
   // Usage
   callsThisMonth  Int @default(0)
   callsLimit      Int @default(300)
+  rolloverCalls   Int @default(0)   // Unused calls rolled over from previous months (capped at 3x callsLimit)
+  prepaidCalls    Int @default(0)   // Purchased call credits (offline payments) — never expire
+
+  // Cost tracking (admin visibility)
+  totalCostIncurred     Float @default(0)  // ₹ spent on this broker's calls via OmniDimension
+  totalRevenueGenerated  Float @default(0)  // ₹ earned from this broker (subscription payments)
+  phoneCostMonthly      Float @default(0)  // ₹ per month for this broker's phone number
+
+  // Usage alert tracking (80%/90%/100% thresholds)
+  lastUsageAlertSentAt  DateTime?
+  usageAlertLevel       Int     @default(0) // 0=none, 80=80%alerted, 90=90%alerted, 100=100%alerted
+
+  // Dunning tracking for PAST_DUE accounts
+  dunningStep      Int       @default(0) // 0=none, 1=day1email, 2=day3whatsapp, 3=day7final
+  dunningStartedAt DateTime?
 
   // Lead sources config
   leadSources     Json @default("[]")
@@ -172,6 +191,7 @@ model Client {
   emailCampaigns     EmailCampaign[]
   scheduledReports   ScheduledReport[]
   abTests            ABTest[]
+  accountingEntries  AccountingEntry[]
 }
 
 model TeamMember {
@@ -260,7 +280,8 @@ model Lead {
   name     String
   phone    String
   email    String?
-  source   String
+  source        String
+  portalSource  String?  // Detected portal from SMS/email forwarding (99acres, magicbricks, etc.)
 
   // Raw inbound payload (stored for debugging)
   rawPayload Json
@@ -293,8 +314,12 @@ model Lead {
   // Customer Portal auth
   otpCode       String?
   otpExpiresAt  DateTime?
+  otpAttempts   Int        @default(0)
   authToken     String?  @unique
   lastLoginAt   DateTime?
+
+  // Per-lead platform cost tracking (FIX #4)
+  platformCost  Float     @default(0)  // ₹ spent on this lead (call costs from OmniDimension)
 
   // Timestamps
   receivedAt    DateTime @default(now())
@@ -420,6 +445,9 @@ model Booking {
   updatedAt DateTime @updatedAt
 
   ownerNotifications OwnerNotification[]
+
+  // BullMQ reminder job ID — used to remove scheduled reminders on cancellation
+  reminderJobId String?
 }
 
 model CustomerNotification {
@@ -450,6 +478,84 @@ model LeadScoreHistory {
 
   @@index([leadId])
   @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// PLATFORM CREDIT & COST TRACKING MODELS
+// ─────────────────────────────────────────────
+
+model PlatformCredit {
+  id           String   @id @default(cuid())
+
+  // Total minutes purchased from OmniDimension
+  totalMinutesPurchased Int     @default(0)
+  minutesUsed           Int     @default(0)
+  costPerMinute         Float   @default(0)  // Current cost in ₹ per minute
+
+  // Phone number costs
+  phoneNumbersActive  Int   @default(0)
+  costPerPhoneMonthly Float @default(200)  // ₹ per phone number per month
+
+  // Tracking
+  billingMonth   String   @default("")  // e.g. "2026-07"
+  lastRechargedAt DateTime?
+
+  // Low credit alert threshold (percentage)
+  alertThresholdPercent Int @default(20)
+  lastAlertSentAt        DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([billingMonth])
+}
+
+model PendingJob {
+  id        String   @id @default(cuid())
+
+  // Queue name (e.g., "call", "notification", "reminder")
+  queue     String
+
+  // Serialized job data
+  jobData   Json
+  jobId     String?  // Original job ID for dedup
+
+  // Status
+  status    String   @default("PENDING")  // PENDING | PROCESSING | COMPLETED | FAILED
+  attempts  Int      @default(0)
+  error     String?
+
+  // Scheduling
+  delayMs   Int      @default(0)
+  processAt DateTime @default(now())
+  processedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([queue, status])
+  @@index([processAt])
+}
+
+model CreditTransaction {
+  id        String   @id @default(cuid())
+
+  type      String   // "PURCHASE" | "CONSUME" | "OVERRIDE"
+  amount    Float    // in ₹
+  minutes   Int      // minutes consumed or purchased
+  description String?
+
+  // Who/what this transaction is for
+  clientId  String?
+  callId    String?
+
+  // Metadata
+  metadata  Json     @default("{}")
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+  @@index([clientId])
 }
 
 model OwnerNotification {
@@ -826,9 +932,23 @@ model Invoice {
   billingPhone   String?
   gstNumber      String?
 
+  // Payment tracking (FIX: Offline payment recording)
+  paymentMethod    String?  // "razorpay" | "bank_transfer" | "cheque" | "cash" | "other"
+  paymentReference String?  // NEFT ref, cheque number, etc.
+  adminNotes       String?
+
+  // GST fields (FIX #2)
+  gstPercentage Float @default(18)  // GST percentage (18% standard)
+  gstAmount     Float @default(0)   // Calculated GST amount
+  taxableAmount Float @default(0)   // Amount before GST
+
   // Provider
   providerInvoiceId String?
   invoiceUrl        String?
+
+  // Has GST invoice PDF been generated?
+  invoicePdfUrl String?
+  invoicePdfGeneratedAt DateTime?
 
   notes String?
 
@@ -836,6 +956,7 @@ model Invoice {
   updatedAt DateTime @updatedAt
 
   payments Payment[]
+  accountingEntries AccountingEntry[]
 }
 
 model Payment {
@@ -871,6 +992,56 @@ model Payment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// REVENUE RECOGNITION MODEL (FIX #5)
+// ─────────────────────────────────────────────
+
+enum RevenueStatus {
+  DEFERRED
+  RECOGNIZED
+  REVERSED
+}
+
+model AccountingEntry {
+  id        String    @id @default(cuid())
+  clientId  String
+  client    Client    @relation(fields: [clientId], references: [id])
+  invoiceId String?
+  invoice   Invoice?  @relation(fields: [invoiceId], references: [id])
+
+  // Entry details
+  type        String        // "subscription_revenue" | "overage_revenue" | "credit_note"
+  status      RevenueStatus @default(DEFERRED)
+  description String?
+
+  // Amounts
+  amount      Float   // Total invoice amount
+  recognizedAmount Float @default(0)  // Amount recognized so far
+  deferredAmount   Float @default(0)  // Amount still deferred
+
+  // Period
+  periodStart DateTime
+  periodEnd   DateTime
+
+  // Recognition schedule
+  totalDays     Int     @default(30)  // Total days in billing period
+  dailyRate     Float   @default(0)   // Amount to recognize per day (amount / totalDays)
+  daysRecognized Int    @default(0)   // Days already recognized
+  lastRecognizedAt DateTime?
+  fullyRecognizedAt DateTime?
+
+  // Reversal (for refunds/credit notes)
+  reversedAt    DateTime?
+  reversalReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@index([periodStart])
 }
 
 model Campaign {

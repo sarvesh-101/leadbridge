@@ -4,9 +4,7 @@
  * Provides full-text search across call transcripts using PostgreSQL tsvector.
  * Searches across transcript text, summaries, and extracted data for keywords.
  */
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 interface SearchResult {
   id: string;

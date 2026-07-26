@@ -145,3 +145,28 @@ export function getOmnidimensionCircuitState() {
 }
 
 export type { DispatchCallParams, CallLogResponse };
+
+/**
+ * Log a request to purchase additional minutes/credits on OmniDimension.
+ *
+ * NOTE: OmniDimension does NOT provide a public API for purchasing credits.
+ * Credits must be purchased manually through their web dashboard at:
+ *   https://omnidim.io
+ *
+ * This function logs the request so admins know how many minutes to buy.
+ * After purchasing on the dashboard, admin records the top-up locally.
+ */
+export async function purchaseCredits(params: {
+  minutes: number;
+  amount: number;
+}): Promise<{ success: boolean; message: string }> {
+  logger.info(
+    { minutes: params.minutes, amount: params.amount },
+    "OmniDimension credit purchase requested — please buy at omnidim.io dashboard"
+  );
+
+  return {
+    success: false,
+    message: "OmniDimension has no public purchase API. Go to https://omnidim.io dashboard to buy credits, then record them here via admin top-up.",
+  };
+}

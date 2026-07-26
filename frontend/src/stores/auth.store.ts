@@ -16,6 +16,7 @@ export interface UserProfile {
   callsThisMonth?: number;
   callsLimit?: number;
   picture?: string;
+  trialEndsAt?: string;
 }
 
 interface AuthState {

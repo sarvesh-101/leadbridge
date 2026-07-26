@@ -6,6 +6,7 @@ import { Search, Filter, Phone, Clock } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { CallCard } from "@/components/calls/CallCard";
 import { RecordingPlayer } from "@/components/calls/RecordingPlayer";
+import { Pagination } from "@/components/shared/Pagination";
 import { api } from "@/lib/api";
 import { toast } from "sonner"
 import { cn } from "@/lib/utils";
@@ -13,35 +14,42 @@ import type { Call } from "@/types";
 
 export default function CallsPage() {
   const [calls, setCalls] = useState<Call[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedCall, setSelectedCall] = useState<Call | null>(null);
+  const limit = 50;
 
   const loadCalls = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("limit", String(limit));
       if (search) params.set("search", search);
       if (statusFilter !== "all") params.set("status", statusFilter);
 
       const data = await api.get(`/calls?${params.toString()}`);
       setCalls(data.calls || []);
+      setTotal(data.total || 0);
     } catch (err) {
       toast.error("Failed to load calls")
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter]);
+  }, [page, search, statusFilter]);
 
   useEffect(() => {
     loadCalls();
   }, [loadCalls]);
 
   const totalDuration = calls.reduce((sum, c) => sum + (c.duration || 0), 0);
-  const successRate = calls.length > 0
-    ? Math.round((calls.filter((c) => c.status === "COMPLETED").length / calls.length) * 100)
+  const successRate = total > 0
+    ? Math.round((calls.filter((c) => c.status === "COMPLETED").length / Math.max(total, 1)) * 100)
     : 0;
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="space-y-6">
@@ -49,7 +57,7 @@ export default function CallsPage() {
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-4">
           <p className="caption mb-1">Total Calls</p>
-          <p className="text-[24px] font-display font-bold text-[#F0F0F8]">{calls.length}</p>
+          <p className="text-[24px] font-display font-bold text-[#F0F0F8]">{total}</p>
         </div>
         <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-4">
           <p className="caption mb-1">Total Duration</p>
@@ -69,7 +77,7 @@ export default function CallsPage() {
             type="text"
             placeholder="Search calls..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
           />
         </div>
@@ -77,7 +85,7 @@ export default function CallsPage() {
           {["all", "COMPLETED", "NO_ANSWER", "FAILED"].map((s) => (
             <button
               key={s}
-              onClick={() => setStatusFilter(s)}
+              onClick={() => { setStatusFilter(s); setPage(1); }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-colors",
                 statusFilter === s
@@ -117,6 +125,18 @@ export default function CallsPage() {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={limit}
+          onPageChange={setPage}
+          loading={loading}
+        />
+      )}
 
       {/* Recording player for selected call */}
       {selectedCall && selectedCall.recordingUrl && (

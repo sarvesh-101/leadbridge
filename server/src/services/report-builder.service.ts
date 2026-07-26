@@ -9,9 +9,8 @@
  * - Schedule recurring email delivery
  */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 
 interface ReportFilter {
   dateFrom?: string;
@@ -173,8 +172,8 @@ export async function scheduleReport(
     data: {
       clientId,
       name: config.name,
-      filters: config.filters as any,
-      groupBy: config.groupBy as any,
+      filters: config.filters as unknown as Prisma.InputJsonValue,
+      groupBy: config.groupBy as unknown as Prisma.InputJsonValue,
       frequency: config.frequency,
       recipients: config.recipients,
       nextRunAt: calculateNextRun(config.frequency),

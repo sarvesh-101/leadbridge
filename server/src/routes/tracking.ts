@@ -6,9 +6,7 @@
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /** 1x1 transparent GIF (base64-decoded) */
 const TRACKING_PIXEL = Buffer.from(

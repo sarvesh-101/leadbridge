@@ -3,14 +3,23 @@
  * POST /campaigns/sms/send — Send SMS campaign
  * GET  /campaigns/sms/analytics — Get SMS campaign history
  */
-import { FastifyInstance, FastifyRequest } from "fastify";
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { sendSmsCampaign } from "../../services/sms-campaign.service";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../utils/prisma-shared";
 
 export default async function smsCampaignRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
+
+  // Feature gate — SMS campaigns are PRO only
+  fastify.addHook("preHandler", async (request: FastifyRequest, reply: FastifyReply) => {
+    if (request.method === "POST") {
+      const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
+      const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "sms_campaigns");
+      if (!allowed) {
+        return reply.status(403).send(featureGateError("SMS campaigns", plan, requiredPlan));
+      }
+    }
+  });
 
   fastify.post<{ Body: { name: string; message: string; targetLeadIds: string[] } }>(
     "/campaigns/sms/send", async (request: FastifyRequest<{ Body: { name: string; message: string; targetLeadIds: string[] } }>) => {

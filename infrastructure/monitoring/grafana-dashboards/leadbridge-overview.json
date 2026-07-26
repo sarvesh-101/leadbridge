@@ -1,7 +1,7 @@
 {
   "title": "LeadBridge Overview",
   "uid": "leadbridge-overview",
-  "version": 1,
+  "version": 2,
   "panels": [
     {
       "title": "Lead Volume (24h)",
@@ -46,11 +46,109 @@
       "type": "stat",
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 16 },
       "targets": [{ "expr": "circuit_breaker_state" }]
+    },
+
+    {
+      "title": "Customer OTP Sent (7d)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 16 },
+      "targets": [{ "expr": "leadbridge_customer_otp_sent_total" }],
+      "description": "Total OTP requests sent via customer portal in last 7 days",
+      "color": { "mode": "thresholds" },
+      "thresholds": { "mode": "absolute", "steps": [{ "value": 0, "color": "blue" }] },
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "title": "OTP Success Rate",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 16 },
+      "targets": [{ "expr": "clamp_min(leadbridge_customer_otp_verify_success_total / (leadbridge_customer_otp_verify_success_total + leadbridge_customer_otp_verify_failed_total) * 100, 0)" }],
+      "description": "Percentage of OTP verifications that succeeded. Red < 50%, Yellow 50-80%, Green > 80%.",
+      "color": { "mode": "thresholds" },
+      "thresholds": {
+        "mode": "percentage",
+        "steps": [
+          { "value": 0, "color": "red" },
+          { "value": 50, "color": "yellow" },
+          { "value": 80, "color": "green" }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100, "decimals": 1 }
+      }
+    },
+    {
+      "title": "OTP Failure Ratio",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 16 },
+      "targets": [{ "expr": "leadbridge_customer_otp_failure_ratio" }],
+      "description": "Alert if > 0.5 for 5 minutes. Indicates brute-force or SMS delivery issues.",
+      "color": { "mode": "thresholds" },
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          { "value": 0, "color": "green" },
+          { "value": 0.3, "color": "yellow" },
+          { "value": 0.5, "color": "red" }
+        ]
+      },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "decimals": 3, "min": 0, "max": 1 }
+      }
+    },
+    {
+      "title": "Customer OTP Activity (7d)",
+      "type": "graph",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        { "expr": "leadbridge_customer_otp_sent_total", "legendFormat": "OTP Sent" },
+        { "expr": "leadbridge_customer_otp_verify_success_total", "legendFormat": "Verified Success" },
+        { "expr": "leadbridge_customer_otp_verify_failed_total", "legendFormat": "Verify Failed" }
+      ],
+      "description": "Daily customer OTP activity showing sent, verified, and failed attempts"
+    },
+    {
+      "title": "Customer Booking Actions (7d)",
+      "type": "graph",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        { "expr": "leadbridge_customer_bookings_confirmed_total", "legendFormat": "Confirmed" },
+        { "expr": "leadbridge_customer_bookings_cancelled_total", "legendFormat": "Cancelled" },
+        { "expr": "leadbridge_customer_bookings_rescheduled_total", "legendFormat": "Rescheduled" }
+      ],
+      "description": "Customer-initiated booking actions through the portal"
+    },
+    {
+      "title": "Active Portal Users (7d)",
+      "type": "stat",
+      "gridPos": { "h": 7, "w": 4, "x": 0, "y": 27 },
+      "targets": [{ "expr": "leadbridge_customer_portal_active_users" }],
+      "description": "Unique leads who used the customer portal in last 7 days",
+      "color": { "mode": "thresholds" },
+      "thresholds": { "mode": "absolute", "steps": [{ "value": 0, "color": "blue" }] }
+    },
+    {
+      "title": "Booking Actions Distribution",
+      "type": "piechart",
+      "gridPos": { "h": 7, "w": 12, "x": 4, "y": 27 },
+      "targets": [
+        { "expr": "leadbridge_customer_bookings_confirmed_total", "legendFormat": "Confirmed" },
+        { "expr": "leadbridge_customer_bookings_cancelled_total", "legendFormat": "Cancelled" },
+        { "expr": "leadbridge_customer_bookings_rescheduled_total", "legendFormat": "Rescheduled" }
+      ],
+      "description": "Distribution of customer portal booking actions"
     }
   ],
   "templating": { "list": [] },
   "annotations": { "list": [] },
   "editable": true,
-  "tags": ["leadbridge", "production"],
-  "schemaVersion": 27
+  "tags": ["leadbridge", "production", "customer-portal"],
+  "schemaVersion": 27,
+  "links": [
+    {
+      "title": "Customer Portal Alerts",
+      "type": "dashboards",
+      "tags": ["customer-portal-alerts"]
+    }
+  ]
 }

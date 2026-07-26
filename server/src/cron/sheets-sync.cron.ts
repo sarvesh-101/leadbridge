@@ -1,8 +1,7 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { logger } from "../utils/logger";
 import { appendLeadToSheet } from "../services/sheets.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * Google Sheets Sync Cron — runs every 15 minutes.

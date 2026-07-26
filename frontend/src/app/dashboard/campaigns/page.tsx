@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Play, Pause, Target, Users, Phone, MessageSquare, Clock, BarChart3, X, Loader2, Trash2, Edit3, AlertTriangle } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Plus, Play, Pause, Target, Users, Phone, MessageSquare, Clock, BarChart3, X, Loader2, Trash2, Edit3, AlertTriangle, Mail, FileText, MessageCircle } from "lucide-react";
 import type { Campaign, CampaignStatus, CampaignType, TaskAction } from "@/types";
 
 
@@ -16,6 +18,14 @@ const CAMPAIGN_TYPES: { value: CampaignType; label: string }[] = [
   { value: "WELCOME", label: "Welcome" },
   { value: "PROMOTIONAL", label: "Promotional" },
   { value: "CUSTOM", label: "Custom" },
+];
+
+const CAMPAIGN_TABS = [
+  { label: "Workflows", href: "/dashboard/campaigns", icon: Target },
+  { label: "Email", href: "/dashboard/campaigns/email", icon: Mail },
+  { label: "SMS", href: "/dashboard/campaigns/sms", icon: MessageSquare },
+  { label: "Templates", href: "/dashboard/campaigns/templates", icon: FileText },
+  { label: "WA Templates", href: "/dashboard/campaigns/whatsapp-templates", icon: MessageCircle },
 ];
 
 export default function CampaignsPage() {
@@ -286,19 +296,37 @@ export default function CampaignsPage() {
     }
   }
 
+  const pathname = usePathname();
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Campaigns</h1>
-          <p className="text-gray-400 mt-1">Automated follow-up workflows</p>
+      {/* Sub-navigation tabs */}
+      <div className="flex items-center border-b border-white/10 gap-0 overflow-x-auto">
+        {CAMPAIGN_TABS.map((tab) => {
+          const isActive = pathname === tab.href;
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
+                isActive
+                  ? "border-[#4F6EF7] text-[#4F6EF7]"
+                  : "border-transparent text-[#6B6B8A] hover:text-white hover:border-[#6B6B8A]/30"
+              )}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </Link>
+          );
+        })}
+        <div className="ml-auto">
+          <button onClick={openCreateModal}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 transition-all"
+          >
+            <Plus className="w-4 h-4" /> New Campaign
+          </button>
         </div>
-        <button onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 transition-all"
-        >
-          <Plus className="w-4 h-4" /> New Campaign
-        </button>
       </div>
 
       {/* Stats Overview */}

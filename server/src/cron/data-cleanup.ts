@@ -19,7 +19,7 @@ export async function runDataCleanup(): Promise<{
   deletedCalls: number;
   deletedNotifications: number;
   deletedOrphanBookings: number;
-  deletedAuditLogs: number;
+  archivedAuditLogs: number;
 }> {
   const now = new Date();
   const sixMonthsAgo = new Date(now.getTime() - SIX_MONTHS_MS);
@@ -83,12 +83,33 @@ export async function runDataCleanup(): Promise<{
     },
   });
 
-  // 5. Delete old audit logs (older than 6 months)
-  const deletedAuditLogs = await prisma.auditLog.deleteMany({
+  // 5. Archive old audit logs (older than 6 months)
+  // Instead of DELETING (which destroys compliance data), we mark them
+  // as archived in the metadata field. The data stays in the database
+  // but is excluded from regular queries by the archived flag.
+  // For heavy compliance needs, this could later export to S3/Blob storage.
+  const oldAuditLogs = await prisma.auditLog.findMany({
     where: {
       createdAt: { lte: sixMonthsAgo },
     },
+    select: { id: true, metadata: true },
   });
+
+  let archivedAuditLogs = 0;
+  for (const log of oldAuditLogs) {
+    const existingMetadata = (log.metadata as Record<string, unknown>) || {};
+    await prisma.auditLog.update({
+      where: { id: log.id },
+      data: {
+        metadata: {
+          ...existingMetadata,
+          archived: true,
+          archivedAt: now.toISOString(),
+        },
+      },
+    });
+    archivedAuditLogs++;
+  }
 
   const totalNotifications = deletedCustomerNotifs.count + deletedOwnerNotifs.count;
 
@@ -98,7 +119,7 @@ export async function runDataCleanup(): Promise<{
       deletedCalls: deletedCalls.count,
       deletedNotifications: totalNotifications,
       deletedOrphanBookings: deletedOrphanBookings.count,
-      deletedAuditLogs: deletedAuditLogs.count,
+      archivedAuditLogs,
     },
     "Data cleanup: Cycle complete"
   );
@@ -108,6 +129,6 @@ export async function runDataCleanup(): Promise<{
     deletedCalls: deletedCalls.count,
     deletedNotifications: totalNotifications,
     deletedOrphanBookings: deletedOrphanBookings.count,
-    deletedAuditLogs: deletedAuditLogs.count,
+    archivedAuditLogs,
   };
 }

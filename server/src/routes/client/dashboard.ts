@@ -1,11 +1,79 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 
 export default async function clientDashboardRoutes(fastify: FastifyInstance) {
-  fastify.addHook("preHandler", fastify.authenticate);
-
-  fastify.get("/dashboard", async (request: FastifyRequest) => {
-    const clientId = request.clientId!;
+  fastify.addHook("preHandler", fastify.authenticate);  fastify.get("/dashboard", async (request: FastifyRequest, reply) => {
     const now = new Date();
+
+    // ─── Admin route — return platform-wide aggregated data ───
+    if (request.role === "admin") {
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const [
+        totalClients,
+        activeClients,
+        totalLeads,
+        callsToday,
+        callsThisMonth,
+        totalBookings,
+        leadsBySource,
+        leadsByStatus,
+        creditOverview,
+      ] = await Promise.all([
+        fastify.prisma.client.count(),
+        fastify.prisma.client.count({ where: { planStatus: { in: ["TRIAL", "ACTIVE"] } } }),
+        fastify.prisma.lead.count(),
+        fastify.prisma.call.count({ where: { createdAt: { gte: startOfToday } } }),
+        fastify.prisma.call.count({ where: { createdAt: { gte: startOfMonth } } }),
+        fastify.prisma.booking.count(),
+        fastify.prisma.lead.groupBy({ by: ["source"], _count: { id: true } }),
+        fastify.prisma.lead.groupBy({ by: ["status"], _count: { id: true } }),
+        fastify.prisma.platformCredit.findFirst({
+          orderBy: { billingMonth: "desc" },
+          select: { totalMinutesPurchased: true, minutesUsed: true, costPerMinute: true },
+        }),
+      ]);
+
+      // MRR calculation
+      const activePlans = await fastify.prisma.client.findMany({
+        where: { planStatus: { in: ["TRIAL", "ACTIVE"] } },
+        select: { plan: true },
+      });
+      const planPrices: Record<string, number> = { STARTER: 18000, GROWTH: 35000, PRO: 60000 };
+      const mrr = activePlans.reduce((sum, c) => sum + (planPrices[c.plan] || 0), 0);
+
+      return {
+        admin: true,
+        platform: {
+          clients: { total: totalClients, active: activeClients },
+          leads: { total: totalLeads },
+          calls: { today: callsToday, thisMonth: callsThisMonth },
+          bookings: { total: totalBookings },
+          revenue: { mrr, arr: mrr * 12 },
+          credits: creditOverview
+            ? {
+                minutesPurchased: creditOverview.totalMinutesPurchased,
+                minutesUsed: creditOverview.minutesUsed,
+                minutesRemaining: creditOverview.totalMinutesPurchased - creditOverview.minutesUsed,
+                costPerMinute: creditOverview.costPerMinute,
+              }
+            : null,
+        },
+        leadsBySource,
+        leadsByStatus,
+      };
+    }
+
+    // ─── Broker route — normal client-scoped data ────────────
+    const clientId = request.clientId;
+    if (!clientId) {
+      return reply.status(401).send({ error: "Authentication required" });
+    }
+
+    const client = await fastify.prisma.client.findUnique({
+      where: { id: clientId },
+      select: { trialEndsAt: true, planStatus: true, plan: true },
+    });
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -53,7 +121,6 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
       }),
     ]);
 
-    // Calculate rates
     const qualifiedLeads = await fastify.prisma.lead.count({
       where: { clientId, status: { in: ["BOOKED", "VISITED", "CONVERTED", "REBOOKED"] } },
     });
@@ -69,7 +136,6 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
     const showRate = monthBookings > 0 ? Math.round((visitedLeads / monthBookings) * 100) : 0;
     const conversionRate = visitedLeads > 0 ? Math.round((convertedLeads / visitedLeads) * 100) : 0;
 
-    // Today's upcoming bookings
     const todayBookingsList = await fastify.prisma.booking.findMany({
       where: {
         clientId,
@@ -80,75 +146,44 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
       orderBy: { visitTime: "asc" },
     });
 
-    // ─── Real Daily Chart Data (last 30 days) ────────────────
+    // Daily chart data (last 30 days)
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    // Get daily lead counts
     const dailyLeads = await fastify.prisma.lead.groupBy({
       by: ["receivedAt"],
-      where: {
-        clientId,
-        receivedAt: { gte: thirtyDaysAgo },
-      },
+      where: { clientId, receivedAt: { gte: thirtyDaysAgo } },
       _count: { id: true },
     });
-
-    // Get daily call counts
     const dailyCalls = await fastify.prisma.call.groupBy({
       by: ["createdAt"],
-      where: {
-        clientId,
-        createdAt: { gte: thirtyDaysAgo },
-      },
+      where: { clientId, createdAt: { gte: thirtyDaysAgo } },
       _count: { id: true },
     });
-
-    // Get daily booking counts
     const dailyBookings = await fastify.prisma.booking.groupBy({
       by: ["createdAt"],
-      where: {
-        clientId,
-        createdAt: { gte: thirtyDaysAgo },
-      },
+      where: { clientId, createdAt: { gte: thirtyDaysAgo } },
       _count: { id: true },
     });
 
-    // Build a map of date -> counts for the last 30 days
     const dailyMap = new Map<string, { leads: number; calls: number; bookings: number }>();
-
     for (let i = 0; i < 30; i++) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const key = d.toISOString().split("T")[0]; // YYYY-MM-DD
-      dailyMap.set(key, { leads: 0, calls: 0, bookings: 0 });
+      dailyMap.set(d.toISOString().split("T")[0], { leads: 0, calls: 0, bookings: 0 });
     }
-
-    // Fill in actual counts
     for (const lead of dailyLeads) {
       const key = lead.receivedAt.toISOString().split("T")[0];
-      if (dailyMap.has(key)) {
-        dailyMap.get(key)!.leads += lead._count.id;
-      }
+      if (dailyMap.has(key)) dailyMap.get(key)!.leads += lead._count.id;
     }
     for (const call of dailyCalls) {
       const key = call.createdAt.toISOString().split("T")[0];
-      if (dailyMap.has(key)) {
-        dailyMap.get(key)!.calls += call._count.id;
-      }
+      if (dailyMap.has(key)) dailyMap.get(key)!.calls += call._count.id;
     }
     for (const booking of dailyBookings) {
       const key = booking.createdAt.toISOString().split("T")[0];
-      if (dailyMap.has(key)) {
-        dailyMap.get(key)!.bookings += booking._count.id;
-      }
+      if (dailyMap.has(key)) dailyMap.get(key)!.bookings += booking._count.id;
     }
-
-    // Sort by date ascending
     const dailyActivity = Array.from(dailyMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, counts]) => ({
-        date,
-        ...counts,
-      }));
+      .map(([date, counts]) => ({ date, ...counts }));
 
     return {
       stats: {
@@ -164,6 +199,11 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
         conversionRate,
         activeFollowups,
         totalLeads,
+      },
+      plan: {
+        status: client?.planStatus || "TRIAL",
+        tier: client?.plan || "GROWTH",
+        trialEndsAt: client?.trialEndsAt?.toISOString() || null,
       },
       leadsBySource,
       leadsByStatus,

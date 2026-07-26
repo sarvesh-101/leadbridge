@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Search, ChevronDown, LogOut, User, Settings } from "lucide-react";
+import { Menu, Search, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { useAuthStore } from "../../stores/auth.store";
 import { RealtimeStatusDot } from "./RealtimeStatusDot";
 import { NotificationDropdown } from "./NotificationDropdown";
@@ -9,9 +9,10 @@ import { useRouter } from "next/navigation";
 
 interface TopBarProps {
   onSearch?: (query: string) => void;
+  onMenuToggle?: () => void;
 }
 
-export function TopBar({ onSearch }: TopBarProps) {
+export function TopBar({ onSearch, onMenuToggle }: TopBarProps) {
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -25,18 +26,27 @@ export function TopBar({ onSearch }: TopBarProps) {
   }
 
   return (
-    <header className="h-14 bg-[#111118] border-b border-[#2A2A3A] flex items-center justify-between px-6 shrink-0">
-      {/* Search */}
-      <div className="relative w-72">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B8A]" />
-        <input
-          ref={searchRef}
-          type="text"
-          placeholder="Search leads... (Enter to go)"
-          onChange={(e) => onSearch?.(e.target.value)}
-          onKeyDown={handleSearchKeyDown}
-          className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
-        />
+    <header className="h-14 bg-[#111118] border-b border-[#2A2A3A] flex items-center justify-between px-3 sm:px-6 shrink-0">
+      {/* Mobile hamburger + Search */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onMenuToggle}
+          className="md:hidden p-2 rounded-lg hover:bg-[#1A1A24] text-[#6B6B8A] hover:text-white transition-colors"
+          title="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="relative w-48 sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B8A]" />
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Search leads... (Enter to go)"
+            onChange={(e) => onSearch?.(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

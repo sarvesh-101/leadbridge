@@ -125,7 +125,7 @@ export default async function adminTerritoryRoutes(fastify: FastifyInstance) {
 
     const updated = await fastify.prisma.territory.update({
       where: { id: territory.id },
-      data: data as any,
+      data: data as Record<string, unknown>,
     });
 
     return {

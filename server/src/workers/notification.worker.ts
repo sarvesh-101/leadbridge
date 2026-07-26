@@ -1,5 +1,4 @@
 import { Worker } from "bullmq";
-import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { NotificationJob } from "./queues";
@@ -18,17 +17,66 @@ import {
   followupResultOwner,
   conversionOwner,
 } from "../utils/templates";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * NOTIFICATION Worker — selects the right message template based on type,
- * builds the message, and sends via WhatsApp Cloud API.
+ * builds the message, and sends via WhatsApp Cloud API (or simulates in demo mode).
+ *
+ * In DEMO_MODE, notifications are logged + DB records created as "simulated"
+ * but no external API calls are made. This allows the entire notification flow
+ * to work end-to-end for investor demos.
  */
 const notificationWorker = new Worker<NotificationJob>(
   "notification",
   async (job) => {
     const { recipient, leadId, clientId, type, bookingId, data } = job.data;
+
+    // ─── DEMO MODE: Simulate notification, skip external APIs ─────
+    if (config.DEMO_MODE) {
+      const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+      const client = await prisma.client.findUnique({ where: { id: clientId } });
+
+      if (!lead || !client) {
+        throw new Error(`Lead or Client not found for notification`);
+      }
+
+      const messageText = `[DEMO] ${type} notification for ${lead.name} — ${recipient === "owner" ? "owner" : "customer"}`;
+      const toNumber = recipient === "customer" ? lead.phone : client.ownerWhatsapp;
+
+      logger.info(
+        { type, recipient, to: toNumber, leadName: lead.name },
+        `📨 [DEMO] Notification simulated: ${type}`
+      );
+
+      // Create notification records as "simulated"
+      if (recipient === "customer") {
+        await prisma.customerNotification.create({
+          data: {
+            leadId,
+            type,
+            channel: "simulated",
+            message: messageText,
+            status: "sent",
+            sentAt: new Date(),
+          },
+        });
+      } else {
+        await prisma.ownerNotification.create({
+          data: {
+            clientId,
+            bookingId: bookingId || undefined,
+            leadId,
+            type,
+            message: messageText,
+            status: "sent",
+            sentAt: new Date(),
+          },
+        });
+      }
+
+      return { waMessageId: "demo-simulated", type, recipient, demoMode: true };
+    }
 
     const lead = await prisma.lead.findUnique({ where: { id: leadId } });
     const client = await prisma.client.findUnique({ where: { id: clientId } });
@@ -276,13 +324,11 @@ notificationWorker.on("failed", (job, error) => {
 // Graceful shutdown
 process.on("SIGTERM", async () => {
   await notificationWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
   await notificationWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 

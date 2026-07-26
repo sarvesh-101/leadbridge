@@ -5,11 +5,9 @@
  * Uses OAuth2 for calendar integration.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 import { config } from "../config";
 import { logger } from "../utils/logger";
-
-const prisma = new PrismaClient();
 
 interface CalendarEvent {
   summary: string;

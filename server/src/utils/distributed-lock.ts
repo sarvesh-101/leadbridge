@@ -37,9 +37,7 @@ export async function tryAcquireLock(
   ttlSeconds: number = 5
 ): Promise<boolean> {
   try {
-    const redis = (fastify as any).redis as
-      | { set: (key: string, value: string, mode: string, ttl: number, flag: string) => Promise<string | null> }
-      | undefined;
+    const redis = fastify.redis;
 
     if (!redis) {
       // No Redis — optimistic fallback (best-effort dedup)
@@ -66,7 +64,7 @@ export async function releaseLock(
   lockId: string
 ): Promise<void> {
   try {
-    const redis = (fastify as any).redis as { del: (key: string) => Promise<number> } | undefined;
+    const redis = fastify.redis;
     if (redis) {
       await redis.del(`${LOCK_PREFIX}${lockId}`);
     }

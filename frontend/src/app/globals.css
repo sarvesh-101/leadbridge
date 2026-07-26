@@ -71,14 +71,17 @@
   }
 
   body {
-    background-color: #0A0A0F;
-    color: #F0F0F8;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Use Tailwind utility classes (bg-surface, text-text-primary, etc.) instead of raw hex values */
+  /* See tailwind.config.ts for available color tokens */
+
   ::selection {
     background-color: rgba(79, 110, 247, 0.3);
-    color: #F0F0F8;
+    color: hsl(var(--foreground));
   }
 
   html {
@@ -171,5 +174,19 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Slide-in animation for the mobile sidebar overlay */
+  @keyframes slide-in {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slide-in 0.2s ease-out;
   }
 }

@@ -13,8 +13,9 @@ import {
   RefreshCw, TrendingUp, Target, Zap, Gauge, AlertTriangle, Info, Home,
 } from "lucide-react";
 import { LeadStatusBadge } from "@/components/shared/LeadStatusBadge";
+import { CustomerActivityPanel } from "@/components/leads/CustomerActivityPanel";
 
-type Tab = "overview" | "scoring" | "calls" | "booking" | "messages" | "notes" | "properties";
+type Tab = "overview" | "scoring" | "calls" | "booking" | "messages" | "notes" | "properties" | "activity";
 
 export default function LeadDetailPage() {
   const params = useParams();
@@ -66,6 +67,7 @@ export default function LeadDetailPage() {
     { id: "booking", label: "Booking", icon: <Calendar className="w-4 h-4" /> },
     { id: "messages", label: "Messages", icon: <MessageSquare className="w-4 h-4" /> },
     { id: "properties", label: "Properties", icon: <Home className="w-4 h-4" /> },
+    { id: "activity", label: "Activity", icon: <Activity className="w-4 h-4" /> },
     { id: "notes", label: "Notes", icon: <Edit3 className="w-4 h-4" /> },
   ];
 
@@ -278,6 +280,7 @@ export default function LeadDetailPage() {
         </div>
       )}
 
+      {activeTab === "activity" && <CustomerActivityPanel leadId={lead.id} />}
       {activeTab === "notes" && <NotesTab leadId={lead.id} />}
     </div>
   );

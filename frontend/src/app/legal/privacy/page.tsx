@@ -64,12 +64,12 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-lg font-semibold text-white mb-3">3. Data Sharing & Third Parties</h2>
             <p className="mb-3">We may share your data with the following third-party service providers:</p>
             <ul className="list-disc pl-6 space-y-2">
-              <li><strong>AI Processing:</strong> DeepSeek (API) for call summarization and qualification extraction</li>
-              <li><strong>Voice/AI:</strong> Omnidimension AI agents for voice calls</li>
-              <li><strong>Telephony:</strong> Omnidimension for making and receiving phone calls</li>
+              <li><strong>AI Processing:</strong> LLM provider for call summarization and qualification extraction</li>
+              <li><strong>Voice/AI:</strong> AI voice agent platform for automated calls</li>
+              <li><strong>Telephony:</strong> Cloud telephony provider for phone calls</li>
               <li><strong>Messaging:</strong> WhatsApp Cloud API for sending messages</li>
-              <li><strong>Payments:</strong> Razorpay for subscription billing</li>
-              <li><strong>Storage:</strong> Supabase for storing call recordings and files</li>
+              <li><strong>Payments:</strong> Payment gateway for subscription billing</li>
+              <li><strong>Storage:</strong> Cloud storage for call recordings and files</li>
               <li><strong>Email:</strong> SMTP (Nodemailer) for transactional emails (password reset, notifications, campaigns)</li>
             </ul>
           </section>

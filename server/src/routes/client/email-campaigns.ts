@@ -7,14 +7,23 @@
  * POST   /campaigns/email/:id/ab-check — Trigger A/B test winner check
  */
 
-import { FastifyInstance, FastifyRequest } from "fastify";
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { sendCampaign, getTemplates, getCampaignAnalytics, checkABTestWinner } from "../../services/email-campaign.service";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../utils/prisma-shared";
 
 export default async function emailCampaignRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
+
+  // Feature gate — email campaign sends are PRO only
+  fastify.addHook("preHandler", async (request: FastifyRequest, reply: FastifyReply) => {
+    if (request.method === "POST") {
+      const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
+      const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "email_campaigns");
+      if (!allowed) {
+        return reply.status(403).send(featureGateError("Email campaigns", plan, requiredPlan));
+      }
+    }
+  });
 
   /**
    * Get available email templates.

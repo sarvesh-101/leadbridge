@@ -441,19 +441,32 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "Invalid or expired reset token" });
     }
 
+    // Invalidate ALL existing reset tokens for this user (prevents token reuse)
+    if (client) {
+      await fastify.prisma.client.updateMany({
+        where: { id: client.id, resetToken: { not: null } },
+        data: { resetToken: null, resetTokenExpiresAt: null },
+      });
+    } else if (admin) {
+      await fastify.prisma.admin.updateMany({
+        where: { id: admin.id, resetToken: { not: null } },
+        data: { resetToken: null, resetTokenExpiresAt: null },
+      });
+    }
+
     // Hash new password
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Update password and clear token
+    // Update password only (tokens already cleared above)
     if (client) {
       await fastify.prisma.client.update({
         where: { id: client.id },
-        data: { passwordHash, resetToken: null, resetTokenExpiresAt: null },
+        data: { passwordHash },
       });
     } else if (admin) {
       await fastify.prisma.admin.update({
         where: { id: admin.id },
-        data: { passwordHash, resetToken: null, resetTokenExpiresAt: null },
+        data: { passwordHash },
       });
     }
 

@@ -83,6 +83,34 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
 }
 
 /**
+ * Execute an actual refund via Razorpay for a payment.
+ * FIX #2 (P0): Called from cancellation flow to return money to the broker.
+ */
+export async function refundPayment(
+  paymentId: string,
+  amount: number
+): Promise<{ refundId: string; status: string }> {
+  try {
+    const response = await razorpayApi.post(`/payments/${paymentId}/refund`, {
+      amount: Math.round(amount * 100), // Razorpay expects amount in paise
+    });
+
+    logger.info({ paymentId, refundId: response.data.id, amount }, "Refund executed via Razorpay");
+
+    return {
+      refundId: response.data.id,
+      status: response.data.status,
+    };
+  } catch (error: any) {
+    logger.error(
+      { paymentId, amount, err: error.response?.data?.error?.description || error.message },
+      "Razorpay refund failed"
+    );
+    throw new Error(`Failed to execute refund: ${error.response?.data?.error?.description || error.message}`);
+  }
+}
+
+/**
  * Verify Razorpay webhook signature.
  */
 export function verifyWebhookSignature(payload: string, signature: string): boolean {

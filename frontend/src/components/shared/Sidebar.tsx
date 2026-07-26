@@ -9,9 +9,13 @@ import {
   Settings, CreditCard, MessageSquare, Globe, Link as LinkIcon,
   ChevronLeft, ChevronRight, Building2, LogOut, Zap,
   Activity, Webhook, UserPlus, Home, RadioTower, Star,
+  FileText, IndianRupee, Bell, Search, CalendarDays, FileSpreadsheet,
+  Send,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuthStore } from "../../stores/auth.store";
+import { Lock } from "lucide-react";
+import { canAccessFeature } from "./FeatureGate";
 
 interface NavItem {
   label: string;
@@ -19,6 +23,7 @@ interface NavItem {
   icon: React.ReactNode;
   badge?: number;
   adminOnly?: boolean;
+  requiredPlan?: string; // Plan required to access this feature
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -26,17 +31,24 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Leads", href: "/dashboard/leads", icon: <Users className="w-5 h-5" /> },
   { label: "Pipeline", href: "/dashboard/leads/pipeline", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Calls", href: "/dashboard/calls", icon: <Phone className="w-5 h-5" /> },
-  { label: "Voice AI", href: "/dashboard/voice", icon: <RadioTower className="w-5 h-5" /> },
+  { label: "Voice AI", href: "/dashboard/voice", icon: <RadioTower className="w-5 h-5" />, requiredPlan: "GROWTH" },
   { label: "Bookings", href: "/dashboard/bookings", icon: <Calendar className="w-5 h-5" /> },
   { label: "Properties", href: "/dashboard/properties", icon: <Home className="w-5 h-5" /> },
   { label: "Messages", href: "/dashboard/messages", icon: <MessageSquare className="w-5 h-5" /> },
-  { label: "Campaigns", href: "/dashboard/campaigns", icon: <Zap className="w-5 h-5" /> },
-  { label: "WA Templates", href: "/dashboard/campaigns/whatsapp-templates", icon: <MessageSquare className="w-5 h-5" /> },
+  { label: "Campaigns", href: "/dashboard/campaigns", icon: <Zap className="w-5 h-5" />, requiredPlan: "PRO" },
+  { label: "WA Templates", href: "/dashboard/campaigns/whatsapp-templates", icon: <MessageSquare className="w-5 h-5" />, requiredPlan: "PRO" },
   { label: "Analytics", href: "/dashboard/analytics", icon: <BarChart3 className="w-5 h-5" /> },
-  { label: "Territories", href: "/dashboard/territories", icon: <Globe className="w-5 h-5" /> },
+  { label: "Territories", href: "/dashboard/territories", icon: <Globe className="w-5 h-5" />, requiredPlan: "GROWTH" },
+  { label: "Documents", href: "/dashboard/documents", icon: <FileText className="w-5 h-5" /> },
+  { label: "Payment Links", href: "/dashboard/payment-links", icon: <IndianRupee className="w-5 h-5" /> },
+  { label: "Calendar Sync", href: "/dashboard/calendar-sync", icon: <CalendarDays className="w-5 h-5" /> },
+  { label: "Sheets Sync", href: "/dashboard/sheets-sync", icon: <FileSpreadsheet className="w-5 h-5" /> },
+  { label: "Lead Forwarding", href: "/dashboard/forwarding", icon: <Send className="w-5 h-5" /> },
+  { label: "Transcript Search", href: "/dashboard/transcript-search", icon: <Search className="w-5 h-5" /> },
+  { label: "Notif. Preferences", href: "/dashboard/notification-preferences", icon: <Bell className="w-5 h-5" /> },
   { label: "Integrations", href: "/dashboard/integrations", icon: <LinkIcon className="w-5 h-5" /> },
   { label: "Referrals", href: "/dashboard/referrals", icon: <Star className="w-5 h-5" /> },
-  { label: "Team", href: "/dashboard/team", icon: <UserPlus className="w-5 h-5" /> },
+  { label: "Team", href: "/dashboard/team", icon: <UserPlus className="w-5 h-5" />, requiredPlan: "GROWTH" },
   { label: "Settings", href: "/dashboard/settings", icon: <Settings className="w-5 h-5" /> },
   { label: "Billing", href: "/dashboard/billing", icon: <CreditCard className="w-5 h-5" /> },
 ];
@@ -45,8 +57,10 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Clients", href: "/admin/clients", icon: <Building2 className="w-5 h-5" /> },
   { label: "Territories", href: "/admin/territories", icon: <Globe className="w-5 h-5" /> },
+  { label: "Forwarding", href: "/admin/forwarding", icon: <Send className="w-5 h-5" /> },
   { label: "Queues", href: "/admin/queues", icon: <Activity className="w-5 h-5" /> },
   { label: "Webhooks", href: "/admin/webhooks", icon: <Webhook className="w-5 h-5" /> },
+  { label: "WhatsApp", href: "/admin/whatsapp", icon: <MessageSquare className="w-5 h-5" /> },
 ];
 
 interface SidebarProps {
@@ -61,6 +75,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   const items = isAdmin ? ADMIN_NAV_ITEMS : NAV_ITEMS;
   const planBadge = user?.plan || "TRIAL";
+  const currentPlan = planBadge;
 
   return (
     <motion.aside
@@ -101,6 +116,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isLocked = item.requiredPlan ? !canAccessFeature(currentPlan, item.requiredPlan) : false;
           return (
             <Link
               key={item.href}
@@ -109,22 +125,38 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 relative",
                 isActive
                   ? "bg-[#4F6EF7]/10 text-[#4F6EF7]"
+                  : isLocked
+                  ? "text-[#4B4B6A] cursor-not-allowed"
                   : "text-[#6B6B8A] hover:bg-[#1A1A24] hover:text-[#F0F0F8]"
               )}
+              onClick={(e) => isLocked ? e.preventDefault() : undefined}
+              title={isLocked ? `Requires ${item.requiredPlan} plan` : item.label}
             >
-              <span className="shrink-0">{item.icon}</span>
+              <span className="shrink-0 relative">
+                {item.icon}
+                {isLocked && (
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#2A2A3A] flex items-center justify-center">
+                    <Lock className="w-2.5 h-2.5 text-[#6B6B8A]" />
+                  </span>
+                )}
+              </span>
               <AnimatePresence>
                 {isOpen && (
                   <motion.span
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "auto" }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="truncate"
+                    className={cn("truncate", isLocked && "opacity-50")}
                   >
                     {item.label}
                   </motion.span>
                 )}
               </AnimatePresence>
+              {isLocked && isOpen && (
+                <span className="ml-auto text-[10px] uppercase tracking-wider text-[#4B4B6A]">
+                  {item.requiredPlan}
+                </span>
+              )}
               {item.badge && isOpen && (
                 <span className="ml-auto bg-[#F43F5E] text-white text-[11px] rounded-full px-1.5 py-0.5">
                   {item.badge}

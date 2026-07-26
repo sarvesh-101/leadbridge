@@ -9,9 +9,7 @@
  *
  * Each member can choose channels per event type (lead.created, booking.confirmed, etc.)
  */
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 const DEFAULT_EVENT_TYPES = [
   "lead.created",

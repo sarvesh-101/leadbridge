@@ -7,11 +7,9 @@
  * 3. Sends a WhatsApp notification if a strong match is found (score >= 70)
  */
 
-import { PrismaClient } from "@prisma/client";
 import { suggestPropertiesForLead } from "./property-suggestion.service";
 import { enqueueNotification } from "../workers/queues";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * Trigger property matching for a newly created lead.

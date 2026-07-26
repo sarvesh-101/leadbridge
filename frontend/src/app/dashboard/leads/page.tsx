@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Download } from "lucide-react";
 import { LeadTable } from "../../../components/leads/LeadTable";
@@ -11,18 +12,24 @@ import { useLeadStatusUpdates } from "../../../lib/websocket";
 import type { Lead, LeadFilterState, LeadStatus } from "../../../types";
 import { useAuthStore } from "../../../stores/auth.store";
 import { exportToCSV, EXPORT_HEADERS } from "../../../lib/csv-export";
+import { BulkActionBar } from "../../../components/leads/BulkActionBar";
 
 export default function LeadsPage() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") || "";
+
   const [leads, setLeads] = useState<Lead[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<LeadFilterState>({
-    search: "", status: [], source: [], dateFrom: "", dateTo: "",
+    search: urlSearch, status: [], source: [], dateFrom: "", dateTo: "",
   });
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const PAGE_SIZE = 20;
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectionKey, setSelectionKey] = useState(0);
+  const PAGE_SIZE = 50;
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
@@ -95,7 +102,15 @@ export default function LeadsPage() {
         }}
       />
 
+      {/* Bulk Action Bar */}
+      <BulkActionBar
+        selectedIds={selectedIds}
+        onClear={() => { setSelectedIds([]); setSelectionKey(k => k + 1); }}
+        onComplete={() => { loadLeads(); setSelectedIds([]); setSelectionKey(k => k + 1); }}
+      />
+
       <LeadTable
+        key={selectionKey}
         leads={leads}
         total={total}
         page={page}
@@ -106,6 +121,7 @@ export default function LeadsPage() {
           setPanelOpen(true);
         }}
         loading={loading}
+        onSelectionChange={setSelectedIds}
       />
 
       <LeadDetailPanel

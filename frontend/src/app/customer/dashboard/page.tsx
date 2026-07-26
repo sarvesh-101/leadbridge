@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import {
-  Calendar, Clock, MapPin, Home, Phone, Building2, Star,
+  Calendar, Clock, MapPin,
   IndianRupee, Bed, Bath, Maximize, CheckCircle2, XCircle,
-  ArrowLeft, Loader2, RefreshCw, User, Zap, MessageSquare,
+  Loader2, RefreshCw, Zap, MessageSquare,
   ChevronDown, ChevronUp, FileText, History,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,25 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   CANCELLED: { label: "Cancelled", color: "text-gray-400 border-gray-500/20 bg-gray-500/10", icon: XCircle },
 };
 
+function BookingCardSkeleton() {
+  return (
+    <div className="p-5 rounded-2xl bg-white/5 border border-white/10 animate-pulse">
+      <div className="flex justify-between mb-4">
+        <div className="space-y-1">
+          <div className="h-4 w-20 bg-white/10 rounded" />
+          <div className="h-3 w-32 bg-white/5 rounded" />
+        </div>
+        <div className="h-6 w-24 bg-white/10 rounded-full" />
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="p-3 rounded-xl bg-white/5"><div className="h-4 w-24 bg-white/10 rounded mb-2" /><div className="h-3 w-16 bg-white/5 rounded" /></div>
+        <div className="p-3 rounded-xl bg-white/5"><div className="h-4 w-20 bg-white/10 rounded mb-2" /><div className="h-3 w-16 bg-white/5 rounded" /></div>
+      </div>
+      <div className="p-3 rounded-xl bg-white/5"><div className="h-3 w-full bg-white/5 rounded" /></div>
+    </div>
+  );
+}
+
 export default function CustomerDashboardPage() {
   const router = useRouter();
   const [customer, setCustomer] = useState<CustomerInfo | null>(null);
@@ -81,6 +101,7 @@ export default function CustomerDashboardPage() {
   const [newTime, setNewTime] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const [showAllProperties, setShowAllProperties] = useState(false);
 
   useEffect(() => {
@@ -115,13 +136,11 @@ export default function CustomerDashboardPage() {
       setCustomer(data.customer);
       setBooking(data.booking);
 
-      // Cache in session
       sessionStorage.setItem("customer_data", JSON.stringify(data.customer));
       if (data.booking) {
         sessionStorage.setItem("customer_booking", JSON.stringify(data.booking));
       }
 
-      // Load available properties
       const propRes = await fetch(`${API_BASE}/customer/properties`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -139,31 +158,37 @@ export default function CustomerDashboardPage() {
   async function handleReschedule() {
     if (!newDate || !newTime) return toast.error("Select a new date and time");
     setActionLoading(true);
-
     try {
       const token = sessionStorage.getItem("customer_token");
       const res = await fetch(`${API_BASE}/customer/bookings/${booking!.id}/reschedule`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ visitDate: newDate, visitTime: newTime }),
       });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to reschedule");
-      }
-
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed to reschedule"); }
       toast.success("Visit rescheduled successfully!");
       setShowReschedule(false);
       await loadProfile();
     } catch (err: any) {
       toast.error(err.message || "Failed to reschedule");
-    } finally {
-      setActionLoading(false);
-    }
+    } finally { setActionLoading(false); }
+  }
+
+  async function handleConfirm() {
+    if (!booking) return;
+    setConfirmLoading(true);
+    try {
+      const token = sessionStorage.getItem("customer_token");
+      const res = await fetch(`${API_BASE}/customer/bookings/${booking.id}/confirm`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed to confirm"); }
+      toast.success("Visit confirmed! We look forward to seeing you.");
+      await loadProfile();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to confirm");
+    } finally { setConfirmLoading(false); }
   }
 
   async function handleCancel() {
@@ -172,26 +197,16 @@ export default function CustomerDashboardPage() {
       const token = sessionStorage.getItem("customer_token");
       const res = await fetch(`${API_BASE}/customer/bookings/${booking!.id}/cancel`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reason: cancelReason || undefined }),
       });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to cancel");
-      }
-
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed to cancel"); }
       toast.success("Visit cancelled");
       setShowCancel(false);
       await loadProfile();
     } catch (err: any) {
       toast.error(err.message || "Failed to cancel");
-    } finally {
-      setActionLoading(false);
-    }
+    } finally { setActionLoading(false); }
   }
 
   function getBookingStatus() {
@@ -206,8 +221,17 @@ export default function CustomerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#4F6EF7] animate-spin" />
+      <div className="min-h-screen bg-[#0A0A0F]">
+        <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+          <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-white/10 animate-pulse" />
+            <div className="w-24 h-4 bg-white/10 rounded animate-pulse" />
+          </div>
+        </header>
+        <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+          <BookingCardSkeleton />
+          <BookingCardSkeleton />
+        </main>
       </div>
     );
   }
@@ -242,7 +266,7 @@ export default function CustomerDashboardPage() {
             <span className="text-sm font-semibold text-white">LeadBridge</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={loadProfile} className="p-2 rounded-lg hover:bg-white/5 text-gray-400">
+            <button onClick={loadProfile} className="p-2 rounded-lg hover:bg-white/5 text-gray-400" title="Refresh">
               <RefreshCw className="w-4 h-4" />
             </button>
             <button onClick={() => { sessionStorage.clear(); router.push("/customer/login"); }}
@@ -255,48 +279,67 @@ export default function CustomerDashboardPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-        {/* Welcome */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#111118] border border-white/10"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F6EF7] to-[#6B8AFF] flex items-center justify-center">
-              <span className="text-white text-sm font-bold">{customer.name[0]}</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">Namaste, {customer.name}! 👋</h1>
-              <p className="text-xs text-gray-500">{customer.clientName} — {customer.clientCity}</p>
-            </div>
+        {/* ── Welcome Card ──────────────────────────────────── */}
+        <ErrorBoundary fallback={
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#111118] border border-white/10 text-center">
+            <p className="text-sm text-gray-400">Welcome back! Please refresh the page.</p>
           </div>
-          {customer.clientContact && (
-            <a href={`https://wa.me/${customer.clientContact.replace(/\D/g, "")}`} target="_blank"
-              className="inline-flex items-center gap-1.5 text-xs text-green-400 hover:underline"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              Contact broker on WhatsApp
-            </a>
-          )}
+        }>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="p-5 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#111118] border border-white/10"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F6EF7] to-[#6B8AFF] flex items-center justify-center">
+                <span className="text-white text-sm font-bold">{customer.name[0]}</span>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">Namaste, {customer.name}! 👋</h1>
+                <p className="text-xs text-gray-500">{customer.clientName} — {customer.clientCity}</p>
+              </div>
+            </div>
+            {customer.clientContact && (
+              <a href={`https://wa.me/${customer.clientContact.replace(/\D/g, "")}`} target="_blank"
+                className="inline-flex items-center gap-1.5 text-xs text-green-400 hover:underline"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                Contact broker on WhatsApp
+              </a>
+            )}
 
-          {/* Quick Actions Navigation */}
-          <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
-            <Link href="/customer/bookings"
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-xs hover:bg-white/10 transition-all"
-            >
-              <History className="w-3.5 h-3.5" />
-              Booking History
-            </Link>
-            <Link href="/customer/documents"
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-xs hover:bg-white/10 transition-all"
-            >
-              <FileText className="w-3.5 h-3.5" />
-              Upload Documents
-            </Link>
-          </div>
-        </motion.div>
+            <div className="flex gap-2 mt-4 pt-4 border-t border-white/5">
+              <Link href="/customer/chat"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-xs hover:bg-white/10 transition-all"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                WhatsApp Chat
+              </Link>
+              <Link href="/customer/bookings"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-xs hover:bg-white/10 transition-all"
+              >
+                <History className="w-3.5 h-3.5" />
+                Bookings
+              </Link>
+              <Link href="/customer/documents"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-xs hover:bg-white/10 transition-all"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Documents
+              </Link>
+            </div>
+          </motion.div>
+        </ErrorBoundary>
 
+        {/* ── Booking ───────────────────────────────────────── */}
         {booking ? (
-          <>
-            {/* Booking Status Card */}
+          <ErrorBoundary fallback={
+            <div className="p-5 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
+              <AlertCircleIcon />
+              <p className="text-sm text-red-400">Failed to load booking details.</p>
+              <button onClick={loadProfile} className="mt-3 text-xs text-[#4F6EF7] hover:underline">
+                Try Again
+              </button>
+            </div>
+          }>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
               className="p-5 rounded-2xl bg-white/5 border border-white/10"
             >
@@ -313,7 +356,6 @@ export default function CustomerDashboardPage() {
                 )}
               </div>
 
-              {/* Date & Time */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="p-3 rounded-xl bg-white/5 border border-white/5">
                   <Calendar className="w-4 h-4 text-[#4F6EF7] mb-1" />
@@ -327,7 +369,6 @@ export default function CustomerDashboardPage() {
                 </div>
               </div>
 
-              {/* Location */}
               <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
                 <MapPin className="w-4 h-4 text-red-400 mt-0.5" />
                 <div>
@@ -338,30 +379,31 @@ export default function CustomerDashboardPage() {
                 </div>
               </div>
 
-              {/* Notes */}
-              {booking.notes && (
-                <p className="text-xs text-gray-500 mt-3">{booking.notes}</p>
-              )}
+              {booking.notes && <p className="text-xs text-gray-500 mt-3">{booking.notes}</p>}
 
-              {/* Actions */}
               {!["VISITED", "CANCELLED", "NO_SHOW"].includes(booking.status) && (
                 <div className="flex gap-3 mt-4 pt-4 border-t border-white/10">
+                  {booking.status === "REMINDED" && (
+                    <button onClick={handleConfirm} disabled={confirmLoading}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-all disabled:opacity-50"
+                    >
+                      {confirmLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                      Confirm Visit
+                    </button>
+                  )}
                   <button onClick={() => { setNewDate(""); setNewTime(""); setShowReschedule(!showReschedule); setShowCancel(false); }}
                     className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-xs hover:bg-white/5 transition-all"
                   >
-                    <Calendar className="w-3.5 h-3.5" />
-                    Reschedule
+                    <Calendar className="w-3.5 h-3.5" /> Reschedule
                   </button>
                   <button onClick={() => { setCancelReason(""); setShowCancel(!showCancel); setShowReschedule(false); }}
                     className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-500/20 text-red-400 text-xs hover:bg-red-500/5 transition-all"
                   >
-                    <XCircle className="w-3.5 h-3.5" />
-                    Cancel Visit
+                    <XCircle className="w-3.5 h-3.5" /> Cancel Visit
                   </button>
                 </div>
               )}
 
-              {/* Reschedule Form */}
               {showReschedule && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
                   className="mt-4 pt-4 border-t border-white/10 space-y-3"
@@ -390,25 +432,21 @@ export default function CustomerDashboardPage() {
                 </motion.div>
               )}
 
-              {/* Cancel Form */}
               {showCancel && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
                   className="mt-4 pt-4 border-t border-white/10 space-y-3"
                 >
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Reason (optional)</label>
-                    <select value={cancelReason} onChange={(e) => setCancelReason(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none"
-                    >
-                      <option value="">Select a reason...</option>
-                      <option value="Not interested anymore">Not interested anymore</option>
-                      <option value="Found another property">Found another property</option>
-                      <option value="Timing doesn't work">Timing doesn&apos;t work</option>
-                      <option value="Too far / location issue">Too far / location issue</option>
-                      <option value="Already purchased">Already purchased</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
+                  <select value={cancelReason} onChange={(e) => setCancelReason(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none"
+                  >
+                    <option value="">Select a reason...</option>
+                    <option value="Not interested anymore">Not interested anymore</option>
+                    <option value="Found another property">Found another property</option>
+                    <option value="Timing doesn't work">Timing doesn&apos;t work</option>
+                    <option value="Too far / location issue">Too far / location issue</option>
+                    <option value="Already purchased">Already purchased</option>
+                    <option value="Other">Other</option>
+                  </select>
                   <button onClick={handleCancel} disabled={actionLoading}
                     className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500 text-white text-xs font-medium hover:bg-red-600 transition-all disabled:opacity-40"
                   >
@@ -418,98 +456,8 @@ export default function CustomerDashboardPage() {
                 </motion.div>
               )}
             </motion.div>
-
-            {/* Property Details */}
-            {booking.property && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="p-5 rounded-2xl bg-white/5 border border-white/10"
-              >
-                <h2 className="text-sm font-semibold text-white mb-4">Property Details</h2>
-                <h3 className="text-base font-bold text-white mb-3">{booking.property.name}</h3>
-
-                {booking.property.description && (
-                  <p className="text-sm text-gray-400 mb-4">{booking.property.description}</p>
-                )}
-
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  {booking.property.price && (
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
-                      <IndianRupee className="w-4 h-4 text-green-400 mx-auto mb-1" />
-                      <div className="text-sm font-bold text-white">₹{booking.property.price.toLocaleString("en-IN")}</div>
-                      <div className="text-[10px] text-gray-500">Price</div>
-                    </div>
-                  )}
-                  {booking.property.bedrooms && (
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
-                      <Bed className="w-4 h-4 text-blue-400 mx-auto mb-1" />
-                      <div className="text-sm font-bold text-white">{booking.property.bedrooms}</div>
-                      <div className="text-[10px] text-gray-500">Bedrooms</div>
-                    </div>
-                  )}
-                  {booking.property.bathrooms && (
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
-                      <Bath className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
-                      <div className="text-sm font-bold text-white">{booking.property.bathrooms}</div>
-                      <div className="text-[10px] text-gray-500">Bathrooms</div>
-                    </div>
-                  )}
-                  {booking.property.area && (
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
-                      <Maximize className="w-4 h-4 text-purple-400 mx-auto mb-1" />
-                      <div className="text-sm font-bold text-white">{booking.property.area}</div>
-                      <div className="text-[10px] text-gray-500">{booking.property.areaUnit}</div>
-                    </div>
-                  )}
-                </div>
-
-                {booking.property.amenities && booking.property.amenities.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {booking.property.amenities.slice(0, 6).map((a, i) => (
-                      <span key={i} className="text-[11px] px-2 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/5">
-                        {a}
-                      </span>
-                    ))}
-                    {booking.property.amenities.length > 6 && (
-                      <span className="text-[11px] text-gray-500">+{booking.property.amenities.length - 6} more</span>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* Other Available Properties */}
-            {properties.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                className="p-5 rounded-2xl bg-white/5 border border-white/10"
-              >
-                <button onClick={() => setShowAllProperties(!showAllProperties)}
-                  className="w-full flex items-center justify-between"
-                >
-                  <h2 className="text-sm font-semibold text-white">
-                    More Properties ({properties.length})
-                  </h2>
-                  {showAllProperties ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
-                </button>
-                {showAllProperties && (
-                  <div className="mt-4 space-y-2">
-                    {properties.map((p, i) => (
-                      <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
-                        <div>
-                          <div className="text-sm text-white">{p.name}</div>
-                          {p.price && <div className="text-xs text-gray-500">₹{p.price.toLocaleString("en-IN")}</div>}
-                        </div>
-                        {p.bedrooms && (
-                          <span className="text-xs text-gray-400">{p.bedrooms} BHK</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </>
+          </ErrorBoundary>
         ) : (
-          /* No Booking */
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center"
           >
@@ -522,52 +470,161 @@ export default function CustomerDashboardPage() {
               <a href={`https://wa.me/${customer.clientContact.replace(/\D/g, "")}`} target="_blank"
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/10 text-green-400 text-sm hover:bg-green-500/20 transition-all"
               >
-                <MessageSquare className="w-4 h-4" />
-                Contact {customer.clientName}
+                <MessageSquare className="w-4 h-4" /> Contact {customer.clientName}
               </a>
             )}
           </motion.div>
         )}
 
-        {/* Lead Info Summary */}
-        {booking && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="p-4 rounded-2xl bg-white/5 border border-white/10"
-          >
-            <h2 className="text-xs font-semibold text-white mb-3">Your Details</h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Name</span>
-                <span className="text-white">{customer.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Phone</span>
-                <span className="text-white">{customer.phone}</span>
-              </div>
-              {customer.email && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Email</span>
-                  <span className="text-white">{customer.email}</span>
-                </div>
-              )}
-              {customer.budget && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Budget</span>
-                  <span className="text-white">₹{customer.budget}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-gray-500">Lead Score</span>
-                <span className={cn("font-medium", customer.score >= 70 ? "text-green-400" : customer.score >= 40 ? "text-amber-400" : "text-gray-400")}>
-                  {customer.score}/100
-                </span>
-              </div>
+        {/* ── Property Details ──────────────────────────────── */}
+        {booking?.property && (
+          <ErrorBoundary fallback={
+            <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+              <h2 className="text-sm font-semibold text-white mb-4">Property Details</h2>
+              <p className="text-xs text-gray-500">Unable to load property details at this time.</p>
             </div>
-          </motion.div>
+          }>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="p-5 rounded-2xl bg-white/5 border border-white/10"
+            >
+              <h2 className="text-sm font-semibold text-white mb-4">Property Details</h2>
+              <h3 className="text-base font-bold text-white mb-3">{booking.property.name}</h3>
+              {booking.property.description && (
+                <p className="text-sm text-gray-400 mb-4">{booking.property.description}</p>
+              )}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {booking.property.price && (
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                    <IndianRupee className="w-4 h-4 text-green-400 mx-auto mb-1" />
+                    <div className="text-sm font-bold text-white">₹{booking.property.price.toLocaleString("en-IN")}</div>
+                    <div className="text-[10px] text-gray-500">Price</div>
+                  </div>
+                )}
+                {booking.property.bedrooms && (
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                    <Bed className="w-4 h-4 text-blue-400 mx-auto mb-1" />
+                    <div className="text-sm font-bold text-white">{booking.property.bedrooms}</div>
+                    <div className="text-[10px] text-gray-500">Bedrooms</div>
+                  </div>
+                )}
+                {booking.property.bathrooms && (
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                    <Bath className="w-4 h-4 text-cyan-400 mx-auto mb-1" />
+                    <div className="text-sm font-bold text-white">{booking.property.bathrooms}</div>
+                    <div className="text-[10px] text-gray-500">Bathrooms</div>
+                  </div>
+                )}
+                {booking.property.area && (
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                    <Maximize className="w-4 h-4 text-purple-400 mx-auto mb-1" />
+                    <div className="text-sm font-bold text-white">{booking.property.area}</div>
+                    <div className="text-[10px] text-gray-500">{booking.property.areaUnit}</div>
+                  </div>
+                )}
+              </div>
+              {booking.property.amenities && booking.property.amenities.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {booking.property.amenities.slice(0, 6).map((a, i) => (
+                    <span key={i} className="text-[11px] px-2 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/5">{a}</span>
+                  ))}
+                  {booking.property.amenities.length > 6 && (
+                    <span className="text-[11px] text-gray-500">+{booking.property.amenities.length - 6} more</span>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </ErrorBoundary>
+        )}
+
+        {/* ── More Properties ───────────────────────────────── */}
+        {properties.length > 0 && (
+          <ErrorBoundary fallback={
+            <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+              <h2 className="text-sm font-semibold text-white mb-4">More Properties</h2>
+              <p className="text-xs text-gray-500">Unable to load properties at this time.</p>
+            </div>
+          }>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+              className="p-5 rounded-2xl bg-white/5 border border-white/10"
+            >
+              <button onClick={() => setShowAllProperties(!showAllProperties)}
+                className="w-full flex items-center justify-between"
+              >
+                <h2 className="text-sm font-semibold text-white">More Properties ({properties.length})</h2>
+                {showAllProperties ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              {showAllProperties && (
+                <div className="mt-4 space-y-2">
+                  {properties.map((p, i) => (
+                    <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-white">{p.name}</div>
+                        {p.price && <div className="text-xs text-gray-500">₹{p.price.toLocaleString("en-IN")}</div>}
+                      </div>
+                      {p.bedrooms && <span className="text-xs text-gray-400">{p.bedrooms} BHK</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </ErrorBoundary>
+        )}
+
+        {/* ── Lead Info Summary ─────────────────────────────── */}
+        {booking && (
+          <ErrorBoundary fallback={
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+              <h2 className="text-xs font-semibold text-white mb-3">Your Details</h2>
+              <p className="text-xs text-gray-500">Unable to load details.</p>
+            </div>
+          }>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="p-4 rounded-2xl bg-white/5 border border-white/10"
+            >
+              <h2 className="text-xs font-semibold text-white mb-3">Your Details</h2>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Name</span>
+                  <span className="text-white">{customer.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Phone</span>
+                  <span className="text-white">{customer.phone}</span>
+                </div>
+                {customer.email && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Email</span>
+                    <span className="text-white">{customer.email}</span>
+                  </div>
+                )}
+                {customer.budget && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Budget</span>
+                    <span className="text-white">₹{customer.budget}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Lead Score</span>
+                  <span className={cn("font-medium", customer.score >= 70 ? "text-green-400" : customer.score >= 40 ? "text-amber-400" : "text-gray-400")}>
+                    {customer.score}/100
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </ErrorBoundary>
         )}
       </main>
     </div>
   );
 }
 
-
+/** Small inline icon for fallback states — avoids requiring AlertCircle import at top level */
+function AlertCircleIcon() {
+  return (
+    <svg className="w-8 h-8 text-red-400 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  );
+}

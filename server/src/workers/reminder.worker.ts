@@ -1,10 +1,9 @@
 import { Worker } from "bullmq";
-import { PrismaClient, LeadStatus } from "@prisma/client";
+import { LeadStatus } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { ReminderJob, enqueueCall, enqueueNotification } from "./queues";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * REMINDER Worker — fires at 9:00 AM on the booking day.
@@ -95,13 +94,11 @@ reminderWorker.on("failed", (job, error) => {
 // Graceful shutdown
 process.on("SIGTERM", async () => {
   await reminderWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
   await reminderWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 

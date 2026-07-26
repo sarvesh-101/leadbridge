@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Pagination } from "@/components/shared/Pagination";
+import ImageUploader from "@/components/properties/ImageUploader";
 import type { Property, PropertyStatus } from "@/types";
 
 const PROPERTY_STATUS_COLORS: Record<PropertyStatus, string> = {
@@ -54,6 +55,7 @@ export default function PropertiesPage() {
     amenities: "",
     tags: "",
     featured: false,
+    images: [] as string[],
   });
 
   // Delete confirmation
@@ -89,7 +91,7 @@ export default function PropertiesPage() {
     setFormData({
       name: "", description: "", price: "", bedrooms: "", bathrooms: "",
       area: "", location: "", city: "", zone: "", status: "AVAILABLE",
-      amenities: "", tags: "", featured: false,
+      amenities: "", tags: "", featured: false, images: [],
     });
     setShowModal(true);
   }
@@ -110,6 +112,7 @@ export default function PropertiesPage() {
       amenities: (property.amenities || []).join(", "),
       tags: (property.tags || []).join(", "),
       featured: property.featured,
+      images: property.images || [],
     });
     setShowModal(true);
   }
@@ -133,6 +136,7 @@ export default function PropertiesPage() {
         featured: formData.featured,
         amenities: formData.amenities ? formData.amenities.split(",").map((s) => s.trim()).filter(Boolean) : [],
         tags: formData.tags ? formData.tags.split(",").map((s) => s.trim()).filter(Boolean) : [],
+        images: formData.images,
       };
 
       if (editingProperty) {
@@ -513,6 +517,14 @@ export default function PropertiesPage() {
                   <input value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                     placeholder="e.g., Corner Unit, New Construction, Furnished"
                     className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                  />
+                </div>
+
+                {/* Images */}
+                <div className="pt-2">
+                  <ImageUploader
+                    images={formData.images}
+                    onChange={(imgs) => setFormData({ ...formData, images: imgs })}
                   />
                 </div>
 

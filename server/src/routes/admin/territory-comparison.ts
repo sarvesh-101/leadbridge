@@ -4,9 +4,7 @@
  */
 
 import { FastifyInstance, FastifyRequest } from "fastify";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../../utils/prisma-shared";
 
 export default async function territoryComparisonRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticateAdmin);

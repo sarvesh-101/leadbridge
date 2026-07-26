@@ -42,16 +42,56 @@ export default async function adminDashboardRoutes(fastify: FastifyInstance) {
 
     const totalMRR = activeClientsWithPlans.reduce((sum, c) => sum + (planPrices[c.plan] || 0), 0);
 
+    // Financial KPIs
+    const [
+      totalCostIncurred,
+      totalRevenueGenerated,
+      totalDeferredRevenue,
+      totalRecognizedRevenue,
+      brokerCosts,
+      pastDueClients,
+    ] = await Promise.all([
+      fastify.prisma.client.aggregate({ _sum: { totalCostIncurred: true } }),
+      fastify.prisma.client.aggregate({ _sum: { totalRevenueGenerated: true } }),
+      fastify.prisma.accountingEntry.aggregate({
+        _sum: { deferredAmount: true },
+        where: { status: "DEFERRED" },
+      }),
+      fastify.prisma.accountingEntry.aggregate({
+        _sum: { recognizedAmount: true },
+        where: { status: { in: ["RECOGNIZED", "DEFERRED"] } },
+      }),
+      fastify.prisma.client.aggregate({
+        _sum: { totalCostIncurred: true },
+        where: { planStatus: "ACTIVE" },
+      }),
+      fastify.prisma.client.count({ where: { planStatus: "PAST_DUE" } }),
+    ]);
+
+    const costs = totalCostIncurred._sum.totalCostIncurred || 0;
+    const revenue = totalRevenueGenerated._sum.totalRevenueGenerated || 0;
+    const profit = revenue - costs;
+    const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
+
     return {
       totalMRR,
       totalClients,
       activeClients,
+      pastDueClients,
       totalLeads,
       callsToday,
       callsThisMonth,
       totalBookings,
       territoriesTotal,
       territoriesAvailable,
+      finance: {
+        totalCost: Math.round(costs * 100) / 100,
+        totalRevenue: Math.round(revenue * 100) / 100,
+        profit: Math.round(profit * 100) / 100,
+        profitMargin: margin,
+        deferredRevenue: Math.round((totalDeferredRevenue._sum.deferredAmount || 0) * 100) / 100,
+        recognizedRevenue: Math.round((totalRecognizedRevenue._sum.recognizedAmount || 0) * 100) / 100,
+      },
       systemHealth: {
         postgres: "connected",
         redis: "connected",

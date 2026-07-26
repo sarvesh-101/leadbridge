@@ -31,7 +31,13 @@ export default function LoginPage() {
     try {
       const res = await api.post("/auth/google", { credential: response.credential }, { skipAuth: true });
       login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
-      router.push("/dashboard");
+
+      // Admin users go to admin dashboard, brokers go to main dashboard
+      if (res.user?.role === "admin") {
+        router.push("/dashboard/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Google Sign-In failed");
     } finally {
@@ -44,7 +50,9 @@ export default function LoginPage() {
     if (!GOOGLE_CLIENT_ID || !googleBtnRef.current) return;
 
     // Load Google Identity Services library if not already loaded
-    if ((window as any).google?.accounts) {
+    // Google Identity Services type augmentation
+    const google = (window as Window & typeof globalThis & { google?: { accounts?: { id: { initialize: Function; renderButton: Function; prompt: Function } } } }).google;
+    if (google?.accounts) {
       renderGoogleButton();
       return;
     }
@@ -58,11 +66,11 @@ export default function LoginPage() {
 
     function renderGoogleButton() {
       if (!googleBtnRef.current) return;
-      (window as any).google.accounts.id.initialize({
+      google!.accounts!.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCredential,
       });
-      (window as any).google.accounts.id.renderButton(googleBtnRef.current, {
+      google!.accounts!.id.renderButton(googleBtnRef.current, {
         theme: "outline",
         size: "large",
         width: googleBtnRef.current.offsetWidth || 360,
@@ -81,7 +89,13 @@ export default function LoginPage() {
       const endpoint = role === "admin" ? "/auth/admin/login" : "/auth/login";
       const res = await api.post(endpoint, { email, password }, { skipAuth: true });
       login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
-      router.push("/dashboard");
+
+      // Admin users go to admin dashboard, brokers go to main dashboard
+      if (res.user?.role === "admin") {
+        router.push("/dashboard/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
     } finally {

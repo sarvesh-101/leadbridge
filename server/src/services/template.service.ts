@@ -2,10 +2,8 @@
  * Template Service — CRUD for reusable campaign templates.
  * Stores templates as JSON in the EmailCampaign table (type = "TEMPLATE").
  */
-import { PrismaClient } from "@prisma/client";
 import { logger } from "../utils/logger";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 export async function listTemplates(clientId: string) {
   const campaigns = await prisma.emailCampaign.findMany({

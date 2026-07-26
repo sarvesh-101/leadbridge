@@ -215,6 +215,22 @@ export default function SetupPage() {
   const handleFinish = async () => {
     setLoading("finish");
     try {
+      // Auto-create agent if broker skipped Step 2 (avoid state changes — just call API directly)
+      if (!agentId && agentName) {
+        try {
+          const res = await api.post<{ agent: any }>("/voice/agents", {
+            name: agentName,
+            language: agentLanguage,
+            systemPrompt: knowledgeBase
+              ? `You are an AI real estate assistant for ${agentName}. ${knowledgeBase}`
+              : undefined,
+          });
+          setAgentId(res.agent.id);
+        } catch {
+          // Non-blocking — agent creation failure shouldn't block setup completion
+        }
+      }
+
       // Mark completion
       await api.patch("/me", {
         phoneSetupStatus: "LIVE",
@@ -487,11 +503,11 @@ export default function SetupPage() {
                 <Globe className="w-12 h-12 text-[#3A3A52] mx-auto" />
                 <div>
                   <p className="text-sm text-white font-medium">No phone numbers available</p>
-                  <p className="text-xs text-[#6B6B8A] mt-1">Purchase a number from the Omnidimension dashboard, then refresh here.</p>
+                  <p className="text-xs text-[#6B6B8A] mt-1">Purchase a number from your provider dashboard, then refresh here.</p>
                 </div>
                 <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10">
-                  Open Omnidimension Dashboard <ExternalLink className="w-3.5 h-3.5" />
+                  Open Provider Dashboard <ExternalLink className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (

@@ -11,14 +11,12 @@
  */
 
 import { Worker } from "bullmq";
-import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { sendEmail } from "../services/email.service";
 import { checkABTestWinner } from "../services/email-campaign.service";
 import { CampaignEmailJob, CampaignWinnerCheckJob, closeAllQueues } from "./queues";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /** 1x1 transparent GIF pixel (base64) */
 const TRACKING_PIXEL_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
@@ -192,7 +190,7 @@ async function shutdown() {
   await campaignWorker.close();
   await winnerCheckWorker.close();
   await closeAllQueues();
-  await prisma.$disconnect();
+  // Prisma disconnects globally in index.ts via prisma-shared
   process.exit(0);
 }
 

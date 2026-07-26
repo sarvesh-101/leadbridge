@@ -52,8 +52,9 @@ export async function listAgents(): Promise<OmnidimAgent[]> {
       throw new Error(`Omnidimension API error ${response.status}: ${await response.text()}`);
     }
 
-    const data = await response.json() as { agents?: OmnidimAgent[] };
-    return data.agents || [];
+    const data = await response.json() as { agents?: OmnidimAgent[]; bots?: OmnidimAgent[] };
+    // Omnidimension API returns { bots: [...] } not { agents: [...] }
+    return data.bots || data.agents || [];
   } catch (error: any) {
     logger.error({ err: error.message }, "Failed to list Omnidimension agents");
     throw new Error(`Failed to list agents: ${error.message}`);
@@ -72,10 +73,10 @@ export async function createAgent(params: CreateAgentParams): Promise<OmnidimAge
   if (params.welcomeMessage) body.welcome_message = params.welcomeMessage;
   if (params.language) body.languages = [params.language, "English"];
 
-  // Voice configuration
+  // Voice configuration — default to Rachel (ElevenLabs) if no voiceId provided
   body.voice = {
     provider: params.voiceProvider || "eleven_labs",
-    voice_id: params.voiceId || "",
+    voice_id: params.voiceId || config.DEFAULT_ELEVENLABS_VOICE_ID,
     speech_speed: 1.0,
   };
 

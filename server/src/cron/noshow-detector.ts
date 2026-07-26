@@ -1,10 +1,8 @@
-import { PrismaClient } from "@prisma/client";
 import { enqueueNotification, enqueueFollowup } from "../workers/queues";
 import { emitStatusChange } from "../services/websocket.service";
 import { getOptimalFollowupTiming } from "../services/smart-scheduler.service";
 import { config } from "../config";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 export async function detectNoShows(): Promise<{ processed: number }> {
   const now = new Date();

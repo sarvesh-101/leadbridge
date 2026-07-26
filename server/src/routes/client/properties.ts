@@ -1,10 +1,16 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import path from "path";
+import fs from "fs";
+import { saveFile, deleteFilesByUrls } from "../../utils/local-storage";
 
 const PROPERTY_UPDATABLE_FIELDS = [
   "name", "description", "price", "currency", "bedrooms", "bathrooms",
   "area", "areaUnit", "location", "city", "zone", "status", "featured",
   "images", "amenities", "tags",
 ];
+
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default async function clientPropertyRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -111,7 +117,7 @@ export default async function clientPropertyRoutes(fastify: FastifyInstance) {
         location: (body.location as string) || null,
         city: (body.city as string) || null,
         zone: (body.zone as string) || null,
-        status: (body.status as any) || "AVAILABLE",
+        status: (body.status as "AVAILABLE" | "BOOKED" | "SOLD" | "OFF_MARKET") || "AVAILABLE",
         featured: (body.featured as boolean) ?? false,
         images: (body.images as string[]) ?? [],
         amenities: (body.amenities as string[]) ?? [],
@@ -153,7 +159,7 @@ export default async function clientPropertyRoutes(fastify: FastifyInstance) {
 
     const updated = await fastify.prisma.property.update({
       where: { id: property.id },
-      data: data as any,
+      data: data as Record<string, unknown>,
     });
 
     // Auto-sync knowledge base in background
@@ -208,6 +214,88 @@ export default async function clientPropertyRoutes(fastify: FastifyInstance) {
     });
 
     return { property: updated };
+  });
+
+  // ─── Upload Property Image ─────────────────────────────────────
+  fastify.post("/properties/upload", {
+    config: {
+      rateLimit: { max: 20, timeWindow: "1 minute" },
+    },
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    const data = await request.file();
+
+    if (!data) {
+      return reply.status(400).send({ error: "No file uploaded" });
+    }
+
+    // Validate file type
+    if (!ALLOWED_IMAGE_TYPES.includes(data.mimetype)) {
+      return reply.status(400).send({
+        error: `Unsupported file type: ${data.mimetype}. Allowed: JPEG, PNG, WebP, GIF, AVIF`,
+      });
+    }
+
+    // Read file buffer
+    const buffer = await data.toBuffer();
+    if (buffer.length > MAX_IMAGE_SIZE) {
+      return reply.status(400).send({ error: "File too large. Maximum 5MB." });
+    }
+
+    // Save to local storage
+    const urlPath = await saveFile(buffer, data.filename);
+
+    if (!urlPath) {
+      return reply.status(500).send({ error: "Failed to save file" });
+    }
+
+    return reply.status(201).send({
+      url: urlPath,
+      filename: data.filename,
+    });
+  });
+
+  // ─── Delete Property Images ────────────────────────────────────
+  fastify.post("/properties/images/delete", async (request: FastifyRequest<{
+    Body: { urls: string[] };
+  }>, reply: FastifyReply) => {
+    const { urls } = request.body;
+
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return reply.status(400).send({ error: "No image URLs provided" });
+    }
+
+    await deleteFilesByUrls(urls);
+    return { success: true, deleted: urls.length };
+  });
+
+  // ─── Serve Uploaded Images ─────────────────────────────────────
+  fastify.get("/uploads/properties/:filename", async (request: FastifyRequest<{
+    Params: { filename: string };
+  }>, reply: FastifyReply) => {
+    const uploadsDir = path.resolve(__dirname, "../../../uploads/properties");
+    const filePath = path.join(uploadsDir, request.params.filename);
+
+    // Security: prevent directory traversal
+    if (!filePath.startsWith(uploadsDir)) {
+      return reply.status(403).send({ error: "Forbidden" });
+    }
+
+    try {
+      const stream = fs.createReadStream(filePath);
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes: Record<string, string> = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".gif": "image/gif",
+        ".avif": "image/avif",
+      };
+      reply.type(mimeTypes[ext] || "application/octet-stream");
+      return reply.send(stream);
+    } catch {
+      return reply.status(404).send({ error: "File not found" });
+    }
   });
 
   // ─── Manually Sync Knowledge Base ──────────────────────────────

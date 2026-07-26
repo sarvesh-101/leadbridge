@@ -8,6 +8,9 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   FRONTEND_URL: z.string().default("http://localhost:3001"),
 
+  // Demo Mode — run without external APIs for investor demos
+  DEMO_MODE: z.coerce.boolean().default(false),
+
   // JWT
   JWT_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
@@ -22,9 +25,24 @@ const envSchema = z.object({
   // Redis
   REDIS_URL: z.string().default("redis://localhost:6379"),
 
+  // ─── Provider Selection ─────────────────────────────────
+  PHONE_PROVIDER: z.enum(["twilio", "omnidimension"]).default("omnidimension"),
+  VOICE_AI_PROVIDER: z.enum(["omnidimension"]).default("omnidimension"),
+
   // Omnidimension — AI Voice Agent Platform
-  OMNIDIM_API_KEY: z.string(),
+  // Required ONLY when DEMO_MODE=false
+  OMNIDIM_API_KEY: z.string().default(""),
   OMNIDIM_BASE_URL: z.string().default("https://backend.omnidim.io/api/v1"),
+
+  // Default ElevenLabs voice ID for AI agents (Rachel)
+  DEFAULT_ELEVENLABS_VOICE_ID: z.string().default("21m00Tcm4TlvDq8ikWAM"),
+
+  // Twilio — Direct phone number purchasing (alternative to Omnidimension)
+  TWILIO_ACCOUNT_SID: z.string().optional(),
+  TWILIO_AUTH_TOKEN: z.string().optional(),
+  TWILIO_VOICE_URL: z.string().optional(),
+  TWILIO_SMS_URL: z.string().optional(),
+
 
   // LLM Provider (OpenAI-compatible API — works with OpenRouter, DeepSeek, etc.)
   // Used for post-call transcript extraction, WhatsApp chatbot, and script generation.
@@ -33,7 +51,7 @@ const envSchema = z.object({
   DEEPSEEK_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
   DEEPSEEK_MODEL: z.string().default("qwen/qwen3-next-80b-a3b-instruct:free"),
 
-  // WhatsApp Cloud API
+  // WhatsApp Cloud API — optional in demo mode
   WHATSAPP_TOKEN: z.string().optional(),
   WHATSAPP_PHONE_ID: z.string().optional(),
   WHATSAPP_VERIFY_TOKEN: z.string().optional(),
@@ -76,6 +94,26 @@ const envSchema = z.object({
   // Encryption (for credential storage at rest)
   // Optional in development; defaults to JWT_SECRET-based derivation if not set
   ENCRYPTION_KEY: z.string().optional(),
+
+  // ─── Cost Tracking ───────────────────────────────────────
+  // How much does the platform pay per minute for OmniDimension calls
+  OMNIDIM_COST_PER_MINUTE: z.coerce.number().default(4.6),  // ₹4.6/min (Growth plan pricing)
+  // Phone number monthly rental cost
+  PHONE_NUMBER_MONTHLY_COST: z.coerce.number().default(200), // ₹200/month
+  // Platform credit low balance warning threshold (percentage of minutes remaining)
+  CREDIT_WARN_THRESHOLD_PERCENT: z.coerce.number().default(20),
+  // Average duration per call for cost estimation
+  AVG_CALL_DURATION_MINUTES: z.coerce.number().default(2),   // 2 minutes avg
+
+  // Broker credit conversion: how many calls per rupee for offline payments
+  BROKER_CALL_PRICE: z.coerce.number().default(116),  // ~₹116/call = ₹35K/300 calls
+
+  // ─── SMS & Email Forwarding ─────────────────────────────
+  // The Twilio number that brokers forward portal SMS to
+  FORWARDING_SMS_NUMBER: z.string().optional(),
+  // The email address that brokers forward portal emails to
+  FORWARDING_EMAIL: z.string().optional(),
+
 });
 
 const parsed = envSchema.safeParse(process.env);

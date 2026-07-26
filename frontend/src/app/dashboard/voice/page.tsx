@@ -668,7 +668,7 @@ export default function VoiceAIPage() {
                   <RadioTower className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-blue-300">Webhook URL</p>
-                    <p className="text-[11px] text-blue-400/70 mt-1">Configure in Omnidimension Agent Dashboard</p>
+                    <p className="text-[11px] text-blue-400/70 mt-1">Configure in your Voice AI Provider Dashboard</p>
                     <code className="mt-2 block text-[11px] text-blue-200 bg-blue-500/10 px-2.5 py-2 rounded-lg break-all font-mono">
                       {webhookUrl}
                     </code>
@@ -753,13 +753,13 @@ export default function VoiceAIPage() {
                   )}
                 </div>
 
-                {/* Fallback to Omnidimension */}
+                {/* Fallback to provider dashboard */}
                 <div className="mt-4 pt-4 border-t border-[#2A2A3A]">
-                  <p className="text-[11px] text-gray-500 mb-2">Can&apos;t buy here? Get one from the provider directly:</p>
+                  <p className="text-[11px] text-gray-500 mb-2">Can&apos;t buy here? Get one from your provider directly:</p>
                   <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
                     className="flex items-center justify-center gap-1.5 w-full px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-xs hover:bg-white/10"
                   >
-                    Open Omnidimension Dashboard <ExternalLink className="w-3 h-3" />
+                    Open Provider Dashboard <ExternalLink className="w-3 h-3" />
                   </button>
                 </div>
               </div>

@@ -26,10 +26,11 @@ export interface KnowledgeDoc {
 
 /**
  * List all knowledge base documents.
+ * Endpoint: GET /api/v1/knowledge_base/list
  */
 export async function listKnowledgeDocs(): Promise<KnowledgeDoc[]> {
   try {
-    const response = await fetch(`${OMNIDIM_BASE}/knowledge_base`, {
+    const response = await fetch(`${OMNIDIM_BASE}/knowledge_base/list`, {
       headers: { ...headers, "Content-Type": "application/json" },
     });
 
@@ -37,8 +38,9 @@ export async function listKnowledgeDocs(): Promise<KnowledgeDoc[]> {
       throw new Error(`Omnidimension API error ${response.status}: ${await response.text()}`);
     }
 
-    const data = await response.json() as { documents?: KnowledgeDoc[] };
-    return data.documents || [];
+    const data = await response.json() as { files?: KnowledgeDoc[]; documents?: KnowledgeDoc[] };
+    // Omnidimension API returns { files: [...] } not { documents: [...] }
+    return data.files || data.documents || [];
   } catch (error: any) {
     logger.error({ err: error.message }, "Failed to list Knowledge Base docs");
     throw new Error(`Failed to list documents: ${error.message}`);
@@ -47,24 +49,23 @@ export async function listKnowledgeDocs(): Promise<KnowledgeDoc[]> {
 
 /**
  * Upload a PDF document to the Knowledge Base.
- * Must use multipart/form-data for file upload.
+ * Endpoint: POST /api/v1/knowledge_base/create
+ * Expects JSON body with "file" (Base64) and "filename" fields.
  */
 export async function uploadKnowledgeDoc(
   fileBuffer: Buffer,
   fileName: string,
 ): Promise<KnowledgeDoc> {
-  const formData = new FormData();
-  const blob = new Blob([fileBuffer], { type: "application/pdf" });
-  formData.append("file", blob, fileName);
+  const base64Content = fileBuffer.toString("base64");
 
   try {
-    const response = await fetch(`${OMNIDIM_BASE}/knowledge_base`, {
+    const response = await fetch(`${OMNIDIM_BASE}/knowledge_base/create`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.OMNIDIM_API_KEY}`,
-        // Do NOT set Content-Type — fetch will set it with the boundary for FormData
-      },
-      body: formData,
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        file: base64Content,
+        filename: fileName,
+      }),
     });
 
     if (!response.ok) {
@@ -82,14 +83,16 @@ export async function uploadKnowledgeDoc(
 
 /**
  * Attach a knowledge base document to an agent.
+ * Endpoint: POST /api/v1/knowledge_base/attach
  */
 export async function attachKnowledgeDoc(docId: number, agentId: number): Promise<boolean> {
   try {
     const response = await fetch(`${OMNIDIM_BASE}/knowledge_base/attach`, {
       method: "POST",
       headers: { ...headers, "Content-Type": "application/json" },
+      // Omnidimension expects file_ids (array) not document_id
       body: JSON.stringify({
-        document_id: docId,
+        file_ids: [docId],
         agent_id: agentId,
       }),
     });
@@ -108,6 +111,7 @@ export async function attachKnowledgeDoc(docId: number, agentId: number): Promis
 
 /**
  * Detach a knowledge base document from its agent.
+ * Endpoint: POST /api/v1/knowledge_base/detach
  */
 export async function detachKnowledgeDoc(docId: number): Promise<boolean> {
   try {
@@ -131,6 +135,7 @@ export async function detachKnowledgeDoc(docId: number): Promise<boolean> {
 
 /**
  * Delete a knowledge base document.
+ * Endpoint: DELETE /api/v1/knowledge_base/:id
  */
 export async function deleteKnowledgeDoc(docId: number): Promise<boolean> {
   try {

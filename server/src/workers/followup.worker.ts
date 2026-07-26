@@ -1,13 +1,12 @@
 import { Worker } from "bullmq";
-import { PrismaClient, LeadStatus } from "@prisma/client";
+import { LeadStatus } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { FollowupJob, enqueueCall, enqueueNotification, enqueueFollowup } from "./queues";
 import { isInFollowup } from "../utils/lifecycle";
 import { emitStatusChange } from "../services/websocket.service";
 import { getOptimalFollowupTiming } from "../services/smart-scheduler.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 const followupWorker = new Worker<FollowupJob>(
   "followup",
@@ -119,13 +118,11 @@ followupWorker.on("failed", (job, error) => {
 // Graceful shutdown
 process.on("SIGTERM", async () => {
   await followupWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 
 process.on("SIGINT", async () => {
   await followupWorker.close();
-  await prisma.$disconnect();
   process.exit(0);
 });
 

@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
 import multipart from "@fastify/multipart";
+import formbodyPlugin from "@fastify/formbody";
 import bcrypt from "bcryptjs";
 import { config } from "./config";
 import { logger } from "./utils/logger";
@@ -55,8 +56,12 @@ import propertySuggestionRoutes from "./routes/client/property-suggestions";
 import referralRoutes from "./routes/client/referrals";
 import apiKeyRoutes from "./routes/client/api-keys";
 import calendarSyncRoutes from "./routes/client/calendar-sync";
+import customerActivityRoutes from "./routes/client/customer-activity";
 import territoryComparisonRoutes from "./routes/admin/territory-comparison";
 import ingestWebhookRoutes from "./routes/webhooks/ingest";
+import smsForwardingRoutes from "./routes/webhooks/sms-forwarding";
+import emailForwardingRoutes from "./routes/webhooks/email-forwarding";
+import forwardingTestRoutes from "./routes/webhooks/forwarding-test";
 
 import omnidimensionWebhookRoutes from "./routes/webhooks/omnidimension";
 import razorpayWebhookRoutes from "./routes/webhooks/razorpay";
@@ -67,10 +72,34 @@ import adminQueueRoutes from "./routes/admin/queues";
 import adminWebhookRoutes from "./routes/admin/webhooks";
 import customerRoutes from "./routes/customer";
 import metricsRoutes from "./routes/metrics";
+import demoRoutes from "./routes/demo";
+// ─── Cron Jobs ────────────────────────────────────────────────
 import { registerCronJobs } from "./cron/scheduler";
+
+// ─── Queue utilities ───────────────────────────────────────────
 import { isRedisAvailable } from "./workers/queues";
+
+// ─── BullMQ Workers ────────────────────────────────────────────
+// Import workers so they start processing their queues immediately.
+// Named imports are used so gracefulShutdown can close() them directly.
+// DO NOT import the campaign worker here — it runs as a separate Docker container.
+import callWorker from "./workers/call.worker";
+import notificationWorker from "./workers/notification.worker";
+import extractionWorker from "./workers/extraction.worker";
+import followupWorker from "./workers/followup.worker";
+import reminderWorker from "./workers/reminder.worker";
+import webhookRetryWorker from "./workers/webhook-retry.worker";
+
 import { getCircuitState } from "./utils/circuit-breaker";
+import { disconnectPrisma } from "./utils/prisma-shared";
 import trackingRoutes from "./routes/tracking";
+import adminCreditRoutes from "./routes/admin/credits";
+import adminRevenueRoutes from "./routes/admin/revenue-recognition";
+import adminPaymentRoutes from "./routes/admin/payments";
+import adminWhatsAppRoutes from "./routes/admin/whatsapp-config";
+
+// Module-level server reference for graceful shutdown
+let __server: Awaited<ReturnType<typeof buildServer>> | null = null;
 
 export async function buildServer() {
   const server = Fastify({
@@ -85,7 +114,8 @@ export async function buildServer() {
   server.addHook("onRequest", async (request, reply) => {
     const requestId = generateRequestId();
     reply.header("X-Request-Id", requestId);
-    (request as any).requestId = requestId;
+    // Add request ID to request for tracing
+    (request as unknown as Record<string, unknown>).requestId = requestId;
   });
 
   // ─── Register Plugins ──────────────────────────────────────
@@ -97,6 +127,7 @@ export async function buildServer() {
   });
 
   await server.register(websocket);
+  await server.register(formbodyPlugin);
   await server.register(multipart, { limits: { fileSize: 50 * 1024 * 1024 } }); // 50MB max
   await server.register(rateLimitPlugin);
   await server.register(prismaPlugin);
@@ -116,7 +147,7 @@ export async function buildServer() {
     }
 
     // Check Redis health (from websocket plugin)
-    const wsRedisHealthy = (server as any).wsRedisHealthy !== false;
+    const wsRedisHealthy = (server as unknown as Record<string, unknown>).wsRedisHealthy !== false;
 
     // Check queue health (from queues.ts)
     const queuesHealthy = isRedisAvailable();
@@ -124,8 +155,8 @@ export async function buildServer() {
     // Check WhatsApp config
     const whatsappConfigured = !!(config.WHATSAPP_TOKEN) && !!(config.WHATSAPP_PHONE_ID);
 
-    // Check Omnidimension config
-    const omnidimensionConfigured = !!(config.OMNIDIM_API_KEY);
+    // Check Voice AI config
+    const voiceAIConfigured = !!(config.OMNIDIM_API_KEY);
 
     // Check MessageBird config (SMS fallback)
     const smsConfigured = !!(config.MESSAGEBIRD_API_KEY);
@@ -135,20 +166,26 @@ export async function buildServer() {
       redis: wsRedisHealthy ? ("healthy" as const) : ("degraded" as const),
       queues: queuesHealthy ? ("healthy" as const) : ("unhealthy" as const),
       websocket: {
-        connectedClients: (server as any).getConnectedClients || 0,
+        connectedClients: (server as unknown as Record<string, unknown>).getConnectedClients || 0,
       },
       integrations: {
         whatsapp: whatsappConfigured ? ("configured" as const) : ("not-configured" as const),
-        omnidimension: omnidimensionConfigured ? ("configured" as const) : ("not-configured" as const),
+        voice_ai: voiceAIConfigured ? ("configured" as const) : ("not-configured" as const),
         sms_fallback: smsConfigured ? ("configured" as const) : ("not-configured" as const),
       },
     };
 
-    const overallStatus = Object.values(checks).every((c) =>
-      typeof c === "string" ? c === "healthy" : true
-    )
-      ? "healthy"
-      : "degraded";
+    // CRITICAL: If Redis is unavailable, the system will accept leads but NEVER call them.
+    // The health status MUST reflect this accurately so operators know.
+    const redisDegraded = !wsRedisHealthy || !queuesHealthy;
+
+    const overallStatus = redisDegraded
+      ? "degraded"
+      : Object.values(checks).every((c) =>
+          typeof c === "string" ? c === "healthy" : true
+        )
+        ? "healthy"
+        : "degraded";
 
     return {
       status: overallStatus,
@@ -156,6 +193,12 @@ export async function buildServer() {
       version: "1.0.0",
       timestamp: new Date().toISOString(),
       checks,
+      warnings: redisDegraded
+        ? [
+            "⚠️ REDIS IS UNAVAILABLE — Leads will be ingested but NEVER called. Follow-ups, reminders, and notifications will NOT run.",
+            "   Start Redis with: docker run -p 6379:6379 redis:alpine",
+          ]
+        : [],
     };
   });
 
@@ -188,8 +231,9 @@ export async function buildServer() {
           ["SMTP_PASS", config.SMTP_PASS],
         ]),
       },
-      omnidimension: {
+      voice_ai: {
         configured: !!(config.OMNIDIM_API_KEY),
+        provider: config.VOICE_AI_PROVIDER,
         circuitState: circuitState.state,
         circuitFailureCount: circuitState.failureCount,
         circuitCooldownRemainingMs: circuitState.cooldownRemainingMs,
@@ -197,10 +241,30 @@ export async function buildServer() {
           ["OMNIDIM_API_KEY", config.OMNIDIM_API_KEY],
         ]),
       },
+      phone: {
+        configured: config.PHONE_PROVIDER === "twilio"
+          ? !!(config.TWILIO_ACCOUNT_SID && config.TWILIO_AUTH_TOKEN)
+          : !!(config.OMNIDIM_API_KEY),
+        provider: config.PHONE_PROVIDER,
+        missingVars: buildMissingList(([
+          ["PHONE_PROVIDER", config.PHONE_PROVIDER],
+          ...(config.PHONE_PROVIDER === "twilio"
+            ? [["TWILIO_ACCOUNT_SID", config.TWILIO_ACCOUNT_SID], ["TWILIO_AUTH_TOKEN", config.TWILIO_AUTH_TOKEN]]
+            : [["OMNIDIM_API_KEY", config.OMNIDIM_API_KEY]]
+          ),
+        ] as Array<[string, string | undefined | null]>)),
+      },
+      platform_credits: {
+        configured: true,
+        costPerMinute: config.OMNIDIM_COST_PER_MINUTE,
+        avgCallDurationMinutes: config.AVG_CALL_DURATION_MINUTES,
+        warningThresholdPercent: config.CREDIT_WARN_THRESHOLD_PERCENT,
+      },
+
       razorpay: {
         configured: !!(
           config.RAZORPAY_KEY_ID &&
-          config.RAZORPAY_KEY_SECRET &&
+        config.RAZORPAY_KEY_SECRET &&
           config.RAZORPAY_PLAN_STARTER
         ),
         missingVars: buildMissingList([
@@ -211,10 +275,44 @@ export async function buildServer() {
           ["RAZORPAY_PLAN_PRO", config.RAZORPAY_PLAN_PRO],
         ]),
       },
+      sms_forwarding: {
+        configured: !!(config.FORWARDING_SMS_NUMBER),
+        forwardingNumber: config.FORWARDING_SMS_NUMBER || null,
+        setupGuide: "https://console.twilio.com → Phone Numbers → Active Numbers → Configure SMS webhook",
+        missingVars: buildMissingList([
+          ["FORWARDING_SMS_NUMBER", config.FORWARDING_SMS_NUMBER],
+        ]),
+      },
+      email_forwarding: {
+        configured: false,
+        forwardingEmail: config.FORWARDING_EMAIL || null,
+        setupGuide: "Set up SendGrid Inbound Parse or Mailgun Routes → POST to /api/v1/webhooks/email/incoming",
+        missingVars: buildMissingList([
+          ["FORWARDING_EMAIL", config.FORWARDING_EMAIL],
+        ]),
+      },
       redis: {
         available: isRedisAvailable(),
       },
     };
+
+    // Try to attach live credit data (non-blocking — graceful failure)
+    try {
+      const { checkCreditHealth } = await import("./services/credit-manager.service");
+      const creditHealth = await checkCreditHealth(server.prisma);
+      (integrations as any).platform_credits = {
+        ...(integrations as any).platform_credits,
+        minutesPurchased: creditHealth.minutesPurchased,
+        minutesUsed: creditHealth.minutesUsed,
+        minutesRemaining: creditHealth.minutesRemaining,
+        remainingPercent: creditHealth.remainingPercent,
+        totalCost: creditHealth.totalCost,
+        effectiveCostPerMinute: creditHealth.effectiveCostPerMinute,
+        needsTopUp: creditHealth.needsAlert,
+      };
+    } catch {
+      // Graceful fallback — credit tracking not yet initialized
+    }
 
     const unconfigured = (Object.entries(integrations) as [string, Record<string, unknown>][])
       .filter(([, v]) => v.configured === false && "missingVars" in v)
@@ -227,7 +325,7 @@ export async function buildServer() {
     };
   });
 
-  function buildMissingList(vars: [string, string | undefined][]): string[] {
+  function buildMissingList(vars: Array<[string, string | undefined | null]>): string[] {
     return vars.filter(([, val]) => !val).map(([name]) => name);
   }
 
@@ -248,6 +346,11 @@ export async function buildServer() {
   await server.register(adminAuditLogRoutes, { prefix: apiPrefix });
   await server.register(adminQueueRoutes, { prefix: apiPrefix });
   await server.register(adminWebhookRoutes, { prefix: apiPrefix });
+  await server.register(adminCreditRoutes, { prefix: apiPrefix });
+  await server.register(adminRevenueRoutes, { prefix: apiPrefix });
+  await server.register(adminPaymentRoutes, { prefix: apiPrefix });
+  await server.register(adminWhatsAppRoutes, { prefix: apiPrefix });
+
 
   // Client routes
   await server.register(clientLeadRoutes, { prefix: apiPrefix });
@@ -277,11 +380,18 @@ export async function buildServer() {
   await server.register(templateRoutes, { prefix: apiPrefix });
   await server.register(notificationRoutes, { prefix: apiPrefix });
   await server.register(calendarSyncRoutes, { prefix: apiPrefix });
+  await server.register(customerActivityRoutes, { prefix: apiPrefix });
   await server.register(territoryComparisonRoutes, { prefix: apiPrefix });
   await server.register(propertySuggestionRoutes, { prefix: apiPrefix });
   await server.register(apiKeyRoutes, { prefix: apiPrefix });
   await server.register(referralRoutes, { prefix: apiPrefix });
   await server.register(webhookSourcesRoutes, { prefix: apiPrefix });
+
+  // Demo mode routes (only when DEMO_MODE=true)
+  if (config.DEMO_MODE) {
+    await server.register(demoRoutes, { prefix: apiPrefix });
+    logger.info("🎯 DEMO MODE enabled — all external APIs simulated");
+  }
 
   // Customer portal routes (auth via OTP)
   await server.register(customerRoutes, { prefix: apiPrefix });
@@ -294,6 +404,32 @@ export async function buildServer() {
   await server.register(omnidimensionWebhookRoutes, { prefix: apiPrefix });
   await server.register(razorpayWebhookRoutes, { prefix: apiPrefix });
   await server.register(whatsappWebhookRoutes, { prefix: apiPrefix });
+  await server.register(smsForwardingRoutes, { prefix: apiPrefix });
+  await server.register(emailForwardingRoutes, { prefix: apiPrefix });
+  await server.register(forwardingTestRoutes, { prefix: apiPrefix });
+
+  // ─── Invoice PDF Serving ─────────────────────────────────────
+  // FIX #2: Serve generated GST invoice PDFs
+  server.get("/invoices/:filename", async (request, reply) => {
+    const { filename } = request.params as { filename: string };
+    // Basic security: only allow PDF files and prevent path traversal
+    if (!filename.endsWith(".pdf") || filename.includes("..") || filename.includes("/")) {
+      return reply.status(400).send({ error: "Invalid filename" });
+    }
+
+    const path = await import("path");
+    const fs = await import("fs");
+    const filePath = path.join(process.cwd(), "invoices", filename);
+
+    if (!fs.existsSync(filePath)) {
+      return reply.status(404).send({ error: "Invoice not found" });
+    }
+
+    const stream = fs.createReadStream(filePath);
+    reply.header("Content-Type", "application/pdf");
+    reply.header("Content-Disposition", `inline; filename="${filename}"`);
+    return reply.send(stream);
+  });
 
   // ─── Error Handler ─────────────────────────────────────────
   server.setErrorHandler((error, _request, reply) => {
@@ -321,7 +457,7 @@ export async function buildServer() {
   });
 
   // Store server reference for graceful shutdown
-  (global as any).__server = server;
+  __server = server;
 
   return server;
 }
@@ -360,7 +496,7 @@ async function validateEnvironment(): Promise<void> {
   const required = [
     { key: "JWT_SECRET", value: config.JWT_SECRET, hint: "Generate with: openssl rand -hex 32" },
     { key: "JWT_REFRESH_SECRET", value: config.JWT_REFRESH_SECRET, hint: "Generate with: openssl rand -hex 32" },
-    { key: "OMNIDIM_API_KEY", value: config.OMNIDIM_API_KEY, hint: "Get from Omnidimension dashboard" },
+    ...(config.DEMO_MODE ? [] : [{ key: "OMNIDIM_API_KEY", value: config.OMNIDIM_API_KEY, hint: "Get from Omnidimension dashboard. Set DEMO_MODE=true to skip." }]),
   ];
 
   for (const { key, value, hint } of required) {
@@ -371,7 +507,48 @@ async function validateEnvironment(): Promise<void> {
     }
   }
 
+  if (config.DEMO_MODE) {
+    logger.warn("");
+    logger.warn("╔═══════════════════════════════════════════════════════════╗");
+    logger.warn("║  🎯  DEMO MODE ACTIVE                                   ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  All external APIs are being SIMULATED.                 ║");
+    logger.warn("║  No real calls, WhatsApp, SMS, or emails will be sent.  ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  Login: demo@broker.com / demo123!A                     ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  Demo API: POST /api/v1/demo/seed-data                  ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  Set DEMO_MODE=false in .env to use real APIs.          ║");
+    logger.warn("╚═══════════════════════════════════════════════════════════╝");
+    logger.warn("");
+  }
+
+  // Validate phone provider-specific vars
+  if (config.PHONE_PROVIDER === "twilio" && !config.TWILIO_ACCOUNT_SID) {
+    logger.warn("⚠️  PHONE_PROVIDER=twilio but TWILIO_ACCOUNT_SID not set. Phone number features will be unavailable.");
+  }
+
   logger.info("✅ Environment validation passed");
+
+  // Warn if Redis is not available — this is CRITICAL for core automation
+  if (!isRedisAvailable()) {
+    logger.warn("");
+    logger.warn("╔═══════════════════════════════════════════════════════════╗");
+    logger.warn("║  ⚠️  REDIS IS NOT AVAILABLE                             ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  The server will START, but the core automation WILL    ║");
+    logger.warn("║  NOT WORK. Leads will be ingested but NEVER called.     ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  - No AI calls will be dispatched                       ║");
+    logger.warn("║  - No follow-ups or reminders                           ║");
+    logger.warn("║  - No notifications via WhatsApp/SMS                    ║");
+    logger.warn("║  - No post-call extraction                              ║");
+    logger.warn("║                                                         ║");
+    logger.warn("║  Start Redis: docker run -p 6379:6379 redis:alpine       ║");
+    logger.warn("╚═══════════════════════════════════════════════════════════╝");
+    logger.warn("");
+  }
 }
 
 // ─── Start Server ───────────────────────────────────────────────
@@ -387,10 +564,10 @@ async function start() {
     // Register cron jobs (non-blocking — runs alongside the server)
     registerCronJobs();
 
-    // Start campaign worker (processes queued campaign emails)
-    import("./workers/campaign.worker").catch((err) => {
-      logger.error({ err: err.message }, "Failed to start campaign worker");
-    });
+    // BullMQ workers are already started via imports above.
+    // The campaign worker runs as a separate Docker container (see docker-compose.yml)
+    // DO NOT start it here — it would create duplicate processing.
+    logger.info("✅ BullMQ workers started: call, notification, extraction, followup, reminder, webhook-retry");
 
     await server.listen({ port: config.PORT, host: "0.0.0.0" });
     logger.info(`LeadBridge server running on port ${config.PORT}`);
@@ -414,8 +591,8 @@ async function gracefulShutdown(signal: string) {
 
   try {
     // Close the Fastify server (stops accepting new requests)
-    if ((global as any).__server) {
-      await (global as any).__server.close();
+    if (__server) {
+      await __server.close();
       logger.info("HTTP server closed");
     }
   } catch (err: any) {
@@ -423,10 +600,23 @@ async function gracefulShutdown(signal: string) {
   }
 
   try {
-    // Disconnect Prisma (waits for pending queries)
-    const { PrismaClient } = await import("@prisma/client");
-    const prisma = new PrismaClient();
-    await prisma.$disconnect();
+    // Close BullMQ workers (each gracefully waits for active jobs to finish)
+    await Promise.allSettled([
+      callWorker.close(),
+      notificationWorker.close(),
+      extractionWorker.close(),
+      followupWorker.close(),
+      reminderWorker.close(),
+      webhookRetryWorker.close(),
+    ]);
+    logger.info("All BullMQ workers closed");
+  } catch (err: any) {
+    logger.warn({ err: err.message }, "Error closing BullMQ workers");
+  }
+
+  try {
+    // Disconnect shared Prisma singleton (waits for pending queries)
+    await disconnectPrisma();
     logger.info("Prisma disconnected");
   } catch (err: any) {
     logger.warn({ err: err.message }, "Error disconnecting Prisma");
@@ -435,7 +625,6 @@ async function gracefulShutdown(signal: string) {
   try {
     // Close Redis connections
     const IORedis = (await import("ioredis")).default;
-    // Create a temp connection just to explicitly quit
     const redis = new IORedis(config.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: null });
     await redis.quit();
     logger.info("Redis connections drained");

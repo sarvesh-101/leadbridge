@@ -1,19 +1,19 @@
-import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { sendEmail } from "../services/email.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * Trial Expiry Checker — runs daily at 8:00 AM.
  *
- * Finds clients where:
- * - planStatus = TRIAL
- * - trialEndsAt < now()
+ * ENFORCEMENT CHAIN:
+ *   1. This cron sets planStatus = PAST_DUE when trial expires
+ *   2. The call.worker.ts checks planStatus !== "TRIAL" || !== "ACTIVE" → blocks calls
+ *   3. The lead ingestion webhook also checks planStatus → blocks new leads
+ *   4. An email is sent to the broker asking them to upgrade
  *
  * For each match:
- * 1. Sets planStatus = PAST_DUE (stops processing new leads)
+ * 1. Sets planStatus = PAST_DUE (stops processing new leads AND blocks AI calls via worker)
  * 2. Sends trial expiry email via SMTP (Nodemailer)
  */
 export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: number }> {
@@ -30,7 +30,7 @@ export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: 
   let emailsSent = 0;
 
   for (const client of expiredTrials) {
-    // Pause the account
+    // Pause the account — this triggers the call.worker.ts enforcement chain
     await prisma.client.update({
       where: { id: client.id },
       data: { planStatus: "PAST_DUE" },

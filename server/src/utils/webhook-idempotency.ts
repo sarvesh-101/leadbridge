@@ -30,7 +30,7 @@ export async function isDuplicate(
 ): Promise<boolean> {
   try {
     const key = `${IDEMPOTENCY_PREFIX}:${source}:${eventId}`;
-    const redis = (fastify as any).redis as import("ioredis").Redis | undefined;
+    const redis = fastify.redis;
 
     if (!redis) {
       // No Redis — skip dedup (best-effort)
@@ -59,7 +59,7 @@ export async function markProcessed(
 ): Promise<void> {
   try {
     const key = `${IDEMPOTENCY_PREFIX}:${source}:${eventId}`;
-    const redis = (fastify as any).redis as import("ioredis").Redis | undefined;
+    const redis = fastify.redis;
     if (redis) {
       await redis.set(key, "1", "EX", ttlSeconds);
     }

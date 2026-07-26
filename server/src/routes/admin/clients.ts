@@ -5,6 +5,62 @@ import { Prisma } from "@prisma/client";
 import { assignTerritory } from "../../services/territory.service";
 import { generateCallScript } from "../../services/deepseek.service";
 
+/**
+ * Pro-rated refund calculation helper.
+ * Used by admin cancellation endpoints and broker self-cancellation.
+ * Creates a credit note (REFUNDED invoice) if a PAID invoice exists with unused days.
+ */
+async function calculateAndCreateRefund(
+  fastify: FastifyInstance,
+  clientId: string
+): Promise<{ refundAmount: number; refundNote: string } | null> {
+  const now = new Date();
+
+  // Find the cancelled subscription's paid invoice for refund calculation
+  // Subscription is already cancelled by the caller — we just need to create credit note
+  const subscription = await fastify.prisma.subscription.findFirst({
+    where: { clientId, status: "CANCELLED" },
+    orderBy: { cancelledAt: "desc" },
+    include: { invoices: { where: { status: "PAID" }, orderBy: { issueDate: "desc" }, take: 1 } },
+  });
+
+  if (!subscription) return null;
+
+  const paidInvoice = subscription.invoices[0];
+  if (!paidInvoice) return null;
+
+  const periodStart = paidInvoice.periodStart || subscription.startDate;
+  const periodEnd = paidInvoice.periodEnd || subscription.endDate;
+  const totalDays = Math.max(1, Math.round((periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)));
+  const daysUsed = Math.max(0, Math.round((now.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24)));
+  const remainingDays = Math.max(0, totalDays - daysUsed);
+
+  if (remainingDays <= 0 || totalDays <= 0) return null;
+
+  const refundAmount = Math.round((remainingDays / totalDays) * paidInvoice.totalAmount * 100) / 100;
+  const refundNote = `Pro-rated refund: ₹${refundAmount} for ${remainingDays}/${totalDays} days remaining (admin deactivation)`;
+
+  // Create refund credit note
+  await fastify.prisma.invoice.create({
+    data: {
+      clientId,
+      subscriptionId: subscription.id,
+      invoiceNumber: `CN-${Date.now()}-${clientId.slice(-4)}`,
+      status: "REFUNDED",
+      description: refundNote,
+      amount: -refundAmount,
+      totalAmount: -refundAmount,
+      issueDate: now,
+      dueDate: now,
+      periodStart: paidInvoice.periodStart || subscription.startDate,
+      periodEnd: now,
+    },
+  });
+
+  fastify.log.info({ clientId, refundAmount, remainingDays, totalDays }, "Admin deactivation — refund calculated");
+  return { refundAmount, refundNote };
+}
+
 export default async function adminClientRoutes(fastify: FastifyInstance) {
   // All routes require admin auth
   fastify.addHook("preHandler", fastify.authenticateAdmin);
@@ -151,7 +207,7 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
 
     const client = await fastify.prisma.client.update({
       where: { id: request.params.id },
-      data: data as any,
+      data: data as Record<string, unknown>,
     });
     return { client };
   });
@@ -196,6 +252,12 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
       updateData.callsLimit = callsLimit;
     }
 
+    // If setting status to CANCELLED, calculate pro-rated refund
+    let refundInfo = null;
+    if (status === "CANCELLED" && client.planStatus !== "CANCELLED") {
+      refundInfo = await calculateAndCreateRefund(fastify, request.params.id);
+    }
+
     if (Object.keys(updateData).length === 0) {
       return reply.status(400).send({ error: "No valid fields to update" });
     }
@@ -209,6 +271,7 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
       message: `Client '${updated.businessName}' updated`,
       status: updated.planStatus,
       plan: updated.plan,
+      ...(refundInfo ? { refund: refundInfo } : {}),
     };
   });
 
@@ -242,7 +305,19 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
 
   // ─── Delete Client (soft-deactivate) ──────────────────────────
   fastify.delete("/admin/clients/:id", async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-    // Set plan to CANCELLED and release territory
+    const client = await fastify.prisma.client.findUnique({ where: { id: request.params.id } });
+    if (!client) return reply.status(404).send({ error: "Client not found" });
+
+    // Always cancel the active subscription first
+    const now = new Date();
+    await fastify.prisma.subscription.updateMany({
+      where: { clientId: request.params.id, status: { in: ["ACTIVE", "TRIAL"] } },
+      data: { status: "CANCELLED", cancelledAt: now },
+    });
+
+    // Then calculate pro-rated refund if a paid invoice exists
+    const refundInfo = await calculateAndCreateRefund(fastify, request.params.id);
+
     await fastify.prisma.client.update({
       where: { id: request.params.id },
       data: { planStatus: "CANCELLED" },
@@ -259,7 +334,10 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
       });
     }
 
-    return { message: "Client deactivated" };
+    return {
+      message: "Client deactivated",
+      ...(refundInfo ? { refund: refundInfo } : {}),
+    };
   });
 
   // ─── Assign Territory ─────────────────────────────────────────

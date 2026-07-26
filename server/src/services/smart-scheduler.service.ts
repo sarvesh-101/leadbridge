@@ -11,10 +11,8 @@
  * We do:    "D1 = next optimal window for THIS lead"
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 import { logger } from "../utils/logger";
-
-const prisma = new PrismaClient();
 
 // Peak answer hours for Indian real estate leads (24h format)
 const PEAK_HOURS = {

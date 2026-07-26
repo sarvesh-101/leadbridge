@@ -173,4 +173,132 @@ export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
       engagementRate: totalUsers > 0 ? Math.round((activeUsersToday / totalUsers) * 100) : 0,
     };
   });
+
+  // ─── Forwarding Analytics ──────────────────────────────────────
+  fastify.get("/admin/forwarding/analytics", async (_request: FastifyRequest) => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Sources that indicate forwarding
+    const forwardSources = ["sms_forward", "email_forward", "test_forward"];
+
+    // Total forwarded leads
+    const totalForwarded = await fastify.prisma.lead.count({
+      where: { source: { in: forwardSources } },
+    });
+
+    // Forwarded leads breakdown by source
+    const forwardBySource = await fastify.prisma.lead.groupBy({
+      by: ["source"],
+      where: { source: { in: forwardSources } },
+      _count: { id: true },
+    });
+
+    // Forwarded leads breakdown by portalSource
+    const forwardByPortal = await fastify.prisma.lead.groupBy({
+      by: ["portalSource"],
+      where: {
+        source: { in: forwardSources },
+        portalSource: { not: null },
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+    });
+
+    // Forwarded leads today
+    const forwardedToday = await fastify.prisma.lead.count({
+      where: {
+        source: { in: forwardSources },
+        createdAt: { gte: todayStart },
+      },
+    });
+
+    // Forwarded leads this month
+    const forwardedThisMonth = await fastify.prisma.lead.count({
+      where: {
+        source: { in: forwardSources },
+        createdAt: { gte: monthStart },
+      },
+    });
+
+    // Conversion stats for forwarded leads
+    const forwardedConverted = await fastify.prisma.lead.count({
+      where: {
+        source: { in: forwardSources },
+        status: "CONVERTED",
+      },
+    });
+
+    const forwardedBooked = await fastify.prisma.lead.count({
+      where: {
+        source: { in: forwardSources },
+        status: { in: ["BOOKED", "VISITED", "CONVERTED"] },
+      },
+    });
+
+    const forwardedCalled = await fastify.prisma.lead.count({
+      where: {
+        source: { in: forwardSources },
+        firstCalledAt: { not: null },
+      },
+    });
+
+    // Recent forwarded leads with broker info
+    const recentLeads = await fastify.prisma.lead.findMany({
+      where: { source: { in: forwardSources } },
+      include: {
+        client: { select: { businessName: true, phone: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    // Status breakdown for funnel
+    const statusBreakdown = await fastify.prisma.lead.groupBy({
+      by: ["status"],
+      where: { source: { in: forwardSources } },
+      _count: { id: true },
+    });
+
+    return {
+      summary: {
+        totalForwarded,
+        forwardedToday,
+        forwardedThisMonth,
+        forwardedConverted,
+        forwardedBooked,
+        forwardedCalled,
+        conversionRate: totalForwarded > 0
+          ? Math.round((forwardedConverted / totalForwarded) * 100)
+          : 0,
+        bookingRate: totalForwarded > 0
+          ? Math.round((forwardedBooked / totalForwarded) * 100)
+          : 0,
+      },
+      // Merge groupBy results: source breakdown counts
+      bySource: forwardBySource.reduce((acc, item) => {
+        acc[item.source] = item._count.id;
+        return acc;
+      }, {} as Record<string, number>),
+      byPortal: forwardByPortal.map(item => ({
+        portal: item.portalSource || "unknown",
+        count: item._count.id,
+      })),
+      statusFunnel: statusBreakdown.map(item => ({
+        status: item.status,
+        count: item._count.id,
+      })),
+      recentLeads: recentLeads.map(lead => ({
+        id: lead.id,
+        name: lead.name,
+        phone: lead.phone,
+        source: lead.source,
+        portalSource: lead.portalSource,
+        status: lead.status,
+        createdAt: lead.createdAt.toISOString(),
+        broker: lead.client.businessName,
+      })),
+    };
+  });
 }

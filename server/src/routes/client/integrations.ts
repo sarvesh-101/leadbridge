@@ -236,7 +236,7 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
 
     await fastify.prisma.integration.update({
       where: { id: integration.id },
-      data: data as any,
+      data: data as Record<string, unknown>,
     });
 
     return { message: "Integration updated" };

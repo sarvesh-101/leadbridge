@@ -6,6 +6,74 @@ import { emitNewLead } from "../../services/websocket.service";
 import { tryAcquireLock, releaseLock } from "../../utils/distributed-lock";
 
 /**
+ * Daily lead ingestion limits per plan.
+ * These prevent a single misconfigured portal from flooding the system.
+ */
+const DAILY_LEAD_LIMITS: Record<string, number> = {
+  STARTER: 50,
+  GROWTH: 200,
+  PRO: Infinity,  // No daily cap for PRO
+  TRIAL: 25,      // Trial users get a stricter limit
+};
+
+/**
+ * Check a client's daily lead ingestion limit using a Redis counter.
+ * Increments the counter on success so concurrent requests are serialized.
+ * Returns null if within limit, or a 429 error response body if exceeded.
+ */
+async function checkDailyLeadLimit(
+  fastify: FastifyInstance,
+  clientId: string,
+  plan: string,
+  increment: boolean
+): Promise<{ error: string; limit: number; retryAfter: string } | null> {
+  const limit = DAILY_LEAD_LIMITS[plan] ?? DAILY_LEAD_LIMITS.GROWTH;
+  if (limit === Infinity) return null; // Unlimited
+
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const redisKey = `daily_leads:${clientId}:${today}`;
+
+  const redis = fastify.redis;
+  if (!redis) {
+    // Redis unavailable — skip the check rather than blocking leads entirely.
+    // In production, Redis should always be available.
+    return null;
+  }
+
+  try {
+    if (increment) {
+      // Atomically increment and set TTL (only sets TTL on first creation)
+      const count = await redis.incr(redisKey);
+      if (count === 1) {
+        await redis.expire(redisKey, 48 * 60 * 60); // 48h safety margin
+      }
+      if (count > limit) {
+        return {
+          error: `Daily lead limit reached (${limit}/day). Upgrade your plan or try again tomorrow.`,
+          limit,
+          retryAfter: "tomorrow",
+        };
+      }
+    } else {
+      // Check-only (no increment)
+      const countStr = await redis.get(redisKey);
+      const count = countStr ? parseInt(countStr, 10) : 0;
+      if (count >= limit) {
+        return {
+          error: `Daily lead limit reached (${limit}/day). Upgrade your plan or try again tomorrow.`,
+          limit,
+          retryAfter: "tomorrow",
+        };
+      }
+    }
+  } catch (err) {
+    fastify.log.warn({ err, clientId }, "Redis error checking daily lead limit — allowing lead through");
+  }
+
+  return null;
+}
+
+/**
  * Lead Ingestion Webhook — receives leads from portals.
  * POST /api/v1/webhooks/ingest/:token
  *
@@ -13,8 +81,9 @@ import { tryAcquireLock, releaseLock } from "../../utils/distributed-lock";
  */
 export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
   // ─── Portal Webhook Ingestion ─────────────────────────────────
+  // Per-source rate limit: 60/min (tightened from 200/min to prevent portal floods)
   fastify.post("/webhooks/ingest/:token", {
-    config: { rateLimit: { max: 200, timeWindow: "1 minute" } },
+    config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
   }, async (request: FastifyRequest<{ Params: { token: string } }>, reply: FastifyReply) => {
     const { token } = request.params;
     const payload = request.body as Record<string, unknown>;
@@ -55,6 +124,13 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       return reply.status(429).send({ error: "Call limit reached" });
     }
 
+    // Check daily lead ingestion limit (per-client, Redis-backed)
+    // This prevents a single misconfigured portal from flooding the system.
+    const dailyLimitError = await checkDailyLeadLimit(fastify, client.id, client.plan, false);
+    if (dailyLimitError) {
+      return reply.status(429).send(dailyLimitError);
+    }
+
     // Parse the payload
     let leadData: { name: string; phone: string; email?: string };
     try {
@@ -77,6 +153,8 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
     // Uses a random lock key to serialize concurrent requests for the same phone+client.
     // This prevents the race condition where two leads with the same phone are created
     // because both findFirst queries return null before either creates.
+    // NOTE: Terminal leads (COLD/CONVERTED) are excluded from dedup — a previously
+    // cold lead from the same person should be a fresh attempt, not a duplicate.
     const dedupLockId = `dedup:${client.id}:${leadData.phone}`;
     const lockAcquired = await tryAcquireLock(fastify, dedupLockId, 5); // 5 second TTL
 
@@ -93,6 +171,9 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
             clientId: client.id,
             phone: leadData.phone,
             receivedAt: { gte: thirtyDaysAgo },
+            // Exclude terminal leads — a previously cold/converted lead
+            // should be treated as a fresh opportunity, not a duplicate
+            status: { notIn: ["COLD", "CONVERTED"] },
           },
         });
 
@@ -117,6 +198,18 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
               receivedAt: new Date(),
             },
           });
+
+          // ─── Auto-assign lead to team member (non-blocking) ──────
+          const { assignLead } = await import("../../services/lead-assignment.service");
+          assignLead(client.id, lead.id).catch((err: Error) => {
+            fastify.log.warn({ leadId: lead.id, err: err.message }, "Lead assignment failed");
+          });
+
+          // ─── Auto-match lead to broker's properties (non-blocking) ─
+          const { matchLeadToProperties } = await import("../../services/property-matching.service");
+          matchLeadToProperties(lead.id, client.id).catch((err: Error) => {
+            fastify.log.warn({ leadId: lead.id, err: err.message }, "Property matching failed");
+          });
         }
       } else {
         // Lock not acquired — fall back to optimistic create
@@ -133,6 +226,13 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
             receivedAt: new Date(),
           },
         });
+
+        // Auto-assign and match even in fallback path
+        const { assignLead } = await import("../../services/lead-assignment.service");
+        assignLead(client.id, lead.id).catch(() => {});
+
+        const { matchLeadToProperties } = await import("../../services/property-matching.service");
+        matchLeadToProperties(lead.id, client.id).catch(() => {});
       }
     } finally {
       if (lockAcquired) {
@@ -147,6 +247,11 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
     if (!lead) {
       return reply.status(500).send({ error: "Failed to create lead" });
     }
+
+    // Increment daily lead counter after successful creation.
+    // Return value intentionally ignored — lead was already created successfully.
+    // If this pushes over the limit, excess is capped at 1-2 leads (acceptable).
+    await checkDailyLeadLimit(fastify, client.id, client.plan, true);
 
     // Enqueue immediate call (within seconds)
     await enqueueCall({
@@ -164,7 +269,7 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
 
   // ─── Email-based lead ingestion ───────────────────────────────
   fastify.post("/webhooks/email/:token", {
-    config: { rateLimit: { max: 50, timeWindow: "1 minute" } },
+    config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
   }, async (request: FastifyRequest<{ Params: { token: string } }>, reply: FastifyReply) => {
     // For now, email parsing is treated similarly to webhook
     // In production, this would parse email content
@@ -197,7 +302,14 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "Could not extract phone number from email" });
     }
 
+    // Check daily lead ingestion limit before creation
+    const emailDailyLimitError = await checkDailyLeadLimit(fastify, source.clientId, source.client?.plan || "TRIAL", false);
+    if (emailDailyLimitError) {
+      return reply.status(429).send(emailDailyLimitError);
+    }
+
     // Deduplicate and create lead — with concurrent-safe locking
+    // NOTE: Terminal leads (COLD/CONVERTED) are excluded from dedup.
     const dedupLockId = `dedup:${source.clientId}:+91${phone.slice(-10)}`;
     const lockAcquired = await tryAcquireLock(fastify, dedupLockId, 5);
 
@@ -213,6 +325,8 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
             clientId: source.clientId,
             phone: `+91${phone.slice(-10)}`,
             receivedAt: { gte: thirtyDaysAgo },
+            // Exclude terminal leads — cold/converted leads should be fresh attempts
+            status: { notIn: ["COLD", "CONVERTED"] },
           },
         });
 
@@ -257,6 +371,9 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
     if (!lead) {
       return reply.status(500).send({ error: "Failed to create lead" });
     }
+
+    // Increment daily lead counter
+    await checkDailyLeadLimit(fastify, source.clientId, source.client?.plan || "TRIAL", true);
 
     await enqueueCall({
       leadId: lead.id,

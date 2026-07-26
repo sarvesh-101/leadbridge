@@ -11,6 +11,18 @@ import { generateReport, reportToCsv, scheduleReport } from "../../services/repo
 export default async function reportBuilderRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
 
+  // Feature gate — custom reports are GROWTH+
+  fastify.addHook("preHandler", async (request: FastifyRequest, reply: FastifyReply) => {
+    // Only gate the actual report-generation endpoints, not static GET routes
+    if (request.method === "POST") {
+      const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
+      const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "reports");
+      if (!allowed) {
+        return reply.status(403).send(featureGateError("Custom reports", plan, requiredPlan));
+      }
+    }
+  });
+
   /**
    * Generate a custom analytics report.
    */

@@ -49,8 +49,8 @@ const INTEGRATION_META: Record<string, {
     description: "Used for password reset emails, booking confirmations, campaign emails, and monthly reports. Works with any SMTP provider.",
     docsLink: "https://nodemailer.com/about/",
   },
-  omnidimension: {
-    label: "Omnidimension AI Voice",
+  voice_ai: {
+    label: "AI Voice",
     icon: Cpu,
     description: "AI-powered outbound calling for lead qualification, reminders, and follow-ups.",
     docsLink: "https://app.omnidim.io/dashboard/settings",
@@ -99,11 +99,11 @@ export default function SystemStatus() {
   const unconfigured = health.unconfigured || [];
   const hasIssues = unconfigured.length > 0;
 
-  // Check for Omnidimension circuit breaker issues
-  const omni = health.integrations?.omnidimension;
-  const omniDegraded = omni?.circuitState === "OPEN";
+  // Check for Voice AI circuit breaker issues
+  const voiceAI = health.integrations?.voice_ai;
+  const voiceAIDegraded = voiceAI?.circuitState === "OPEN";
 
-  if (!hasIssues && !omniDegraded) return null;
+  if (!hasIssues && !voiceAIDegraded) return null;
 
   return (
     <motion.div
@@ -119,8 +119,8 @@ export default function SystemStatus() {
           </div>
           <div>
             <p className="text-sm font-medium text-yellow-200">
-              {omniDegraded
-                ? "Omnidimension circuit breaker open — AI calls may fail"
+              {voiceAIDegraded
+                ? "Voice AI circuit breaker open — AI calls may fail"
                 : `${unconfigured.length} integration${unconfigured.length > 1 ? "s" : ""} not configured`
               }
             </p>
@@ -199,24 +199,24 @@ export default function SystemStatus() {
                 );
               })}
 
-              {/* Omnidimension degraded state */}
-              {omniDegraded && (
+              {/* Voice AI degraded state */}
+              {voiceAIDegraded && (
                 <div className="flex items-start gap-3 p-3 rounded-lg bg-red-500/5">
                   <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
                     <WifiOff className="w-4 h-4 text-red-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-red-200">Omnidimension Voice API</span>
+                      <span className="text-sm font-medium text-red-200">AI Voice Service</span>
                       <span className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">
                         Circuit Open
                       </span>
                     </div>
                     <p className="text-xs text-red-400/70 mt-1">
-                      The AI calling API has failed {omni?.circuitFailureCount ?? 0} times. 
+                      The AI calling API has failed {voiceAI?.circuitFailureCount ?? 0} times. 
                       New calls are being blocked to prevent cascading failures.
-                      {omni?.circuitCooldownRemainingMs && omni.circuitCooldownRemainingMs > 0
-                        ? ` Auto-recovery in ${Math.ceil(omni.circuitCooldownRemainingMs / 60000)} minutes.`
+                      {voiceAI?.circuitCooldownRemainingMs && voiceAI.circuitCooldownRemainingMs > 0
+                        ? ` Auto-recovery in ${Math.ceil(voiceAI.circuitCooldownRemainingMs / 60000)} minutes.`
                         : ""
                       }
                     </p>
@@ -226,7 +226,7 @@ export default function SystemStatus() {
 
               {/* Configured services summary */}
               {Object.entries(INTEGRATION_META)
-                .filter(([name]) => !unconfigured.includes(name) && !(name === "omnidimension" && omniDegraded))
+                .filter(([name]) => !unconfigured.includes(name) && !(name === "voice_ai" && voiceAIDegraded))
                 .map(([name, meta]) => {
                   const integration = health.integrations?.[name];
                   if (!integration?.configured && name !== "redis") return null;
@@ -234,7 +234,7 @@ export default function SystemStatus() {
                     <div key={name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-green-500/5">
                       <Wifi className="w-3.5 h-3.5 text-green-400 shrink-0" />
                       <span className="text-xs text-green-300">{meta.label}</span>
-                      {name === "omnidimension" && integration?.circuitState && (
+                      {name === "voice_ai" && integration?.circuitState && (
                         <span className={cn(
                           "text-xs px-1.5 py-0.5 rounded",
                           integration.circuitState === "CLOSED" ? "bg-green-500/10 text-green-400" :

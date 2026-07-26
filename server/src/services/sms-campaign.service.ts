@@ -2,11 +2,9 @@
  * SMS Campaign Service.
  * Sends bulk SMS messages to leads via MessageBird.
  */
-import { PrismaClient } from "@prisma/client";
 import { logger } from "../utils/logger";
 import { sendSms } from "./sms.service";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 export async function sendSmsCampaign(
   clientId: string,

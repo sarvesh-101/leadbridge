@@ -2,22 +2,98 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn, formatDate } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   ArrowLeft, Home, MapPin, Bed, Bath, Maximize, IndianRupee,
   Star, Edit3, Trash2, Loader2, Calendar, Phone, Building2,
-  CheckCircle2, XCircle, Clock,
+  CheckCircle2, XCircle, Clock, X, Camera, Tags,
 } from "lucide-react";
-import type { Property, Booking, LeadStatus } from "@/types";
+import type { Property, PropertyStatus } from "@/types";
+
+const PROPERTY_STATUS_OPTIONS: { value: PropertyStatus; label: string }[] = [
+  { value: "AVAILABLE", label: "Available" },
+  { value: "BOOKED", label: "Booked" },
+  { value: "SOLD", label: "Sold" },
+  { value: "OFF_MARKET", label: "Off Market" },
+];
 
 export default function PropertyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    bedrooms: "",
+    bathrooms: "",
+    area: "",
+    location: "",
+    city: "",
+    zone: "",
+    status: "AVAILABLE" as PropertyStatus,
+    amenities: "",
+    tags: "",
+    featured: false,
+  });
+  const [saving, setSaving] = useState(false);
+
+  function openEditModal() {
+    if (!property) return;
+    setEditForm({
+      name: property.name,
+      description: property.description || "",
+      price: property.price ? String(property.price) : "",
+      bedrooms: property.bedrooms ? String(property.bedrooms) : "",
+      bathrooms: property.bathrooms ? String(property.bathrooms) : "",
+      area: property.area ? String(property.area) : "",
+      location: property.location || "",
+      city: property.city || "",
+      zone: property.zone || "",
+      status: property.status,
+      amenities: (property.amenities || []).join(", "),
+      tags: (property.tags || []).join(", "),
+      featured: property.featured,
+    });
+    setShowEditModal(true);
+  }
+
+  async function handleSaveEdit() {
+    if (!editForm.name.trim()) return toast.error("Property name is required");
+    setSaving(true);
+    try {
+      const body: Record<string, unknown> = {
+        name: editForm.name.trim(),
+        description: editForm.description.trim() || undefined,
+        price: editForm.price ? Number(editForm.price) : undefined,
+        bedrooms: editForm.bedrooms ? Number(editForm.bedrooms) : undefined,
+        bathrooms: editForm.bathrooms ? Number(editForm.bathrooms) : undefined,
+        area: editForm.area ? Number(editForm.area) : undefined,
+        location: editForm.location.trim() || undefined,
+        city: editForm.city.trim() || undefined,
+        zone: editForm.zone.trim() || undefined,
+        status: editForm.status,
+        featured: editForm.featured,
+        amenities: editForm.amenities ? editForm.amenities.split(",").map((s) => s.trim()).filter(Boolean) : [],
+        tags: editForm.tags ? editForm.tags.split(",").map((s) => s.trim()).filter(Boolean) : [],
+      };
+      await api.patch(`/properties/${property!.id}`, body);
+      toast.success("Property updated");
+      setShowEditModal(false);
+      await loadProperty();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update property");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   useEffect(() => {
     loadProperty();
@@ -226,30 +302,30 @@ export default function PropertyDetailPage() {
           >
             <h2 className="text-sm font-semibold text-white mb-4">Quick Actions</h2>
             <div className="space-y-2">
-              <button onClick={() => router.push("/dashboard/properties")}
-            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm hover:bg-white/10 transition-all"
-          >
-            <Edit3 className="w-4 h-4" />
-            Edit in List View
-          </button>
-          <button onClick={async () => {
-            try {
-              await api.post(`/properties/${property.id}/feature`);
-              await loadProperty();
-              toast.success(property.featured ? "Unfeatured" : "Featured");
-            } catch { toast.error("Failed to toggle"); }
-          }}
-            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm hover:bg-white/10 transition-all"
-          >
-            <Star className="w-4 h-4" />
-            {property.featured ? "Unfeature" : "Feature"}
-          </button>
-          <button onClick={() => router.push("/dashboard/leads")}
-            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm hover:bg-white/10 transition-all"
-          >
-            <Building2 className="w-4 h-4" />
-            View All Leads
-          </button>
+              <button onClick={openEditModal}
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4F6EF7]/10 text-[#4F6EF7] text-sm font-medium hover:bg-[#4F6EF7]/20 transition-all"
+              >
+                <Edit3 className="w-4 h-4" />
+                Edit Property
+              </button>
+              <button onClick={async () => {
+                try {
+                  await api.post(`/properties/${property.id}/feature`);
+                  await loadProperty();
+                  toast.success(property.featured ? "Unfeatured" : "Featured");
+                } catch { toast.error("Failed to toggle"); }
+              }}
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm hover:bg-white/10 transition-all"
+              >
+                <Star className="w-4 h-4" />
+                {property.featured ? "Unfeature" : "Feature"}
+              </button>
+              <button onClick={() => router.push("/dashboard/leads")}
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm hover:bg-white/10 transition-all"
+              >
+                <Building2 className="w-4 h-4" />
+                View All Leads
+              </button>
             </div>
           </motion.div>
 
@@ -292,6 +368,148 @@ export default function PropertyDetailPage() {
           )}
         </div>
       </div>
+
+      {/* ── Inline Edit Modal ───────────────────────────────── */}
+      <AnimatePresence>
+        {showEditModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowEditModal(false)}
+          >
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#111118] border border-white/10 p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-white">Edit Property</h2>
+                <button onClick={() => setShowEditModal(false)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs text-gray-500 mb-1.5 block">Property Name *</label>
+                  <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Price (₹)</label>
+                    <input value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} type="number"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Bedrooms</label>
+                    <input value={editForm.bedrooms} onChange={(e) => setEditForm({ ...editForm, bedrooms: e.target.value })} type="number"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Bathrooms</label>
+                    <input value={editForm.bathrooms} onChange={(e) => setEditForm({ ...editForm, bathrooms: e.target.value })} type="number"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Area (sqft)</label>
+                    <input value={editForm.area} onChange={(e) => setEditForm({ ...editForm, area: e.target.value })} type="number"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Status</label>
+                    <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value as PropertyStatus })}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm"
+                    >
+                      {PROPERTY_STATUS_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Location</label>
+                    <input value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">City</label>
+                    <input value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1.5 block">Zone</label>
+                    <input value={editForm.zone} onChange={(e) => setEditForm({ ...editForm, zone: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-500 mb-1.5 block">Description</label>
+                  <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-500 mb-1.5 flex items-center gap-1.5">
+                    <Camera className="w-3 h-3" /> Amenities (comma-separated)
+                  </label>
+                  <input value={editForm.amenities} onChange={(e) => setEditForm({ ...editForm, amenities: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-500 mb-1.5 flex items-center gap-1.5">
+                    <Tags className="w-3 h-3" /> Tags (comma-separated)
+                  </label>
+                  <input value={editForm.tags} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                  />
+                </div>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <button onClick={() => setEditForm({ ...editForm, featured: !editForm.featured })}
+                    className={cn("relative w-10 h-5 rounded-full transition-colors", editForm.featured ? "bg-amber-500" : "bg-white/10")}
+                  >
+                    <div className={cn("absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform", editForm.featured ? "translate-x-5" : "translate-x-0.5")} />
+                  </button>
+                  <span className="text-sm text-gray-400">Feature this property</span>
+                  {editForm.featured && <Star className="w-4 h-4 text-amber-400 fill-amber-400" />}
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                <button onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+                <button onClick={handleSaveEdit} disabled={saving}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Save Changes
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

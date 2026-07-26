@@ -5,9 +5,8 @@
  * and measure which performs better.
  */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 
 interface ABTestConfig {
   name: string;
@@ -41,7 +40,7 @@ export async function createABTest(
         goalMetric: config.goalMetric,
         minSampleSize: config.minSampleSize,
         status: "RUNNING",
-        variants: config.variants as unknown as any,
+        variants: config.variants as unknown as Prisma.InputJsonValue,
       },
     });
 
@@ -120,8 +119,7 @@ export async function recordABTestResult(
       testId,
       leadId,
       variantName,
-      converted,
-      metadata: (metadata || {}) as any,
+      converted,        metadata: (metadata || {}) as Prisma.InputJsonValue,
     },
   });
 }

@@ -7,6 +7,7 @@ import { emitStatusChange, emitBookingCreated, emitCallEnded } from "../../servi
 import { config } from "../../config";
 import { isDuplicate, markProcessed } from "../../utils/webhook-idempotency";
 import { shouldRetry, getRetryDelay } from "../../utils/retry-delay";
+import { recordCallCost } from "../../services/credit-manager.service";
 
 /**
  * Omnidimension Webhook Handler — THE MOST CRITICAL FILE IN THE CODEBASE.
@@ -95,12 +96,17 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
         await fastify.prisma.lead.update({
           where: { id: lead.id },
           data: {
-            callAttempts: { increment: 1 },
+            // ⚠️ Do NOT increment callAttempts here — the call worker already
+            // incremented it when it dispatched the call. Incrementing again
+            // would double-count every attempt.
             nextRetryAt: null,
           },
         });
 
-        const attempts = lead.callAttempts + 1;
+        // The worker already incremented callAttempts when dispatching,
+        // so lead.callAttempts already includes this attempt.
+        // No need to add +1.
+        const attempts = lead.callAttempts;
         const maxAttempts = lead.maxAttempts || 3;
 
         if (shouldRetry(attempts, maxAttempts)) {
@@ -154,6 +160,18 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
           data: updateData,
         });
 
+        // ─── Track platform cost for this call ──────────────────
+        if (!config.DEMO_MODE) {
+          const durationMinutes = Math.max(0.5, duration / 60); // Convert seconds to minutes, min 30s
+          await recordCallCost(fastify.prisma, {
+            clientId: call.clientId,
+            callId: call.id,
+            durationMinutes,
+          }).catch((err: Error) => {
+            fastify.log.warn({ err: err.message, callId: call.id }, "Failed to track call cost");
+          });
+        }
+
         // ─── Update Lead qualification fields from extracted variables ─
         if (Object.keys(ext).length > 0) {
           await fastify.prisma.lead.update({
@@ -166,17 +184,23 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
               bedrooms: ext.bedrooms || lead.bedrooms,
               sentiment: ext.sentiment || lead.sentiment,
               callLanguage: ext.language || lead.callLanguage,
-              callAttempts: { increment: 1 },
+              // ⚠️ Do NOT increment callAttempts here — the call worker already
+              // incremented it when it dispatched the call. Double-counting would
+              // exhaust maxAttempts prematurely and send inaccurate stats.
               firstCalledAt: lead.firstCalledAt || new Date(),
             },
           });
         }
 
         // ─── Increment client usage ─────────────────────────────
-        await fastify.prisma.client.update({
-          where: { id: call.clientId },
-          data: { callsThisMonth: { increment: 1 } },
-        });
+        // NOTE: callsThisMonth is already incremented by the call worker's
+        // 'completed' event via incrementBrokerCallCount(). Do NOT increment
+        // it here again — that would double-count every successful call.
+        // The call worker handles billing increment atomically with dedup.
+        // await fastify.prisma.client.update({
+        //   where: { id: call.clientId },
+        //   data: { callsThisMonth: { increment: 1 } },
+        // });
 
         // ─── Route by call type ──────────────────────────────────
         switch (callTypeFromContext) {
@@ -262,8 +286,8 @@ async function handleQualificationOutcome(
           clientId,
           visitDate,
           visitTime: bookingTime || "11:00 AM",
-          propertyAddress: "",
-          propertyName: null,
+          propertyAddress: ext.property_address || ext.propertyAddress || call.client?.city || "To be confirmed",
+          propertyName: ext.property_name || ext.propertyName || null,
           status: "CONFIRMED",
           sourceCallId: call.id,
         },
@@ -402,7 +426,7 @@ async function handleFollowupD1Outcome(
           clientId,
           visitDate: new Date(bookingDate),
           visitTime: ext.booking_time || ext.bookingTime || "11:00 AM",
-          propertyAddress: "",
+          propertyAddress: ext.property_address || ext.propertyAddress || call.client?.city || "To be confirmed",
           status: "CONFIRMED",
           sourceCallId: call.id,
         },
@@ -477,7 +501,7 @@ async function handleFollowupD3Outcome(
           clientId,
           visitDate: new Date(bookingDate),
           visitTime: ext.booking_time || ext.bookingTime || "11:00 AM",
-          propertyAddress: "",
+          propertyAddress: ext.property_address || ext.propertyAddress || call.client?.city || "To be confirmed",
           status: "CONFIRMED",
           sourceCallId: call.id,
         },

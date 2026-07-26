@@ -116,12 +116,15 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
     }
 
     // Deduplicate — check same phone in last 30 days
+    // Terminal leads (COLD/CONVERTED) are excluded — a cold lead from the
+    // same person is a fresh opportunity, not a duplicate.
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const existing = await fastify.prisma.lead.findFirst({
       where: {
         clientId,
         phone,
         receivedAt: { gte: thirtyDaysAgo },
+        status: { notIn: ["COLD", "CONVERTED"] },
       },
     });
 
@@ -211,7 +214,13 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
     // Record scoring outcome for feedback training loop
     if (["CONVERTED", "COLD", "VISITED"].includes(newStatus)) {
       const { recordScoringOutcome } = await import("../../services/scoring.service");
-      recordScoringOutcome(lead.id, newStatus.toLowerCase() as any).catch(() => {});
+      (recordScoringOutcome as (leadId: string, outcome: string) => Promise<void>)(lead.id, newStatus.toLowerCase()).catch(() => {});
+    }
+
+    // Reward referral conversion — when a referred lead converts, give broker bonus calls
+    if (["VISITED", "CONVERTED"].includes(newStatus)) {
+      const { rewardReferralConversion } = await import("../../services/referral.service");
+      rewardReferralConversion(clientId, lead.id).catch(() => {});
     }
 
     // Create audit log entry for team member tracking
@@ -392,9 +401,25 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
     Params: { id: string };
     Body: { notes?: string };
   }>, reply: FastifyReply) => {
-    const lead = await fastify.prisma.lead.update({
+    // First fetch the lead to get existing rawPayload
+    const existingLead = await fastify.prisma.lead.findFirst({
       where: { id: request.params.id, clientId: request.clientId },
-      data: { rawPayload: { notes: request.body.notes } },
+      select: { id: true, rawPayload: true },
+    });
+
+    if (!existingLead) {
+      return reply.status(404).send({ error: "Lead not found" });
+    }
+
+    // Merge notes into existing rawPayload instead of overwriting
+    // Strip HTML tags to prevent XSS (brokers may paste from rich sources)
+    const existingPayload = existingLead.rawPayload as Record<string, unknown> || {};
+    const notes = request.body.notes ? request.body.notes.replace(/<[^>]*>/g, '') : null;
+    const updatedPayload = { ...existingPayload, notes };
+
+    const lead = await fastify.prisma.lead.update({
+      where: { id: request.params.id },
+      data: { rawPayload: updatedPayload },
     });
     return { lead };
   });

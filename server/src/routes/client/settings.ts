@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Prisma } from "@prisma/client";
+import { getBrokerCredits } from "../../services/credit-manager.service";
 
 export default async function clientSettingsRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -39,6 +40,7 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
       select: {
         callsThisMonth: true,
         callsLimit: true,
+        rolloverCalls: true,
         plan: true,
         planStatus: true,
         trialEndsAt: true,
@@ -49,10 +51,16 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
       return { error: "Client not found" };
     }
 
+    const credits = await getBrokerCredits(fastify.prisma, request.clientId!);
+
     return {
       callsThisMonth: client.callsThisMonth,
       callsLimit: client.callsLimit,
-      callsRemaining: client.callsLimit - client.callsThisMonth,
+      rolloverCalls: client.rolloverCalls,
+      totalAvailable: credits.totalAvailable,
+      totalRemaining: credits.totalRemaining,
+      usagePercent: credits.usagePercent,
+      needsWarning: credits.needsWarning,
       plan: client.plan,
       planStatus: client.planStatus,
       trialEndsAt: client.trialEndsAt,
@@ -112,7 +120,7 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
 
     const updated = await fastify.prisma.webhookSource.update({
       where: { id: webhook.id },
-      data: data as any,
+      data: data as Record<string, unknown>,
     });
 
     return { webhook: updated };

@@ -12,15 +12,14 @@
  * - GENERAL: Any other query → natural response
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { chatCompletion } from "./openrouter.service";
 import { sendTextMessage } from "./whatsapp.service";
 import { enqueueCall, enqueueNotification } from "../workers/queues";
 import { emitStatusChange } from "./websocket.service";
-
-const prisma = new PrismaClient();
+import { getChatbotLanguageInstruction, getChatbotFallbackMessage } from "../utils/templates";
 
 interface ChatbotResponse {
   intent: "CONFIRM_APPOINTMENT" | "RESCHEDULE" | "CANCEL" | "INTERESTED" | "GENERAL";
@@ -54,6 +53,31 @@ export async function handleIncomingMessage(
   const client = lead.client;
   const booking = lead.booking;
 
+  // ─── Fetch matching properties for the lead ─────────────────────
+  // This gives the chatbot real inventory to answer questions like
+  // "What 2BHK flats under 1Cr do you have?" instead of making up generic replies.
+  let propertyContext = "";
+  try {
+    const { suggestPropertiesForLead } = await import("./property-suggestion.service");
+    const matches = await suggestPropertiesForLead(client.id, lead.id);
+    if (matches.length > 0) {
+      propertyContext = "\nAvailable properties matching this lead:\n" + matches
+        .slice(0, 5)
+        .map((p, i) =>
+          `${i + 1}. ${p.propertyName}${p.propertyPrice ? ` — ₹${(p.propertyPrice / 100000).toFixed(1)}L` : ""}` +
+          `${p.propertyBedrooms ? `, ${p.propertyBedrooms} BHK` : ""}` +
+          `${p.propertyLocation ? `, ${p.propertyLocation}` : ""}` +
+          ` (${p.score}% match)`
+        )
+        .join("\n");
+    }
+  } catch {
+    // Non-critical — chatbot works without property data
+  }
+
+  // Use the broker's configured language preference for chatbot responses
+  const languageInstruction = getChatbotLanguageInstruction(client.language || "hinglish");
+
   // Build context for the AI model
   const contextMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
     {
@@ -68,20 +92,22 @@ Context:
 - Looking for: ${lead.propertyType || "property"} in ${lead.location || "their area"}
 ${booking ? `- Visit booked: ${booking.visitDate.toISOString().split("T")[0]} at ${booking.visitTime}` : "- No visit booked yet"}
 - Timeline: ${lead.timeline || "Not specified"}
+${propertyContext}
 
 Rules:
-1. Respond in Hinglish (mix Hindi + English naturally)
+1. ${languageInstruction}
 2. Be warm, helpful, and concise
 3. If they confirm a visit → say thank you and confirm
 4. If they want to reschedule → ask for preferred date/time
 5. If they cancel → acknowledge politely
 6. If interested → share enthusiasm and offer to book
-7. NEVER make up property details
+7. NEVER make up property details — use the available properties listed above to answer inventory questions
+8. If the lead asks about a specific property type/location/budget, recommend from the available properties list
 
 Respond with JSON:
 {
   "intent": "CONFIRM_APPOINTMENT|RESCHEDULE|CANCEL|INTERESTED|GENERAL",
-  "reply": "your natural response in Hinglish",
+  "reply": "your natural response following the language instruction",
   "action": {} // optional action data
 }`,
     },
@@ -136,10 +162,11 @@ Respond with JSON:
 
   } catch (error: any) {
     logger.error({ err: error.message, fromNumber }, "Chatbot processing failed");
-    // Fallback reply
+    // Fallback reply in the client's configured language
+    const fallbackText = getChatbotFallbackMessage(lead.name, client.language || "hinglish", client.ownerWhatsapp);
     await sendTextMessage({
       to: lead.phone,
-      text: `Namaste ${lead.name} ji! Aapka message mil gaya. Is waqt main aapko jald hi reply karunga. Koi urgent ho toh ${client.ownerWhatsapp} pe contact karein. 🙏`,
+      text: fallbackText,
       recipientType: "customer",
     });
   }

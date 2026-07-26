@@ -4,9 +4,8 @@
  * Tracks cost-per-lead by source, conversion rates, and source quality trending over time.
  */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Prisma } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 
 interface SourceROI {
   source: string;
@@ -138,6 +137,6 @@ export async function updateSourceCost(
 
   await prisma.client.update({
     where: { id: clientId },
-    data: { leadSources: sources as any },
+    data: { leadSources: sources as unknown as Prisma.InputJsonValue },
   });
 }

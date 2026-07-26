@@ -8,12 +8,11 @@
  * Supports scheduling (delayed sends) and A/B testing (variant winner selection).
  */
 
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { enqueueCampaignEmail, enqueueCampaignWinnerCheck } from "../workers/queues";
-
-const prisma = new PrismaClient();
 
 const DEFAULT_TEMPLATES = [
   {
@@ -183,7 +182,7 @@ export async function sendCampaign(
         aSent: 0,
         bSent: 0,
         winnerCheckAt: null,
-      }) as any : {},
+      } as Prisma.InputJsonValue) : {} as Prisma.InputJsonValue,
     },
   });
 
@@ -238,7 +237,7 @@ export async function sendCampaign(
           aSent: sampleCount,
           bSent: sampleCount,
           winnerCheckAt: winnerCheckAt.toISOString(),
-        }) as any,
+        }) as Prisma.InputJsonValue,
         totalRecipients: leads.length,
       },
     });
@@ -343,7 +342,7 @@ export async function checkABTestWinner(campaignId: string): Promise<{ winner: s
         aOpens,
         bOpens,
         winnerCheckAt: null,
-      }) as any,
+      }) as Prisma.InputJsonValue,
     },
   });
 

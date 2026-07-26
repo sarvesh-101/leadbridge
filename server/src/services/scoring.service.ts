@@ -16,10 +16,9 @@
  * and can be triggered on-demand from the frontend.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 import { logger } from "../utils/logger";
-
-const prisma = new PrismaClient();
 
 /**
  * Track a score change in the lead score history.
@@ -37,7 +36,7 @@ async function trackScoreHistory(
       data: {
         leadId,
         score,
-        factors: factors as unknown as any,
+        factors: factors as unknown as Prisma.InputJsonValue,
         source,
         reason: reason || null,
       },
@@ -476,7 +475,7 @@ export async function recordScoringOutcome(
       data: {
         leadId,
         score: lastScore.score,
-        factors: lastScore.factors as any,
+        factors: lastScore.factors as Prisma.InputJsonValue,
         source: "auto",
         reason: `OUTCOME:${outcome}|PREDICTION_CORRECT:${predictionCorrect}|SCORE_AT_PREDICTION:${lastScore.score}`,
       },

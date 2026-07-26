@@ -1,10 +1,8 @@
 import { Worker } from "bullmq";
-import { PrismaClient } from "@prisma/client";
 import { config } from "../config";
 import { WebhookRetryJob, enqueueCall, enqueueExtraction, enqueueNotification } from "./queues";
 import { logger } from "../utils/logger";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/prisma-shared";
 
 /**
  * WEBHOOK RETRY Worker — processes Omnidimension webhooks that arrived

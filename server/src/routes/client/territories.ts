@@ -107,6 +107,13 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
   }, async (request: FastifyRequest<{
     Body: { city: string; zone?: string };
   }>, reply: FastifyReply) => {
+    // Plan gate — exclusive territories require GROWTH+
+    const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
+    const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "territories");
+    if (!allowed) {
+      return reply.status(403).send(featureGateError("Exclusive territories", plan, requiredPlan));
+    }
+
     const { city, zone } = request.body;
 
     // Check if client already has a territory
@@ -180,6 +187,13 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
   }, async (request: FastifyRequest<{
     Body: { territoryId: string };
   }>, reply: FastifyReply) => {
+    // Plan gate — exclusive territories require GROWTH+
+    const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
+    const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "territories");
+    if (!allowed) {
+      return reply.status(403).send(featureGateError("Exclusive territories", plan, requiredPlan));
+    }
+
     const { territoryId } = request.body;
 
     const territory = await fastify.prisma.territory.findUnique({

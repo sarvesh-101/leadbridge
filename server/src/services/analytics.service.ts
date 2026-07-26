@@ -11,9 +11,8 @@
  * - Time-series forecasting (predicted next month performance)
  */
 
-import { PrismaClient, LeadStatus } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { LeadStatus } from "@prisma/client";
+import { prisma } from "../utils/prisma-shared";
 
 interface StageFunnel {
   stage: string;

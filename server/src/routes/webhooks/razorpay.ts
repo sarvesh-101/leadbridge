@@ -32,10 +32,54 @@ export default async function razorpayWebhookRoutes(fastify: FastifyInstance) {
         const razorpaySubId = subscription?.id as string | undefined;
 
         if (razorpaySubId) {
+          // Activate the client
           await fastify.prisma.client.updateMany({
             where: { razorpaySubId },
             data: { planStatus: "ACTIVE" },
           });
+
+          // FIX #8 (P2): Track trial → paid conversion only on FIRST payment
+          // We set convertedFromTrialAt only if it's null (never been paid before)
+          const newPayers = await fastify.prisma.client.findMany({
+            where: { razorpaySubId, convertedFromTrialAt: null },
+            select: { id: true, trialStartedAt: true },
+          });
+          for (const c of newPayers) {
+            await fastify.prisma.client.update({
+              where: { id: c.id },
+              data: { convertedFromTrialAt: new Date() },
+            });
+          }
+
+          // Mark the client's latest SENT invoice as PAID
+          const clients = await fastify.prisma.client.findMany({
+            where: { razorpaySubId },
+            select: { id: true },
+          });
+          for (const c of clients) {
+            const latestInvoice = await fastify.prisma.invoice.findFirst({
+              where: { clientId: c.id, status: "SENT" },
+              orderBy: { issueDate: "desc" },
+            });
+            if (latestInvoice) {
+              await fastify.prisma.invoice.update({
+                where: { id: latestInvoice.id },
+                data: { status: "PAID", paidAt: new Date() },
+              });
+              fastify.log.info({ invoiceId: latestInvoice.id, razorpaySubId }, "Invoice marked PAID on subscription.charged");
+
+              // FIX #2: Auto-generate GST invoice PDF
+              try {
+                const { generateGstInvoiceForInvoice } = await import("../../services/invoice.service");
+                generateGstInvoiceForInvoice(fastify.prisma, latestInvoice.id).catch((err: any) =>
+                  fastify.log.warn({ err: err.message, invoiceId: latestInvoice.id }, "GST invoice generation deferred")
+                );
+              } catch (err: any) {
+                fastify.log.warn({ err: err.message }, "GST invoice service not available");
+              }
+            }
+          }
+
           fastify.log.info({ razorpaySubId }, "Subscription charged — client activated");
         }
         break;
@@ -80,8 +124,31 @@ export default async function razorpayWebhookRoutes(fastify: FastifyInstance) {
 
       case "invoice.paid": {
         const payloadData = event.payload as Record<string, any> | undefined;
-        const invoice = payloadData?.invoice?.entity as Record<string, unknown> | undefined;
-        fastify.log.info({ invoiceId: invoice?.id }, "Invoice paid successfully");
+        const razorpayInvoice = payloadData?.invoice?.entity as Record<string, unknown> | undefined;
+        const invoiceId = razorpayInvoice?.id as string | undefined;
+        const subId = (razorpayInvoice?.subscription_id as string) || (razorpayInvoice?.subscriptionId as string) || undefined;
+        fastify.log.info({ invoiceId, subId }, "Invoice paid via Razorpay");
+
+        // Try to match by subscription ID (more reliable than providerInvoiceId)
+        if (subId) {
+          const clients = await fastify.prisma.client.findMany({
+            where: { razorpaySubId: subId },
+            select: { id: true },
+          });
+          for (const c of clients) {
+            const latestInvoice = await fastify.prisma.invoice.findFirst({
+              where: { clientId: c.id, status: "SENT" },
+              orderBy: { issueDate: "desc" },
+            });
+            if (latestInvoice) {
+              await fastify.prisma.invoice.update({
+                where: { id: latestInvoice.id },
+                data: { status: "PAID", paidAt: new Date() },
+              });
+              fastify.log.info({ invoiceId: latestInvoice.id, subId }, "Invoice marked PAID via invoice.paid webhook");
+            }
+          }
+        }
         break;
       }
     }
