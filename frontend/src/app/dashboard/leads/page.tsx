@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Plus, Download } from "lucide-react";
 import { LeadTable } from "../../../components/leads/LeadTable";
@@ -14,7 +15,7 @@ import { useAuthStore } from "../../../stores/auth.store";
 import { exportToCSV, EXPORT_HEADERS } from "../../../lib/csv-export";
 import { BulkActionBar } from "../../../components/leads/BulkActionBar";
 
-export default function LeadsPage() {
+function LeadsPageContent() {
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get("search") || "";
 
@@ -133,5 +134,13 @@ export default function LeadsPage() {
         }}
       />
     </div>
+  );
+}
+
+export default function LeadsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-[#4F6EF7] animate-spin" /></div>}>
+      <LeadsPageContent />
+    </Suspense>
   );
 }

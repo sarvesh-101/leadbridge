@@ -98,7 +98,7 @@ export default function AdminForwardingPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const totalBySource = data?.bySource || {};
+  const totalBySource = data?.bySourceFull || {};
   const smsCount = totalBySource["sms_forward"] || 0;
   const emailCount = totalBySource["email_forward"] || 0;
   const testCount = totalBySource["test_forward"] || 0;
@@ -121,7 +121,7 @@ export default function AdminForwardingPage() {
         <StatCard icon={Send} label="Total Forwarded" value={data?.summary.totalForwarded ?? "—"} sub={`${data?.summary.forwardedToday ?? 0} today`} color="from-blue-500 to-blue-600" loading={loading} />
         <StatCard icon={Smartphone} label="SMS Forwarded" value={smsCount} sub={`${emailCount} via email · ${testCount} test`} color="from-violet-500 to-violet-600" loading={loading} />
         <StatCard icon={Phone} label="Calls Made" value={data?.summary.forwardedCalled ?? "—"} sub={`${data?.summary.forwardedBooked ?? 0} booked visits`} color="from-amber-500 to-amber-600" loading={loading} />
-        <StatCard icon={TrendingUp} label="Conversion Rate" value={data?.summary.conversionRate ?? "—"} sub={`${data?.summary.forwardedConverted ?? 0} converted`} color="from-emerald-500 to-emerald-600" suffix="%" loading={loading} />
+        <StatCard icon={TrendingUp} label="Conversion Rate" value={data?.summary.conversionRate != null ? `${data.summary.conversionRate}%` : "—"} sub={`${data?.summary.forwardedConverted ?? 0} converted`} color="from-emerald-500 to-emerald-600" loading={loading} />
       </div>
 
       {/* Portal Source Breakdown & Status Funnel */}
