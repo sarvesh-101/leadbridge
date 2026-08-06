@@ -84,8 +84,8 @@ export default function ROISection() {
     {
       icon: IndianRupee,
       value: `₹${(annualSavings / 100000).toFixed(1)}L`,
-      label: "Annual savings",
-      subtext: "every year, guaranteed",
+      label: "Projected annual savings",
+      subtext: "based on the scenario above",
       positive: true,
     },
     {
@@ -111,7 +111,7 @@ export default function ROISection() {
           <span className="caption text-[#22D3A5] mb-4 block">ROI CALCULATOR</span>
           <h2 className="h1-text mb-4">See how much you save</h2>
           <p className="text-[16px] text-[#6B6B8A] max-w-[520px] mx-auto">
-            Replace telecallers with AI and get 3x more bookings at half the cost.
+            Estimate the impact of replacing telecallers with AI — based on the example scenario below.
           </p>
         </div>
 
@@ -189,7 +189,7 @@ export default function ROISection() {
             <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#22D3A5]/10 border border-[#22D3A5]/20">
               <IndianRupee className="w-4 h-4 text-[#22D3A5]" />
               <span className="text-[13px] font-semibold text-[#22D3A5]">
-                Save ₹{(monthlySavings / 1000).toFixed(0)}K/mo — that&apos;s ₹{(annualSavings / 100000).toFixed(1)}L/year
+                Illustrative: ₹{(monthlySavings / 1000).toFixed(0)}K/mo saved in this scenario — ₹{(annualSavings / 100000).toFixed(1)}L/year
               </span>
             </div>
           </div>

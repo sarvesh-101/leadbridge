@@ -166,6 +166,7 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
           await recordCallCost(fastify.prisma, {
             clientId: call.clientId,
             callId: call.id,
+            leadId: call.leadId || undefined,
             durationMinutes,
           }).catch((err: Error) => {
             fastify.log.warn({ err: err.message, callId: call.id }, "Failed to track call cost");

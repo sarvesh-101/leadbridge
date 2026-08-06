@@ -115,6 +115,13 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
       return reply.status(429).send({ error: "Monthly call limit reached. Upgrade your plan." });
     }
 
+    // FIX Round-2 #6: monthly leads cap (plan.leads)
+    const { checkMonthlyLeadsCapacity, monthlyLeadsCapError, tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+    const monthlyLeads = await checkMonthlyLeadsCapacity(fastify.prisma, clientId, client.plan);
+    if (!monthlyLeads.canIngest) {
+      return reply.status(429).send(monthlyLeadsCapError(monthlyLeads.limit));
+    }
+
     // Deduplicate — check same phone in last 30 days
     // Terminal leads (COLD/CONVERTED) are excluded — a cold lead from the
     // same person is a fresh opportunity, not a duplicate.
@@ -149,6 +156,9 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
         receivedAt: new Date(),
       },
     });
+
+    // FIX Round-2 #6: consume monthly leads allowance (race-safe)
+    await tryConsumeMonthlyLead(fastify.prisma, clientId, client.plan);
 
     // Enqueue immediate call
     await enqueueCall({

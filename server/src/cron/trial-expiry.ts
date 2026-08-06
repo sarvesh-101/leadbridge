@@ -50,7 +50,7 @@ Your LeadBridge trial period has ended.
 To continue receiving and managing AI-called leads, please upgrade to a paid plan.
 
 Here's what you get with Growth plan (₹35,000/month):
-• 300 AI calls per month
+• 500 AI calls per month
 • WhatsApp notifications
 • Territory exclusivity
 • Daily follow-up sequences

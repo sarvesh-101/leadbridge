@@ -3,11 +3,18 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 
+// Source of truth: server/src/routes/client/billing.ts → PLAN_DEFINITIONS
+// STARTER users 5 / leads 500 / calls 100 · GROWTH 15 / 3000 / 500 · PRO 50 / 50000 / unlimited
 const plans = [
   {
     name: "Starter",
     price: "₹18,000",
     calls: "100 AI calls",
+    users: "5",
+    leads: "500",
+    dedicatedNumber: false,
+    followups: "3-day",
+    support: "Basic",
     features: [
       "Full qualification + booking",
       "WhatsApp notifications",
@@ -19,7 +26,12 @@ const plans = [
   {
     name: "Growth",
     price: "₹35,000",
-    calls: "300 AI calls",
+    calls: "500 AI calls",
+    users: "15",
+    leads: "3,000",
+    dedicatedNumber: true,
+    followups: "3-day",
+    support: "Priority",
     features: [
       "Full qualification + booking",
       "WhatsApp notifications",
@@ -34,6 +46,11 @@ const plans = [
     name: "Pro",
     price: "₹60,000",
     calls: "Unlimited calls",
+    users: "50",
+    leads: "50,000",
+    dedicatedNumber: true,
+    followups: "7-day",
+    support: "Account manager",
     features: [
       "Full qualification + booking",
       "WhatsApp notifications",
@@ -44,6 +61,18 @@ const plans = [
     ],
     popular: false,
   },
+];
+
+// Comparison table rows shared with the plan cards (kept in sync with the
+// `plans` array above — mirrors PLAN_DEFINITIONS in the server).
+const compareRows = [
+  { label: "AI calls / month", get: (p: (typeof plans)[number]) => p.calls },
+  { label: "Team users", get: (p: (typeof plans)[number]) => p.users },
+  { label: "Leads managed / month", get: (p: (typeof plans)[number]) => p.leads },
+  { label: "Dedicated calling number", get: (p: (typeof plans)[number]) => p.dedicatedNumber },
+  { label: "Follow-up automation", get: (p: (typeof plans)[number]) => p.followups },
+  { label: "Support", get: (p: (typeof plans)[number]) => p.support },
+  { label: "White-label option", get: (p: (typeof plans)[number]) => p.name === "Pro" },
 ];
 
 export default function PricingSection() {
@@ -117,7 +146,26 @@ export default function PricingSection() {
                   {plan.price}
                   <span className="text-[15px] text-[#6B6B8A] font-sans font-normal">/mo</span>
                 </div>
-                <ul className="mt-8 space-y-3">
+
+                {/* Stat chips: users / leads / dedicated number */}
+                <div className="mt-6 grid grid-cols-3 gap-2">
+                  <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-2.5 text-center">
+                    <p className="text-[16px] font-bold text-[#F0F0F8] leading-none">{plan.users}</p>
+                    <p className="text-[10px] text-[#6B6B8A] uppercase tracking-wide mt-1.5">Users</p>
+                  </div>
+                  <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-2.5 text-center">
+                    <p className="text-[16px] font-bold text-[#F0F0F8] leading-none">{plan.leads}</p>
+                    <p className="text-[10px] text-[#6B6B8A] uppercase tracking-wide mt-1.5">Leads</p>
+                  </div>
+                  <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-2.5 text-center">
+                    <p className="text-[16px] font-bold leading-none" style={{ color: plan.dedicatedNumber ? "#22D3A5" : "#4A4A5A" }}>
+                      {plan.dedicatedNumber ? "✓" : "—"}
+                    </p>
+                    <p className="text-[10px] text-[#6B6B8A] uppercase tracking-wide mt-1.5">Number</p>
+                  </div>
+                </div>
+
+                <ul className="mt-6 space-y-3">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex items-center gap-3 text-[14px] text-[#6B6B8A]">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
@@ -141,6 +189,52 @@ export default function PricingSection() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* ─── Plan comparison table ─────────────────────────────── */}
+        <div className="mt-20">
+          <h3 className="text-[20px] font-semibold text-[#F0F0F8] text-center mb-8">Compare every plan</h3>
+          <div className="overflow-x-auto rounded-2xl border border-[#2A2A3A] bg-[#111118]">
+          <div className="min-w-[640px]">
+            <div className="grid grid-cols-4 gap-0 border-b border-[#2A2A3A]">
+              <div className="px-6 py-4">
+                <span className="text-[11px] font-semibold text-[#6B6B8A] uppercase tracking-[0.08em]">Feature</span>
+              </div>
+              {plans.map((p) => (
+                <div key={p.name} className={`px-6 py-4 ${p.popular ? "bg-[#4F6EF7]/5" : ""} ${p.name !== "Starter" ? "border-l border-[#2A2A3A]" : ""}`}>
+                  <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${p.popular ? "text-[#4F6EF7]" : "text-[#F0F0F8]"}`}>{p.name}</span>
+                </div>
+              ))}
+            </div>
+            {compareRows.map((row, i) => (
+              <div key={row.label} className={`grid grid-cols-4 gap-0 ${i < compareRows.length - 1 ? "border-b border-[#2A2A3A]" : ""} hover:bg-[#1A1A24] transition-colors`}>
+                <div className="px-6 py-4 flex items-center">
+                  <span className="text-[13px] text-[#F0F0F8]">{row.label}</span>
+                </div>
+                {plans.map((p) => {
+                  const val = row.get(p);
+                  return (
+                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 ${p.popular ? "bg-[#4F6EF7]/5" : ""} ${p.name !== "Starter" ? "border-l border-[#2A2A3A]" : ""}`}>
+                      {typeof val === "boolean" ? (
+                        val ? (
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
+                            <circle cx="8" cy="8" r="6" fill="#22D3A5" fillOpacity="0.2" />
+                            <path d="M5 8l2 2 4-4" stroke="#22D3A5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        ) : (
+                          <span className="text-[14px] text-[#4A4A5A]">—</span>
+                        )
+                      ) : (
+                        <span className={`text-[13px] font-medium ${p.popular ? "text-[#22D3A5]" : "text-[#6B6B8A]"}`}>{val}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          </div>
+          <p className="text-center text-[12px] text-[#4A4A5A] mt-4">All plans include full qualification, booking automation, WhatsApp notifications, and follow-up sequences. 18% GST applies.</p>
         </div>
       </div>
     </section>

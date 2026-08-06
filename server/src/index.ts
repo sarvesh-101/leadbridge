@@ -73,6 +73,7 @@ import adminWebhookRoutes from "./routes/admin/webhooks";
 import customerRoutes from "./routes/customer";
 import metricsRoutes from "./routes/metrics";
 import demoRoutes from "./routes/demo";
+import publicRoutes from "./routes/public";
 // ─── Cron Jobs ────────────────────────────────────────────────
 import { registerCronJobs } from "./cron/scheduler";
 
@@ -92,6 +93,7 @@ import webhookRetryWorker from "./workers/webhook-retry.worker";
 
 import { getCircuitState } from "./utils/circuit-breaker";
 import { disconnectPrisma } from "./utils/prisma-shared";
+import { captureError } from "./utils/error-reporting";
 import trackingRoutes from "./routes/tracking";
 import adminCreditRoutes from "./routes/admin/credits";
 import adminRevenueRoutes from "./routes/admin/revenue-recognition";
@@ -338,6 +340,9 @@ export async function buildServer() {
   // Auth (public)
   await server.register(authRoutes, { prefix: apiPrefix });
 
+  // Public landing-page stats (no auth — aggregate numbers only)
+  await server.register(publicRoutes, { prefix: apiPrefix });
+
   // Admin routes
   await server.register(adminDashboardRoutes, { prefix: apiPrefix });
   await server.register(adminClientRoutes, { prefix: apiPrefix });
@@ -388,6 +393,16 @@ export async function buildServer() {
   await server.register(webhookSourcesRoutes, { prefix: apiPrefix });
 
   // Demo mode routes (only when DEMO_MODE=true)
+  // ─── HARD GUARD: DEMO MODE IS NOT ALLOWED IN PRODUCTION ──────
+  // Demo mode fabricates calls, transcripts, bookings and numbers. Letting it
+  // run in production means brokers get billed for calls that never happened.
+  if (config.DEMO_MODE && config.NODE_ENV === "production") {
+    logger.error("❌ REFUSING TO START: DEMO_MODE=true with NODE_ENV=production.");
+    logger.error("   Demo mode fabricates all external API activity and must never run in production.");
+    logger.error("   Set DEMO_MODE=false before deploying.");
+    process.exit(1);
+  }
+
   if (config.DEMO_MODE) {
     await server.register(demoRoutes, { prefix: apiPrefix });
     logger.info("🎯 DEMO MODE enabled — all external APIs simulated");
@@ -434,6 +449,7 @@ export async function buildServer() {
   // ─── Error Handler ─────────────────────────────────────────
   server.setErrorHandler((error, _request, reply) => {
     logger.error({ err: error.message, stack: error.stack }, "Unhandled error");
+    captureError(error, { route: _request.url, method: _request.method });
 
     if (error.statusCode === 429) {
       return reply.status(429).send({
@@ -527,6 +543,37 @@ async function validateEnvironment(): Promise<void> {
   // Validate phone provider-specific vars
   if (config.PHONE_PROVIDER === "twilio" && !config.TWILIO_ACCOUNT_SID) {
     logger.warn("⚠️  PHONE_PROVIDER=twilio but TWILIO_ACCOUNT_SID not set. Phone number features will be unavailable.");
+  }
+
+  // ─── FAIL-LOUD WARNINGS: optional integrations that are missing ─
+  // The server can boot, but these features will be disabled or fail silently.
+  // Listing them at startup makes the current state unmistakable.
+  const optionalChecks: Array<{ key: string; label: string; configured: boolean }> = [
+    { key: "WHATSAPP_TOKEN", label: "WhatsApp Cloud API", configured: !!(config.WHATSAPP_TOKEN && config.WHATSAPP_PHONE_ID) },
+    { key: "RAZORPAY_KEY_ID", label: "Razorpay payments", configured: !!(config.RAZORPAY_KEY_ID && config.RAZORPAY_KEY_SECRET && config.RAZORPAY_PLAN_STARTER) },
+    { key: "OPENROUTER_API_KEY", label: "AI transcript analysis / scripts / chatbot (OpenRouter)", configured: !!config.OPENROUTER_API_KEY || !!config.DEEPSEEK_API_KEY },
+    { key: "FORWARDING_SMS_NUMBER", label: "SMS lead forwarding", configured: !!config.FORWARDING_SMS_NUMBER },
+    { key: "FORWARDING_EMAIL", label: "Email lead forwarding", configured: !!config.FORWARDING_EMAIL },
+    { key: "SUPABASE_URL", label: "Call recording storage", configured: !!(config.SUPABASE_URL && config.SUPABASE_SERVICE_KEY) },
+    { key: "MESSAGEBIRD_API_KEY", label: "SMS fallback", configured: !!config.MESSAGEBIRD_API_KEY },
+    { key: "ENCRYPTION_KEY", label: "Credential encryption at rest", configured: !!config.ENCRYPTION_KEY },
+    // CRITICAL for real calls: without WEBHOOK_URL, the webhook URL registered on
+    // Omni agents falls back to the request hostname (unreliable behind a proxy),
+    // so completed-call events 404 → cost tracking + lead qualification never fire.
+    ...(config.OMNIDIM_API_KEY ? [{ key: "WEBHOOK_URL", label: "Omnidimension call-events webhook (real calls log cost)", configured: !!config.WEBHOOK_URL }] : []),
+  ];
+
+  const missing = optionalChecks.filter((c2) => !c2.configured);
+  if (missing.length > 0) {
+    logger.warn("");
+    logger.warn("╔═══════════════════════════════════════════════════════════╗");
+    logger.warn("║  ⚠️  UNCONFIGURED INTEGRATIONS                          ║");
+    logger.warn("║  These features will be DISABLED or fail silently:      ║");
+    for (const m of missing) {
+      logger.warn(`║   • ${m.label.padEnd(46)} (set ${m.key})  ║`);
+    }
+    logger.warn("╚═══════════════════════════════════════════════════════════╝");
+    logger.warn("");
   }
 
   logger.info("✅ Environment validation passed");
@@ -645,6 +692,7 @@ process.on("unhandledRejection", (reason: unknown, promise: Promise<unknown>) =>
     { err: reason instanceof Error ? reason.message : String(reason), stack: reason instanceof Error ? reason.stack : undefined },
     "UNHANDLED PROMISE REJECTION — process continuing"
   );
+  captureError(reason instanceof Error ? reason : new Error(String(reason)));
 });
 
 process.on("uncaughtException", (error: Error) => {
@@ -652,6 +700,7 @@ process.on("uncaughtException", (error: Error) => {
     { err: error.message, stack: error.stack },
     "UNCAUGHT EXCEPTION — process will exit"
   );
-  // Give logger time to flush, then exit
-  setTimeout(() => process.exit(1), 1000);
+  captureError(error);
+  // Give logger + error reporter time to flush, then exit
+  setTimeout(() => process.exit(1), 2000);
 });

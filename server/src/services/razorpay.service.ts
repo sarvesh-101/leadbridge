@@ -47,6 +47,11 @@ export async function createSubscription(params: {
       plan_id: params.planId,
       customer_notify: 1,
       total_count: params.totalCount,
+      // REQUIRED — without start_at Razorpay returns a generic "Validation failed"
+      // (verified live on 2026-08-04: every payload variant 400'd until start_at added).
+      // start_at = now → the subscription begins immediately (trial_period_days still
+      // applies on top for the STARTER trial).
+      start_at: Math.floor(Date.now() / 1000),
       ...(params.trialDays ? { trial_period_days: params.trialDays } : {}),
       notes: {
         customer_email: params.customerEmail,
@@ -112,13 +117,34 @@ export async function refundPayment(
 
 /**
  * Verify Razorpay webhook signature.
+ * Safe-guarded: returns false (never throws) when the secret is missing or the
+ * signature is empty/malformed, so an unconfigured webhook can't crash the route.
  */
 export function verifyWebhookSignature(payload: string, signature: string): boolean {
-  const expected = crypto
-    .createHmac("sha256", config.RAZORPAY_WEBHOOK_SECRET || "")
-    .update(payload)
-    .digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  const secret = config.RAZORPAY_WEBHOOK_SECRET || "";
+  if (!secret || !signature) {
+    logger.warn({ hasSecret: !!secret, hasSignature: !!signature }, "Razorpay webhook signature check skipped — secret or signature missing");
+    return false;
+  }
+
+  try {
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
+
+    const expectedBuf = Buffer.from(expected);
+    const signatureBuf = Buffer.from(signature);
+
+    // timingSafeEqual throws on length mismatch — return false instead of crashing
+    if (expectedBuf.length !== signatureBuf.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(expectedBuf, signatureBuf);
+  } catch (err: any) {
+    logger.error({ err: err.message }, "Razorpay webhook signature verification error");
+    return false;
+  }
 }
 
 /**

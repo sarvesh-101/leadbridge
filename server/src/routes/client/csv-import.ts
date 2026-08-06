@@ -214,12 +214,19 @@ export default async function csvImportRoutes(fastify: FastifyInstance) {
     const existingPhoneSet = new Set(existingLeads.map((l) => l.phone));
     const toImport = validRows.filter((r) => !existingPhoneSet.has(r.phone));
 
+    // FIX Round-2 #6: cap import to remaining monthly leads allowance
+    const { checkMonthlyLeadsCapacity } = await import("../../utils/lead-limits");
+    const monthly = await checkMonthlyLeadsCapacity(fastify.prisma, clientId, client.plan);
+    const remainingSlots = Math.max(0, monthly.limit - monthly.used);
+    const cappedByPlan = Math.max(0, toImport.length - remainingSlots);
+    const toImportCapped = remainingSlots > 0 ? toImport.slice(0, remainingSlots) : [];
+
     // Import in batches of 50
     let imported = 0;
     const batchSize = 50;
 
-    for (let i = 0; i < toImport.length; i += batchSize) {
-      const batch = toImport.slice(i, i + batchSize);
+    for (let i = 0; i < toImportCapped.length; i += batchSize) {
+      const batch = toImportCapped.slice(i, i + batchSize);
       const leads = await Promise.all(
         batch.map((row) =>
           fastify.prisma.lead.create({
@@ -260,11 +267,26 @@ export default async function csvImportRoutes(fastify: FastifyInstance) {
       }
     }
 
+    // FIX Round-2 #6 (reviewer): consume the allowance AFTER the import actually
+    // succeeds, by the exact number imported — never pre-counts rows that fail.
+    // Guarded updateMany (leadsThisMonth: { lte: limit - imported }) is race-safe
+    // against concurrent webhook ingestion, matching tryConsumeMonthlyLead's
+    // atomic pattern. If it returns 0 the cap was already crossed by a concurrent
+    // path — stored leads stay (P0-3: never drop data, cap exceeded by at most
+    // the concurrent in-flight leads).
+    if (imported > 0) {
+      await fastify.prisma.client.updateMany({
+        where: { id: clientId, leadsThisMonth: { lte: monthly.limit - imported } },
+        data: { leadsThisMonth: { increment: imported } },
+      });
+    }
+
     return {
       imported,
       skipped: validRows.length - imported,
+      cappedByPlan,
       total: toImport.length,
-      message: `Imported ${imported} leads successfully`,
+      message: `Imported ${imported} leads successfully` + (cappedByPlan > 0 ? ` (${cappedByPlan} skipped — monthly lead limit reached)` : ""),
     };
   });
 

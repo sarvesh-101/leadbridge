@@ -253,6 +253,22 @@ async function pullFromSheet(
     let pulled = 0;
     let lastProcessedIndex = 0;
 
+    // FIX Round-2 #6: enforce the monthly leads cap (plan.leads) on Sheets pulls
+    // too — every ingestion path must respect it, otherwise the cap is pointless.
+    const { checkMonthlyLeadsCapacity, tryConsumeMonthlyLead } = await import("../utils/lead-limits");
+    const planClient = await prisma.client.findUnique({
+      where: { id: clientId },
+      select: { plan: true },
+    });
+    const plan = planClient?.plan || "GROWTH";
+
+    // Short-circuit: already at/over the cap? Don't even read the rows.
+    const headroom = await checkMonthlyLeadsCapacity(prisma, clientId, plan);
+    if (!headroom.canIngest) {
+      logger.warn({ clientId }, `Sheets pull skipped — monthly lead limit (${headroom.limit}) reached`);
+      return 0;
+    }
+
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const name = row[0]?.trim();
@@ -319,7 +335,19 @@ async function pullFromSheet(
         attempt: 1,
       });
 
+      // The lead is stored regardless of the cap outcome (P0-3: never drop
+      // data) — count it before the consume check so stats stay accurate even
+      // when the pull stops mid-way (the 1-lead cap overage is documented).
       pulled++;
+
+      // FIX Round-2 #6: consume one slot of the monthly leads allowance
+      // (race-safe guard). If the cap was just hit by a concurrent ingestion,
+      // stop pulling — the stored lead is the documented 1-lead overage.
+      const consumed = await tryConsumeMonthlyLead(prisma, clientId, plan);
+      if (!consumed) {
+        logger.warn({ clientId }, `Sheets pull stopped — monthly lead limit (${headroom.limit}) reached mid-pull`);
+        break;
+      }
     }
 
     // Update lastSyncRow: advance by the LAST actual row index we processed

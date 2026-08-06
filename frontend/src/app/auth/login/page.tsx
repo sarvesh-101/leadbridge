@@ -23,6 +23,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // FIX Round-2 #3: account exists but email not verified — show resend prompt
+  const [verificationRequired, setVerificationRequired] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resendFailed, setResendFailed] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
 
   const handleGoogleCredential = useCallback(async (response: { credential: string }) => {
@@ -98,8 +103,29 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
+      // FIX Round-2 #3: server flags unverified accounts (403 + verificationRequired)
+      if (err?.data?.verificationRequired) {
+        setVerificationRequired(true);
+        setResendSent(false);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    setResendSent(false);
+    setResendFailed(false);
+    try {
+      const res = await api.post("/auth/resend-verification", { email }, { skipAuth: true });
+      setResendSent(true);
+      // FIX Round-2 #3 (reviewer): server tells us if SMTP actually sent it
+      setResendFailed(res.emailSent === false);
+    } catch (err: any) {
+      setError(err.message || "Could not resend verification email");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -161,7 +187,7 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
+            {error && !verificationRequired && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -169,6 +195,42 @@ export default function LoginPage() {
               >
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 {error}
+              </motion.div>
+            )}
+
+            {/* FIX Round-2 #3: email verification prompt */}
+            {verificationRequired && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-[13px]"
+              >
+                <div className="flex items-start gap-2">
+                  <Mail className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#F59E0B]" />
+                  <div>
+                    <p className="text-[#F0F0F8] font-medium mb-1">Verify your email</p>
+                    <p className="text-[#6B6B8A] leading-relaxed mb-2">
+                      Check <span className="text-[#F0F0F8]">{email || "your inbox"}</span> for the
+                      verification link we sent when you signed up.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={resending}
+                        className="px-3 py-1.5 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[12px] font-semibold text-[#F0F0F8] hover:border-[#F59E0B] transition-colors"
+                      >
+                        {resending ? "Sending…" : "Resend email"}
+                      </button>
+                      {resendSent && !resendFailed && (
+                        <span className="text-[12px] text-[#22D3A5]">✓ Sent again</span>
+                      )}
+                      {resendFailed && (
+                        <span className="text-[12px] text-[#F59E0B]">Could not send — retry in a minute</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             )}
 

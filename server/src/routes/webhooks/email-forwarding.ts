@@ -107,6 +107,7 @@ export default async function emailForwardingRoutes(fastify: FastifyInstance) {
         planStatus: true,
         callsThisMonth: true,
         callsLimit: true,
+        leadsThisMonth: true,
         email: true,
       },
     });
@@ -133,12 +134,28 @@ export default async function emailForwardingRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({ status: "ignored", reason: "unparseable" });
     }
 
-    // ─── Check call limits ─────────────────────────────────────
-    if (client.plan !== "PRO" && client.callsThisMonth >= client.callsLimit) {
-      logger.warn({ clientId: client.id, callsThisMonth: client.callsThisMonth, requestId },
-        "[EMAIL] Broker call limit reached");
-      return reply.status(200).send({ status: "ignored", reason: "limit_reached" });
+    // FIX Round-2 #6: monthly leads cap (plan.leads)
+    const { checkMonthlyLeadsCapacity, tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+    const monthlyLeads = await checkMonthlyLeadsCapacity(fastify.prisma, client.id, client.plan);
+    if (!monthlyLeads.canIngest) {
+      // FIX Round-2 #6 (reviewer): don't drop silently — tell the broker why.
+      logger.warn({ clientId: client.id, requestId }, "[EMAIL] Forwarded email ignored — monthly lead limit reached");
+      fastify.prisma.ownerNotification.create({
+        data: {
+          clientId: client.id,
+          type: "LEAD_LIMIT",
+          message: `A forwarded email lead (${parsed.name || "new lead"}) was not added — your monthly lead limit (${monthlyLeads.limit}) is reached. Upgrade your plan to add more leads.`,
+          status: "sent",
+          sentAt: new Date(),
+        },
+      }).catch(() => {});
+      return reply.status(200).send({ status: "ignored", reason: "monthly_limit" });
     }
+
+    // FIX P0-3: Call quota check — leads are ALWAYS stored. If the broker is
+    // out of monthly calls, the lead is kept and only the auto-call is skipped
+    // (with an owner notification), instead of silently dropping forwarded emails.
+    const callAllowed = client.plan === "PRO" || client.callsThisMonth < client.callsLimit;
 
     // ─── Create lead with distributed lock ───────────────────────
     const dedupLockId = `dedup:${client.id}:${parsed.phone}`;
@@ -222,6 +239,9 @@ export default async function emailForwardingRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({ status: "error", reason: "creation_failed" });
     }
 
+    // FIX Round-2 #6: consume monthly leads allowance (race-safe)
+    await tryConsumeMonthlyLead(fastify.prisma, client.id, client.plan);
+
     logger.info({ clientId: client.id, leadId: lead.id, phone: parsed.phone, source: parsed.source, requestId },
       `[EMAIL] Lead created from forwarded email`);
 
@@ -241,12 +261,26 @@ export default async function emailForwardingRoutes(fastify: FastifyInstance) {
       })(),
       (async () => {
         try {
-          await enqueueCall({
-            leadId: lead.id,
-            clientId: client.id,
-            callType: "QUALIFICATION",
-            attempt: 1,
-          });
+          if (callAllowed) {
+            await enqueueCall({
+              leadId: lead.id,
+              clientId: client.id,
+              callType: "QUALIFICATION",
+              attempt: 1,
+            });
+          } else {
+            await fastify.prisma.ownerNotification.create({
+              data: {
+                clientId: client.id,
+                leadId: lead.id,
+                type: "CALL_SKIPPED_LIMIT",
+                message: `New forwarded email lead (${parsed.name}) received — AI call skipped because your monthly call limit is reached. Upgrade to resume AI calls.`,
+                status: "sent",
+                sentAt: new Date(),
+              },
+            }).catch(() => {});
+            logger.warn({ clientId: client.id, leadId: lead.id, requestId }, "[EMAIL] Lead stored but AI call skipped — call limit reached");
+          }
         } catch { /* non-blocking */ }
       })(),
       (async () => {

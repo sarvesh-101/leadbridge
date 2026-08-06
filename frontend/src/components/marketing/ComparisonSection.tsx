@@ -64,10 +64,10 @@ export default function ComparisonSection() {
     <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0A0F]" id="comparison">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="caption text-[#F43F5E] mb-4 block">THE NUMBERS DON&apos;T LIE</span>
+          <span className="caption text-[#F43F5E] mb-4 block">HEAD-TO-HEAD</span>
           <h2 className="h1-text mb-4">LeadBridge vs. Traditional Telecaller</h2>
           <p className="text-[16px] text-[#6B6B8A] max-w-[520px] mx-auto">
-            See how AI calling compares to the old way of doing things. The difference is stark.
+            A capability comparison — what each approach offers. Results vary by broker and market.
           </p>
         </div>
 
@@ -109,7 +109,7 @@ export default function ComparisonSection() {
         {/* Savings Callout */}
         <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-[#22D3A5]/5 to-[#4F6EF7]/5 border border-[#22D3A5]/10 text-center">
           <p className="text-[15px] text-[#F0F0F8] font-medium">
-            💰 Replace 2 telecallers (₹50K/mo) with LeadBridge Growth (₹35K/mo) — <span className="text-[#22D3A5]">save ₹15K/mo</span> while handling <span className="text-[#22D3A5]">3x more leads</span>
+            💰 Example: 2 telecallers (₹50K/mo) vs LeadBridge Growth (₹35K/mo) — <span className="text-[#22D3A5]">about ₹15K/mo less</span> in this scenario
           </p>
         </div>
       </div>

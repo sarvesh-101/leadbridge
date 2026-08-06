@@ -1,12 +1,7 @@
-import { BillingCycle, Plan, PlanStatus } from "@prisma/client";
+import { Plan } from "@prisma/client";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { createSubscription, getPlanIds, cancelSubscription as cancelRazorpaySub, refundPayment } from "../../services/razorpay.service";
-
-const PLAN_DEFINITIONS: Record<string, { name: string; monthly: number; yearly: number; users: number; leads: number; calls: number }> = {
-  STARTER: { name: "Starter", monthly: 18000, yearly: 180000, users: 5, leads: 500, calls: 100 },
-  GROWTH: { name: "Growth", monthly: 35000, yearly: 350000, users: 15, leads: 3000, calls: 500 },
-  PRO: { name: "Pro", monthly: 60000, yearly: 600000, users: 50, leads: 50000, calls: 999999 },
-};
+import { cancelSubscription as cancelRazorpaySub, refundPayment } from "../../services/razorpay.service";
+import { PLAN_DEFINITIONS, createSubscriptionCheckout, getRazorpayPlanIdForTier } from "../../services/subscription.service";
 
 export default async function clientBillingRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -79,7 +74,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         required: ["planTier"],
         properties: {
           planTier: { type: "string", enum: ["STARTER", "GROWTH", "PRO"] },
-          billingCycle: { type: "string", enum: ["MONTHLY", "YEARLY"] },
+          billingCycle: { type: "string", enum: ["MONTHLY"] },
         },
       },
     },
@@ -94,108 +89,26 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "Invalid plan tier" });
     }
 
-    const isYearly = billingCycle === "YEARLY";
-    const amount = isYearly ? plan.yearly : plan.monthly;
-    const now = new Date();
-    const endDate = new Date(now);
-    endDate.setDate(endDate.getDate() + (isYearly ? 365 : 30));
+    // ⚠️ MONTHLY-ONLY billing for now. Yearly is disabled: it previously sent
+    // the monthly Razorpay plan with totalCount 12, which would overcharge a
+    // yearly customer (e.g. ₹18,000 × 12 ≠ ₹1,80,000). Re-enable only when
+    // separate yearly Razorpay plans are wired into the plan ID map.
+    if (billingCycle !== "MONTHLY") {
+      return reply.status(400).send({ error: "Yearly billing is not available yet. Please choose monthly billing." });
+    }
 
     // Get client info for Razorpay
     const client = await fastify.prisma.client.findUnique({
       where: { id: clientId },
-      select: { email: true, phone: true, ownerName: true, trialStartedAt: true },
+      select: { id: true, email: true, phone: true, ownerName: true, trialStartedAt: true },
     });
     if (!client) {
       return reply.status(404).send({ error: "Client not found" });
     }
 
-    // ─── Create Razorpay subscription FIRST ─────────────────────
-    const planIds = getPlanIds();
-    const planIdMap: Record<string, string> = {
-      STARTER: planIds.starter,
-      GROWTH: planIds.growth,
-      PRO: planIds.pro,
-    };
-    const razorpayPlanId = planIdMap[planTier];
-
-    let razorpaySubId: string | null = null;
-    let paymentUrl: string | null = null;
-
-    if (razorpayPlanId) {
-      try {
-        const rzpSub = await createSubscription({
-          planId: razorpayPlanId,
-          customerEmail: client.email,
-          customerPhone: client.phone,
-          customerName: client.ownerName,
-          totalCount: isYearly ? 12 : 12,
-          trialDays: planTier === "STARTER" ? 14 : 0,
-        });
-        razorpaySubId = rzpSub.id;
-        paymentUrl = rzpSub.shortUrl;
-      } catch (err: any) {
-        fastify.log.warn({ err: err.message, planTier }, "Razorpay subscription creation failed — will retry via webhook");
-      }
-    } else {
-      fastify.log.warn({ planTier }, "No Razorpay plan ID configured — subscription will not be charged");
-    }
-
-    // Cancel any existing active subscriptions
-    await fastify.prisma.subscription.updateMany({
-      where: { clientId, status: { in: ["ACTIVE", "TRIAL"] } },
-      data: { status: "CANCELLED", cancelledAt: now },
-    });
-
-    // Create subscription in database with Razorpay ID
-    const subscription = await fastify.prisma.subscription.create({
-      data: {
-        clientId,
-        planName: plan.name,
-        planTier,
-        billingCycle: billingCycle as BillingCycle,
-        status: razorpaySubId ? "ACTIVE" : "PENDING",
-        amount,
-        totalAmount: amount,
-        startDate: now,
-        endDate,
-        features: { maxUsers: plan.users, maxLeads: plan.leads, maxCalls: plan.calls },
-        limits: { users: plan.users, leads: plan.leads, calls: plan.calls },
-        autoRenew: true,
-        providerSubscriptionId: razorpaySubId,
-      },
-    });
-
-    // Update client plan info
-    await fastify.prisma.client.update({
-      where: { id: clientId },
-      data: {
-        plan: planTier as Plan,
-        planStatus: razorpaySubId ? PlanStatus.ACTIVE : PlanStatus.TRIAL,
-        callsLimit: plan.calls,
-        razorpaySubId: razorpaySubId || undefined,
-        // Track trial start if this is the first sub
-        trialStartedAt: client.trialStartedAt || now,
-        // Track trial → paid conversion if they were on trial
-        ...(planTier !== "STARTER" && client.trialStartedAt ? { convertedFromTrialAt: now } : {}),
-      },
-    });
-
-    // Create initial invoice as SENT
-    const invoiceNumber = `INV-${Date.now()}-${clientId.slice(-4)}`;
-    await fastify.prisma.invoice.create({
-      data: {
-        clientId,
-        subscriptionId: subscription.id,
-        invoiceNumber,
-        status: "SENT",
-        description: `${plan.name} (${isYearly ? "Yearly" : "Monthly"})`,
-        amount,
-        totalAmount: amount,
-        issueDate: now,
-        dueDate: endDate,
-        periodStart: now,
-        periodEnd: endDate,
-      },
+    // ─── Shared checkout flow (single source of truth — subscription.service.ts) ──
+    const { subscription, paymentUrl } = await createSubscriptionCheckout(fastify, client, planTier, {
+      billingCycle,
     });
 
     return reply.status(201).send({
@@ -442,6 +355,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         callsThisMonth: true,
         callsLimit: true,
         rolloverCalls: true,
+        leadsThisMonth: true,
         lastUsageAlertSentAt: true,
         usageAlertLevel: true,
         dunningStep: true,
@@ -459,6 +373,9 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       ? Math.round((client.callsThisMonth / totalAvailable) * 100)
       : 0;
 
+    // FIX Round-2 #6: real monthly leads usage vs plan cap
+    const { getMonthlyLeadsLimit } = await import("../../utils/lead-limits");
+
     return {
       plan: client.plan,
       planStatus: client.planStatus,
@@ -470,6 +387,8 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         callsThisMonth: client.callsThisMonth,
         callsLimit: client.callsLimit,
         rolloverCalls: client.rolloverCalls,
+        leadsThisMonth: client.leadsThisMonth,
+        leadsLimit: getMonthlyLeadsLimit(client.plan),
         totalAvailable,
         totalRemaining,
         usagePercent,
@@ -490,6 +409,12 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
   });
 
   // ─── Upgrade Plan (legacy compatibility) ──────────────────────
+  // FIX #10 (P0): Now mirrors the modern POST /subscriptions path — creates a
+  // Subscription DB record + SENT invoice, cancels prior active subs, and sets
+  // callsLimit. Previously it only updated client.razorpaySubId, leaving NO
+  // Subscription row — which silently broke POST /subscriptions/cancel ("No
+  // active subscription found" → no cancel/refund possible) and left brokers
+  // with an empty invoice list for the upgrade charge.
   fastify.post("/billing/upgrade", async (request: FastifyRequest<{
     Body: { plan: "STARTER" | "GROWTH" | "PRO" };
   }>, reply: FastifyReply) => {
@@ -501,39 +426,25 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       return reply.status(404).send({ error: "Client not found" });
     }
 
-    const planIds = getPlanIds();
-    const planIdMap: Record<string, string> = {
-      STARTER: planIds.starter,
-      GROWTH: planIds.growth,
-      PRO: planIds.pro,
-    };
-
-    const razorpayPlanId = planIdMap[request.body.plan];
-    if (!razorpayPlanId) {
+    const plan = PLAN_DEFINITIONS[request.body.plan];
+    if (!plan) {
       return reply.status(400).send({ error: "Invalid plan selected or plan not configured" });
     }
 
-    const subscription = await createSubscription({
-      planId: razorpayPlanId,
-      customerEmail: client.email,
-      customerPhone: client.phone,
-      customerName: client.ownerName,
-      totalCount: 12,
-      trialDays: request.body.plan === "STARTER" ? 14 : 0,
+    // Preserve legacy 400 behaviour when the Razorpay plan isn't configured
+    if (!getRazorpayPlanIdForTier(request.body.plan)) {
+      return reply.status(400).send({ error: "Invalid plan selected or plan not configured" });
+    }
+
+    // ─── Shared checkout flow (single source of truth — subscription.service.ts) ──
+    // strict: true → a Razorpay failure throws here (legacy behaviour), so a
+    // failed checkout never leaves a half-created subscription behind.
+    const { razorpaySub } = await createSubscriptionCheckout(fastify, client, request.body.plan, {
+      strict: true,
     });
 
-    await fastify.prisma.client.update({
-      where: { id: client.id },
-      data: {
-        plan: request.body.plan,
-        planStatus: "ACTIVE",
-        razorpaySubId: subscription.id,
-        trialStartedAt: client.trialStartedAt || new Date(),
-        ...(client.trialStartedAt ? { convertedFromTrialAt: new Date() } : {}),
-      },
-    });
-
-    return { subscription };
+    // Response shape preserved for the frontend: { subscription: { id, shortUrl, status } }
+    return { subscription: razorpaySub };
   });
 
   // ─── Overage Billing ──────────────────────────────────────────

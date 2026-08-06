@@ -99,6 +99,7 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
             plan: true,
             callsThisMonth: true,
             callsLimit: true,
+            leadsThisMonth: true,
             ownerWhatsapp: true,
           },
         },
@@ -119,16 +120,24 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
       return reply.status(402).send({ error: "Account inactive" });
     }
 
-    // Check call limit (skip check for PRO)
-    if (client.plan !== "PRO" && client.callsThisMonth >= client.callsLimit) {
-      return reply.status(429).send({ error: "Call limit reached" });
-    }
+    // FIX P0-3: Call quota check — leads are ALWAYS stored. If the broker is
+    // out of monthly calls, the lead is kept and only the auto-call is skipped
+    // (with an owner notification), instead of silently dropping portal leads.
+    const callAllowed = client.plan === "PRO" || client.callsThisMonth < client.callsLimit;
 
     // Check daily lead ingestion limit (per-client, Redis-backed)
     // This prevents a single misconfigured portal from flooding the system.
     const dailyLimitError = await checkDailyLeadLimit(fastify, client.id, client.plan, false);
     if (dailyLimitError) {
       return reply.status(429).send(dailyLimitError);
+    }
+
+    // FIX Round-2 #6: monthly leads cap (plan.leads) — reject before storing
+    // when the broker has used their full monthly lead allowance.
+    const { checkMonthlyLeadsCapacity, monthlyLeadsCapError } = await import("../../utils/lead-limits");
+    const monthlyLeads = await checkMonthlyLeadsCapacity(fastify.prisma, client.id, client.plan);
+    if (!monthlyLeads.canIngest) {
+      return reply.status(429).send(monthlyLeadsCapError(monthlyLeads.limit));
     }
 
     // Parse the payload
@@ -253,13 +262,33 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
     // If this pushes over the limit, excess is capped at 1-2 leads (acceptable).
     await checkDailyLeadLimit(fastify, client.id, client.plan, true);
 
-    // Enqueue immediate call (within seconds)
-    await enqueueCall({
-      leadId: lead.id,
-      clientId: client.id,
-      callType: "QUALIFICATION",
-      attempt: 1,
-    });
+    // FIX Round-2 #6: consume monthly leads allowance (race-safe).
+    const { tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+    await tryConsumeMonthlyLead(fastify.prisma, client.id, client.plan);
+
+    // Enqueue immediate call (within seconds) — only if broker has call quota
+    if (callAllowed) {
+      await enqueueCall({
+        leadId: lead.id,
+        clientId: client.id,
+        callType: "QUALIFICATION",
+        attempt: 1,
+      });
+    } else {
+      // FIX P0-3: lead stored but call skipped — notify the broker so no lead
+      // silently disappears from their portal feed.
+      await fastify.prisma.ownerNotification.create({
+        data: {
+          clientId: client.id,
+          leadId: lead.id,
+          type: "CALL_SKIPPED_LIMIT",
+          message: `New lead from ${source.name} (${lead.name}) received — AI call skipped because your monthly call limit is reached. Upgrade to resume AI calls.`,
+          status: "sent",
+          sentAt: new Date(),
+        },
+      }).catch(() => {});
+      fastify.log.warn({ clientId: client.id, leadId: lead.id }, "Lead stored but AI call skipped — call limit reached");
+    }
 
     // Publish WebSocket event for real-time dashboard update
     await emitNewLead(lead.id, lead.name, source.name, client.id).catch(() => {});
@@ -306,6 +335,13 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
     const emailDailyLimitError = await checkDailyLeadLimit(fastify, source.clientId, source.client?.plan || "TRIAL", false);
     if (emailDailyLimitError) {
       return reply.status(429).send(emailDailyLimitError);
+    }
+
+    // FIX Round-2 #6: monthly leads cap (plan.leads)
+    const { checkMonthlyLeadsCapacity, monthlyLeadsCapError } = await import("../../utils/lead-limits");
+    const monthlyLeads = await checkMonthlyLeadsCapacity(fastify.prisma, source.clientId, source.client?.plan || "TRIAL");
+    if (!monthlyLeads.canIngest) {
+      return reply.status(429).send(monthlyLeadsCapError(monthlyLeads.limit));
     }
 
     // Deduplicate and create lead — with concurrent-safe locking
@@ -374,6 +410,10 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
 
     // Increment daily lead counter
     await checkDailyLeadLimit(fastify, source.clientId, source.client?.plan || "TRIAL", true);
+
+    // FIX Round-2 #6: consume monthly leads allowance (race-safe)
+    const { tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+    await tryConsumeMonthlyLead(fastify.prisma, source.clientId, source.client?.plan || "TRIAL");
 
     await enqueueCall({
       leadId: lead.id,

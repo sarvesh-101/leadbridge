@@ -65,6 +65,17 @@ export default function VoiceAIPage() {
   const [buyResult, setBuyResult] = useState<{ success: boolean; message: string } | null>(null);
   const [selectedRegion, setSelectedRegion] = useState("india");
 
+  // Import number modal (Exotel / Twilio)
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importProvider, setImportProvider] = useState<"exotel" | "twilio">("exotel");
+  const [importPhone, setImportPhone] = useState("");
+  const [importSid, setImportSid] = useState("");
+  const [importApiKey, setImportApiKey] = useState("");
+  const [importApiToken, setImportApiToken] = useState("");
+  const [importSubdomain, setImportSubdomain] = useState("api.exotel.com");
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
+
   // Test call
   const [testCallLoading, setTestCallLoading] = useState(false);
   const [testCallResult, setTestCallResult] = useState<string | null>(null);
@@ -194,6 +205,47 @@ export default function VoiceAIPage() {
       toast.success("Phone number detached");
     } catch (err: any) {
       toast.error(err.message || "Failed to detach phone");
+    }
+  };
+
+  const resetImportForm = () => {
+    setImportProvider("exotel");
+    setImportPhone("");
+    setImportSid("");
+    setImportApiKey("");
+    setImportApiToken("");
+    setImportSubdomain("api.exotel.com");
+    setImportResult(null);
+  };
+
+  const handleImportNumber = async () => {
+    setImportLoading(true);
+    setImportResult(null);
+    try {
+      let res: { success: boolean; message: string };
+      if (importProvider === "exotel") {
+        res = await api.post<{ success: boolean; message: string }>("/voice/phone-numbers/import/exotel", {
+          phoneNumber: importPhone.trim(),
+          sid: importSid.trim(),
+          apiKey: importApiKey.trim(),
+          apiToken: importApiToken.trim(),
+          subdomain: importSubdomain.trim() || undefined,
+        });
+      } else {
+        res = await api.post<{ success: boolean; message: string }>("/voice/phone-numbers/import/twilio", {
+          phoneNumber: importPhone.trim(),
+          sid: importSid.trim(),
+          authToken: importApiToken.trim(),
+        });
+      }
+      setImportResult(res);
+      if (res.success) {
+        setTimeout(() => { loadData(); setShowImportModal(false); resetImportForm(); }, 1500);
+      }
+    } catch (err: any) {
+      setImportResult({ success: false, message: err.message || "Import failed" });
+    } finally {
+      setImportLoading(false);
     }
   };
 
@@ -447,11 +499,18 @@ export default function VoiceAIPage() {
                   <Smartphone className="w-5 h-5 text-[#22D3A5]" />
                   <h2 className="text-base font-semibold text-white">Phone Numbers</h2>
                 </div>
-                <button onClick={() => setShowBuyModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22D3A5]/10 text-[#22D3A5] text-xs font-medium hover:bg-[#22D3A5]/20"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Buy Number
-                </button>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => { resetImportForm(); setShowImportModal(true); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-gray-300 text-xs font-medium hover:bg-white/10"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5" /> Import
+                  </button>
+                  <button onClick={() => setShowBuyModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22D3A5]/10 text-[#22D3A5] text-xs font-medium hover:bg-[#22D3A5]/20"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Buy Number
+                  </button>
+                </div>
               </div>
 
               {phoneNumbers.length === 0 ? (
@@ -761,6 +820,145 @@ export default function VoiceAIPage() {
                   >
                     Open Provider Dashboard <ExternalLink className="w-3 h-3" />
                   </button>
+                  <button onClick={() => { resetImportForm(); setShowBuyModal(false); setShowImportModal(true); }}
+                    className="flex items-center justify-center gap-1.5 w-full px-4 py-2 mt-2 rounded-lg bg-white/5 text-gray-400 text-xs hover:bg-white/10"
+                  >
+                    <ArrowRight className="w-3 h-3" /> Already have a number? Import it
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══ Import Number Modal ═══ */}
+      <AnimatePresence>
+        {showImportModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => { if (!importLoading) { setShowImportModal(false); resetImportForm(); } }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md rounded-2xl bg-[#111118] border border-[#2A2A3A] overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white">Import Existing Number</h3>
+                  <button onClick={() => { setShowImportModal(false); resetImportForm(); }} className="text-gray-500 hover:text-white">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Provider toggle */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["exotel", "twilio"] as const).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => { setImportProvider(p); setImportResult(null); }}
+                        className={cn(
+                          "p-3 rounded-xl border text-xs text-center font-medium transition-all",
+                          importProvider === p
+                            ? "bg-[#4F6EF7]/10 border-[#4F6EF7]/40 text-[#4F6EF7]"
+                            : "bg-[#1A1A24] border-[#2A2A3A] text-gray-500 hover:border-[#3A3A52]"
+                        )}
+                      >
+                        {p === "exotel" ? "Exotel" : "Twilio"}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5">Phone Number *</label>
+                    <input value={importPhone} onChange={e => setImportPhone(e.target.value)}
+                      placeholder="e.g., +919876543210"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5">Number SID *</label>
+                    <input value={importSid} onChange={e => setImportSid(e.target.value)}
+                      placeholder="e.g., EX123456 or PNxxxxxxxx"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                    />
+                  </div>
+
+                  {importProvider === "exotel" ? (
+                    <>
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1.5">Exotel API Key *</label>
+                        <input value={importApiKey} onChange={e => setImportApiKey(e.target.value)}
+                          placeholder="Exotel API key"
+                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1.5">Exotel API Token *</label>
+                        <input value={importApiToken} onChange={e => setImportApiToken(e.target.value)}
+                          type="password"
+                          placeholder="Exotel API token"
+                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1.5">Subdomain</label>
+                        <input value={importSubdomain} onChange={e => setImportSubdomain(e.target.value)}
+                          placeholder="api.exotel.com"
+                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1.5">Twilio Auth Token *</label>
+                      <input value={importApiToken} onChange={e => setImportApiToken(e.target.value)}
+                        type="password"
+                        placeholder="Twilio auth token"
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      />
+                    </div>
+                  )}
+
+                  {importResult && (
+                    <div className={cn(
+                      "p-3 rounded-lg text-xs",
+                      importResult.success ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
+                      "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    )}>
+                      {importResult.message}
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-gray-500 leading-relaxed">
+                    Import a number you already own from Exotel or Twilio. After import it will appear in your number list and you can attach it to your AI agent.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button onClick={() => { setShowImportModal(false); resetImportForm(); }}
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-gray-400 text-sm hover:bg-white/5"
+                  >Cancel</button>
+                  {!importResult || !importResult.success ? (
+                    <button onClick={handleImportNumber} disabled={importLoading || !importPhone.trim() || !importSid.trim() || !importApiToken.trim() || (importProvider === "exotel" && !importApiKey.trim())}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#4F6EF7] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                    >
+                      {importLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                      {importLoading ? "Importing..." : "Import Number"}
+                    </button>
+                  ) : (
+                    <button onClick={() => { setShowImportModal(false); resetImportForm(); }}
+                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/10 text-white text-sm hover:bg-white/20"
+                    >Done</button>
+                  )}
                 </div>
               </div>
             </motion.div>

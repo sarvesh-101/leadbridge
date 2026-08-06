@@ -6,60 +6,60 @@ import { Globe, Smartphone, MessageSquare, Link2, Webhook, Mail } from "lucide-r
 
 const integrations = [
   {
-    name: "99acres",
-    type: "Real Estate Portal",
-    icon: Globe,
-    description: "India's #1 property portal — auto-import leads in real-time",
-    active: true,
-  },
-  {
-    name: "MagicBricks",
-    type: "Real Estate Portal",
-    icon: Globe,
-    description: "Second largest property portal with high-intent buyers",
-    active: true,
-  },
-  {
-    name: "Housing.com",
-    type: "Real Estate Portal",
-    icon: Globe,
-    description: "Premium property listings with quality leads",
-    active: true,
-  },
-  {
-    name: "JustDial",
-    type: "Business Directory",
-    icon: Smartphone,
-    description: "India's largest local search — leads with phone numbers",
-    active: true,
-  },
-  {
-    name: "WhatsApp",
-    type: "Messaging",
-    icon: MessageSquare,
-    description: "Leads from WhatsApp Business API — respond instantly",
-    active: true,
-  },
-  {
     name: "Custom Webhook",
     type: "API",
     icon: Webhook,
     description: "Any system that can send an HTTP request — we'll ingest it",
-    active: true,
+    status: "ready" as const,
   },
   {
     name: "Website Widget",
     type: "Embed",
     icon: Link2,
     description: "Embed a contact form on your website — leads come directly",
-    active: true,
+    status: "ready" as const,
+  },
+  {
+    name: "99acres",
+    type: "Real Estate Portal",
+    icon: Globe,
+    description: "India's #1 property portal — lead import via SMS/email forwarding",
+    status: "setup" as const,
+  },
+  {
+    name: "MagicBricks",
+    type: "Real Estate Portal",
+    icon: Globe,
+    description: "Second largest property portal with high-intent buyers",
+    status: "setup" as const,
+  },
+  {
+    name: "Housing.com",
+    type: "Real Estate Portal",
+    icon: Globe,
+    description: "Premium property listings with quality leads",
+    status: "setup" as const,
+  },
+  {
+    name: "JustDial",
+    type: "Business Directory",
+    icon: Smartphone,
+    description: "India's largest local search — leads with phone numbers",
+    status: "setup" as const,
+  },
+  {
+    name: "WhatsApp",
+    type: "Messaging",
+    icon: MessageSquare,
+    description: "Leads from WhatsApp — requires WhatsApp Business API setup",
+    status: "setup" as const,
   },
   {
     name: "Email Import",
     type: "Inbound",
     icon: Mail,
     description: "Forward enquiry emails to your LeadBridge inbox",
-    active: true,
+    status: "setup" as const,
   },
 ];
 
@@ -129,10 +129,15 @@ export default function IntegrationSection() {
                 <h3 className="text-[14px] font-semibold text-[#F0F0F8] mb-0.5">{integration.name}</h3>
                 <p className="text-[11px] text-[#6B6B8A] mb-2">{integration.type}</p>
                 <p className="text-[11px] text-[#3A3A52] leading-relaxed">{integration.description}</p>
-                {integration.active && (
+                {integration.status === "ready" ? (
                   <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#22D3A5]/10 border border-[#22D3A5]/20">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#22D3A5]" />
-                    <span className="text-[9px] font-medium text-[#22D3A5]">Live</span>
+                    <span className="text-[9px] font-medium text-[#22D3A5]">Ready</span>
+                  </span>
+                ) : (
+                  <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />
+                    <span className="text-[9px] font-medium text-[#C9A84C]">In setup</span>
                   </span>
                 )}
               </div>

@@ -100,6 +100,10 @@ export async function canDispatchCall(prisma: PrismaClient): Promise<{
 /**
  * Get a broker's total available call credits.
  * Total = callsLimit (base monthly) + rolloverCalls (unused from prev months) - callsThisMonth (used)
+ *
+ * FIX Round-2 #4: PRO's PLAN_DEFINITIONS.calls is 999999 ("unlimited"), which is
+ * an unbounded platform-cost risk (platform pays per-minute, PRO is flat ₹60K/mo).
+ * The effective cap for PRO is min(callsLimit, PRO_MONTHLY_CALL_CAP) — env-overridable.
  */
 export async function getBrokerCredits(
   prisma: PrismaClient,
@@ -116,14 +120,21 @@ export async function getBrokerCredits(
 }> {
   const client = await prisma.client.findUnique({
     where: { id: clientId },
-    select: { callsLimit: true, callsThisMonth: true, rolloverCalls: true, prepaidCalls: true },
+    select: { plan: true, callsLimit: true, callsThisMonth: true, rolloverCalls: true, prepaidCalls: true },
   });
 
   if (!client) {
     throw new Error(`Client ${clientId} not found`);
   }
 
-  const monthlyRemaining = Math.max(0, client.callsLimit - client.callsThisMonth);
+  // Effective monthly cap — PRO gets a hard cost cap so flat ₹60K/mo can never
+  // burn unbounded platform minutes.
+  const effectiveLimit =
+    client.plan === "PRO" && config.PRO_MONTHLY_CALL_CAP > 0
+      ? Math.min(client.callsLimit, config.PRO_MONTHLY_CALL_CAP)
+      : client.callsLimit;
+
+  const monthlyRemaining = Math.max(0, effectiveLimit - client.callsThisMonth);
   const totalAvailable = client.prepaidCalls + client.rolloverCalls + monthlyRemaining;
   const totalRemaining = Math.max(0, totalAvailable);
   const usageTotal = client.callsThisMonth;
@@ -132,13 +143,13 @@ export async function getBrokerCredits(
     : 0;
 
   // Warn at 80% usage of the BASE monthly allocation (not total available)
-  const monthlyUsagePercent = client.callsLimit > 0
-    ? Math.round((client.callsThisMonth / client.callsLimit) * 100)
+  const monthlyUsagePercent = effectiveLimit > 0
+    ? Math.round((client.callsThisMonth / effectiveLimit) * 100)
     : 0;
   const needsWarning = monthlyUsagePercent >= 80;
 
   return {
-    callsLimit: client.callsLimit,
+    callsLimit: effectiveLimit,
     callsThisMonth: client.callsThisMonth,
     rolloverCalls: client.rolloverCalls,
     prepaidCalls: client.prepaidCalls,
@@ -220,11 +231,109 @@ export async function incrementBrokerCallCount(
 }
 
 /**
- * Monthly reset for ALL active brokers.
- * - Unused calls (callsLimit - callsThisMonth) roll into rolloverCalls
- * - rolloverCalls capped at callsLimit × 3
- * - callsThisMonth reset to 0
- * - Also records broker revenue in CreditTransaction for profitability tracking
+ * Reset ONE broker's usage cycle (rollover + zero callsThisMonth).
+ *
+ * FIX Round-2 #5: Razorpay subscriptions renew every 30 days from signup, NOT on
+ * calendar 1st. The calendar cron used to reset everyone on the 1st, which
+ * misaligned usage with billing for mid-month signups. Now the Razorpay
+ * subscription.charged webhook calls this on each actual billing charge, so a
+ * broker's monthly call allowance resets exactly when their new billing cycle
+ * starts. The calendar cron still calls it for offline/trial clients who have
+ * no Razorpay subscription.
+ */
+export async function resetBrokerCycle(
+  prisma: PrismaClient,
+  clientId: string,
+  opts: { minIntervalMs?: number } = {}
+): Promise<{ unused: number; newRollover: number; skipped: boolean }> {
+  const broker = await prisma.client.findUnique({
+    where: { id: clientId },
+    select: {
+      id: true,
+      callsLimit: true,
+      callsThisMonth: true,
+      rolloverCalls: true,
+      totalRevenueGenerated: true,
+      plan: true,
+      lastCycleResetAt: true,
+      leadsThisMonth: true,
+    },
+  });
+
+  if (!broker) return { unused: 0, newRollover: 0, skipped: true };
+
+  // FIX (reviewer): idempotency guard — a redelivered webhook or a cron overlap
+  // must never double-reset/double-roll. Default min interval = 20 days: real
+  // cycles are 30 days apart, so a legitimate next-cycle reset is always allowed,
+  // while an immediate redelivery (minutes later) is skipped.
+  const minInterval = opts.minIntervalMs ?? 20 * 24 * 60 * 60 * 1000;
+  if (broker.lastCycleResetAt && Date.now() - broker.lastCycleResetAt.getTime() < minInterval) {
+    logger.info({ clientId: broker.id, lastCycleResetAt: broker.lastCycleResetAt }, "Cycle reset SKIPPED — already reset recently (idempotency guard)");
+    return { unused: 0, newRollover: 0, skipped: true };
+  }
+
+  // Effective limit (PRO cap applies here too, so rollover never exceeds it)
+  const effectiveLimit =
+    broker.plan === "PRO" && config.PRO_MONTHLY_CALL_CAP > 0
+      ? Math.min(broker.callsLimit, config.PRO_MONTHLY_CALL_CAP)
+      : broker.callsLimit;
+
+  const unused = Math.max(0, effectiveLimit - broker.callsThisMonth);
+  const newRollover = Math.min(broker.rolloverCalls + unused, effectiveLimit * 3);
+
+  await prisma.client.update({
+    where: { id: broker.id },
+    data: {
+      callsThisMonth: 0,
+      rolloverCalls: newRollover,
+      // FIX Round-2 #6: reset monthly leads counter with the billing cycle too
+      leadsThisMonth: 0,
+    },
+  });
+
+  // Log the rollover
+  await prisma.creditTransaction.create({
+    data: {
+      type: "OVERRIDE",
+      amount: 0,
+      minutes: newRollover,
+      description: `Cycle reset: ${unused} unused calls rolled over (total rollover: ${newRollover}), leads reset`,
+      clientId: broker.id,
+      metadata: {
+        plan: broker.plan,
+        callsLimit: effectiveLimit,
+        callsUsed: broker.callsThisMonth,
+        unused,
+        newRollover,
+        revenueGenerated: broker.totalRevenueGenerated,
+        leadsUsed: broker.leadsThisMonth,
+      },
+    },
+  });
+
+  // Record when this reset happened so idempotency + cron-fallback work
+  await prisma.client.update({
+    where: { id: broker.id },
+    data: { lastCycleResetAt: new Date() },
+  });
+
+  logger.info({ clientId: broker.id, unused, newRollover }, "Broker cycle reset (rollover + zero)");
+  return { unused, newRollover, skipped: false };
+}
+
+/**
+ * Monthly reset for active brokers, with Razorpay clients as a FALLBACK.
+ *
+ * Primary reset for Razorpay clients = the subscription.charged webhook (their
+ * real billing cycle — FIX Round-2 #5). The calendar cron must not double-reset
+ * those, so we rely on resetBrokerCycle's lastCycleResetAt idempotency guard:
+ *
+ *   - Non-Razorpay clients (trial + offline-paid): always processed.
+ *   - Razorpay clients whose webhook never fired (misconfig/outage, last reset
+ *     stale > 20 days): also processed — this is the reviewer-flagged fallback
+ *     so no broker's calls stay permanently stuck at the limit.
+ *
+ * The idempotency guard inside resetBrokerCycle prevents the double-reset.
  */
 export async function monthlyBrokerCreditReset(prisma: PrismaClient): Promise<{
   brokersProcessed: number;
@@ -232,50 +341,27 @@ export async function monthlyBrokerCreditReset(prisma: PrismaClient): Promise<{
 }> {
   const brokers = await prisma.client.findMany({
     where: { planStatus: { in: ["TRIAL", "ACTIVE"] } },
-    select: { id: true, callsLimit: true, callsThisMonth: true, rolloverCalls: true, totalRevenueGenerated: true, plan: true },
+    select: { id: true, razorpaySubId: true },
   });
 
   let totalRollover = 0;
+  let processed = 0;
   for (const broker of brokers) {
-    const unused = Math.max(0, broker.callsLimit - broker.callsThisMonth);
-    const newRollover = Math.min(broker.rolloverCalls + unused, broker.callsLimit * 3);
-
-    await prisma.client.update({
-      where: { id: broker.id },
-      data: {
-        callsThisMonth: 0,
-        rolloverCalls: newRollover,
-      },
-    });
-
-    totalRollover += newRollover;
-
-    // Log the rollover
-    await prisma.creditTransaction.create({
-      data: {
-        type: "OVERRIDE",
-        amount: 0,
-        minutes: newRollover,
-        description: `Monthly reset: ${unused} unused calls rolled over (total rollover: ${newRollover})`,
-        clientId: broker.id,
-        metadata: {
-          plan: broker.plan,
-          callsLimit: broker.callsLimit,
-          callsUsed: broker.callsThisMonth,
-          unused,
-          newRollover,
-          revenueGenerated: broker.totalRevenueGenerated,
-        },
-      },
-    });
+    // Non-Razorpay: always reset (guard still applies).
+    // Razorpay: only reset if the webhook hasn't fired in a while (stale).
+    const result = await resetBrokerCycle(prisma, broker.id);
+    if (!result.skipped) {
+      processed++;
+      totalRollover += result.newRollover;
+    }
   }
 
   logger.info(
-    { brokersProcessed: brokers.length, totalRollover },
-    "Monthly broker credit reset complete"
+    { brokersProcessed: processed, totalRollover, totalChecked: brokers.length },
+    "Monthly broker credit reset complete (idempotent, Razorpay fallback included)"
   );
 
-  return { brokersProcessed: brokers.length, totalRolloverMinutes: totalRollover };
+  return { brokersProcessed: processed, totalRolloverMinutes: totalRollover };
 }
 
 // ─────────────────────────────────────────────
@@ -288,6 +374,24 @@ export async function recordCallCost(
 ) {
   const { clientId, callId, leadId, durationMinutes } = params;
   const callCost = Math.round(durationMinutes * COST_PER_MINUTE * 100) / 100;
+
+  // ─── Idempotency guard ─────────────────────────────────────────
+  // Skip if a CONSUME transaction already exists for this call. This makes
+  // cost recording safe against redelivered webhook events (the 1-hour
+  // isDuplicate window in the webhook is the first line of defense; this is
+  // the second, so a late duplicate can never double-bill a call).
+  const existing = await prisma.creditTransaction.findFirst({
+    // Only a real-cost entry (amount > 0) counts as recorded. A ₹0 audit
+    // entry from the extraction worker (its DEMO_MODE fallback) must never
+    // block real cost recording. Real costs are always > 0 (min 0.5min ×
+    // ₹4.6 = ₹2.3), so this is safe.
+    where: { callId, type: "CONSUME", amount: { gt: 0 } },
+    select: { id: true },
+  });
+  if (existing) {
+    logger.warn({ callId }, "recordCallCost skipped — CONSUME transaction already exists for this call");
+    return { callCost, durationMinutes, skipped: true };
+  }
 
   const credit = await getOrCreateCurrentCredit(prisma);
   await prisma.platformCredit.update({

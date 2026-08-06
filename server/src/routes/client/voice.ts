@@ -1,6 +1,23 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { LeadStatus } from "@prisma/client";
 import { getVoiceAIProvider, VoiceAIProvider } from "../../services/voice";
 import { getPhoneProvider, PhoneProvider } from "../../services/phone";
+import { config } from "../../config";
+
+/**
+ * Build the public Omnidimension call-events webhook URL.
+ * Uses config.WEBHOOK_URL (e.g. the ngrok URL) when set — that is the ONLY
+ * reliable way to get a stable public URL. Falls back to the incoming request's
+ * protocol/hostname (works on localhost, unreliable behind a proxy).
+ *
+ * The path MUST match the registered route:
+ *   server/src/routes/webhooks/omnidimension.ts → POST /webhooks/omnidimension/call-events
+ * registered with prefix /api/v1 in index.ts.
+ */
+function buildCallEventsWebhookUrl(request: FastifyRequest): string {
+  const base = (config.WEBHOOK_URL || `${request.protocol}://${request.hostname}`).replace(/\/+$/, "");
+  return `${base}/api/v1/webhooks/omnidimension/call-events`;
+}
 
 /**
  * Voice AI management routes (provider-agnostic).
@@ -84,17 +101,26 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         voiceId: request.body.voiceId,
         modelName: request.body.modelName || "gpt-4o-mini",
         systemPrompt: request.body.systemPrompt,
-        webhookUrl: `${request.protocol}://${request.hostname}/api/v1/webhooks/call-events`,
+        webhookUrl: buildCallEventsWebhookUrl(request),
       });
     } catch (err: any) {
-      request.log.warn({ err: err.message }, "Voice AI provider unavailable — using simulated agent");
-      agent = {
-        id: Math.floor(Math.random() * 900000) + 100000,
-        name: request.body.name,
-        status: "simulated",
-        languages: [request.body.language || "hi-IN"],
-      };
-      isLocal = true;
+      if (config.DEMO_MODE) {
+        // Only simulate when DEMO_MODE is explicitly enabled
+        request.log.warn({ err: err.message }, "Voice AI provider unavailable — using simulated agent (DEMO_MODE)");
+        agent = {
+          id: Math.floor(Math.random() * 900000) + 100000,
+          name: request.body.name,
+          status: "simulated",
+          languages: [request.body.language || "hi-IN"],
+        };
+        isLocal = true;
+      } else {
+        // Fail loudly — never create a fake agent in production
+        return reply.status(502).send({
+          error: "Voice AI provider unavailable",
+          message: err.message,
+        });
+      }
     }
 
     // Store the agent ID on the client's record
@@ -173,6 +199,74 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
     const phoneProvider = getPhoneProvider();
     await phoneProvider.releaseNumber(request.body.phoneNumberId);
     return { message: "Phone number released" };
+  });
+
+  /** Import an existing Exotel number into Omnidimension */
+  fastify.post("/voice/phone-numbers/import/exotel", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["phoneNumber", "sid", "apiKey", "apiToken"],
+        properties: {
+          phoneNumber: { type: "string" },
+          sid: { type: "string" },
+          apiKey: { type: "string" },
+          apiToken: { type: "string" },
+          subdomain: { type: "string" },
+        },
+      },
+    },
+  }, async (request: FastifyRequest<{ Body: {
+    phoneNumber: string;
+    sid: string;
+    apiKey: string;
+    apiToken: string;
+    subdomain?: string;
+  } }>, reply: FastifyReply) => {
+    const { importExotelNumber } = await import("../../services/omnidimension-phone.service");
+    try {
+      const number = await importExotelNumber({
+        phoneNumber: request.body.phoneNumber,
+        sid: request.body.sid,
+        apiKey: request.body.apiKey,
+        apiToken: request.body.apiToken,
+        subdomain: request.body.subdomain,
+      });
+      return { success: true, number, message: `Exotel number ${number.phone_number} imported` };
+    } catch (err: any) {
+      return reply.status(502).send({ error: "Import failed", message: err.message });
+    }
+  });
+
+  /** Import an existing Twilio number into Omnidimension */
+  fastify.post("/voice/phone-numbers/import/twilio", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["phoneNumber", "sid", "authToken"],
+        properties: {
+          phoneNumber: { type: "string" },
+          sid: { type: "string" },
+          authToken: { type: "string" },
+        },
+      },
+    },
+  }, async (request: FastifyRequest<{ Body: {
+    phoneNumber: string;
+    sid: string;
+    authToken: string;
+  } }>, reply: FastifyReply) => {
+    const { importTwilioNumber } = await import("../../services/omnidimension-phone.service");
+    try {
+      const number = await importTwilioNumber({
+        phoneNumber: request.body.phoneNumber,
+        sid: request.body.sid,
+        authToken: request.body.authToken,
+      });
+      return { success: true, number, message: `Twilio number ${number.phone_number} imported` };
+    } catch (err: any) {
+      return reply.status(502).send({ error: "Import failed", message: err.message });
+    }
   });
 
   // ─── Knowledge Base ────────────────────────────────────────────
@@ -256,14 +350,43 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "No AI agent configured. Create an agent first." });
     }
 
+    let callRecord: { id: string } | null = null;
     try {
+      // FIX: Create a Lead + Call record BEFORE dispatching so the completed-call
+      // webhook can find this call by omnidimensionCallId and record its cost
+      // (recordCallCost in the webhook handler). Without these records the webhook
+      // retries forever and cost tracking never fires — same pattern as call.worker.ts.
+      // NOTE: this is a deliberate test artifact — it does NOT consume the monthly
+      // leads cap (plan.leads) so testing the voice setup never eats real allowance.
+      const testLead = await fastify.prisma.lead.create({
+        data: {
+          clientId: client.id,
+          name: `Test Call — ${client.ownerName}`,
+          phone: client.phone,
+          source: "test",
+          rawPayload: {},
+          status: "CALLING" as LeadStatus,
+        },
+      });
+
+      const created = await fastify.prisma.call.create({
+        data: {
+          clientId: client.id,
+          leadId: testLead.id,
+          type: "QUALIFICATION",
+          direction: "outbound",
+          status: "INITIATED",
+        },
+      });
+      callRecord = { id: created.id };
+
       const voiceAI = getVoiceAIProvider();
       const result = await voiceAI.dispatchCall({
         agentId: client.omniAgentId,
         toNumber: client.phone,
         fromNumber: client.omniPhoneNumberId ? String(client.omniPhoneNumberId) : undefined,
         callContext: {
-          lead_id: "test-call",
+          lead_id: testLead.id,
           client_id: client.id,
           lead_name: client.ownerName,
           lead_source: "test",
@@ -274,18 +397,39 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         },
       });
 
+      // Store the Omni request ID so the completed webhook matches this call
+      await fastify.prisma.call.update({
+        where: { id: callRecord.id },
+        data: { omnidimensionCallId: String(result.requestId) },
+      });
+
       return {
         message: "Test call initiated — your phone should ring shortly",
+        callId: callRecord.id,
         requestId: result.requestId,
         status: result.status,
       };
     } catch (err: any) {
-      request.log.warn({ err: err.message }, "Voice AI unavailable — test call simulated");
-      return {
-        message: "Test call simulated (voice AI not available in dev mode)",
-        requestId: Math.floor(Math.random() * 100000),
-        status: "simulated",
-      };
+      // Mark the call FAILED so no dangling INITIATED record confuses the webhook
+      if (typeof callRecord?.id === "string") {
+        await fastify.prisma.call.update({
+          where: { id: callRecord.id },
+          data: { status: "FAILED", transcript: `Test call failed: ${err.message}` },
+        }).catch(() => {});
+      }
+      if (config.DEMO_MODE) {
+        request.log.warn({ err: err.message }, "Voice AI unavailable — test call simulated (DEMO_MODE)");
+        return {
+          message: "Test call simulated (DEMO_MODE)",
+          requestId: Math.floor(Math.random() * 100000),
+          status: "simulated",
+        };
+      }
+      // Fail loudly in production — a fake "test passed" is worse than a clear error
+      return reply.status(502).send({
+        error: "Voice AI provider unavailable",
+        message: err.message,
+      });
     }
   });
 
@@ -293,7 +437,6 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
 
   /** Get the webhook URL clients should configure */
   fastify.get("/voice/webhook-url", async (request: FastifyRequest) => {
-    const url = `${request.protocol}://${request.hostname}/api/v1/webhooks/call-events`;
-    return { webhookUrl: url };
+    return { webhookUrl: buildCallEventsWebhookUrl(request) };
   });
 }

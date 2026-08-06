@@ -4,6 +4,7 @@
  * Allows clients to browse available territories and claim one.
  */
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { assignTerritory } from "../../services/territory.service";
 
 export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -66,33 +67,42 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
     };
   });
 
-  // ─── Get My Territory ─────────────────────────────────────────
+  // ─── Get My Territory / Service Area ─────────────────────────
   // Ported from FastAPI: GET /territories/my
+  // Soft model: client.city/zone is the broker's service area. The linked
+  // Territory row may be null (another broker holds the catalog row) — the
+  // service area tag still works for scoring + analytics.
   fastify.get("/territories/my", async (request: FastifyRequest) => {
     const client = await fastify.prisma.client.findUnique({
       where: { id: request.clientId },
       include: { territory: true },
     });
 
-    if (!client?.territory) {
+    if (!client) {
+      return { territory: null };
+    }
+
+    if (!client.city) {
       return { territory: null };
     }
 
     return {
       territory: {
-        id: client.territory.id,
-        city: client.territory.city,
-        zone: client.territory.zone,
-        tier: client.territory.tier,
-        tierLabel: tierLabel(client.territory.tier),
-        locked: client.territory.locked,
-        assignedAt: client.territory.clientId ? undefined : undefined,
+        id: client.territory?.id || null,
+        city: client.city,
+        zone: client.zone,
+        tier: client.territory?.tier || null,
+        tierLabel: client.territory?.tier ? tierLabel(client.territory.tier) : null,
+        locked: client.territory?.locked ?? false,
+        exclusive: !!client.territory, // true only if the catalog row is linked
       },
     };
   });
 
-  // ─── Claim Territory (by city/zone — used by onboarding) ──────
-  // POST /territories/claim — looks up or creates a territory by city/zone and assigns it
+  // ─── Claim Territory / Service Area (by city/zone — used by onboarding) ──
+  // POST /territories/claim — soft model: ALWAYS succeeds. Sets the broker's
+  // service area (client.city/zone). Never returns 409 for "taken" — leads are
+  // broker-sourced, so multiple brokers can serve the same city.
   fastify.post("/territories/claim", {
     schema: {
       body: {
@@ -107,73 +117,37 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
   }, async (request: FastifyRequest<{
     Body: { city: string; zone?: string };
   }>, reply: FastifyReply) => {
-    // Plan gate — exclusive territories require GROWTH+
-    const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
-    const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "territories");
-    if (!allowed) {
-      return reply.status(403).send(featureGateError("Exclusive territories", plan, requiredPlan));
-    }
-
+    // Soft model: service area tag is available to all plans — no gate.
     const { city, zone } = request.body;
 
-    // Check if client already has a territory
-    const existing = await fastify.prisma.client.findUnique({
-      where: { id: request.clientId },
-      include: { territory: true },
-    });
-
-    if (existing?.territory) {
-      return reply.status(409).send({
-        error: "You already have a territory assigned. Release it first to claim a new one.",
-      });
+    if (!city || !city.trim()) {
+      return reply.status(400).send({ error: "City is required" });
     }
 
-    // Look for existing territory for this city/zone
-    let territory = await fastify.prisma.territory.findFirst({
-      where: {
-        city: { equals: city, mode: "insensitive" },
-        zone: zone ? { equals: zone, mode: "insensitive" } : undefined,
-        clientId: null,
-        locked: false,
-      },
-    });
-
-    // Create a new territory record if none exists
-    if (!territory) {
-      territory = await fastify.prisma.territory.create({
-        data: {
-          city,
-          zone: zone || null,
-          tier: 2,  // default Tier 2
-        },
-      });
-    }
-
-    // Assign territory to client
-    const [updatedTerritory] = await fastify.prisma.$transaction([
-      fastify.prisma.territory.update({
-        where: { id: territory.id },
-        data: { clientId: request.clientId, locked: true },
-      }),
-      fastify.prisma.client.update({
-        where: { id: request.clientId },
-        data: { city: territory.city, zone: territory.zone },
-      }),
-    ]);
+    // Soft model: no hard "release first" rule — a broker can set/change their
+    // service area at any time. Assignment never 409s; links catalog row only
+    // if free.
+    const result = await assignTerritory(fastify.prisma, request.clientId!, city, zone);
 
     return {
-      message: `Territory '${updatedTerritory.city}${updatedTerritory.zone ? ` - ${updatedTerritory.zone}` : ""}' claimed`,
-      territory: {
-        id: updatedTerritory.id,
-        city: updatedTerritory.city,
-        zone: updatedTerritory.zone,
-        tier: updatedTerritory.tier,
-      },
+      message: `Service area set to '${city}${zone ? ` - ${zone}` : ""}'`,
+      territory: result.territory
+        ? {
+            id: result.territory.id,
+            city: result.territory.city,
+            zone: result.territory.zone,
+            tier: result.territory.tier,
+          }
+        : null,
+      exclusive: !!result.territory,
     };
   });
 
   // ─── Purchase / Claim Territory (by territoryId) ────────────────
   // Ported from FastAPI: POST /territories/purchase
+  // Soft model: setting a service area is open to all plans; the "purchase"
+  // route is kept for backward compatibility and now behaves like claim — it
+  // sets the broker's service area and links the catalog row only if free.
   fastify.post("/territories/purchase", {
     schema: {
       body: {
@@ -187,13 +161,6 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
   }, async (request: FastifyRequest<{
     Body: { territoryId: string };
   }>, reply: FastifyReply) => {
-    // Plan gate — exclusive territories require GROWTH+
-    const { canAccessFeature, featureGateError } = await import("../../utils/plan-gates");
-    const { allowed, plan, requiredPlan } = await canAccessFeature(fastify.prisma, request.clientId!, "territories");
-    if (!allowed) {
-      return reply.status(403).send(featureGateError("Exclusive territories", plan, requiredPlan));
-    }
-
     const { territoryId } = request.body;
 
     const territory = await fastify.prisma.territory.findUnique({
@@ -204,76 +171,47 @@ export default async function clientTerritoryRoutes(fastify: FastifyInstance) {
       return reply.status(404).send({ error: "Territory not found" });
     }
 
-    if (territory.clientId) {
-      return reply.status(409).send({ error: "Territory is already occupied" });
-    }
-
-    if (territory.locked) {
-      return reply.status(409).send({ error: "Territory is locked" });
-    }
-
-    // Check if client already has a territory
-    const existing = await fastify.prisma.client.findUnique({
-      where: { id: request.clientId },
-      select: { territory: { select: { id: true } } },
-    });
-
-    if (existing?.territory) {
-      return reply.status(409).send({
-        error: "You already have a territory assigned. Release it first to claim a new one.",
-      });
-    }
-
-    // Assign territory to client
-    const [updatedTerritory] = await fastify.prisma.$transaction([
-      fastify.prisma.territory.update({
-        where: { id: territory.id },
-        data: { clientId: request.clientId, locked: true },
-      }),
-      fastify.prisma.client.update({
-        where: { id: request.clientId },
-        data: { city: territory.city, zone: territory.zone },
-      }),
-    ]);
+    // Soft assignment — never 409 for occupied/locked; sets service area tag.
+    const result = await assignTerritory(fastify.prisma, request.clientId!, territory.city, territory.zone || undefined);
 
     return {
-      message: `Territory '${updatedTerritory.city}${updatedTerritory.zone ? ` - ${updatedTerritory.zone}` : ""}' claimed`,
-      territory: {
-        id: updatedTerritory.id,
-        city: updatedTerritory.city,
-        zone: updatedTerritory.zone,
-        tier: updatedTerritory.tier,
-      },
+      message: `Service area set to '${territory.city}${territory.zone ? ` - ${territory.zone}` : ""}'`,
+      territory: result.territory
+        ? {
+            id: result.territory.id,
+            city: result.territory.city,
+            zone: result.territory.zone,
+            tier: result.territory.tier,
+          }
+        : null,
+      exclusive: !!result.territory,
     };
   });
 
-  // ─── Release My Territory ─────────────────────────────────────
+  // ─── Release My Territory / Service Area ──────────────────────
+  // Soft model: releases the linked catalog row (if any) AND clears the
+  // broker's service area tag (client.city/zone). Works even when the broker
+  // has a service area without a linked row (their target row is owned by
+  // someone else).
   fastify.post("/territories/release", async (request: FastifyRequest, reply: FastifyReply) => {
     const client = await fastify.prisma.client.findUnique({
       where: { id: request.clientId },
       include: { territory: true },
     });
 
-    if (!client?.territory) {
-      return reply.status(400).send({ error: "You don't have a territory to release" });
+    if (!client || (!client.territory && !client.city)) {
+      return reply.status(400).send({ error: "You don't have a territory or service area to release" });
     }
 
-    await fastify.prisma.$transaction([
-      fastify.prisma.territory.update({
-        where: { id: client.territory.id },
-        data: { clientId: null, locked: false },
-      }),
-      fastify.prisma.client.update({
-        where: { id: client.id },
-        data: { city: "", zone: null },
-      }),
-    ]);
+    const { releaseTerritory } = await import("../../services/territory.service");
+    await releaseTerritory(fastify.prisma, request.clientId!);
 
     return {
-      message: `Territory '${client.territory.city}${client.territory.zone ? ` - ${client.territory.zone}` : ""}' released`,
+      message: "Service area released",
     };
   });
 }
+
 
 function tierLabel(tier: number): string {
   switch (tier) {

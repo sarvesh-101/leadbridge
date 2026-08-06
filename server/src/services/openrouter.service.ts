@@ -1,14 +1,17 @@
 /**
- * OpenRouter AI Service — shared LLM client with model fallback chain.
+ * Shared LLM client (OpenAI-compatible) with model fallback chain.
  *
  * Provides a single `chatCompletion()` function used by:
  *   - deepseek.service.ts  → post-call transcript extraction + script generation
  *   - whatsapp-chatbot.service.ts → incoming message intent classification + reply
  *
+ * Provider selection:
+ *   - If OPENROUTER_API_KEY is set → OpenRouter (hosts DeepSeek/Qwen/Llama models).
+ *   - Otherwise → DEEPSEEK_BASE_URL / DEEPSEEK_MODEL (DeepSeek or any OpenAI-compatible API).
+ *
  * Fallback chain (tried in order):
- *   1. Primary: Qwen3 Next 80B A3B Instruct (or whatever DEEPSEEK_MODEL is set to)
- *   2. Fallback 1: Llama 3.3 70B Instruct (best Hindi support, strong reasoning)
- *   3. Fallback 2: Llama 3.2 3B Instruct (lightweight, fast, always available)
+ *   1. Primary: deepseek/deepseek-chat (OpenRouter) or config.DEEPSEEK_MODEL (DeepSeek)
+ *   2. Fallbacks: deepseek-v4-flash + qwen3.7-flash (OpenRouter, all verified live)
  *
  * On 429 (rate limited), connection timeout, or network error → skip to next model.
  * On 400/401/500 → throw immediately (not a rate-limit issue).
@@ -18,14 +21,24 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 
+// ─── Provider selection ─────────────────────────────────────────
+// OpenRouter takes precedence when its key is present.
+const USE_OPENROUTER = !!config.OPENROUTER_API_KEY;
+
 // ─── Fallback model chain ───────────────────────────────────────
-// The primary model is configurable via DEEPSEEK_MODEL env var.
-// Hardcoded fallbacks match the user's OpenRouter API keys.
-const PRIMARY_MODEL = config.DEEPSEEK_MODEL;
-const FALLBACK_MODELS = [
-  "meta-llama/llama-3.3-70b-instruct:free",   // Best Hindi, strong reasoning
-  "meta-llama/llama-3.2-3b-instruct:free",     // Lightweight, fast, always up
-];
+// All models below verified working with this key (2026-08-03).
+const PRIMARY_MODEL = USE_OPENROUTER
+  ? "deepseek/deepseek-chat"      // Fast, general purpose (DeepSeek-V3 on OpenRouter)
+  : config.DEEPSEEK_MODEL;
+const FALLBACK_MODELS = USE_OPENROUTER
+  ? [
+      "deepseek/deepseek-v4-flash",  // Fast fallback — verified
+      "qwen/qwen3.7-flash",          // Lightweight fallback — verified
+    ]
+  : [
+      "deepseek-chat",      // Fast, general purpose (DeepSeek-V3)
+      "deepseek-reasoner",  // Stronger reasoning (R1) — fallback only
+    ];
 
 /** Full list of models to try, deduplicated */
 const MODEL_CHAIN = [
@@ -34,11 +47,14 @@ const MODEL_CHAIN = [
 ];
 
 // ─── Shared Axios client ────────────────────────────────────────
-// Uses OpenRouter-specific headers for analytics + rate-limit tracking.
+// Base URL + key depend on which provider is active.
+// Extra headers are harmless for providers that ignore them.
 const openrouterClient = axios.create({
-  baseURL: "https://openrouter.ai/api/v1",
+  baseURL: USE_OPENROUTER
+    ? "https://openrouter.ai/api/v1"
+    : config.DEEPSEEK_BASE_URL,
   headers: {
-    Authorization: `Bearer ${config.DEEPSEEK_API_KEY}`,
+    Authorization: `Bearer ${USE_OPENROUTER ? config.OPENROUTER_API_KEY : config.DEEPSEEK_API_KEY}`,
     "Content-Type": "application/json",
     "HTTP-Referer": "https://leadbridge.com",
     "X-Title": "LeadBridge",
@@ -115,7 +131,7 @@ export async function chatCompletion(
 
       logger.debug(
         { model, tokens: usage?.total_tokens || "?" },
-        `OpenRouter: ${model} succeeded`
+        `LLM: ${model} succeeded`
       );
 
       return { content, model, usage };
@@ -141,7 +157,7 @@ export async function chatCompletion(
       if (isRetryable && i < MODEL_CHAIN.length - 1) {
         logger.warn(
           { model, status, err: errorMessage },
-          `OpenRouter: ${model} failed (retryable) — trying fallback ${MODEL_CHAIN[i + 1]}`
+          `LLM: ${model} failed (retryable) — trying fallback ${MODEL_CHAIN[i + 1]}`
         );
         continue; // Try next model
       }
@@ -149,7 +165,7 @@ export async function chatCompletion(
       // Non-retryable error or last model — log and bubble up
       logger.error(
         { model, status, err: errorMessage },
-        `OpenRouter: ${model} failed (non-retryable)`
+        `LLM: ${model} failed (non-retryable)`
       );
     }
   }

@@ -102,8 +102,9 @@ export default async function teamRoutes(fastify: FastifyInstance) {
       data: { resetToken: inviteToken, resetTokenExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
     });
 
+    let emailSent = false;
     try {
-      const emailSent = await sendEmail({
+      emailSent = await sendEmail({
         to: email,
         subject: `${name} — you've been invited to join LeadBridge`,
         text: `You've been invited to join LeadBridge as a ${role}.\n\nAccept here: ${inviteUrl}\n\nThis invitation expires in 7 days.`,
@@ -129,13 +130,20 @@ export default async function teamRoutes(fastify: FastifyInstance) {
       });
 
       if (!emailSent) {
-        fastify.log.warn({ email }, "Failed to send invitation email — no email provider configured");
+        fastify.log.warn({ email }, "Failed to send invitation email — email provider rejected it (check SMTP credentials)");
       }
     } catch (err: any) {
       fastify.log.error({ err }, "Failed to send invitation email");
     }
 
-    return reply.status(201).send({ member: { id: member.id, email: member.email, name: member.name, role: member.role, status: member.status } });
+    // HONEST response: tell the caller whether the email actually went out.
+    // If it didn't, the frontend shows the invite link so it can be shared manually
+    // instead of showing a fake "Invitation sent" success.
+    return reply.status(201).send({
+      member: { id: member.id, email: member.email, name: member.name, role: member.role, status: member.status },
+      emailSent,
+      inviteUrl,
+    });
   });
 
   // ─── Accept Invitation ─────────────────────────────────────────

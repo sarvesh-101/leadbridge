@@ -116,6 +116,11 @@ model Client {
   resetToken        String?  @unique
   resetTokenExpiresAt DateTime?
 
+  // FIX Round-2 #3: email verification (trial abuse protection)
+  emailVerified          Boolean  @default(false)
+  verificationToken      String?  @unique
+  verificationTokenExpiresAt DateTime?
+
   // Omnidimension AI Voice Agent
   omnidimensionAgentId Int?     @unique
   omniAgentId         String?  @unique  // OmniDimension agent UUID (string format)
@@ -144,9 +149,14 @@ model Client {
 
   // Usage
   callsThisMonth  Int @default(0)
-  callsLimit      Int @default(300)
+  callsLimit      Int @default(500) // Growth plan default (matches PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
   rolloverCalls   Int @default(0)   // Unused calls rolled over from previous months (capped at 3x callsLimit)
   prepaidCalls    Int @default(0)   // Purchased call credits (offline payments) — never expire
+
+  // FIX Round-2 #6: leads ingested this billing month (vs plan.leads cap)
+  // Reset together with callsThisMonth in resetBrokerCycle so usage aligns
+  // with the Razorpay billing cycle, not the calendar.
+  leadsThisMonth  Int @default(0)
 
   // Cost tracking (admin visibility)
   totalCostIncurred     Float @default(0)  // ₹ spent on this broker's calls via OmniDimension
@@ -160,6 +170,13 @@ model Client {
   // Dunning tracking for PAST_DUE accounts
   dunningStep      Int       @default(0) // 0=none, 1=day1email, 2=day3whatsapp, 3=day7final
   dunningStartedAt DateTime?
+
+  // FIX Round-2 #5: last time the broker's call allowance cycle was reset
+  // (rollover + zero). Set by resetBrokerCycle on subscription.charged and by
+  // the calendar cron. Used to make resets idempotent against redelivered
+  // webhooks AND to give the cron a fallback for Razorpay clients whose
+  // webhook never fires (reset if stale > 40 days).
+  lastCycleResetAt  DateTime?
 
   // Lead sources config
   leadSources     Json @default("[]")

@@ -23,9 +23,6 @@ export const FEATURE_PLANS: Record<string, Plan[]> = {
   // Multi-broker / team
   team: ["GROWTH", "PRO"],
 
-  // Exclusive city territories
-  territories: ["GROWTH", "PRO"],
-
   // AI voice agent configuration
   voice: ["GROWTH", "PRO"],
 

@@ -124,6 +124,7 @@ export default async function smsForwardingRoutes(fastify: FastifyInstance) {
             planStatus: true,
             callsThisMonth: true,
             callsLimit: true,
+            leadsThisMonth: true,
             phone: true,
             ownerWhatsapp: true,
           },
@@ -153,11 +154,29 @@ export default async function smsForwardingRoutes(fastify: FastifyInstance) {
 
     const { confidence } = parseSmsLeadWithConfidence(Body);
 
-    // ─── Check call limits ─────────────────────────────────────
-    if (client.plan !== "PRO" && client.callsThisMonth >= client.callsLimit) {
-      logger.warn({ clientId: client.id, callsThisMonth: client.callsThisMonth, requestId }, "[SMS] Broker call limit reached");
+    // FIX Round-2 #6: monthly leads cap (plan.leads) — return empty TwiML so
+    // Twilio doesn't retry, but log it so the platform can see over-cap traffic.
+    const { checkMonthlyLeadsCapacity, tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+    const monthlyLeads = await checkMonthlyLeadsCapacity(fastify.prisma, client.id, client.plan);
+    if (!monthlyLeads.canIngest) {
+      // FIX Round-2 #6 (reviewer): don't drop silently — tell the broker why.
+      logger.warn({ clientId: client.id, requestId }, "[SMS] Forwarded SMS ignored — monthly lead limit reached");
+      fastify.prisma.ownerNotification.create({
+        data: {
+          clientId: client.id,
+          type: "LEAD_LIMIT",
+          message: `A forwarded SMS lead (${parsed.name || "new lead"}) was not added — your monthly lead limit (${monthlyLeads.limit}) is reached. Upgrade your plan to add more leads.`,
+          status: "sent",
+          sentAt: new Date(),
+        },
+      }).catch(() => {});
       return reply.status(200).type("text/xml").send("<Response></Response>");
     }
+
+    // FIX P0-3: Call quota check — leads are ALWAYS stored. If the broker is
+    // out of monthly calls, the lead is kept and only the auto-call is skipped
+    // (with an owner notification), instead of silently dropping forwarded SMS.
+    const callAllowed = client.plan === "PRO" || client.callsThisMonth < client.callsLimit;
 
     // ─── Create lead with distributed lock for dedup safety ──────
     const dedupLockId = `dedup:${client.id}:${parsed.phone}`;
@@ -246,6 +265,9 @@ export default async function smsForwardingRoutes(fastify: FastifyInstance) {
       return reply.status(200).type("text/xml").send("<Response></Response>");
     }
 
+    // FIX Round-2 #6: consume monthly leads allowance (race-safe)
+    await tryConsumeMonthlyLead(fastify.prisma, client.id, client.plan);
+
     logger.info({ clientId: client.id, leadId: lead.id, phone: parsed.phone, source: parsed.source, requestId },
       `[SMS] Lead created from forwarded SMS`);
 
@@ -265,12 +287,26 @@ export default async function smsForwardingRoutes(fastify: FastifyInstance) {
       })(),
       (async () => {
         try {
-          await enqueueCall({
-            leadId: lead.id,
-            clientId: client!.id,
-            callType: "QUALIFICATION",
-            attempt: 1,
-          });
+          if (callAllowed) {
+            await enqueueCall({
+              leadId: lead.id,
+              clientId: client!.id,
+              callType: "QUALIFICATION",
+              attempt: 1,
+            });
+          } else {
+            await fastify.prisma.ownerNotification.create({
+              data: {
+                clientId: client!.id,
+                leadId: lead.id,
+                type: "CALL_SKIPPED_LIMIT",
+                message: `New forwarded SMS lead (${parsed.name}) received — AI call skipped because your monthly call limit is reached. Upgrade to resume AI calls.`,
+                status: "sent",
+                sentAt: new Date(),
+              },
+            }).catch(() => {});
+            logger.warn({ clientId: client!.id, leadId: lead.id, requestId }, "[SMS] Lead stored but AI call skipped — call limit reached");
+          }
         } catch { /* non-blocking */ }
       })(),
       (async () => {

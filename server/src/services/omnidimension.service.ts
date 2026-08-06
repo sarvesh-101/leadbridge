@@ -86,23 +86,27 @@ export async function dispatchCall(params: DispatchCallParams): Promise<{
 
       const data = (await response.json()) as DispatchCallResponse;
 
+      if (!data.success) {
+        // Fail loudly — never report a call as dispatched when the vendor rejected it
+        // (also catches API responses that omit `success` entirely)
+        throw new Error(`Omnidimension rejected the call: ${JSON.stringify(data)}`);
+      }
+
       logger.info(
         { requestId: data.requestId, status: data.status, to: params.toNumber },
         "Omnidimension call dispatched"
       );
 
       return {
-        success: data.success,
+        success: true,
         requestId: data.requestId,
         status: data.status,
       };
-    },
-    // Fallback when circuit is open — return simulated response
-    () => ({
-      success: false,
-      requestId: -1,
-      status: "circuit_open",
-    })
+    }
+    // NOTE: No fallback is passed on purpose. When the circuit is OPEN or the API
+    // fails, the error propagates so the call worker marks the call as FAILED and
+    // notifies the broker. Returning a fake "simulated" success here silently
+    // billed brokers for calls that never happened.
   );
 }
 

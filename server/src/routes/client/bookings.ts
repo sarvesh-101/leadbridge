@@ -20,6 +20,20 @@ export default async function clientBookingRoutes(fastify: FastifyInstance) {
     });
 
     if (!lead) {
+      // FIX Round-2 #6 (reviewer): booking quick-add creates a new lead — count
+      // it against the monthly leads cap so no ingestion path bypasses the plan.
+      const client = await fastify.prisma.client.findUnique({
+        where: { id: clientId },
+        select: { plan: true },
+      });
+      if (client) {
+        const { checkMonthlyLeadsCapacity, monthlyLeadsCapError } = await import("../../utils/lead-limits");
+        const monthly = await checkMonthlyLeadsCapacity(fastify.prisma, clientId, client.plan);
+        if (!monthly.canIngest) {
+          return reply.status(429).send(monthlyLeadsCapError(monthly.limit));
+        }
+      }
+
       lead = await fastify.prisma.lead.create({
         data: {
           clientId,
@@ -33,6 +47,12 @@ export default async function clientBookingRoutes(fastify: FastifyInstance) {
           receivedAt: new Date(),
         },
       });
+
+      // Consume the allowance (race-safe)
+      if (client) {
+        const { tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+        await tryConsumeMonthlyLead(fastify.prisma, clientId, client.plan);
+      }
     } else {
       // Update lead status to rebooked
       await fastify.prisma.lead.update({

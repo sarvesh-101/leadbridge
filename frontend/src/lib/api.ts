@@ -89,7 +89,15 @@ export async function apiFetch<T = any>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(error.error || error.message || `HTTP ${res.status}`);
+    // Attach the status + full body so callers can branch on flags like
+    // verificationRequired (FIX Round-2 #3) instead of just the message.
+    const err = new Error(error.error || error.message || `HTTP ${res.status}`) as Error & {
+      status?: number;
+      data?: unknown;
+    };
+    err.status = res.status;
+    err.data = error;
+    throw err;
   }
 
   return res.json();

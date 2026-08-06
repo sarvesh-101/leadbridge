@@ -16,6 +16,14 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  // FIX Round-2 #3: after register we show a "check your email" screen until
+  // the broker verifies their email (login is blocked server-side until then).
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  // FIX Round-2 #3 (reviewer): true when the server couldn't send the
+  // verification email (SMTP not configured) — warn the broker.
+  const [emailWarning, setEmailWarning] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "", phone: "",
     companyName: "", city: "", password: "",
@@ -52,11 +60,35 @@ export default function RegisterPage() {
         ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
         phone: formData.phone, city: formData.city,
       }, { skipAuth: true });
+      // FIX Round-2 #3: new accounts need email verification before login
+      if (res.requiresVerification) {
+        // FIX Round-2 #3 (reviewer): if SMTP failed server-side (emailSent false),
+        // show a warning so the broker doesn't wait for an email that never came.
+        setEmailWarning(res.emailSent === false);
+        setPendingEmail(formData.email);
+        return;
+      }
       login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Registration failed");
     } finally { setLoading(false); }
+  };
+
+  const handleResend = async () => {
+    if (!pendingEmail) return;
+    setResending(true);
+    setResendSent(false);
+    try {
+      const res = await api.post("/auth/resend-verification", { email: pendingEmail }, { skipAuth: true });
+      // FIX Round-2 #3 (reviewer): server tells us if SMTP actually sent it
+      setEmailWarning(res.emailSent === false);
+      setResendSent(true);
+    } catch (err: any) {
+      setError(err.message || "Could not resend verification email");
+    } finally {
+      setResending(false);
+    }
   };
 
   const updateField = (field: string, value: string) => {
@@ -91,6 +123,43 @@ export default function RegisterPage() {
         </div>
 
         <div className="p-6 rounded-lg bg-[#111118] border border-[#2A2A3A]">
+          {pendingEmail ? (
+            /* FIX Round-2 #3: verification-required success screen */
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center py-6">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#22D3A5]/10 border border-[#22D3A5]/30 flex items-center justify-center">
+                <Mail className="w-6 h-6 text-[#22D3A5]" />
+              </div>
+              <h2 className="text-[18px] font-display font-bold text-[#F0F0F8] mb-2">Check your email</h2>
+              <p className="text-[13px] text-[#6B6B8A] leading-relaxed mb-1">
+                We sent a verification link to{" "}
+                <span className="text-[#F0F0F8] font-medium">{pendingEmail}</span>
+              </p>
+              <p className="text-[13px] text-[#6B6B8A] leading-relaxed mb-5">
+                Click the link to activate your 14-day free trial and log in.
+              </p>
+              {emailWarning && (
+                <p className="flex items-center gap-2 p-3 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/25 text-[#F59E0B] text-[12px] text-left mb-4">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  The verification email could not be sent right now. Use the
+                  resend button below to try again.
+                </p>
+              )}
+              {resendSent && (
+                <p className="text-[12px] text-[#22D3A5] mb-3">✓ Verification email sent again</p>
+              )}
+              <div className="flex items-center justify-center gap-2">
+                <button type="button" onClick={handleResend} disabled={resending}
+                  className="px-4 py-2.5 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] font-semibold text-[#F0F0F8] hover:border-[#4F6EF7] transition-colors">
+                  {resending ? "Sending…" : "Resend email"}
+                </button>
+                <Link href="/auth/login"
+                  className="px-4 py-2.5 rounded-lg bg-[#4F6EF7] text-white text-[13px] font-semibold hover:brightness-110 transition-all">
+                  Go to login
+                </Link>
+              </div>
+            </motion.div>
+          ) : (
+          <>
           {error && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
               className="flex items-center gap-2 p-3 rounded-lg bg-[#F43F5E]/10 border border-[#F43F5E]/20 text-[#F43F5E] text-[13px] mb-4">
@@ -210,6 +279,8 @@ export default function RegisterPage() {
               <Link href="/auth/login" className="text-[#4F6EF7] hover:underline font-medium">Sign in</Link>
             </p>
           </div>
+          </>
+          )}
         </div>
       </motion.div>
     </div>

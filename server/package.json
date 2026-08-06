@@ -13,6 +13,7 @@
     "prisma:studio": "prisma studio",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "test:smtp": "node scripts/test-smtp.cjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "worker:call": "tsx src/workers/call.worker.ts",
@@ -20,7 +21,11 @@
     "worker:notification": "tsx src/workers/notification.worker.ts",
     "worker:followup": "tsx src/workers/followup.worker.ts",
     "worker:reminder": "tsx src/workers/reminder.worker.ts",
-    "worker:webhook-retry": "tsx src/workers/webhook-retry.worker.ts"
+    "worker:webhook-retry": "tsx src/workers/webhook-retry.worker.ts",
+    "test:llm": "node scripts/test-llm.cjs",
+    "backfill:call-costs": "node scripts/backfill-call-costs.cjs",
+    "reconcile:calls-limit": "node scripts/reconcile-calls-limit.cjs",
+    "test:extraction": "node scripts/test-extraction.cjs"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",

@@ -88,6 +88,17 @@ export async function runDunning(): Promise<{
               callsLimit: 0,
             },
           });
+
+          // FIX P1-5: release the phone number + delete the AI agent so the
+          // platform stops paying ₹200/mo per cancelled number and inbound
+          // calls stop ringing a live agent on a dead account.
+          try {
+            const { cleanupBrokerResources } = await import("../services/account-cleanup.service");
+            await cleanupBrokerResources(client.id);
+          } catch (err: any) {
+            logger.warn({ clientId: client.id, err: err.message }, "Cleanup failed after dunning deactivation");
+          }
+
           deactivated++;
           step3Sent++;
           break;

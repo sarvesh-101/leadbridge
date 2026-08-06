@@ -54,6 +54,14 @@ export default async function authRoutes(fastify: FastifyInstance) {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // FIX Round-2 #3: email verification (trial-abuse protection) — every new
+    // account starts unverified. Login is blocked (403 verificationRequired)
+    // until the broker clicks the link in the verification email. This makes
+    // fake-email signups useless: they can never activate the 14-day trial
+    // (which costs the platform ~₹460/user in real AI calls).
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48h
+
     // Create the client (no admin assignment needed — adminId is optional)
     const client = await fastify.prisma.client.create({
       data: {
@@ -68,23 +76,73 @@ export default async function authRoutes(fastify: FastifyInstance) {
         plan: "GROWTH",
         planStatus: "TRIAL",
         trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14-day trial
-        callsLimit: 100,
+        callsLimit: 500, // matches Growth plan definition (PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
         leadSources: ["manual"],
         adminId: null,
+        emailVerified: false,
+        verificationToken,
+        verificationTokenExpiresAt,
       },
     });
 
-    // Generate tokens
-    const accessToken = generateAccessToken({
-      sub: client.id,
-      role: "client",
-      clientId: client.id,
-    });
-    const refreshToken = generateRefreshToken({ sub: client.id, role: "client" });
+    // Send the verification email (best-effort — never blocks registration)
+    const verifyUrl = `${config.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
+    fastify.log.info({ email }, "Sending email verification link");
+    let emailSent = false;
+    try {
+      emailSent = await sendEmail({
+        to: email,
+        subject: "Verify your LeadBridge account",
+        text: `Welcome to LeadBridge! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+              <div style="display: inline-flex; align-items: center; gap: 8px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
+                <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
+              </div>
+            </div>
+            <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Verify your email</h1>
+            <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+              Welcome to LeadBridge! Click the button below to verify your email
+              and activate your 14-day free trial.
+            </p>
+            <div style="text-align: center; margin-bottom: 24px;">
+              <a href="${verifyUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
+                Verify Email
+              </a>
+            </div>
+            <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+              This link expires in 48 hours. If you didn't create a LeadBridge account,
+              you can safely ignore this email.
+            </p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+            <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+              LeadBridge — Never Lose Another Lead Again
+            </p>
+          </div>
+        `,
+      });
+
+      if (!emailSent) {
+        fastify.log.warn(
+          { email },
+          "Verification email NOT sent — SMTP not configured. Account created unverified."
+        );
+      }
+    } catch (err: any) {
+      fastify.log.error({ err }, "Failed to send verification email");
+    }
 
     return reply.status(201).send({
-      accessToken,
-      refreshToken,
+      // FIX Round-2 #3: no tokens until the email is verified
+      requiresVerification: true,
+      // FIX Round-2 #3 (reviewer): let the UI know if SMTP failed so the broker
+      // isn't left waiting for an email that will never arrive.
+      emailSent,
+      message: emailSent
+        ? "Account created. Check your email to verify your account and activate your trial."
+        : "Account created, but the verification email could not be sent right now. Use the resend button below to try again.",
       user: {
         id: client.id,
         businessName: client.businessName,
@@ -164,6 +222,16 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return reply.status(401).send({ error: "Invalid email or password" });
     }
 
+    // FIX Round-2 #3: block unverified accounts from logging in.
+    // Existing accounts (created before this fix) are all backfilled to
+    // emailVerified=true, so only brand-new signups are gated.
+    if (!client.emailVerified) {
+      return reply.status(403).send({
+        error: "Please verify your email before logging in. Check your inbox for the verification link.",
+        verificationRequired: true,
+      });
+    }
+
     const accessToken = generateAccessToken({
       sub: client.id,
       role: "client",
@@ -188,6 +256,119 @@ export default async function authRoutes(fastify: FastifyInstance) {
         city: client.city,
         zone: client.zone,
       },
+    };
+  });
+
+  // ─── Verify Email ──────────────────────────────────────────────
+  // GET /auth/verify-email?token=... — marks the account verified and returns
+  // fresh tokens so the broker is logged in immediately.
+  fastify.get("/auth/verify-email", {
+    schema: {
+      querystring: {
+        type: "object",
+        required: ["token"],
+        properties: { token: { type: "string" } },
+      },
+    },
+  }, async (request: FastifyRequest<{ Querystring: { token: string } }>, reply: FastifyReply) => {
+    const { token } = request.query;
+
+    const client = await fastify.prisma.client.findFirst({
+      where: {
+        verificationToken: token,
+        verificationTokenExpiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!client) {
+      return reply.status(400).send({ error: "Invalid or expired verification link" });
+    }
+
+    await fastify.prisma.client.update({
+      where: { id: client.id },
+      data: {
+        emailVerified: true,
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
+      },
+    });
+
+    const accessToken = generateAccessToken({
+      sub: client.id,
+      role: "client",
+      clientId: client.id,
+    });
+    const refreshToken = generateRefreshToken({ sub: client.id, role: "client" });
+
+    return {
+      message: "Email verified successfully. Welcome to LeadBridge!",
+      accessToken,
+      refreshToken,
+      user: {
+        id: client.id,
+        businessName: client.businessName,
+        ownerName: client.ownerName,
+        email: client.email,
+        phone: client.phone,
+        role: "client",
+        plan: client.plan,
+        planStatus: client.planStatus,
+        callsThisMonth: client.callsThisMonth,
+        callsLimit: client.callsLimit,
+        city: client.city,
+        zone: client.zone,
+      },
+    };
+  });
+
+  // ─── Resend Verification Email ─────────────────────────────────
+  fastify.post("/auth/resend-verification", {
+    schema: {
+      body: {
+        type: "object",
+        required: ["email"],
+        properties: { email: { type: "string", format: "email" } },
+      },
+    },
+    config: { rateLimit: { max: 3, timeWindow: "1 minute" } },
+  }, async (request: FastifyRequest<{ Body: { email: string } }>, reply: FastifyReply) => {
+    const { email } = request.body;
+
+    const client = await fastify.prisma.client.findUnique({ where: { email } });
+    if (!client) {
+      // Don't reveal whether the email exists
+      return { message: "If an account exists, a new verification link has been sent." };
+    }
+
+    if (client.emailVerified) {
+      return reply.status(400).send({ error: "This email is already verified. You can log in." });
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+    await fastify.prisma.client.update({
+      where: { id: client.id },
+      data: { verificationToken, verificationTokenExpiresAt },
+    });
+
+    const verifyUrl = `${config.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
+    const emailSent = await sendEmail({
+      to: email,
+      subject: "Verify your LeadBridge account",
+      text: `Verify your email to activate your trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
+    });
+
+    if (!emailSent) {
+      fastify.log.warn({ email }, "Resend verification email failed — SMTP not configured");
+    }
+
+    // FIX Round-2 #3 (reviewer): return emailSent like register does so the UI
+    // can warn instead of falsely confirming "sent again" when SMTP is down.
+    // Keep the generic message to avoid email enumeration.
+    return {
+      message: "If an account exists, a new verification link has been sent.",
+      emailSent,
     };
   });
 
@@ -266,6 +447,15 @@ export default async function authRoutes(fastify: FastifyInstance) {
       // Find or create the client
       let client = await fastify.prisma.client.findUnique({ where: { email: googleEmail } });
 
+      if (client && !client.emailVerified) {
+        // FIX Round-2 #3 (reviewer): a broker who signed up with email/password
+        // but never verified can prove ownership via Google — verify them now.
+        client = await fastify.prisma.client.update({
+          where: { id: client.id },
+          data: { emailVerified: true },
+        });
+      }
+
       if (!client) {
         // Auto-create account from Google profile
         const randomPassword = crypto.randomBytes(24).toString("hex");
@@ -283,9 +473,12 @@ export default async function authRoutes(fastify: FastifyInstance) {
             plan: "GROWTH",
             planStatus: "TRIAL",
             trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-            callsLimit: 100,
+            callsLimit: 500, // matches Growth plan definition (PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
             leadSources: ["manual"],
             adminId: null,
+            // FIX Round-2 #3: Google already verified the email — skip the
+            // email-verification step for OAuth signups.
+            emailVerified: true,
           },
         });
       }

@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "Starter plan is ₹18,000/mo for 100 AI calls. Growth is ₹35,000/mo for 300 calls. Pro is ₹60,000/mo for unlimited calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
+    a: "Starter plan is ₹18,000/mo for 100 AI calls. Growth is ₹35,000/mo for 500 calls. Pro is ₹60,000/mo for unlimited calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
   },
   {
     q: "What languages does the AI speak?",
@@ -51,7 +51,7 @@ const faqs = [
   },
   {
     q: "Do you offer a trial?",
-    a: "We offer a 7-day trial with 30 AI calls included — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If LeadBridge isn't right, just let us know.",
+    a: "We offer a 7-day trial with 50 AI calls included — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If LeadBridge isn't right, just let us know.",
   },
 ];
 

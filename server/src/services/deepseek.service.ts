@@ -36,7 +36,7 @@ export async function extractFromTranscript(transcript: string): Promise<Extract
   "propertyType": "flat|villa|plot|commercial|rental|not-specified",
   "bedrooms": "1BHK|2BHK|3BHK|4BHK+|any|not-specified",
   "bookingRequested": boolean,
-  "bookingDate": "YYYY-MM-DD or null",
+  "bookingDate": "YYYY-MM-DD (today is 2026-08-03 — interpret relative day/week words like 'this Saturday', 'next week', 'tomorrow' as the actual upcoming date, e.g. 'this Saturday' → 2026-08-08) or null",
   "bookingTime": "HH:MM AM/PM or null",
   "faqsAsked": ["list of questions they asked"],
   "sentiment": "positive|neutral|negative",

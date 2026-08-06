@@ -125,14 +125,8 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
     const { businessName, ownerName, email, phone, city, zone, password, ownerWhatsapp, language } = request.body;
     const adminId = request.userId;
 
-    // Check territory availability
-    const existingTerritory = await fastify.prisma.territory.findFirst({
-      where: { city, zone: zone || null, locked: true },
-    });
-    if (existingTerritory) {
-      return reply.status(409).send({ error: "This territory is already assigned to another client" });
-    }
-
+    // Soft territory model (2026-08-06): leads are broker-sourced, so a city
+    // is NOT exclusive. Multiple brokers may serve the same city — no 409 here.
     const passwordHash = await bcrypt.hash(password, 12);
 
     const client = await fastify.prisma.client.create({
@@ -147,6 +141,9 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
         passwordHash,
         ownerWhatsapp,
         language: language || "hinglish",
+        // FIX Round-2 #3: admin already verified the broker's identity —
+        // skip the self-serve email verification step for admin-created accounts.
+        emailVerified: true,
       },
     });
 
@@ -322,6 +319,15 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
       where: { id: request.params.id },
       data: { planStatus: "CANCELLED" },
     });
+
+    // FIX P1-5: release the broker's phone number + AI agent so a deactivated
+    // account stops incurring monthly number rental and inbound call costs.
+    try {
+      const { cleanupBrokerResources } = await import("../../services/account-cleanup.service");
+      await cleanupBrokerResources(request.params.id);
+    } catch (err: any) {
+      fastify.log.warn({ clientId: request.params.id, err: err.message }, "Cleanup failed on admin delete");
+    }
 
     // Release any territory
     const clientTerritory = await fastify.prisma.territory.findFirst({

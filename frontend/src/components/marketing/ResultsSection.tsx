@@ -2,12 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-import CountUp from "react-countup";
 
 const stats = [
-  { value: 60, suffix: "s", label: "Average time to first call", subtext: "Industry average: 4–8 hours", noCountUp: true },
-  { value: 94, suffix: "%", label: "Gross margin per client", subtext: "After all AI and calling costs" },
-  { value: 3, suffix: "x", label: "More bookings per month", subtext: "Compared to manual follow-up" },
+  { value: 60, suffix: "s", label: "Target time to first call", subtext: "Industry average response: 4–8 hours" },
+  { value: 24, suffix: "/7", label: "Calling coverage", subtext: "AI never sleeps — weekends included" },
+  { value: 3, suffix: "+", label: "Follow-up attempts", subtext: "Day 1 + Day 3 automatic sequence" },
 ];
 
 export default function ResultsSection() {
@@ -68,13 +67,7 @@ export default function ResultsSection() {
             >
               <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4F6EF7]/50 to-transparent" />
               <div className="text-[72px] font-display font-bold text-[#F0F0F8] leading-none mb-3">
-                {inView && !stat.noCountUp ? (
-                  <CountUp end={stat.value} suffix={stat.suffix} duration={2} useEasing separator="" />
-                ) : stat.noCountUp ? (
-                  `${stat.value}${stat.suffix}`
-                ) : (
-                  `0${stat.suffix}`
-                )}
+                {`${stat.value}${stat.suffix}`}
               </div>
               <p className="text-[16px] font-medium text-[#6B6B8A] mb-2">{stat.label}</p>
               <p className="text-[13px] text-[#3A3A52]">{stat.subtext}</p>

@@ -1,0 +1,140 @@
+========================================
+ LEADBRIDGE - COMPLETE CONTEXT PROMPT
+========================================
+(Last session: July 22, 2026)
+
+Hey Buffy, this is Ganesh continuing from our previous session. Here's full context:
+
+========================================
+ THE PROJECT
+========================================
+LeadBridge — AI-powered lead management & voice calling platform for Indian real estate brokers.
+- Monorepo: Fastify + Prisma + PostgreSQL backend, Next.js frontend
+- Target: Brokers who get leads from 99acres, MagicBricks, JustDial etc.
+- Plans: Starter (₹18K/100 calls), Growth (₹35K/500 calls), Pro (₹60K/10K calls)
+- AI calling via OmniDimension API
+- Payment via Razorpay subscriptions
+
+========================================
+ CURRENT STATE (What's real)
+========================================
+- Full backend with real routes, services, workers ✅
+- Lead lifecycle system (ingest→call→book→remind→followup→cold) ✅
+- D1/D2/D3 follow-up automation via BullMQ workers ✅
+- WhatsApp notifications for owner + customer ✅
+- Email campaigns + team invites (needs SMTP config) ✅
+- Phone number purchase (OmniDimension/Twilio/Exotel) ✅
+- Razorpay subscription billing ✅
+- Real Prisma schema with all models ✅
+- Tests exist but limited coverage ✅
+
+========================================
+ THE CRITICAL GAPS (Must Fix)
+========================================
+
+GAP 1: COST CREDIT SYSTEM (PRIORITY #1)
+-----------------------------------------
+Broker pays ₹35K to platform via Razorpay → platform's bank account.
+But ALL calls go through ONE OmniDimension API key in .env.
+Platform needs to pay OmniDimension for every call made.
+There is NO credit tracking system currently.
+- No "purchased credits" table
+- No OmniDimension balance check
+- No per-broker cost tracking
+- No auto-top-up when credits low
+
+GAP 2: PRO PLAN LOSS RISK
+--------------------------
+Current PRO (₹60K/mo, 10K calls) may be unprofitable.
+At Enterprise pricing (₹3.5/min), 20K minutes = ₹70K cost vs ₹60K revenue = -16% LOSS.
+Need to either reduce PRO calls to 5K or increase PRO price to ₹75K.
+
+GAP 3: OVERAGE SYSTEM (Lost Revenue)
+--------------------------------------
+When broker hits call limit → blocked. No "buy extra calls" option.
+Should add: ₹300 for 100 extra calls, auto-processed.
+
+GAP 4: ADMIN FINANCIAL DASHBOARD
+-----------------------------------
+No dashboard showing:
+- Per-broker revenue vs cost
+- Total OmniDimension spend
+- MRR vs infrastructure cost
+- Profitability by plan
+
+GAP 5: NO DEPROVISIONING
+--------------------------
+When broker cancels → OmniDimension agent stays active, phone number stays active.
+Platform keeps paying for unused numbers.
+
+========================================
+ OMNIDIMENSION PRICING (From Website)
+========================================
+| Plan           | Price (USD) | Price (₹) | Cost/min  | Minutes |
+|----------------|-------------|-----------|-----------|---------|
+| Starter        | $15         | ₹1,250    | $0.084    | 179 min |
+| Jump Starter   | $30         | ₹2,500    | $0.076    | 395 min |
+| Early Deployers| $36         | ₹3,000    | $0.068    | 588 min |
+| Growth         | $200        | ₹16,600   | $0.056    | 3,571min|
+| Enterprise     | Custom      | Custom    | ~$0.04    | Custom  |
+
+========================================
+ THE BUSINESS MODEL (Agreed Strategy)
+========================================
+HYBRID MODEL:
+1. Platform buys ONE OmniDimension Growth plan ($200/mo) → 3,571 min
+2. All brokers share those minutes
+3. Extra usage beyond that: $0.005/min (₹0.42/min) — negligible
+4. Future: Add BYOK option for power users
+
+One $200 Omni plan can serve:
+- 3 Growth brokers (₹1.05L revenue) OR
+- 17 Starter brokers (₹3.06L revenue)
+
+========================================
+ 🔴 URGENT: ACTION REQUIRED
+========================================
+You MUST ask me FIRST thing:
+"Ganesh, did you get the OmniDimension Enterprise pricing?
+Specifically:
+1. What's the per-minute rate for Enterprise? (Website says ~$0.04/min = ₹3.5/min)
+2. Is there a minimum monthly commitment?
+3. Any setup fees or phone-number rental costs?
+4. Is there a platform/SaaS fee on top of per-minute charges?"
+
+========================================
+ PENDING IMPLEMENTATIONS
+========================================
+Once Enterprise pricing is confirmed, implement in order:
+
+PHASE 1 (Immediate):
+1. PlatformCredit model (Prisma schema) — track purchased vs consumed Omni credits
+2. Admin endpoint to top up credits manually
+3. Credit check before dispatching calls (guard in call.worker.ts)
+4. Auto-pause gracefully when credits run out
+5. Cost tracking per broker (callsCost field or separate model)
+6. Env vars for Omni pricing: OMNIDIM_COST_PER_MIN, OMNIDIM_MONTHLY_FEE, PHONE_COST_PER_MONTH
+
+PHASE 2 (After Phase 1):
+7. Admin profitability dashboard (revenue vs cost per broker/plan)
+8. Overage selling system (buy extra 100 calls for ₹300)
+9. Broker usage dashboard (see their own cost-to-serve)
+
+PHASE 3 (Future):
+10. BYOK option for power users (broker brings own Omni key)
+11. Auto-deprovisioning on cancellation
+12. Invoice breakdown showing cost per call to broker
+
+========================================
+ OTHER TOPICS DISCUSSED
+========================================
+- CRON_JOBS: Monthly report cron resets callsThisMonth counter
+- NO-SHOW DETECTOR: Runs every 15 min, schedules D1/D2/D3
+- SEEDING: prisma/seed.ts creates dummy data
+- DOCKER: docker-compose.yml for local dev
+- DEPLOYMENT: Railway/Docker, Procfile, railway.json
+- WHATSAPP: Meta Cloud API, sender = broker's business number
+- EMAIL: SMTP config, FROM_NAME/FROM_EMAIL env vars
+- PHONE NUMBERS: Brokers buy via OmniDimension or import from Exotel/Twilio
+- AI VOICE: DeepSeek via OpenRouter for transcript extraction + chatbot
+- TESTS: 9 test files in server/src/__tests__/

@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Prisma } from "@prisma/client";
 import { getBrokerCredits } from "../../services/credit-manager.service";
+import { getMonthlyLeadsLimit } from "../../utils/lead-limits";
 
 export default async function clientSettingsRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -41,6 +42,7 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
         callsThisMonth: true,
         callsLimit: true,
         rolloverCalls: true,
+        leadsThisMonth: true,
         plan: true,
         planStatus: true,
         trialEndsAt: true,
@@ -57,6 +59,9 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
       callsThisMonth: client.callsThisMonth,
       callsLimit: client.callsLimit,
       rolloverCalls: client.rolloverCalls,
+      // FIX Round-2 #6: expose real monthly leads usage vs plan cap
+      leadsThisMonth: client.leadsThisMonth,
+      leadsLimit: getMonthlyLeadsLimit(client.plan),
       totalAvailable: credits.totalAvailable,
       totalRemaining: credits.totalRemaining,
       usagePercent: credits.usagePercent,

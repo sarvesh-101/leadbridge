@@ -57,6 +57,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Clients", href: "/admin/clients", icon: <Building2 className="w-5 h-5" /> },
   { label: "Territories", href: "/admin/territories", icon: <Globe className="w-5 h-5" /> },
+  { label: "Integration Health", href: "/admin/health", icon: <Activity className="w-5 h-5" /> },
   { label: "Forwarding", href: "/admin/forwarding", icon: <Send className="w-5 h-5" /> },
   { label: "Queues", href: "/admin/queues", icon: <Activity className="w-5 h-5" /> },
   { label: "Webhooks", href: "/admin/webhooks", icon: <Webhook className="w-5 h-5" /> },

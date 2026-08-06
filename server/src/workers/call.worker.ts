@@ -9,7 +9,6 @@ import { emitCallStarted, emitCallEnded, emitStatusChange } from "../services/we
 import { canDispatchCall, canBrokerDispatchCall, incrementBrokerCallCount } from "../services/credit-manager.service";
 
 // Track which calls have had their billing increment already applied
-const billingProcessed = new Set<string>();
 
 const callWorker = new Worker<CallJob>(
   "call",
@@ -214,11 +213,6 @@ const callWorker = new Worker<CallJob>(
         where: { id: call.id },
         data: { status: "FAILED", transcript: `Call failed: ${error.message}` },
       });
-      // Only increment billing counter here if dispatch was attempted
-      // (avoid double-counting since 'completed' event also increments)
-      if (!billingProcessed.has(call.id)) {
-        billingProcessed.add(call.id);
-      }
       await emitCallEnded(leadId, call.id, "failed", clientId);
       throw error;
     }
@@ -231,22 +225,41 @@ const callWorker = new Worker<CallJob>(
 );
 
 callWorker.on("completed", async (job) => {
-  if (job) {
-    const { clientId, leadId } = job.data;
-    // Increment billing counter only once per unique call dispatch
-    // The 'completed' event fires once per successful job execution.
-    // Use the latest call record's ID to avoid double-counting on retries.
-    const lastCall = await prisma.call.findFirst({
-      where: { leadId, clientId },
-      orderBy: { createdAt: "desc" },
+  if (!job) return;
+  const { clientId, leadId } = job.data;
+
+  // Use the latest call record's ID to identify this dispatch.
+  const lastCall = await prisma.call.findFirst({
+    where: { leadId, clientId },
+    orderBy: { createdAt: "desc" },
+  });
+  if (!lastCall) return;
+
+  // DB-backed idempotency marker — survives restarts (replaces the old in-memory
+  // Set which reset on restart and could double-bill if a job was redelivered).
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.creditTransaction.findFirst({
+      where: { callId: lastCall.id, type: "BROKER_CALL" },
     });
-    if (lastCall && !billingProcessed.has(lastCall.id)) {
-      billingProcessed.add(lastCall.id);
-      // Use the shared credit manager function that respects rollover
-      await incrementBrokerCallCount(prisma, clientId);
-      await emitCallEnded(leadId, lastCall.id, "completed", clientId);
-    }
-  }
+    if (existing) return;
+
+    // Record the marker first, then increment — atomic, so concurrent/redelivered
+    // completions can never bill the same dispatch twice.
+    await tx.creditTransaction.create({
+      data: {
+        type: "BROKER_CALL",
+        amount: 0,
+        minutes: 0,
+        description: "Broker call count increment (idempotency marker)",
+        clientId,
+        callId: lastCall.id,
+        metadata: { leadId },
+      },
+    });
+    await incrementBrokerCallCount(tx as any, clientId);
+  });
+
+  await emitCallEnded(leadId, lastCall.id, "completed", clientId);
 });
 
 callWorker.on("failed", (job, error) => {

@@ -37,7 +37,7 @@ const PLANS = [
     period: "/month",
     description: "For growing brokerages with dedicated number",
     features: [
-      "300 AI calls/month",
+      "500 AI calls/month",
       "Full qualification + booking",
       "WhatsApp notifications",
       "3-day follow-up automation",
@@ -136,6 +136,7 @@ export default function BillingPage() {
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const [pollingPlan, setPollingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [manualPaymentNotice, setManualPaymentNotice] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"plans" | "invoices" | "usage">("plans");
 
   useEffect(() => {
@@ -205,11 +206,18 @@ export default function BillingPage() {
         // Payment URL from Razorpay — open in new tab
         window.open(res.paymentUrl, "_blank");
         setBilling((prev) => prev ? { ...prev, paymentUrl: res.paymentUrl } : prev);
+        setManualPaymentNotice(null);
         setPollingPlan(plan);
         toast.success("Razorpay checkout opened. Waiting for payment confirmation...");
       } else if (res.subscription) {
+        // No payment URL means Razorpay is NOT configured — never pretend the
+        // subscription is paid. Surface an honest notice so brokers contact you.
         await loadBilling();
-        toast.success(`Subscribed to ${plan} plan!`);
+        setManualPaymentNotice(
+          res.message ||
+          `Your ${plan} subscription was created, but online payment isn't configured yet. Contact the LeadBridge team to complete payment.`
+        );
+        toast.warning("Subscription created — payment required manually");
       } else {
         // Fall back to the legacy upgrade endpoint
         const legacyRes = await api.post("/billing/upgrade", { plan });
@@ -435,6 +443,23 @@ export default function BillingPage() {
           </div>
         )}
       </motion.div>
+
+      {/* Honest notice: subscription created but Razorpay not configured */}
+      {manualPaymentNotice && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-200">Subscription created — but payment is NOT processed</p>
+            <p className="text-xs text-amber-300/70 mt-1">{manualPaymentNotice}</p>
+            <p className="text-xs text-amber-300/70 mt-1">
+              Your plan will be activated once payment is confirmed by the team.
+            </p>
+          </div>
+          <button onClick={() => setManualPaymentNotice(null)} className="p-1 hover:bg-amber-500/20 rounded shrink-0">
+            <X className="w-3 h-3 text-amber-300" />
+          </button>
+        </div>
+      )}
 
       {/* Error */}
       {error && (

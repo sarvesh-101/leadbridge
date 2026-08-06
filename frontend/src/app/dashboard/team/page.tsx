@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Users, Plus, X, Loader2, Shield, User, Eye, Mail,
-  Trash2, ArrowUpDown, ChevronDown,
+  Trash2, ArrowUpDown, ChevronDown, Copy, AlertTriangle,
 } from "lucide-react";
 
 interface TeamMember {
@@ -49,6 +49,9 @@ export default function TeamPage() {
   const [inviteName, setInviteName] = useState("");
   const [inviteRole, setInviteRole] = useState<"ADMIN" | "AGENT" | "VIEWER">("AGENT");
 
+  // Invite result — honest: if the email failed, show a copyable link instead of fake success
+  const [inviteResult, setInviteResult] = useState<{ emailSent: boolean; inviteUrl: string; email: string } | null>(null);
+
   // Confirm delete
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
@@ -68,18 +71,25 @@ export default function TeamPage() {
   async function handleInvite() {
     if (!inviteEmail.trim() || !inviteName.trim()) return;
     setActionLoading("invite");
+    setInviteResult(null);
     try {
-      await api.post("/team/invite", {
+      const res = await api.post<{ emailSent: boolean; inviteUrl: string }>("/team/invite", {
         email: inviteEmail.trim(),
         name: inviteName.trim(),
         role: inviteRole,
       });
-      toast.success(`Invitation sent to ${inviteEmail}`);
-      setShowInvite(false);
-      setInviteEmail("");
-      setInviteName("");
-      setInviteRole("AGENT");
       await loadMembers();
+      if (res.emailSent) {
+        toast.success(`Invitation sent to ${inviteEmail}`);
+        setShowInvite(false);
+        setInviteEmail("");
+        setInviteName("");
+        setInviteRole("AGENT");
+      } else {
+        // Email failed — show the copyable invite link instead of lying
+        setInviteResult({ emailSent: false, inviteUrl: res.inviteUrl, email: inviteEmail.trim() });
+        toast.warning("Invitation created, but the email failed to send. Share the link manually.");
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to send invitation");
     } finally {
@@ -300,21 +310,55 @@ export default function TeamPage() {
                 </div>
               </div>
 
+              {/* Honest invite result — shown only when the email couldn't be sent */}
+              {inviteResult && !inviteResult.emailSent && (
+                <div className="mt-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-amber-300 mb-1">
+                        The invite email couldn&apos;t be sent (email provider issue).
+                      </p>
+                      <p className="text-[11px] text-gray-400 mb-2">
+                        Share this invite link with {inviteResult.email} manually:
+                      </p>
+                      <code className="block text-[11px] text-amber-200 bg-black/30 px-2.5 py-2 rounded-lg break-all font-mono">
+                        {inviteResult.inviteUrl}
+                      </code>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(inviteResult.inviteUrl); toast.success("Invite link copied!"); }}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[11px] font-medium hover:bg-amber-500/30"
+                      >
+                        <Copy className="w-3 h-3" /> Copy Invite Link
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center gap-3 mt-6">
-                <button onClick={() => setShowInvite(false)}
+                <button onClick={() => { setShowInvite(false); setInviteResult(null); }}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/5"
                 >
-                  Cancel
+                  Close
                 </button>
-                <button onClick={handleInvite} disabled={!inviteEmail.trim() || !inviteName.trim() || actionLoading === "invite"}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
-                >
-                  {actionLoading === "invite" ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
-                  ) : (
-                    <><Mail className="w-4 h-4" /> Send Invite</>
-                  )}
-                </button>
+                {!inviteResult ? (
+                  <button onClick={handleInvite} disabled={!inviteEmail.trim() || !inviteName.trim() || actionLoading === "invite"}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  >
+                    {actionLoading === "invite" ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+                    ) : (
+                      <><Mail className="w-4 h-4" /> Send Invite</>
+                    )}
+                  </button>
+                ) : (
+                  <button onClick={() => { setShowInvite(false); setInviteResult(null); setInviteEmail(""); setInviteName(""); setInviteRole("AGENT"); }}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90"
+                  >
+                    Done
+                  </button>
+                )}
               </div>
             </motion.div>
           </motion.div>

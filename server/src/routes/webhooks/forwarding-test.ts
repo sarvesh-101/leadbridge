@@ -45,6 +45,7 @@ export default async function forwardingTestRoutes(fastify: FastifyInstance) {
         planStatus: true,
         callsThisMonth: true,
         callsLimit: true,
+        leadsThisMonth: true,
       },
     });
 
@@ -56,9 +57,17 @@ export default async function forwardingTestRoutes(fastify: FastifyInstance) {
       return reply.status(402).send({ error: "Account inactive" });
     }
 
-    if (client.plan !== "PRO" && client.callsThisMonth >= client.callsLimit) {
-      return reply.status(429).send({ error: "Call limit reached" });
+    // FIX Round-2 #6: monthly leads cap (plan.leads)
+    const { checkMonthlyLeadsCapacity, monthlyLeadsCapError } = await import("../../utils/lead-limits");
+    const monthlyLeads = await checkMonthlyLeadsCapacity(fastify.prisma, clientId, client.plan);
+    if (!monthlyLeads.canIngest) {
+      return reply.status(429).send(monthlyLeadsCapError(monthlyLeads.limit));
     }
+
+    // FIX P0-3: Call quota check — leads are ALWAYS stored. If the broker is
+    // out of monthly calls, the lead is kept and only the auto-call is skipped
+    // (with an owner notification), instead of rejecting the forwarded lead.
+    const callAllowed = client.plan === "PRO" || client.callsThisMonth < client.callsLimit;
 
     // Parse the test body
     const parsed = parseSmsLead(body);
@@ -156,14 +165,35 @@ export default async function forwardingTestRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({ error: "Failed to create lead" });
     }
 
-    // Enqueue AI call (non-blocking)
+    // FIX Round-2 #6: consume monthly leads allowance (race-safe)
+    const { tryConsumeMonthlyLead } = await import("../../utils/lead-limits");
+    await tryConsumeMonthlyLead(fastify.prisma, clientId, client.plan);
+
+    // Enqueue AI call (non-blocking) — only if broker has call quota
     Promise.allSettled([
-      enqueueCall({
-        leadId: lead.id,
-        clientId,
-        callType: "QUALIFICATION",
-        attempt: 1,
-      }),
+      (async () => {
+        try {
+          if (callAllowed) {
+            await enqueueCall({
+              leadId: lead.id,
+              clientId,
+              callType: "QUALIFICATION",
+              attempt: 1,
+            });
+          } else {
+            await fastify.prisma.ownerNotification.create({
+              data: {
+                clientId,
+                leadId: lead.id,
+                type: "CALL_SKIPPED_LIMIT",
+                message: `Test lead (${parsed.name}) received — AI call skipped because your monthly call limit is reached. Upgrade to resume AI calls.`,
+                status: "sent",
+                sentAt: new Date(),
+              },
+            }).catch(() => {});
+          }
+        } catch { /* non-blocking */ }
+      })(),
       emitNewLead(lead.id, lead.name, "test_forward", clientId).catch(() => {}),
     ]);
 
@@ -172,6 +202,10 @@ export default async function forwardingTestRoutes(fastify: FastifyInstance) {
 
     return reply.status(200).send({
       status: "created",
+      callSkipped: !callAllowed,
+      message: callAllowed
+        ? "Test lead created — AI call queued."
+        : "Test lead created — AI call SKIPPED because your monthly call limit is reached.",
       leadId: lead.id,
       lead: {
         id: lead.id,

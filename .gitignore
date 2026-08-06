@@ -66,3 +66,15 @@ server/node_modules/.prisma/
 *.zip
 tmp/
 temp/
+
+.vercel
+.env*
+
+# Runtime artifacts (never commit)
+*.rdb
+*ngrok-output*
+ngrok*.txt
+invoices/
+
+# Test artifacts
+server/test-knowledge-doc.pdf

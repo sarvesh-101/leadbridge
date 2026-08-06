@@ -1,37 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useLandingData } from "@/hooks/useLandingData";
 
 const GlobeCanvas = dynamic(() => import("@/components/canvas/GlobeCanvas"), {
   ssr: false,
   loading: () => <div className="w-full h-full" />,
 });
 
-const claimCities = [
-  "Mumbai - Andheri West was claimed 2 hours ago",
-  "Pune - Baner was claimed 4 hours ago",
-  "Delhi - Dwarka was claimed 30 minutes ago",
-  "Bangalore - Whitefield was claimed 1 hour ago",
-  "Hyderabad - Gachibowli was claimed 3 hours ago",
-];
-
 export default function CTASection() {
-  const [cityIndex, setCityIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const { data } = useLandingData();
+  const stats = data?.stats ?? null;
 
-  // Cycle through cities every 4 seconds with fade
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setCityIndex((prev) => (prev + 1) % claimCities.length);
-        setVisible(true);
-      }, 400);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+  const urgencyLine =
+    stats && stats.citiesClaimed > 0
+      ? `🏙️  ${stats.citiesClaimed} city${stats.citiesClaimed === 1 ? "" : "s"} already claimed — ${stats.citiesAvailable} still open. First come, first locked.`
+      : "🏙️  Every city is still open. Be the first broker to claim yours.";
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0A0A0F]">
@@ -87,12 +72,9 @@ export default function CTASection() {
           </Link>
         </div>
 
-        {/* Urgency line */}
-        <div
-          className="text-[13px] text-[#6B6B8A] font-mono transition-opacity duration-400"
-          style={{ opacity: visible ? 1 : 0 }}
-        >
-          ⚡  {claimCities[cityIndex]}
+        {/* Real urgency line (live from DB, no fake timestamps) */}
+        <div className="text-[13px] text-[#6B6B8A] font-mono">
+          {urgencyLine}
         </div>
       </div>
     </section>

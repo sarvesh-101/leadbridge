@@ -8,6 +8,7 @@ vi.mock("@prisma/client", () => {
       findFirst: vi.fn(),
       findUnique: vi.fn(),
       update: vi.fn(),
+      create: vi.fn(),
     },
     client: {
       findUnique: vi.fn(),
@@ -58,37 +59,82 @@ describe("Territory Service", () => {
 
   describe("assignTerritory", () => {
     it("assigns an available territory to a client", async () => {
-      const mockTerritory = { id: "t1", city: "Mumbai", zone: "Andheri", tier: 1, locked: false, clientId: null };
-      (prisma.territory.findFirst as any).mockResolvedValue(mockTerritory);
-      (prisma.$transaction as any).mockResolvedValue([
-        { ...mockTerritory, locked: true, clientId: "client-1" },
-        { id: "client-1", city: "Mumbai", zone: "Andheri" },
-      ]);
+      // findFirst #1 = existing linked row (none); findFirst #2 = target row (free)
+      (prisma.territory.findFirst as any)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: "t1", city: "Mumbai", zone: "Andheri", tier: 1, locked: false, clientId: null });
+      (prisma.territory.update as any).mockResolvedValue({ id: "t1", city: "Mumbai", zone: "Andheri", tier: 1 });
+      (prisma.client.update as any).mockResolvedValue({ id: "client-1", city: "Mumbai", zone: "Andheri" });
 
       const result = await assignTerritory(prisma, "client-1", "Mumbai", "Andheri");
-      expect(result.territory.locked).toBe(true);
-      expect(result.territory.clientId).toBe("client-1");
+      expect(result.territory?.id).toBe("t1");
+      expect(result.territory?.city).toBe("Mumbai");
       expect(result.client.city).toBe("Mumbai");
-    });
-
-    it("throws when territory is not available", async () => {
-      (prisma.territory.findFirst as any).mockResolvedValue(null);
-      await expect(assignTerritory(prisma, "client-1", "Mumbai", "Andheri")).rejects.toThrow(
-        "Territory Mumbai - Andheri is not available"
+      expect(prisma.territory.update).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: "t1" }, data: { clientId: "client-1", locked: true } })
       );
     });
 
+    it("soft model: creates a new territory row when none exists (never blocks)", async () => {
+      (prisma.territory.findFirst as any)
+        .mockResolvedValueOnce(null) // existing linked row
+        .mockResolvedValueOnce(null); // target row not found
+      (prisma.territory.create as any).mockResolvedValue({
+        id: "t-new", city: "Mumbai", zone: "Andheri", tier: 2, clientId: "client-1", locked: true,
+      });
+      (prisma.client.update as any).mockResolvedValue({
+        id: "client-1", city: "Mumbai", zone: "Andheri",
+      });
+
+      const result = await assignTerritory(prisma, "client-1", "Mumbai", "Andheri");
+      expect(result.territory?.id).toBe("t-new");
+      expect(result.territory?.city).toBe("Mumbai");
+      expect(result.client.city).toBe("Mumbai");
+      expect(prisma.territory.create).toHaveBeenCalled();
+    });
+
+    it("soft model: does NOT steal a taken territory — client still gets service area", async () => {
+      // No existing linked row, target row exists but is taken by another broker
+      (prisma.territory.findFirst as any)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: "t1", city: "Mumbai", zone: "Western Suburbs", tier: 1, locked: true, clientId: "other-client",
+        });
+      (prisma.client.update as any).mockResolvedValue({
+        id: "client-1", city: "Mumbai", zone: "Western Suburbs",
+      });
+
+      const result = await assignTerritory(prisma, "client-1", "Mumbai", "Western Suburbs");
+      // No territory row linked (still owned by other broker) but client has service area
+      expect(result.territory).toBeNull();
+      expect(result.client.city).toBe("Mumbai");
+      expect(prisma.territory.update).not.toHaveBeenCalled();
+    });
+
     it("works without zone parameter", async () => {
-      const mockTerritory = { id: "t2", city: "Delhi", zone: null, tier: 1, locked: false, clientId: null };
-      (prisma.territory.findFirst as any).mockResolvedValue(mockTerritory);
-      (prisma.$transaction as any).mockResolvedValue([
-        { ...mockTerritory, locked: true, clientId: "client-2" },
-        { id: "client-2", city: "Delhi", zone: null },
-      ]);
+      (prisma.territory.findFirst as any)
+        .mockResolvedValueOnce(null) // existing linked row
+        .mockResolvedValueOnce({ id: "t2", city: "Delhi", zone: null, tier: 1, locked: false, clientId: null });
+      (prisma.territory.update as any).mockResolvedValue({ id: "t2", city: "Delhi", zone: null, tier: 1 });
+      (prisma.client.update as any).mockResolvedValue({ id: "client-2", city: "Delhi", zone: null });
 
       const result = await assignTerritory(prisma, "client-2", "Delhi");
-      expect(result.territory.locked).toBe(true);
+      expect(result.territory?.city).toBe("Delhi");
       expect(result.client.city).toBe("Delhi");
+    });
+
+    it("soft model: same service area already linked keeps the row (no double-link)", async () => {
+      (prisma.territory.findFirst as any).mockResolvedValueOnce({
+        id: "t1", city: "Mumbai", zone: "Andheri", tier: 1, clientId: "client-1",
+      });
+      (prisma.client.update as any).mockResolvedValue({ id: "client-1", city: "Mumbai", zone: "Andheri" });
+
+      const result = await assignTerritory(prisma, "client-1", "Mumbai", "Andheri");
+      expect(result.territory?.id).toBe("t1");
+      expect(result.client.city).toBe("Mumbai");
+      // No relink/update needed — same row kept
+      expect(prisma.territory.update).not.toHaveBeenCalled();
+      expect(prisma.territory.create).not.toHaveBeenCalled();
     });
   });
 

@@ -7,6 +7,11 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().default(3000),
   FRONTEND_URL: z.string().default("http://localhost:3001"),
+  // Public base URL for inbound webhooks (e.g. ngrok https://xxxx.ngrok-free.app).
+  // Used to build the Omnidimension call-events webhook URL that gets registered
+  // on AI agents. When empty, the request's own protocol/hostname is used (which
+  // is unreliable behind a proxy, so ALWAYS set this for real call cost tracking).
+  WEBHOOK_URL: z.string().optional(),
 
   // Demo Mode — run without external APIs for investor demos
   DEMO_MODE: z.coerce.boolean().default(false),
@@ -44,12 +49,14 @@ const envSchema = z.object({
   TWILIO_SMS_URL: z.string().optional(),
 
 
-  // LLM Provider (OpenAI-compatible API — works with OpenRouter, DeepSeek, etc.)
+  // LLM Provider (OpenAI-compatible API — works with DeepSeek, OpenRouter, etc.)
   // Used for post-call transcript extraction, WhatsApp chatbot, and script generation.
-  // Default: Qwen3 Next 80B A3B Instruct via OpenRouter (free, fast, multilingual)
+  // OpenRouter key takes precedence when set (hosts DeepSeek/Qwen/Llama models with one key).
+  // Default: deepseek-chat via DeepSeek's official API
   DEEPSEEK_API_KEY: z.string().optional(),
-  DEEPSEEK_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
-  DEEPSEEK_MODEL: z.string().default("qwen/qwen3-next-80b-a3b-instruct:free"),
+  DEEPSEEK_BASE_URL: z.string().default("https://api.deepseek.com"),
+  DEEPSEEK_MODEL: z.string().default("deepseek-chat"),
+  OPENROUTER_API_KEY: z.string().optional(),
 
   // WhatsApp Cloud API — optional in demo mode
   WHATSAPP_TOKEN: z.string().optional(),
@@ -95,6 +102,10 @@ const envSchema = z.object({
   // Optional in development; defaults to JWT_SECRET-based derivation if not set
   ENCRYPTION_KEY: z.string().optional(),
 
+  // Error reporting — optional Sentry DSN (https://<publicKey>@<host>/<projectId>)
+  // When set, errors are reported to Sentry via the HTTP envelope API.
+  SENTRY_DSN: z.string().optional(),
+
   // ─── Cost Tracking ───────────────────────────────────────
   // How much does the platform pay per minute for OmniDimension calls
   OMNIDIM_COST_PER_MINUTE: z.coerce.number().default(4.6),  // ₹4.6/min (Growth plan pricing)
@@ -106,7 +117,13 @@ const envSchema = z.object({
   AVG_CALL_DURATION_MINUTES: z.coerce.number().default(2),   // 2 minutes avg
 
   // Broker credit conversion: how many calls per rupee for offline payments
-  BROKER_CALL_PRICE: z.coerce.number().default(116),  // ~₹116/call = ₹35K/300 calls
+  BROKER_CALL_PRICE: z.coerce.number().default(70),  // ~₹70/call = ₹35K/500 calls (Growth plan)
+
+  // FIX Round-2 #4: hard monthly call cap for PRO. PLAN_DEFINITIONS.PRO.calls is
+  // 999999 ("unlimited"), but the platform pays per-minute while PRO is flat
+  // ₹60K/mo — unbounded cost risk. 0 = no cap (dangerous); default 5000 keeps
+  // margin safe (₹4.6/min × ~2min avg ≈ ₹9.2/call × 5000 ≈ ₹46K < ₹60K revenue).
+  PRO_MONTHLY_CALL_CAP: z.coerce.number().default(5000),
 
   // ─── SMS & Email Forwarding ─────────────────────────────
   // The Twilio number that brokers forward portal SMS to

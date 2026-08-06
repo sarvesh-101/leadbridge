@@ -164,7 +164,7 @@ async function main() {
       language: "hinglish",
       plan: "GROWTH",
       planStatus: "ACTIVE",
-      callsLimit: 300,
+      callsLimit: 500, // matches Growth plan definition (PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
       onboardingComplete: true,
       onboardingStep: 7,
       adminId: admin.id,
