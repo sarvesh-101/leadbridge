@@ -12,9 +12,11 @@
   - Currently everything runs on local laptop + ngrok (`casino-bunkbed-bronze.ngrok-free.dev`). Dies when PC is off.
   - `railway.json` + `Procfile` already exist. CI `deploy` job gated on `vars.DEPLOY_ENABLED == 'true'` (unset → skipped).
   - Need: DEPLOY_ENABLED=true + host secrets, or manual Railway deploy.
-- [ ] **0.2 Fix CSP** in `frontend/next.config.js` `connect-src`
-  - Allows `https://*.ngrok-free.app` but tunnel is `.ngrok-free.dev` → live landing page API calls are BLOCKED (verified in browser 2026-08-08).
-  - Replace with production domain once 0.1 is done.
+- [x] **0.2 Fix CSP** in `frontend/next.config.js` `connect-src` ✅ DONE 2026-08-08 (commit `b82f3ab`)
+  - Was: allowed `https://*.ngrok-free.app` but tunnel is `.ngrok-free.dev` → live landing page API calls BLOCKED.
+  - Fix: pinned exact static tunnel host `casino-bunkbed-bronze.ngrok-free.dev` for `connect-src` (https + wss).
+  - Verified live: backend `/api/v1/public/landing` returns HTTP 200, zero CSP console errors in browser (2026-08-08).
+  - ⚠️ When 0.1 is done: replace ngrok entries with the production domain (TODO comment already in next.config.js).
 - [ ] **0.3 WhatsApp approval → switch `.env` to real number**
   - Real number **+91 72088 55916** still "In review / Unverified" at Meta. `.env` points at Meta TEST number (phone ID `1174238042447407`).
   - After approval: update `WHATSAPP_PHONE_ID`, `WHATSAPP_TOKEN`, `WHATSAPP_BUSINESS_ACCOUNT_ID`.
