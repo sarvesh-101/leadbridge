@@ -180,7 +180,9 @@ jobs:
   deploy:
     name: Deploy to Production
     needs: [server-tests, server-e2e, frontend-lint, docker-build]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only run when a VPS is actually configured (secrets present) — otherwise
+    # skip so CI stays green for the local/ngrok deployment model.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.DEPLOY_HOST != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
