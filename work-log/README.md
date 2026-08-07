@@ -10,6 +10,9 @@
 2. Fill in the template below.
 3. If continuing previous work, **read the most recent entry first**.
 
+> 🚀 **Launch plan:** the tracked pre/post-launch checklist lives in
+> [`launch-plan.md`](./launch-plan.md) — update its checkboxes as tasks complete.
+
 ## Template
 
 ```markdown
