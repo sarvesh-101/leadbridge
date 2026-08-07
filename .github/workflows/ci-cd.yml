@@ -180,22 +180,20 @@ jobs:
   deploy:
     name: Deploy to Production
     needs: [server-tests, server-e2e, frontend-lint, docker-build]
-    # NOTE: the `secrets` context is NOT allowed in job-level `if` conditions.
-    # So the job runs on every main push, but each deploy step is gated on
-    # DEPLOY_HOST being set (step-level `if` CAN read secrets). With no VPS
-    # configured, the steps skip and the job passes — keeping CI green for the
-    # current local/ngrok deployment model.
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Runs ONLY when the repository VARIABLE DEPLOY_ENABLED is "true" (i.e., a
+    # VPS + deploy secrets actually exist). Otherwise the job is skipped and CI
+    # stays green for the current local/ngrok deployment model.
+    # Uses `vars` (not `secrets`) because the secrets context is not allowed in
+    # job-level `if` conditions.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        if: ${{ secrets.DEPLOY_HOST != '' }}
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Container Registry
-        if: ${{ secrets.DEPLOY_HOST != '' }}
         uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY }}
@@ -203,7 +201,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push server image
-        if: ${{ secrets.DEPLOY_HOST != '' }}
         uses: docker/build-push-action@v5
         with:
           context: ./server
@@ -214,7 +211,6 @@ jobs:
             ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/server:${{ github.sha }}
 
       - name: Build and push frontend image
-        if: ${{ secrets.DEPLOY_HOST != '' }}
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -225,7 +221,6 @@ jobs:
             ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ github.sha }}
 
       - name: Run Prisma migrations
-        if: ${{ secrets.DEPLOY_HOST != '' }}
         run: |
           cd server
           npx prisma migrate deploy
@@ -233,7 +228,6 @@ jobs:
           DATABASE_URL_PRISMA: ${{ secrets.PROD_DATABASE_URL }}
 
       - name: Deploy via SSH
-        if: ${{ secrets.DEPLOY_HOST != '' }}
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEPLOY_HOST }}
