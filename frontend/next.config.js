@@ -32,7 +32,9 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com",
               "img-src 'self' data: blob: https: http:",
               // TODO: After deployment, restrict *.railway.app *.vercel.app to actual production URLs
-              "connect-src 'self' http://localhost https://*.railway.app https://*.vercel.app https://*.ngrok-free.app https://api.deepseek.com https://accounts.google.com ws://localhost wss://*.railway.app wss://*.vercel.app wss://*.ngrok-free.app",
+              // Static ngrok tunnel for the local backend (pinned exact host - not wildcard)
+              // TODO: Remove ngrok entries entirely once backend is on a production domain
+              "connect-src 'self' http://localhost https://*.railway.app https://*.vercel.app https://*.ngrok-free.app https://casino-bunkbed-bronze.ngrok-free.dev https://api.deepseek.com https://accounts.google.com ws://localhost wss://*.railway.app wss://*.vercel.app wss://*.ngrok-free.app wss://casino-bunkbed-bronze.ngrok-free.dev",
               "frame-src 'self' https://accounts.google.com",
               "object-src 'none'",
               "base-uri 'self'",
