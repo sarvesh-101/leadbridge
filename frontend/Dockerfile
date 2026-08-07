@@ -8,8 +8,9 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev
+# Install ALL deps (next build needs devDeps like typescript/tailwind plugins).
+# The runner stage only copies .next/standalone output, so devDeps don't bloat the image.
+RUN npm ci
 
 # Copy source code
 COPY . .
