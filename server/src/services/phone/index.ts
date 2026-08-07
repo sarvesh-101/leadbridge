@@ -12,6 +12,9 @@
 import { config } from "../../config";
 import { logger } from "../../utils/logger";
 import { PhoneProvider } from "./phone-provider.interface";
+import { DemoPhoneProvider } from "./demo-phone-provider";
+import { TwilioPhoneProvider } from "./twilio-provider";
+import { OmnidimensionPhoneProvider } from "./omnidimension-provider";
 
 let cachedProvider: PhoneProvider | null = null;
 
@@ -24,7 +27,6 @@ export function getPhoneProvider(): PhoneProvider {
 
   // ─── DEMO MODE: Use simulated provider ─────────────────────
   if (config.DEMO_MODE) {
-    const { DemoPhoneProvider } = require("./demo-phone-provider");
     cachedProvider = new DemoPhoneProvider();
     logger.info("📞 Phone provider: DEMO MODE (all operations simulated)");
     return cachedProvider!;
@@ -34,14 +36,12 @@ export function getPhoneProvider(): PhoneProvider {
 
   switch (providerName) {
     case "twilio": {
-      const { TwilioPhoneProvider } = require("./twilio-provider");
       cachedProvider = new TwilioPhoneProvider();
       logger.info("Phone provider: Twilio (direct number purchasing)");
       break;
     }
     case "omnidimension":
     default: {
-      const { OmnidimensionPhoneProvider } = require("./omnidimension-provider");
       cachedProvider = new OmnidimensionPhoneProvider();
       logger.info(`Phone provider: Omnidimension${providerName !== "omnidimension" ? ` (fallback from "${providerName}")` : ""}`);
       break;

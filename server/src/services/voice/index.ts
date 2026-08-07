@@ -11,6 +11,8 @@
 import { config } from "../../config";
 import { logger } from "../../utils/logger";
 import { VoiceAIProvider } from "./voice-ai-provider.interface";
+import { DemoVoiceAIProvider } from "./demo-voice-provider";
+import { OmnidimensionVoiceProvider } from "./omnidimension-voice-provider";
 
 let cachedProvider: VoiceAIProvider | null = null;
 
@@ -22,7 +24,6 @@ export function getVoiceAIProvider(): VoiceAIProvider {
 
   // ─── DEMO MODE: Use simulated provider ─────────────────────
   if (config.DEMO_MODE) {
-    const { DemoVoiceAIProvider } = require("./demo-voice-provider");
     cachedProvider = new DemoVoiceAIProvider();
     logger.info("🎯 Voice AI provider: DEMO MODE (all operations simulated)");
     return cachedProvider!;
@@ -33,7 +34,6 @@ export function getVoiceAIProvider(): VoiceAIProvider {
   switch (providerName) {
     case "omnidimension":
     default: {
-      const { OmnidimensionVoiceProvider } = require("./omnidimension-voice-provider");
       cachedProvider = new OmnidimensionVoiceProvider();
       logger.info("Voice AI provider: Omnidimension");
       break;

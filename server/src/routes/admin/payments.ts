@@ -53,7 +53,8 @@ export default async function adminPaymentRoutes(fastify: FastifyInstance) {
     };
   }>, reply: FastifyReply) => {
     try {
-      let { clientId, amount, paymentMethod, paymentReference, callsToAdd, notes } = request.body;
+      const { clientId, amount, paymentMethod, paymentReference, notes } = request.body;
+      let callsToAdd = request.body.callsToAdd;
 
       // Auto-calculate calls from amount if not specified (GAP D: BROKER_CALL_PRICE)
       if (!callsToAdd || callsToAdd < 1) {

@@ -348,9 +348,10 @@ describeDb("E2E: Full Lead Lifecycle", () => {
     expect(lead?.status).toBe("REBOOKED");
     expect(lead?.bookingId).toBe(rebookBookingId);
 
-    // Cleanup rebook test data
-    await prisma.booking.delete({ where: { id: rebookBookingId } });
+    // Cleanup rebook test data — delete the lead FIRST (it references the booking,
+    // and the booked-status check constraint requires bookingId on the lead).
     await prisma.lead.delete({ where: { id: rebookLeadId } });
+    await prisma.booking.delete({ where: { id: rebookBookingId } });
   });
 
   // ─── PART 7: Lead Score Calculation ───────────────────────────

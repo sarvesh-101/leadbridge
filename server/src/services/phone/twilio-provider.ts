@@ -11,6 +11,7 @@
  *   TWILIO_PHONE_NUMBER_SID=your_twilio_number_sid (optional, for outbound calls)
  */
 
+import twilio from "twilio";
 import { config } from "../../config";
 import { logger } from "../../utils/logger";
 import { PhoneProvider } from "./phone-provider.interface";
@@ -30,7 +31,6 @@ export class TwilioPhoneProvider implements PhoneProvider {
 
   private getClient(): import("twilio").Twilio {
     if (!this.client) {
-      const twilio = require("twilio") as typeof import("twilio");
       this.client = twilio(config.TWILIO_ACCOUNT_SID, config.TWILIO_AUTH_TOKEN);
     }
     return this.client;
