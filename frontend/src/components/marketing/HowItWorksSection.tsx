@@ -1,5 +1,7 @@
 "use client";
 
+import { MotionConfig, motion } from "framer-motion";
+
 const slides = [
   {
     number: "01",
@@ -43,6 +45,7 @@ const slides = [
 
 export default function HowItWorksSection() {
   return (
+    <MotionConfig reducedMotion="user">
     <section className="relative py-16 lg:py-24 bg-[#0A0A0F] overflow-hidden">
       {/* Soft radial glow behind the section */}
       <div
@@ -51,12 +54,18 @@ export default function HowItWorksSection() {
       />
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12 lg:mb-16">
+        <motion.div
+          className="text-center mb-12 lg:mb-16"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           <h2 className="h1-text px-4">How It Works</h2>
           <p className="mt-4 text-[16px] text-[#6B6B8A] max-w-[560px] mx-auto px-4">
             Five steps. Zero missed leads. From enquiry to confirmed site visit — on autopilot.
           </p>
-        </div>
+        </motion.div>
 
         <div className="relative">
           {/* Vertical timeline line (desktop) */}
@@ -67,9 +76,13 @@ export default function HowItWorksSection() {
 
           <div className="space-y-6 md:space-y-8">
             {slides.map((slide, i) => (
-              <div
+              <motion.div
                 key={i}
                 className="relative md:pl-20"
+                initial={{ opacity: 0, y: 28 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.55, delay: (i % 3) * 0.12, ease: "easeOut" }}
               >
                 {/* Number node on the timeline */}
                 <div
@@ -180,11 +193,12 @@ export default function HowItWorksSection() {
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </div>
     </section>
+    </MotionConfig>
   );
 }
