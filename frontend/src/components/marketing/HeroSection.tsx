@@ -69,11 +69,11 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden bg-[#0A0A0F]"
+      className="relative min-h-screen flex items-center overflow-hidden bg-[#0B0D12]"
     >
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#4F6EF7] opacity-[0.03] blur-[120px]" />
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[120px]" />
       </div>
 
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-0">
@@ -87,7 +87,7 @@ export default function HeroSection() {
               EXCLUSIVE · ONE BROKER PER CITY
             </span>
 
-            <h1 className="text-[clamp(36px,8vw,72px)] font-display font-bold leading-[0.95] text-[#F0F0F8] tracking-[-0.04em] mb-6">
+            <h1 className="text-[clamp(36px,8vw,72px)] font-display font-bold leading-[0.95] text-[#F2F4F8] tracking-[-0.04em] mb-6">
               <span ref={line1Ref} className="block opacity-0">
                 Your leads call
               </span>
@@ -101,7 +101,7 @@ export default function HeroSection() {
 
             <p
               ref={subheadRef}
-              className="text-[15px] sm:text-[18px] text-[#6B6B8A] max-w-[480px] leading-relaxed mb-10 opacity-0"
+              className="text-[15px] sm:text-[18px] text-[#8B93A3] max-w-[480px] leading-relaxed mb-10 opacity-0"
             >
               LeadBridge puts an AI agent on every inbound lead
               within 60 seconds — qualifying, booking, following up —
@@ -114,8 +114,8 @@ export default function HeroSection() {
             >
               <Link
                 href="/auth/register"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#4F6EF7] text-white text-[16px] font-semibold transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
-                style={{ boxShadow: "0 0 32px #4F6EF740" }}
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#3B82F6] text-white text-[16px] font-semibold transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+                style={{ boxShadow: "0 0 32px #3B82F640" }}
               >
                 Request Your City
                 <svg
@@ -136,7 +136,7 @@ export default function HeroSection() {
               </Link>
               <Link
                 href="#demo"
-                className="inline-flex items-center gap-2 text-[#6B6B8A] text-[16px] font-medium hover:underline transition-colors"
+                className="inline-flex items-center gap-2 text-[#8B93A3] text-[16px] font-medium hover:underline transition-colors"
               >
                 See it live ↓
               </Link>
@@ -158,7 +158,7 @@ export default function HeroSection() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
       >
         <div className="flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-[11px] font-medium text-[#6B6B8A] tracking-[0.08em] uppercase">
+          <span className="text-[11px] font-medium text-[#8B93A3] tracking-[0.08em] uppercase">
             Scroll
           </span>
           <svg
@@ -173,14 +173,14 @@ export default function HeroSection() {
               width="14"
               height="22"
               rx="7"
-              stroke="#6B6B8A"
+              stroke="#8B93A3"
               strokeWidth="1.5"
             />
             <circle
               cx="8"
               cy="9"
               r="2"
-              fill="#4F6EF7"
+              fill="#3B82F6"
               className="animate-pulse"
             />
           </svg>

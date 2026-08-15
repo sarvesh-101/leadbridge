@@ -105,12 +105,12 @@ export default function IntegrationSection() {
   }, [inView]);
 
   return (
-    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0A0F]" id="integrations">
+    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0B0D12]" id="integrations">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="caption text-[#22D3A5] mb-4 block">CONNECT EVERYTHING</span>
+          <span className="caption text-[#10B981] mb-4 block">CONNECT EVERYTHING</span>
           <h2 className="h1-text mb-4">Works with every lead source</h2>
-          <p className="text-[16px] text-[#6B6B8A] max-w-[520px] mx-auto">
+          <p className="text-[16px] text-[#8B93A3] max-w-[520px] mx-auto">
             No matter where your leads come from — portals, social, web, or WhatsApp — they all land in one inbox.
           </p>
         </div>
@@ -121,18 +121,18 @@ export default function IntegrationSection() {
             return (
               <div
                 key={i}
-                className="integration-card group relative p-5 rounded-xl bg-[#111118] border border-[#2A2A3A] hover:border-[#4F6EF7]/30 transition-all duration-300"
+                className="integration-card group relative p-5 rounded-xl bg-[#14161C] border border-[#272B34] hover:border-[#3B82F6]/30 transition-all duration-300"
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#4F6EF7]/20 to-[#4F6EF7]/5 flex items-center justify-center mb-3 border border-[#4F6EF7]/10">
-                  <Icon className="w-5 h-5 text-[#4F6EF7]" />
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3B82F6]/20 to-[#3B82F6]/5 flex items-center justify-center mb-3 border border-[#3B82F6]/10">
+                  <Icon className="w-5 h-5 text-[#3B82F6]" />
                 </div>
-                <h3 className="text-[14px] font-semibold text-[#F0F0F8] mb-0.5">{integration.name}</h3>
-                <p className="text-[11px] text-[#6B6B8A] mb-2">{integration.type}</p>
-                <p className="text-[11px] text-[#3A3A52] leading-relaxed">{integration.description}</p>
+                <h3 className="text-[14px] font-semibold text-[#F2F4F8] mb-0.5">{integration.name}</h3>
+                <p className="text-[11px] text-[#8B93A3] mb-2">{integration.type}</p>
+                <p className="text-[11px] text-[#363B45] leading-relaxed">{integration.description}</p>
                 {integration.status === "ready" ? (
-                  <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#22D3A5]/10 border border-[#22D3A5]/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#22D3A5]" />
-                    <span className="text-[9px] font-medium text-[#22D3A5]">Ready</span>
+                  <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#10B981]/10 border border-[#10B981]/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                    <span className="text-[9px] font-medium text-[#10B981]">Ready</span>
                   </span>
                 ) : (
                   <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/20">
@@ -147,15 +147,15 @@ export default function IntegrationSection() {
 
         {/* Flow description */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#111118] border border-[#2A2A3A]">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#14161C] border border-[#272B34]">
             <div className="flex items-center gap-1">
               {[Globe, Smartphone, MessageSquare, Webhook].map((Icon, i) => (
-                <div key={i} className="w-6 h-6 rounded-full bg-[#1A1A24] flex items-center justify-center">
-                  <Icon className="w-3 h-3 text-[#4F6EF7]" />
+                <div key={i} className="w-6 h-6 rounded-full bg-[#1B1E26] flex items-center justify-center">
+                  <Icon className="w-3 h-3 text-[#3B82F6]" />
                 </div>
               ))}
             </div>
-            <span className="text-[13px] text-[#6B6B8A]">
+            <span className="text-[13px] text-[#8B93A3]">
               Any source → LeadBridge AI → You get a WhatsApp notification
             </span>
           </div>

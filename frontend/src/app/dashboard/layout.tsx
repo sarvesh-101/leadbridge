@@ -56,14 +56,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Show loading spinner briefly while checking profile on dashboard routes
   if (!setupCheckDone && isAuthenticated && !pathname.startsWith("/setup") && !pathname.startsWith("/auth")) {
     return (
-      <div className="h-screen bg-[#0A0A0F] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-[#4F6EF7] animate-spin" />
+      <div className="h-screen bg-[#0B0D12] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-[#3B82F6] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#0A0A0F]">
+    <div className="flex h-screen bg-[#0B0D12]">
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
@@ -77,7 +77,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar onMenuToggle={() => setMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#0A0A0F] pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#0B0D12] pb-20 md:pb-6">
           <div className="max-w-7xl mx-auto space-y-4">
             <SystemStatus />
             <ErrorBoundary>
@@ -97,9 +97,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         toastOptions={{
           duration: 4000,
           style: {
-            background: "#1A1A24",
-            border: "1px solid #2A2A3A",
-            color: "#F0F0F8",
+            background: "#1B1E26",
+            border: "1px solid #272B34",
+            color: "#F2F4F8",
           },
         }}
       />
@@ -141,18 +141,18 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 bottom-0 w-72 bg-[#111118] border-r border-[#2A2A3A] overflow-y-auto z-50 shadow-2xl animate-slide-in">
+      <div className="fixed left-0 top-0 bottom-0 w-72 bg-[#14161C] border-r border-[#272B34] overflow-y-auto z-50 shadow-2xl animate-slide-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-[#2A2A3A]">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-[#272B34]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center">
               <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-[16px] font-bold text-[#F0F0F8]">LeadBridge</span>
+            <span className="text-[16px] font-bold text-[#F2F4F8]">LeadBridge</span>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#1A1A24] text-[#6B6B8A] transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#1B1E26] text-[#8B93A3] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -168,8 +168,8 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-[#4F6EF7]/10 text-[#4F6EF7]"
-                    : "text-[#6B6B8A] hover:bg-[#1A1A24] hover:text-[#F0F0F8]"
+                    ? "bg-[#3B82F6]/10 text-[#3B82F6]"
+                    : "text-[#8B93A3] hover:bg-[#1B1E26] hover:text-[#F2F4F8]"
                 }`}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
@@ -200,7 +200,7 @@ function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#111118] border-t border-[#2A2A3A] flex items-center justify-around px-2 z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#14161C] border-t border-[#272B34] flex items-center justify-around px-2 z-50">
       {navItems.map((item) => {
         const active = isActive(item.href);
         return (
@@ -208,7 +208,7 @@ function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
             key={item.label}
             href={item.href}
             className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
-              active ? "text-[#4F6EF7]" : "text-[#6B6B8A]"
+              active ? "text-[#3B82F6]" : "text-[#8B93A3]"
             }`}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -220,7 +220,7 @@ function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
       })}
       <button
         onClick={onOpenMenu}
-        className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[#6B6B8A] transition-colors"
+        className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[#8B93A3] transition-colors"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="1" />

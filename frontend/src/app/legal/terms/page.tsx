@@ -133,8 +133,8 @@ export default function TermsOfServicePage() {
             <h2 className="text-lg font-semibold text-white mb-3">11. Contact</h2>
             <p>
               For questions about these Terms, please contact us at{" "}
-              <a href="mailto:support@leadbridge.com" className="text-leadflow-accent hover:underline">
-                support@leadbridge.com
+              <a href="mailto:support@converza.tech" className="text-leadflow-accent hover:underline">
+                support@converza.tech
               </a>.
             </p>
           </section>

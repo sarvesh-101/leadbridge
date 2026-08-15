@@ -55,30 +55,30 @@ export default function CallsPage() {
     <div className="space-y-6">
       {/* Header stats */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-4">
+        <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-4">
           <p className="caption mb-1">Total Calls</p>
-          <p className="text-[24px] font-display font-bold text-[#F0F0F8]">{total}</p>
+          <p className="text-[24px] font-display font-bold text-[#F2F4F8]">{total}</p>
         </div>
-        <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-4">
+        <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-4">
           <p className="caption mb-1">Total Duration</p>
-          <p className="text-[24px] font-display font-bold text-[#F0F0F8]">{Math.floor(totalDuration / 60)}m {totalDuration % 60}s</p>
+          <p className="text-[24px] font-display font-bold text-[#F2F4F8]">{Math.floor(totalDuration / 60)}m {totalDuration % 60}s</p>
         </div>
-        <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-4">
+        <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-4">
           <p className="caption mb-1">Success Rate</p>
-          <p className="text-[24px] font-display font-bold text-[#22D3A5]">{successRate}%</p>
+          <p className="text-[24px] font-display font-bold text-[#10B981]">{successRate}%</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6B8A]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B93A3]" />
           <input
             type="text"
             placeholder="Search calls..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] text-[#F2F4F8] placeholder-[#363B45] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-colors"
           />
         </div>
         <div className="flex gap-1">
@@ -89,8 +89,8 @@ export default function CallsPage() {
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-colors",
                 statusFilter === s
-                  ? "border-[#4F6EF7] bg-[#4F6EF7]/10 text-[#4F6EF7]"
-                  : "border-[#2A2A3A] text-[#6B6B8A] hover:bg-[#1A1A24]"
+                  ? "border-[#3B82F6] bg-[#3B82F6]/10 text-[#3B82F6]"
+                  : "border-[#272B34] text-[#8B93A3] hover:bg-[#1B1E26]"
               )}
             >
               {s === "all" ? "All" : s}
@@ -103,7 +103,7 @@ export default function CallsPage() {
       <div className="space-y-3">
         {loading ? (
           [...Array(4)].map((_, i) => (
-            <div key={i} className="h-[72px] rounded-lg bg-[#111118] border border-[#2A2A3A] animate-pulse" />
+            <div key={i} className="h-[72px] rounded-lg bg-[#14161C] border border-[#272B34] animate-pulse" />
           ))
         ) : calls.length === 0 ? (
           <EmptyState
@@ -141,14 +141,14 @@ export default function CallsPage() {
       {/* Recording player for selected call */}
       {selectedCall && selectedCall.recordingUrl && (
         <div className="sticky bottom-0">
-          <div className="rounded-lg bg-[#1A1A24] border border-[#2A2A3A] p-4">
+          <div className="rounded-lg bg-[#1B1E26] border border-[#272B34] p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[13px] font-medium text-[#F0F0F8]">
+              <span className="text-[13px] font-medium text-[#F2F4F8]">
                 Recording — {selectedCall.type}
               </span>
               <button
                 onClick={() => setSelectedCall(null)}
-                className="text-[12px] text-[#6B6B8A] hover:text-[#F0F0F8] transition-colors"
+                className="text-[12px] text-[#8B93A3] hover:text-[#F2F4F8] transition-colors"
               >
                 Close
               </button>

@@ -110,14 +110,14 @@ export default function CustomerChatPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
+    <div className="min-h-screen bg-[#0B0D12]">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
           <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#22D3A5] to-[#10B981] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10B981] to-[#10B981] flex items-center justify-center">
             <MessageSquare className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1">
@@ -178,9 +178,9 @@ export default function CustomerChatPage() {
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1",
                           isBot
-                            ? "bg-gradient-to-br from-[#22D3A5] to-[#10B981]"
+                            ? "bg-gradient-to-br from-[#10B981] to-[#10B981]"
                             : isIncoming
-                              ? "bg-[#4F6EF7]/20"
+                              ? "bg-[#3B82F6]/20"
                               : "bg-white/10"
                         )}>
                           {isBot ? (
@@ -195,10 +195,10 @@ export default function CustomerChatPage() {
                           <div className={cn(
                             "px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed",
                             isBot
-                              ? "bg-[#22D3A5]/10 border border-[#22D3A5]/15 text-gray-200 rounded-tl-sm"
+                              ? "bg-[#10B981]/10 border border-[#10B981]/15 text-gray-200 rounded-tl-sm"
                               : isIncoming
-                                ? "bg-[#4F6EF7]/10 border border-[#4F6EF7]/15 text-gray-200"
-                                : "bg-[#4F6EF7] text-white rounded-tr-sm"
+                                ? "bg-[#3B82F6]/10 border border-[#3B82F6]/15 text-gray-200"
+                                : "bg-[#3B82F6] text-white rounded-tr-sm"
                           )}>
                             {msg.type === "OTP_SENT" ? (
                               <div className="flex items-center gap-1.5">
@@ -240,7 +240,7 @@ export default function CustomerChatPage() {
         </ErrorBoundary>
 
         {/* Fixed bottom bar with WhatsApp link */}
-        <div className="sticky bottom-4 bg-[#111118] border border-white/10 rounded-2xl p-3">
+        <div className="sticky bottom-4 bg-[#14161C] border border-white/10 rounded-2xl p-3">
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <p className="text-xs text-white font-medium">Chat with AI Assistant</p>
@@ -251,7 +251,7 @@ export default function CustomerChatPage() {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#22D3A5] text-white text-xs font-medium hover:bg-[#1FB98E] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#047857] text-white text-xs font-medium hover:bg-[#065F46] transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 Open WhatsApp
@@ -260,7 +260,7 @@ export default function CustomerChatPage() {
             ) : (
               <a
                 href={`tel:${customer?.clientContact}`}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4F6EF7] text-white text-xs font-medium hover:opacity-90 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 transition-colors"
               >
                 <Phone className="w-3.5 h-3.5" />
                 Call Broker

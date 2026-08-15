@@ -58,7 +58,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <div className="flex items-center gap-3">
             <button
               onClick={this.handleReset}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#4F6EF7] text-white text-sm font-medium hover:brightness-110 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-sm font-medium hover:brightness-110 transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <Link
               href="/dashboard"
               onClick={this.handleReset}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#2A2A3A] text-gray-300 text-sm font-medium hover:bg-[#1A1A24] transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#272B34] text-gray-300 text-sm font-medium hover:bg-[#1B1E26] transition-all"
             >
               <Home className="w-4 h-4" />
               Dashboard

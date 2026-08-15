@@ -100,8 +100,8 @@ export default function AnalyticsPage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
                 isActive
-                  ? "border-[#4F6EF7] text-[#4F6EF7]"
-                  : "border-transparent text-[#6B6B8A] hover:text-white hover:border-[#6B6B8A]/30"
+                  ? "border-[#3B82F6] text-[#3B82F6]"
+                  : "border-transparent text-[#8B93A3] hover:text-white hover:border-[#8B93A3]/30"
               )}
             >
               <tab.icon className="w-4 h-4" />

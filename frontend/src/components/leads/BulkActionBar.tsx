@@ -103,9 +103,9 @@ export function BulkActionBar({ selectedIds, onClear, onComplete }: BulkActionBa
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4F6EF7]/10 border border-[#4F6EF7]/20"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20"
       >
-        <span className="text-sm font-medium text-[#4F6EF7] mr-2">
+        <span className="text-sm font-medium text-[#3B82F6] mr-2">
           {selectedIds.length} selected
         </span>
 
@@ -131,7 +131,7 @@ export function BulkActionBar({ selectedIds, onClear, onComplete }: BulkActionBa
                     {action.label}
                   </button>
                   {showStatusMenu && (
-                    <div className="absolute top-full mt-1 left-0 z-50 w-40 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] shadow-xl overflow-hidden">
+                    <div className="absolute top-full mt-1 left-0 z-50 w-40 rounded-lg bg-[#1B1E26] border border-[#272B34] shadow-xl overflow-hidden">
                       {BULK_STATUSES.map((s) => (
                         <button
                           key={s.value}

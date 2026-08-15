@@ -179,7 +179,7 @@ export default function AdminWhatsAppPage() {
                     {config.phoneInfo.phoneNumber}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Shield className="w-3.5 h-3.5 text-[#4F6EF7]" />
+                    <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />
                     {config.phoneInfo.name}
                   </span>
                   <span className={cn(
@@ -205,17 +205,17 @@ export default function AdminWhatsAppPage() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               className="p-5 rounded-xl bg-white/5 border border-white/10"
             >
-              <Send className="w-5 h-5 text-[#4F6EF7] mb-3" />
+              <Send className="w-5 h-5 text-[#3B82F6] mb-3" />
               <h3 className="text-sm font-semibold text-white mb-3">Send Test Message</h3>
               <div className="space-y-2">
                 <input
                   value={testPhone}
                   onChange={(e) => setTestPhone(e.target.value)}
                   placeholder="+91 9876543210"
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#4A4A62] focus:outline-none focus:border-[#4F6EF7]/50"
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#4A4A62] focus:outline-none focus:border-[#3B82F6]/50"
                 />
                 <button onClick={handleTestSend} disabled={testSending || !testPhone.trim() || !config.configured}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#4F6EF7] text-white text-xs font-medium disabled:opacity-50 hover:opacity-90 transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-xs font-medium disabled:opacity-50 hover:opacity-90 transition-all"
                 >
                   {testSending ? (
                     <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Sending...</>
@@ -235,7 +235,7 @@ export default function AdminWhatsAppPage() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
               className="p-5 rounded-xl bg-white/5 border border-white/10"
             >
-              <Globe className="w-5 h-5 text-[#22D3A5] mb-3" />
+              <Globe className="w-5 h-5 text-[#10B981] mb-3" />
               <h3 className="text-sm font-semibold text-white mb-3">Webhook URL</h3>
               <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/5 border border-white/10">
                 <code className="flex-1 text-[11px] text-gray-300 truncate font-mono">
@@ -322,7 +322,7 @@ export default function AdminWhatsAppPage() {
                 href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-[#4F6EF7] hover:underline"
+                className="flex items-center gap-1 text-xs text-[#3B82F6] hover:underline"
               >
                 Meta Docs <ExternalLink className="w-3 h-3" />
               </a>
@@ -336,7 +336,7 @@ export default function AdminWhatsAppPage() {
                     className={cn(
                       "rounded-xl border transition-all cursor-pointer",
                       isOpen
-                        ? "bg-[#4F6EF7]/5 border-[#4F6EF7]/20"
+                        ? "bg-[#3B82F6]/5 border-[#3B82F6]/20"
                         : "bg-white/5 border-white/10 hover:bg-white/10"
                     )}
                     onClick={() => setActiveStep(isOpen ? null : step.step)}
@@ -344,7 +344,7 @@ export default function AdminWhatsAppPage() {
                     <div className="flex items-start gap-3 p-4">
                       <div className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
-                        isOpen ? "bg-[#4F6EF7] text-white" : "bg-white/10 text-gray-400"
+                        isOpen ? "bg-[#3B82F6] text-white" : "bg-white/10 text-gray-400"
                       )}>
                         {step.step}
                       </div>
@@ -369,7 +369,7 @@ export default function AdminWhatsAppPage() {
                               </p>
                               {step.code && (
                                 <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/5">
-                                  <code className="flex-1 text-[11px] text-[#22D3A5] font-mono break-all">
+                                  <code className="flex-1 text-[11px] text-[#10B981] font-mono break-all">
                                     {step.code}
                                   </code>
                                   <button onClick={(e) => {
@@ -394,7 +394,7 @@ export default function AdminWhatsAppPage() {
                               )}
                               {step.link && (
                                 <a href={step.link} target="_blank" rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 text-xs text-[#4F6EF7] hover:underline"
+                                  className="inline-flex items-center gap-1.5 text-xs text-[#3B82F6] hover:underline"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {step.linkLabel || "Open"} <ExternalLink className="w-3 h-3" />
@@ -468,7 +468,7 @@ Suresh Properties aapka intezaar kar rahe hain.
               ].map((msg, i) => (
                 <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4 text-[#22D3A5]" />
+                    <MessageSquare className="w-4 h-4 text-[#10B981]" />
                     <span className="text-xs font-medium text-gray-300">{msg.label}</span>
                   </div>
                   <pre className="text-xs text-gray-400 font-sans whitespace-pre-wrap leading-relaxed">
@@ -487,7 +487,7 @@ Suresh Properties aapka intezaar kar rahe hain.
         <div className="p-8 rounded-xl bg-white/5 border border-white/10 text-center">
           <MessageSquare className="w-10 h-10 text-gray-600 mx-auto mb-3" />
           <p className="text-sm text-gray-400">Failed to load WhatsApp configuration.</p>
-          <button onClick={loadConfig} className="mt-3 text-xs text-[#4F6EF7] hover:underline">
+          <button onClick={loadConfig} className="mt-3 text-xs text-[#3B82F6] hover:underline">
             Try Again
           </button>
         </div>

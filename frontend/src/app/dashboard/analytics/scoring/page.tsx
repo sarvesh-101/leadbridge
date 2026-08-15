@@ -242,14 +242,14 @@ export default function ScoringAnalyticsPage() {
                   <div key={factor}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-lg border",
-                      changed ? "bg-[#4F6EF7]/5 border-[#4F6EF7]/20" : "bg-white/5 border-white/10"
+                      changed ? "bg-[#3B82F6]/5 border-[#3B82F6]/20" : "bg-white/5 border-white/10"
                     )}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-white">{FACTOR_LABELS[factor] || factor}</span>
                         {changed && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-[#4F6EF7]/10 text-[#4F6EF7]">
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-[#3B82F6]/10 text-[#3B82F6]">
                             Recommended change
                           </span>
                         )}
@@ -262,8 +262,8 @@ export default function ScoringAnalyticsPage() {
                       <span className="text-gray-400">{Math.round(currentWeight * 100)}%</span>
                       {changed && (
                         <>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#4F6EF7]" />
-                          <span className="text-[#4F6EF7] font-semibold">{Math.round(recommended * 100)}%</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-[#3B82F6]" />
+                          <span className="text-[#3B82F6] font-semibold">{Math.round(recommended * 100)}%</span>
                         </>
                       )}
                     </div>

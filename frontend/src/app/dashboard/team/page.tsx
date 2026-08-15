@@ -263,7 +263,7 @@ export default function TeamPage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="w-full max-w-md mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-white">Invite Team Member</h2>
@@ -373,7 +373,7 @@ export default function TeamPage() {
             onClick={() => setDeleteConfirmId(null)}
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-sm font-semibold text-white mb-2">Remove Team Member?</h3>

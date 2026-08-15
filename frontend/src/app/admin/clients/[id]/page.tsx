@@ -63,7 +63,7 @@ export default function AdminClientDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 text-[#4F6EF7] animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#3B82F6] animate-spin" />
       </div>
     );
   }
@@ -86,7 +86,7 @@ export default function AdminClientDetailPage() {
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-[#1A1A24] text-[#6B6B8A]">
+        <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-[#1B1E26] text-[#8B93A3]">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
@@ -127,10 +127,10 @@ export default function AdminClientDetailPage() {
             {client.callsThisMonth} / {client.callsLimit} ({usagePercent}%)
           </span>
         </div>
-        <div className="h-2 rounded-full bg-[#1A1A24] overflow-hidden">
+        <div className="h-2 rounded-full bg-[#1B1E26] overflow-hidden">
           <div className={cn(
             "h-full rounded-full transition-all",
-            usagePercent > 80 ? "bg-red-500" : usagePercent > 60 ? "bg-yellow-500" : "bg-[#4F6EF7]"
+            usagePercent > 80 ? "bg-red-500" : usagePercent > 60 ? "bg-yellow-500" : "bg-[#3B82F6]"
           )} style={{ width: `${Math.min(usagePercent, 100)}%` }} />
         </div>
       </div>

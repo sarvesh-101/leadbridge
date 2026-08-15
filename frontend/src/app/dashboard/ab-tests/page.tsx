@@ -214,7 +214,7 @@ export default function ABTestsPage() {
             onClick={() => setSelectedTest(null)}
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="w-full max-w-lg mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
@@ -303,7 +303,7 @@ export default function ABTestsPage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-xl mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10 max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-xl mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-white">Create A/B Test</h2>

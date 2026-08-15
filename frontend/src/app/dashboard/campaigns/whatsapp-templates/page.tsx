@@ -238,7 +238,7 @@ export default function WhatsAppTemplatesPage() {
             className={cn(
               "px-4 py-2 rounded-xl text-sm font-medium transition-all",
               activeCategory === cat
-                ? "bg-[#4F6EF7]/10 text-[#4F6EF7] border border-[#4F6EF7]/30"
+                ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
                 : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
             )}
           >
@@ -268,7 +268,7 @@ export default function WhatsAppTemplatesPage() {
               <p className="text-xs text-gray-400 line-clamp-2 mb-3">{template.description}</p>
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-gray-500">{template.variables.length} variables</span>
-                <div className="flex items-center gap-1 text-xs text-[#4F6EF7] opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 text-xs text-[#3B82F6] opacity-0 group-hover:opacity-100 transition-opacity">
                   <Eye className="w-3.5 h-3.5" /> Preview
                 </div>
               </div>
@@ -282,7 +282,7 @@ export default function WhatsAppTemplatesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setPreviewing(null)}
         >
-          <div className="w-full max-w-2xl rounded-2xl bg-[#111118] border border-[#2A2A3A] overflow-hidden"
+          <div className="w-full max-w-2xl rounded-2xl bg-[#14161C] border border-[#272B34] overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             {(() => {
@@ -293,7 +293,7 @@ export default function WhatsAppTemplatesPage() {
 
               return (
                 <>
-                  <div className="p-6 border-b border-[#2A2A3A]">
+                  <div className="p-6 border-b border-[#272B34]">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", template.bg)}>
@@ -310,7 +310,7 @@ export default function WhatsAppTemplatesPage() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {template.variables.map(v => (
-                        <span key={v} className="text-[10px] px-2 py-0.5 rounded-full bg-[#1A1A24] text-[#4F6EF7] border border-[#4F6EF7]/20 font-mono">
+                        <span key={v} className="text-[10px] px-2 py-0.5 rounded-full bg-[#1B1E26] text-[#3B82F6] border border-[#3B82F6]/20 font-mono">
                           {`{{${v}}}`}
                         </span>
                       ))}
@@ -319,8 +319,8 @@ export default function WhatsAppTemplatesPage() {
                   <div className="p-6 space-y-4">
                     {/* Phone preview */}
                     <div className="max-w-sm mx-auto">
-                      <div className="rounded-2xl bg-[#0A0A0F] border border-[#2A2A3A] overflow-hidden">
-                        <div className="p-3 border-b border-[#2A2A3A] flex items-center gap-3">
+                      <div className="rounded-2xl bg-[#0B0D12] border border-[#272B34] overflow-hidden">
+                        <div className="p-3 border-b border-[#272B34] flex items-center gap-3">
                           <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", template.bg)}>
                             <Icon className={cn("w-4 h-4", template.color)} />
                           </div>
@@ -330,7 +330,7 @@ export default function WhatsAppTemplatesPage() {
                           </div>
                         </div>
                         <div className="p-4">
-                          <div className="bg-[#1A1A24] rounded-xl p-4 max-w-[90%]">
+                          <div className="bg-[#1B1E26] rounded-xl p-4 max-w-[90%]">
                             <pre className="text-xs text-gray-300 whitespace-pre-wrap font-sans leading-relaxed">{message}</pre>
                           </div>
                         </div>

@@ -129,7 +129,7 @@ export default function AdminForwardingPage() {
         {/* Portal Source Breakdown */}
         <motion.div className="p-5 rounded-xl bg-white/5 border border-white/10">
           <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#4F6EF7]" />
+            <Zap className="w-4 h-4 text-[#3B82F6]" />
             Portal Source Breakdown
           </h2>
           {loading ? (
@@ -142,8 +142,8 @@ export default function AdminForwardingPage() {
                 const maxCount = Math.max(...data.byPortal.map(p => p.count));
                 const pct = maxCount > 0 ? Math.round((item.count / maxCount) * 100) : 0;
                 const colors = [
-                  "from-[#4F6EF7] to-[#4F6EF7]/60",
-                  "from-[#22D3A5] to-[#22D3A5]/60",
+                  "from-[#3B82F6] to-[#3B82F6]/60",
+                  "from-[#10B981] to-[#10B981]/60",
                   "from-[#F43F5E] to-[#F43F5E]/60",
                   "from-[#C9A84C] to-[#C9A84C]/60",
                   "from-[#8B5CF6] to-[#8B5CF6]/60",
@@ -173,7 +173,7 @@ export default function AdminForwardingPage() {
         {/* Status Funnel */}
         <motion.div className="p-5 rounded-xl bg-white/5 border border-white/10">
           <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#22D3A5]" />
+            <Activity className="w-4 h-4 text-[#10B981]" />
             Conversion Funnel
           </h2>
           {loading ? (
@@ -196,7 +196,7 @@ export default function AdminForwardingPage() {
                         {item.status}
                       </span>
                       <div className="flex-1 h-6 rounded-md bg-white/5 overflow-hidden">
-                        <div className="h-full rounded-md bg-gradient-to-r from-[#22D3A5] to-[#22D3A5]/60"
+                        <div className="h-full rounded-md bg-gradient-to-r from-[#10B981] to-[#10B981]/60"
                           style={{ width: `${pct}%`, minWidth: item.count > 0 ? "24px" : "0" }} />
                       </div>
                       <span className="text-xs font-medium text-white w-8 text-right">{item.count}</span>
@@ -234,7 +234,7 @@ export default function AdminForwardingPage() {
       {/* Recent Forwarding Leads Table */}
       <motion.div className="p-5 rounded-xl bg-white/5 border border-white/10">
         <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#4F6EF7]" />
+          <Users className="w-4 h-4 text-[#3B82F6]" />
           Recent Forwarded Leads
           {!loading && data && (
             <span className="text-[11px] text-gray-500 font-normal ml-2">({data.recentLeads.length} total)</span>

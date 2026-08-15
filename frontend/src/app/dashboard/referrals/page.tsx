@@ -63,7 +63,7 @@ export default function ReferralsPage() {
           <p className="text-gray-400 mt-1">Track leads that come from customer referrals</p>
         </div>
         <button onClick={() => setShowRecordModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
         >
           <UserPlus className="w-4 h-4" />
           Record Referral
@@ -103,7 +103,7 @@ export default function ReferralsPage() {
         ) : stats?.topReferrers?.length > 0 ? (
           <div className="space-y-2">
             {stats.topReferrers.map((r: any, i: number) => (
-              <div key={r.name} className="flex items-center gap-3 p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A]">
+              <div key={r.name} className="flex items-center gap-3 p-3 rounded-lg bg-[#1B1E26] border border-[#272B34]">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0",
                   i === 0 ? "bg-amber-500/20 text-amber-400" :
@@ -137,7 +137,7 @@ export default function ReferralsPage() {
       {stats?.monthlyTrend?.length > 0 && (
         <div className="p-5 rounded-xl bg-white/5 border border-white/10">
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#4F6EF7]" />
+            <Calendar className="w-4 h-4 text-[#3B82F6]" />
             Monthly Referral Trend
           </h3>
           <div className="flex items-end gap-2 h-24">
@@ -147,7 +147,7 @@ export default function ReferralsPage() {
               return (
                 <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
                   <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-[#4F6EF7] to-[#6B8AFF] transition-all"
+                    className="w-full rounded-t-md bg-gradient-to-t from-[#3B82F6] to-[#6B8AFF] transition-all"
                     style={{ height: `${height}%` }}
                   >
                     <div className="text-[9px] text-white text-center font-mono pt-1">{m.count}</div>
@@ -165,7 +165,7 @@ export default function ReferralsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => { if (!saving) setShowRecordModal(false); }}
         >
-          <div className="w-full max-w-md rounded-2xl bg-[#111118] border border-[#2A2A3A] p-6"
+          <div className="w-full max-w-md rounded-2xl bg-[#14161C] border border-[#272B34] p-6"
             onClick={e => e.stopPropagation()}
           >
             <h3 className="text-lg font-semibold text-white mb-4">Record Referral</h3>
@@ -188,7 +188,7 @@ export default function ReferralsPage() {
                 className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-gray-400 text-sm hover:bg-white/5"
               >Cancel</button>
               <button onClick={handleRecordReferral} disabled={saving || !leadId.trim() || !referredBy.trim()}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                 Record Referral

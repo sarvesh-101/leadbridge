@@ -131,7 +131,7 @@ export default function LeadForwardingPage() {
         smsConfigured: smsStatus?.configured || false,
         emailConfigured: emailStatus?.configured || false,
         forwardingNumber: smsStatus?.forwardingNumber || process.env.NEXT_PUBLIC_FORWARDING_SMS_NUMBER || "+919876543210",
-        forwardingEmail: emailStatus?.forwardingEmail || process.env.NEXT_PUBLIC_FORWARDING_EMAIL || "forward@leadbridge.com",
+        forwardingEmail: emailStatus?.forwardingEmail || process.env.NEXT_PUBLIC_FORWARDING_EMAIL || "forward@converza.tech",
         recentLeads: (recentLeads as any)?.leads?.slice(0, 5) || [],
       });
     } catch (err: any) {
@@ -171,8 +171,8 @@ export default function LeadForwardingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F]">
-        <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <div className="min-h-screen bg-[#0B0D12]">
+        <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
           <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white/10 animate-pulse" />
             <div className="space-y-1">
@@ -191,11 +191,11 @@ export default function LeadForwardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
+    <div className="min-h-screen bg-[#0B0D12]">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#4F6EF7] to-[#22D3A5] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#10B981] flex items-center justify-center">
             <Send className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -238,7 +238,7 @@ export default function LeadForwardingPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/20">
-              <Phone className="w-3.5 h-3.5 text-[#4F6EF7]" />
+              <Phone className="w-3.5 h-3.5 text-[#3B82F6]" />
               <span className="text-sm font-mono text-white flex-1">{status?.forwardingNumber || "Set FORWARDING_SMS_NUMBER"}</span>
               <CopyButton text={status?.forwardingNumber || ""} />
             </div>
@@ -271,7 +271,7 @@ export default function LeadForwardingPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/20">
-              <Inbox className="w-3.5 h-3.5 text-[#22D3A5]" />
+              <Inbox className="w-3.5 h-3.5 text-[#10B981]" />
               <span className="text-sm font-mono text-white flex-1">{status?.forwardingEmail || "Set FORWARDING_EMAIL"}</span>
               <CopyButton text={status?.forwardingEmail || ""} />
             </div>
@@ -285,14 +285,14 @@ export default function LeadForwardingPage() {
           <h2 className="text-sm font-semibold text-white mb-4">How It Works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              <div className="w-8 h-8 rounded-lg bg-[#4F6EF7]/10 flex items-center justify-center mb-2">
-                <span className="text-sm font-bold text-[#4F6EF7]">1</span>
+              <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center mb-2">
+                <span className="text-sm font-bold text-[#3B82F6]">1</span>
               </div>
               <p className="text-xs text-gray-400">You receive a new enquiry SMS or email from 99acres, MagicBricks, or another portal</p>
             </div>
             <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              <div className="w-8 h-8 rounded-lg bg-[#22D3A5]/10 flex items-center justify-center mb-2">
-                <span className="text-sm font-bold text-[#22D3A5]">2</span>
+              <div className="w-8 h-8 rounded-lg bg-[#10B981]/10 flex items-center justify-center mb-2">
+                <span className="text-sm font-bold text-[#10B981]">2</span>
               </div>
               <p className="text-xs text-gray-400">Forward that SMS/email to the LeadBridge number/email above — don't change anything</p>
             </div>
@@ -316,8 +316,8 @@ export default function LeadForwardingPage() {
               className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#4F6EF7]/10 flex items-center justify-center">
-                  <Smartphone className="w-4.5 h-4.5 text-[#4F6EF7]" />
+                <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center">
+                  <Smartphone className="w-4.5 h-4.5 text-[#3B82F6]" />
                 </div>
                 <div className="text-left">
                   <h3 className="text-sm font-semibold text-white">Forward SMS from Your Phone</h3>
@@ -339,19 +339,19 @@ export default function LeadForwardingPage() {
                     </h4>
                     <ol className="space-y-2 text-xs text-gray-400">
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">1.</span>
+                        <span className="text-[#3B82F6] shrink-0">1.</span>
                         Open the SMS from the portal (99acres, MagicBricks, etc.)
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">2.</span>
+                        <span className="text-[#3B82F6] shrink-0">2.</span>
                         Long-press the message and tap <strong className="text-white">Forward</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">3.</span>
+                        <span className="text-[#3B82F6] shrink-0">3.</span>
                         Enter this number: <strong className="text-white font-mono">{status?.forwardingNumber}</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">4.</span>
+                        <span className="text-[#3B82F6] shrink-0">4.</span>
                         Tap <strong className="text-white">Send</strong> — the lead is automatically created!
                       </li>
                     </ol>
@@ -364,23 +364,23 @@ export default function LeadForwardingPage() {
                     </h4>
                     <ol className="space-y-2 text-xs text-gray-400">
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">1.</span>
+                        <span className="text-[#3B82F6] shrink-0">1.</span>
                         Open the SMS from the portal
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">2.</span>
+                        <span className="text-[#3B82F6] shrink-0">2.</span>
                         Tap and hold the message bubble, tap <strong className="text-white">More...</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">3.</span>
+                        <span className="text-[#3B82F6] shrink-0">3.</span>
                         Tap the forward arrow <strong className="text-white">→</strong> in bottom-right
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">4.</span>
+                        <span className="text-[#3B82F6] shrink-0">4.</span>
                         Enter this number: <strong className="text-white font-mono">{status?.forwardingNumber}</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#4F6EF7] shrink-0">5.</span>
+                        <span className="text-[#3B82F6] shrink-0">5.</span>
                         Tap <strong className="text-white">Send</strong>
                       </li>
                     </ol>
@@ -418,8 +418,8 @@ export default function LeadForwardingPage() {
               className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#22D3A5]/10 flex items-center justify-center">
-                  <Mail className="w-4.5 h-4.5 text-[#22D3A5]" />
+                <div className="w-9 h-9 rounded-xl bg-[#10B981]/10 flex items-center justify-center">
+                  <Mail className="w-4.5 h-4.5 text-[#10B981]" />
                 </div>
                 <div className="text-left">
                   <h3 className="text-sm font-semibold text-white">Forward Email from Your Inbox</h3>
@@ -440,19 +440,19 @@ export default function LeadForwardingPage() {
                     </h4>
                     <ol className="space-y-2 text-xs text-gray-400">
                       <li className="flex gap-2">
-                        <span className="text-[#22D3A5] shrink-0">1.</span>
+                        <span className="text-[#10B981] shrink-0">1.</span>
                         Open the portal enquiry email in your inbox
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#22D3A5] shrink-0">2.</span>
+                        <span className="text-[#10B981] shrink-0">2.</span>
                         Click <strong className="text-white">Forward</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#22D3A5] shrink-0">3.</span>
+                        <span className="text-[#10B981] shrink-0">3.</span>
                         Enter this email: <strong className="text-white font-mono">{status?.forwardingEmail}</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#22D3A5] shrink-0">4.</span>
+                        <span className="text-[#10B981] shrink-0">4.</span>
                         Send — LeadBridge extracts the lead and starts the AI calling process
                       </li>
                     </ol>
@@ -481,7 +481,7 @@ export default function LeadForwardingPage() {
           className="p-5 rounded-2xl bg-white/5 border border-white/10"
         >
           <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <Send className="w-4 h-4 text-[#4F6EF7]" />
+            <Send className="w-4 h-4 text-[#3B82F6]" />
             Test Lead Forwarding
           </h2>
           <p className="text-xs text-gray-500 mb-4">Simulate forwarding a lead by entering a phone number below. We'll create a test lead and trigger the AI call pipeline.</p>
@@ -494,7 +494,7 @@ export default function LeadForwardingPage() {
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
                 placeholder="9876543210"
-                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#4F6EF7] font-mono"
+                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#3B82F6] font-mono"
               />
             </div>
             <div className="flex-1">
@@ -504,12 +504,12 @@ export default function LeadForwardingPage() {
                 value={testEmail}
                 onChange={(e) => setTestEmail(e.target.value)}
                 placeholder="you@email.com"
-                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#22D3A5]"
+                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#10B981]"
               />
             </div>              <button
                 onClick={testForwarding}
                 disabled={sendingTest || !testPhone}
-                className="px-4 py-2 rounded-lg bg-[#4F6EF7] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1.5 mt-5"
+                className="px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1.5 mt-5"
               >
                 {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 Test Forward
@@ -522,7 +522,7 @@ export default function LeadForwardingPage() {
           className="p-5 rounded-2xl bg-white/5 border border-white/10"
         >
           <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <History className="w-4 h-4 text-[#4F6EF7]" />
+            <History className="w-4 h-4 text-[#3B82F6]" />
             Recently Forwarded Leads
           </h2>
 
@@ -536,8 +536,8 @@ export default function LeadForwardingPage() {
                   transition={{ delay: i * 0.03 }}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-black/20 border border-white/5 hover:bg-black/30 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#4F6EF7]/10 flex items-center justify-center shrink-0">
-                    <Users className="w-4 h-4 text-[#4F6EF7]" />
+                  <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-[#3B82F6]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -589,24 +589,24 @@ export default function LeadForwardingPage() {
                 {/* Step 1: Buy a number */}
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                   <h4 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center text-[11px] font-bold text-[#4F6EF7]">1</span>
+                    <span className="w-6 h-6 rounded-full bg-[#3B82F6]/10 flex items-center justify-center text-[11px] font-bold text-[#3B82F6]">1</span>
                     Buy a Twilio Phone Number with SMS capability
                   </h4>
                   <ol className="space-y-2 text-xs text-gray-400 ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">1.</span>
-                      Log in to <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-[#4F6EF7] hover:underline inline-flex items-center gap-1">Twilio Console <ExternalLink className="w-3 h-3" /></a>
+                      <span className="text-[#3B82F6] shrink-0">1.</span>
+                      Log in to <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-[#3B82F6] hover:underline inline-flex items-center gap-1">Twilio Console <ExternalLink className="w-3 h-3" /></a>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">2.</span>
+                      <span className="text-[#3B82F6] shrink-0">2.</span>
                       Go to <strong className="text-white">Develop → Phone Numbers → Manage → Buy a number</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">3.</span>
+                      <span className="text-[#3B82F6] shrink-0">3.</span>
                       Search for an Indian (+91) number and make sure <strong className="text-white">SMS capability</strong> is checked
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">4.</span>
+                      <span className="text-[#3B82F6] shrink-0">4.</span>
                       Click <strong className="text-white">Buy</strong> — costs ~$1/month (₹85)
                     </li>
                   </ol>
@@ -615,28 +615,28 @@ export default function LeadForwardingPage() {
                 {/* Step 2: Configure webhook */}
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                   <h4 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center text-[11px] font-bold text-[#4F6EF7]">2</span>
+                    <span className="w-6 h-6 rounded-full bg-[#3B82F6]/10 flex items-center justify-center text-[11px] font-bold text-[#3B82F6]">2</span>
                     Configure the SMS Webhook URL
                   </h4>
                   <ol className="space-y-2 text-xs text-gray-400 ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">1.</span>
+                      <span className="text-[#3B82F6] shrink-0">1.</span>
                       Go to <strong className="text-white">Develop → Phone Numbers → Manage → Active Numbers</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">2.</span>
+                      <span className="text-[#3B82F6] shrink-0">2.</span>
                       Click on the number you just purchased
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">3.</span>
+                      <span className="text-[#3B82F6] shrink-0">3.</span>
                       Scroll to the <strong className="text-white">Messaging</strong> section
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">4.</span>
+                      <span className="text-[#3B82F6] shrink-0">4.</span>
                       Set <strong className="text-white">"A message comes in"</strong> to <strong className="text-white">Webhook</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">5.</span>
+                      <span className="text-[#3B82F6] shrink-0">5.</span>
                       Enter this URL (replace with your domain):
                       <div className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/5">
                         <code className="text-[11px] text-white font-mono break-all">{window.location.origin}/api/v1/webhooks/sms/incoming</code>
@@ -644,11 +644,11 @@ export default function LeadForwardingPage() {
                       </div>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">6.</span>
+                      <span className="text-[#3B82F6] shrink-0">6.</span>
                       Set HTTP method to <strong className="text-white">POST</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#4F6EF7] shrink-0">7.</span>
+                      <span className="text-[#3B82F6] shrink-0">7.</span>
                       Click <strong className="text-white">Save</strong>
                     </li>
                   </ol>
@@ -686,7 +686,7 @@ export default function LeadForwardingPage() {
                     <li className="flex gap-2">
                       <span className="text-green-400 shrink-0">→</span>
                       <strong className="text-white">HTTPS required:</strong> Twilio won't send to non-HTTPS URLs. Use ngrok for local testing:
-                      <code className="ml-1 text-[#4F6EF7] font-mono">ngrok http 3000</code>
+                      <code className="ml-1 text-[#3B82F6] font-mono">ngrok http 3000</code>
                     </li>
                     <li className="flex gap-2">
                       <span className="text-green-400 shrink-0">→</span>
@@ -716,8 +716,8 @@ export default function LeadForwardingPage() {
             className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#22D3A5]/10 flex items-center justify-center">
-                <Mail className="w-4.5 h-4.5 text-[#22D3A5]" />
+              <div className="w-9 h-9 rounded-xl bg-[#10B981]/10 flex items-center justify-center">
+                <Mail className="w-4.5 h-4.5 text-[#10B981]" />
               </div>
               <div className="text-left">
                 <h3 className="text-sm font-semibold text-white">Email Forwarding Setup Guide</h3>
@@ -735,7 +735,7 @@ export default function LeadForwardingPage() {
                 {/* DNS Setup */}
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                   <h4 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#22D3A5]/10 flex items-center justify-center text-[11px] font-bold text-[#22D3A5]">1</span>
+                    <span className="w-6 h-6 rounded-full bg-[#10B981]/10 flex items-center justify-center text-[11px] font-bold text-[#10B981]">1</span>
                     DNS Setup — Add MX Records
                   </h4>
                   <p className="text-xs text-gray-400 mb-3 ml-8">
@@ -759,31 +759,31 @@ export default function LeadForwardingPage() {
                 {/* SendGrid Setup */}
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                   <h4 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#22D3A5]/10 flex items-center justify-center text-[11px] font-bold text-[#22D3A5]">2</span>
+                    <span className="w-6 h-6 rounded-full bg-[#10B981]/10 flex items-center justify-center text-[11px] font-bold text-[#10B981]">2</span>
                     Option A: SendGrid Inbound Parse
                   </h4>
                   <ol className="space-y-2 text-xs text-gray-400 ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">1.</span>
+                      <span className="text-[#10B981] shrink-0">1.</span>
                       Go to <strong className="text-white">Settings → Inbound Parse</strong> in SendGrid dashboard
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">2.</span>
+                      <span className="text-[#10B981] shrink-0">2.</span>
                       Add your subdomain (e.g. <strong className="text-white">forward.yourdomain.com</strong>)
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">3.</span>
+                      <span className="text-[#10B981] shrink-0">3.</span>
                       Set Destination URL to:
                       <div className="mt-1 p-2 rounded-lg bg-black/30 border border-white/5">
                         <code className="text-[11px] text-white font-mono break-all">{window.location.origin}/api/v1/webhooks/email/incoming</code>
                       </div>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">4.</span>
+                      <span className="text-[#10B981] shrink-0">4.</span>
                       Disable "Automatic Security" for this subdomain (to avoid loop)
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">5.</span>
+                      <span className="text-[#10B981] shrink-0">5.</span>
                       Send a test email to <strong className="text-white">anything@forward.yourdomain.com</strong>
                     </li>
                   </ol>
@@ -798,28 +798,28 @@ export default function LeadForwardingPage() {
                 {/* Mailgun Setup */}
                 <div className="p-4 rounded-xl bg-black/20 border border-white/5">
                   <h4 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#22D3A5]/10 flex items-center justify-center text-[11px] font-bold text-[#22D3A5]">2</span>
+                    <span className="w-6 h-6 rounded-full bg-[#10B981]/10 flex items-center justify-center text-[11px] font-bold text-[#10B981]">2</span>
                     Option B: Mailgun Routes
                   </h4>
                   <ol className="space-y-2 text-xs text-gray-400 ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">1.</span>
+                      <span className="text-[#10B981] shrink-0">1.</span>
                       Go to <strong className="text-white">Sending → Receiving</strong> in Mailgun dashboard
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">2.</span>
+                      <span className="text-[#10B981] shrink-0">2.</span>
                       Click <strong className="text-white">Create Route</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">3.</span>
+                      <span className="text-[#10B981] shrink-0">3.</span>
                       Set Expression Type: <strong className="text-white">Match Recipient</strong> → <code className="text-white font-mono">forward@yourdomain.com</code>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">4.</span>
+                      <span className="text-[#10B981] shrink-0">4.</span>
                       Action: <strong className="text-white">Forward</strong> to URL
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#22D3A5] shrink-0">5.</span>
+                      <span className="text-[#10B981] shrink-0">5.</span>
                       Enter: <code className="text-[11px] text-white font-mono break-all">{window.location.origin}/api/v1/webhooks/email/incoming</code>
                     </li>
                   </ol>
@@ -837,7 +837,7 @@ export default function LeadForwardingPage() {
                     Required Environment Variable
                   </h4>
                   <div className="p-2 rounded-lg bg-black/30 border border-white/5">
-                    <code className="text-[11px] text-white font-mono">FORWARDING_EMAIL=forward@leadbridge.com</code>
+                    <code className="text-[11px] text-white font-mono">FORWARDING_EMAIL=forward@converza.tech</code>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
                     Set this in your .env file so the frontend shows the correct forwarding email address.

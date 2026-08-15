@@ -15,8 +15,10 @@ const comparisons = [
   { metric: "Call recordings & transcripts", bridge: "Every call recorded", traditional: "Rarely done" },
   { metric: "Analytics dashboard", bridge: "Real-time funnel & metrics", traditional: "Excel sheets" },
   { metric: "Monthly cost", bridge: "₹18,000 - ₹60,000", traditional: "₹20,000 - ₹30,000/person" },
-  { metric: "Leads handled", bridge: "500+ per month", traditional: "~200 per person" },
-  { metric: "Script consistency", bridge: "100% consistent", traditional: "Varies by agent" },
+  // Phase 2.1: the two capability-number claims below carry a footnote so
+  // prospects know they're platform capability, not a guaranteed outcome.
+  { metric: "Leads handled", bridge: "500+ per month", traditional: "~200 per person", note: true },
+  { metric: "Script consistency", bridge: "100% consistent", traditional: "Varies by agent", note: true },
 ];
 
 export default function ComparisonSection() {
@@ -61,24 +63,24 @@ export default function ComparisonSection() {
   }, [inView]);
 
   return (
-    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0A0F]" id="comparison">
+    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0B0D12]" id="comparison">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <span className="caption text-[#F43F5E] mb-4 block">HEAD-TO-HEAD</span>
           <h2 className="h1-text mb-4">LeadBridge vs. Traditional Telecaller</h2>
-          <p className="text-[16px] text-[#6B6B8A] max-w-[520px] mx-auto">
+          <p className="text-[16px] text-[#8B93A3] max-w-[520px] mx-auto">
             A capability comparison — what each approach offers. Results vary by broker and market.
           </p>
         </div>
 
-        <div ref={tableRef} className="rounded-2xl border border-[#2A2A3A] overflow-hidden bg-[#111118]">
+        <div ref={tableRef} className="rounded-2xl border border-[#272B34] overflow-hidden bg-[#14161C]">
           {/* Header */}
-          <div className="grid grid-cols-3 gap-0 border-b border-[#2A2A3A]">
+          <div className="grid grid-cols-3 gap-0 border-b border-[#272B34]">
             <div className="px-6 py-4">
-              <span className="text-[11px] font-semibold text-[#6B6B8A] uppercase tracking-[0.08em]">Metric</span>
+              <span className="text-[11px] font-semibold text-[#8B93A3] uppercase tracking-[0.08em]">Metric</span>
             </div>
-            <div className="px-6 py-4 bg-[#4F6EF7]/5 border-x border-[#2A2A3A]">
-              <span className="text-[11px] font-semibold text-[#4F6EF7] uppercase tracking-[0.08em]">LeadBridge</span>
+            <div className="px-6 py-4 bg-[#3B82F6]/5 border-x border-[#272B34]">
+              <span className="text-[11px] font-semibold text-[#3B82F6] uppercase tracking-[0.08em]">LeadBridge</span>
             </div>
             <div className="px-6 py-4">
               <span className="text-[11px] font-semibold text-[#F43F5E] uppercase tracking-[0.08em]">Telecaller</span>
@@ -89,27 +91,35 @@ export default function ComparisonSection() {
           {comparisons.map((row, i) => (
             <div
               key={i}
-              className="comparison-row grid grid-cols-3 gap-0 border-b border-[#2A2A3A] last:border-b-0 hover:bg-[#1A1A24] transition-colors"
+              className="comparison-row grid grid-cols-3 gap-0 border-b border-[#272B34] last:border-b-0 hover:bg-[#1B1E26] transition-colors"
             >
               <div className="px-6 py-4 flex items-center">
-                <span className="text-[13px] text-[#F0F0F8]">{row.metric}</span>
+                <span className="text-[13px] text-[#F2F4F8]">{row.metric}</span>
               </div>
-              <div className="px-6 py-4 flex items-center gap-2 bg-[#4F6EF7]/5 border-x border-[#2A2A3A]">
-                <Check className="w-3.5 h-3.5 text-[#22D3A5] shrink-0" />
-                <span className="text-[13px] text-[#22D3A5] font-medium">{row.bridge}</span>
+              <div className="px-6 py-4 flex items-center gap-2 bg-[#3B82F6]/5 border-x border-[#272B34]">
+                <Check className="w-3.5 h-3.5 text-[#10B981] shrink-0" />
+                <span className="text-[13px] text-[#10B981] font-medium">
+                  {row.bridge}
+                  {row.note && <sup className="ml-0.5 text-[10px] text-[#10B981]/70">*</sup>}
+                </span>
               </div>
               <div className="px-6 py-4 flex items-center gap-2">
                 <X className="w-3.5 h-3.5 text-[#F43F5E] shrink-0" />
-                <span className="text-[13px] text-[#6B6B8A]">{row.traditional}</span>
+                <span className="text-[13px] text-[#8B93A3]">{row.traditional}</span>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Phase 2.1: footnote for the capability claims above */}
+        <p className="mt-4 text-[12px] text-[#363B45] text-center leading-relaxed">
+          * Platform capability, not a guarantee. Actual results vary by broker, market and lead flow.
+        </p>
+
         {/* Savings Callout */}
-        <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-[#22D3A5]/5 to-[#4F6EF7]/5 border border-[#22D3A5]/10 text-center">
-          <p className="text-[15px] text-[#F0F0F8] font-medium">
-            💰 Example: 2 telecallers (₹50K/mo) vs LeadBridge Growth (₹35K/mo) — <span className="text-[#22D3A5]">about ₹15K/mo less</span> in this scenario
+        <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-[#10B981]/5 to-[#3B82F6]/5 border border-[#10B981]/10 text-center">
+          <p className="text-[15px] text-[#F2F4F8] font-medium">
+            💰 Example: 2 telecallers (₹50K/mo) vs LeadBridge Growth (₹35K/mo) — <span className="text-[#10B981]">about ₹15K/mo less</span> in this scenario
           </p>
         </div>
       </div>

@@ -186,7 +186,7 @@ export default function AdminClientsPage() {
                 {openMenu === client.id && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
-                    <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl bg-[#1A1A24] border border-white/10 shadow-xl overflow-hidden">
+                    <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl bg-[#1B1E26] border border-white/10 shadow-xl overflow-hidden">
                       <div className="py-1">
                         {["ACTIVE", "TRIAL", "PAST_DUE", "CANCELLED"].map((status) => (
                           <button key={status} onClick={(e) => { e.stopPropagation(); handleStatusChange(client.id, status); }}

@@ -119,7 +119,7 @@ export default function PricingSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-20 lg:py-32 bg-[#0A0A0F] overflow-hidden">
+    <section ref={sectionRef} className="relative py-20 lg:py-32 bg-[#0B0D12] overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="h1-text text-center mb-16">Simple, transparent pricing</h2>
         <div className="grid md:grid-cols-3 gap-6 items-center">
@@ -128,49 +128,49 @@ export default function PricingSection() {
               key={plan.name}
               className={`pricing-card relative glass-card p-8 transition-all duration-200 ${
                 plan.popular
-                  ? "border-[#4F6EF7] scale-[1.05] z-10"
+                  ? "border-[#3B82F6] scale-[1.05] z-10"
                   : "hover:translate-y-[-8px] hover:shadow-lg"
               }`}
-              style={plan.popular ? { boxShadow: "0 0 20px #4F6EF740" } : undefined}
+              style={plan.popular ? { boxShadow: "0 0 20px #3B82F640" } : undefined}
             >
               {plan.popular && (
                 <>
-                  <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none" style={{ background: "conic-gradient(from 0deg, transparent, #C9A84C40, transparent, #4F6EF740, transparent)", WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)", WebkitMaskComposite: "xor", maskComposite: "exclude", padding: "1px", animation: "gradient 4s linear infinite" }} />
+                  <div className="absolute inset-0 rounded-xl pointer-events-none" style={{ boxShadow: "inset 0 0 0 1px #3B82F640" }} />
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#C9A84C] text-[11px] font-semibold text-black tracking-[0.08em] uppercase whitespace-nowrap">Most Popular</div>
                 </>
               )}
               <div className="relative z-1">
-                <h3 className="text-[20px] font-semibold text-[#F0F0F8] mb-1">{plan.name}</h3>
-                <p className="text-[13px] text-[#6B6B8A] mb-1">{plan.calls}</p>
-                <div className="text-[36px] font-display font-bold text-[#F0F0F8] mt-6 mb-1">
+                <h3 className="text-[20px] font-semibold text-[#F2F4F8] mb-1">{plan.name}</h3>
+                <p className="text-[13px] text-[#8B93A3] mb-1">{plan.calls}</p>
+                <div className="text-[36px] font-display font-bold text-[#F2F4F8] mt-6 mb-1">
                   {plan.price}
-                  <span className="text-[15px] text-[#6B6B8A] font-sans font-normal">/mo</span>
+                  <span className="text-[15px] text-[#8B93A3] font-sans font-normal">/mo</span>
                 </div>
 
                 {/* Stat chips: users / leads / dedicated number */}
                 <div className="mt-6 grid grid-cols-3 gap-2">
-                  <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-2.5 text-center">
-                    <p className="text-[16px] font-bold text-[#F0F0F8] leading-none">{plan.users}</p>
-                    <p className="text-[10px] text-[#6B6B8A] uppercase tracking-wide mt-1.5">Users</p>
+                  <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-2.5 text-center">
+                    <p className="text-[16px] font-bold text-[#F2F4F8] leading-none">{plan.users}</p>
+                    <p className="text-[10px] text-[#8B93A3] uppercase tracking-wide mt-1.5">Users</p>
                   </div>
-                  <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-2.5 text-center">
-                    <p className="text-[16px] font-bold text-[#F0F0F8] leading-none">{plan.leads}</p>
-                    <p className="text-[10px] text-[#6B6B8A] uppercase tracking-wide mt-1.5">Leads</p>
+                  <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-2.5 text-center">
+                    <p className="text-[16px] font-bold text-[#F2F4F8] leading-none">{plan.leads}</p>
+                    <p className="text-[10px] text-[#8B93A3] uppercase tracking-wide mt-1.5">Leads</p>
                   </div>
-                  <div className="rounded-lg bg-[#111118] border border-[#2A2A3A] p-2.5 text-center">
-                    <p className="text-[16px] font-bold leading-none" style={{ color: plan.dedicatedNumber ? "#22D3A5" : "#4A4A5A" }}>
+                  <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-2.5 text-center">
+                    <p className="text-[16px] font-bold leading-none" style={{ color: plan.dedicatedNumber ? "#10B981" : "#4A4F59" }}>
                       {plan.dedicatedNumber ? "✓" : "—"}
                     </p>
-                    <p className="text-[10px] text-[#6B6B8A] uppercase tracking-wide mt-1.5">Number</p>
+                    <p className="text-[10px] text-[#8B93A3] uppercase tracking-wide mt-1.5">Number</p>
                   </div>
                 </div>
 
                 <ul className="mt-6 space-y-3">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-[14px] text-[#6B6B8A]">
+                    <li key={feature} className="flex items-center gap-3 text-[14px] text-[#8B93A3]">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
-                        <circle cx="8" cy="8" r="6" fill="#22D3A5" fillOpacity="0.2" />
-                        <path d="M5 8l2 2 4-4" stroke="#22D3A5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="8" cy="8" r="6" fill="#10B981" fillOpacity="0.2" />
+                        <path d="M5 8l2 2 4-4" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       {feature}
                     </li>
@@ -180,8 +180,8 @@ export default function PricingSection() {
                   href="/auth/register"
                   className={`block text-center py-3 px-6 rounded-lg mt-8 text-[15px] font-semibold transition-all duration-150 hover:scale-[1.02] active:scale-[0.98] ${
                     plan.popular
-                      ? "bg-[#4F6EF7] text-white brand-glow"
-                      : "border border-[#2A2A3A] text-[#F0F0F8] hover:bg-[#111118]"
+                      ? "bg-[#3B82F6] text-white brand-glow"
+                      : "border border-[#272B34] text-[#F2F4F8] hover:bg-[#14161C]"
                   }`}
                 >
                   Request Your City
@@ -193,39 +193,39 @@ export default function PricingSection() {
 
         {/* ─── Plan comparison table ─────────────────────────────── */}
         <div className="mt-20">
-          <h3 className="text-[20px] font-semibold text-[#F0F0F8] text-center mb-8">Compare every plan</h3>
-          <div className="overflow-x-auto rounded-2xl border border-[#2A2A3A] bg-[#111118]">
+          <h3 className="text-[20px] font-semibold text-[#F2F4F8] text-center mb-8">Compare every plan</h3>
+          <div className="overflow-x-auto rounded-2xl border border-[#272B34] bg-[#14161C]">
           <div className="min-w-[640px]">
-            <div className="grid grid-cols-4 gap-0 border-b border-[#2A2A3A]">
+            <div className="grid grid-cols-4 gap-0 border-b border-[#272B34]">
               <div className="px-6 py-4">
-                <span className="text-[11px] font-semibold text-[#6B6B8A] uppercase tracking-[0.08em]">Feature</span>
+                <span className="text-[11px] font-semibold text-[#8B93A3] uppercase tracking-[0.08em]">Feature</span>
               </div>
               {plans.map((p) => (
-                <div key={p.name} className={`px-6 py-4 ${p.popular ? "bg-[#4F6EF7]/5" : ""} ${p.name !== "Starter" ? "border-l border-[#2A2A3A]" : ""}`}>
-                  <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${p.popular ? "text-[#4F6EF7]" : "text-[#F0F0F8]"}`}>{p.name}</span>
+                <div key={p.name} className={`px-6 py-4 ${p.popular ? "bg-[#3B82F6]/5" : ""} ${p.name !== "Starter" ? "border-l border-[#272B34]" : ""}`}>
+                  <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${p.popular ? "text-[#3B82F6]" : "text-[#F2F4F8]"}`}>{p.name}</span>
                 </div>
               ))}
             </div>
             {compareRows.map((row, i) => (
-              <div key={row.label} className={`grid grid-cols-4 gap-0 ${i < compareRows.length - 1 ? "border-b border-[#2A2A3A]" : ""} hover:bg-[#1A1A24] transition-colors`}>
+              <div key={row.label} className={`grid grid-cols-4 gap-0 ${i < compareRows.length - 1 ? "border-b border-[#272B34]" : ""} hover:bg-[#1B1E26] transition-colors`}>
                 <div className="px-6 py-4 flex items-center">
-                  <span className="text-[13px] text-[#F0F0F8]">{row.label}</span>
+                  <span className="text-[13px] text-[#F2F4F8]">{row.label}</span>
                 </div>
                 {plans.map((p) => {
                   const val = row.get(p);
                   return (
-                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 ${p.popular ? "bg-[#4F6EF7]/5" : ""} ${p.name !== "Starter" ? "border-l border-[#2A2A3A]" : ""}`}>
+                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 ${p.popular ? "bg-[#3B82F6]/5" : ""} ${p.name !== "Starter" ? "border-l border-[#272B34]" : ""}`}>
                       {typeof val === "boolean" ? (
                         val ? (
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
-                            <circle cx="8" cy="8" r="6" fill="#22D3A5" fillOpacity="0.2" />
-                            <path d="M5 8l2 2 4-4" stroke="#22D3A5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx="8" cy="8" r="6" fill="#10B981" fillOpacity="0.2" />
+                            <path d="M5 8l2 2 4-4" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         ) : (
-                          <span className="text-[14px] text-[#4A4A5A]">—</span>
+                          <span className="text-[14px] text-[#4A4F59]">—</span>
                         )
                       ) : (
-                        <span className={`text-[13px] font-medium ${p.popular ? "text-[#22D3A5]" : "text-[#6B6B8A]"}`}>{val}</span>
+                        <span className={`text-[13px] font-medium ${p.popular ? "text-[#10B981]" : "text-[#8B93A3]"}`}>{val}</span>
                       )}
                     </div>
                   );
@@ -234,7 +234,7 @@ export default function PricingSection() {
             ))}
           </div>
           </div>
-          <p className="text-center text-[12px] text-[#4A4A5A] mt-4">All plans include full qualification, booking automation, WhatsApp notifications, and follow-up sequences. 18% GST applies.</p>
+          <p className="text-center text-[12px] text-[#4A4F59] mt-4">All plans include full qualification, booking automation, WhatsApp notifications, and follow-up sequences. 18% GST applies.</p>
         </div>
       </div>
     </section>

@@ -23,7 +23,7 @@ interface EventTypeOption {
 }
 
 const CHANNELS = [
-  { value: "whatsapp", label: "WhatsApp", icon: MessageSquare, color: "text-[#22D3A5]" },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageSquare, color: "text-[#10B981]" },
   { value: "sms", label: "SMS", icon: Smartphone, color: "text-blue-400" },
   { value: "email", label: "Email", icon: Mail, color: "text-amber-400" },
 ];
@@ -117,7 +117,7 @@ export default function NotificationPreferencesPage() {
             <RefreshCw className="w-4 h-4" /> Reset
           </button>
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             Save Preferences
@@ -145,7 +145,7 @@ export default function NotificationPreferencesPage() {
                 <button onClick={() => toggleEvent(pref.eventType)}
                   className={cn(
                     "relative w-11 h-6 rounded-full transition-colors shrink-0",
-                    pref.enabled ? "bg-[#22D3A5]" : "bg-white/10"
+                    pref.enabled ? "bg-[#10B981]" : "bg-white/10"
                   )}
                 >
                   <div className={cn(
@@ -157,7 +157,7 @@ export default function NotificationPreferencesPage() {
                 {/* Event label */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    {pref.enabled ? <Bell className="w-4 h-4 text-[#22D3A5]" /> : <BellOff className="w-4 h-4 text-gray-500" />}
+                    {pref.enabled ? <Bell className="w-4 h-4 text-[#10B981]" /> : <BellOff className="w-4 h-4 text-gray-500" />}
                     <span className="text-sm font-medium text-white">{eventLabel}</span>
                   </div>
                 </div>

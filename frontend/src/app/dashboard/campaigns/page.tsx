@@ -311,8 +311,8 @@ export default function CampaignsPage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
                 isActive
-                  ? "border-[#4F6EF7] text-[#4F6EF7]"
-                  : "border-transparent text-[#6B6B8A] hover:text-white hover:border-[#6B6B8A]/30"
+                  ? "border-[#3B82F6] text-[#3B82F6]"
+                  : "border-transparent text-[#8B93A3] hover:text-white hover:border-[#8B93A3]/30"
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -504,7 +504,7 @@ export default function CampaignsPage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10 max-h-[90vh] flex flex-col"
+              className="w-full max-w-2xl mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10 max-h-[90vh] flex flex-col"
             >
               <div className="flex items-center justify-between mb-6 shrink-0">
                 <h2 className="text-lg font-semibold text-white">
@@ -746,7 +746,7 @@ export default function CampaignsPage() {
             onClick={() => setDeleteConfirmId(null)}
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 mb-4">
@@ -789,7 +789,7 @@ export default function CampaignsPage() {
             onClick={() => setDeleteTaskConfirm(null)}
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 mb-4">

@@ -111,9 +111,9 @@ export default function CustomerDocumentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
+    <div className="min-h-screen bg-[#0B0D12]">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
           <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
             <ArrowLeft className="w-5 h-5" />
@@ -136,7 +136,7 @@ export default function CustomerDocumentsPage() {
           <div className="mb-4">
             <label className="text-xs text-gray-500 mb-1.5 block">Document Type</label>
             <select value={docType} onChange={(e) => setDocType(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#4F6EF7]/50"
+              className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#3B82F6]/50"
             >
               {DOC_TYPES.map((dt) => (
                 <option key={dt.value} value={dt.value}>{dt.label}</option>
@@ -147,7 +147,7 @@ export default function CustomerDocumentsPage() {
           {/* File Picker */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="relative p-6 rounded-xl border-2 border-dashed border-white/10 text-center cursor-pointer hover:border-[#4F6EF7]/30 hover:bg-white/5 transition-all mb-4"
+            className="relative p-6 rounded-xl border-2 border-dashed border-white/10 text-center cursor-pointer hover:border-[#3B82F6]/30 hover:bg-white/5 transition-all mb-4"
           >
             <input
               ref={fileInputRef}
@@ -158,7 +158,7 @@ export default function CustomerDocumentsPage() {
             />
             {file ? (
               <div className="flex items-center gap-3 justify-center">
-                <FileText className="w-6 h-6 text-[#4F6EF7]" />
+                <FileText className="w-6 h-6 text-[#3B82F6]" />
                 <div className="text-left">
                   <p className="text-sm text-white">{file.name}</p>
                   <p className="text-[11px] text-gray-500">{formatSize(file.size)}</p>
@@ -179,7 +179,7 @@ export default function CustomerDocumentsPage() {
           </div>
 
           <button onClick={handleUpload} disabled={!file || uploading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-40"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-40"
           >
             {uploading ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading...</>
@@ -235,7 +235,7 @@ export default function CustomerDocumentsPage() {
         </motion.div>
 
         {/* Info */}
-        <div className="p-4 rounded-xl bg-[#4F6EF7]/5 border border-[#4F6EF7]/10">
+        <div className="p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/10">
           <p className="text-xs text-gray-400">
             <strong className="text-gray-300">Note:</strong> Your documents are securely stored and only
             visible to you and your broker. Uploaded documents help speed up the booking process.

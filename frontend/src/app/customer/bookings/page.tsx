@@ -146,9 +146,9 @@ export default function CustomerBookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
+    <div className="min-h-screen bg-[#0B0D12]">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
           <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -191,7 +191,7 @@ export default function CustomerBookingsPage() {
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all",
                 filter === s
-                  ? "bg-[#4F6EF7] text-white"
+                  ? "bg-[#3B82F6] text-white"
                   : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
               )}
             >
@@ -204,7 +204,7 @@ export default function CustomerBookingsPage() {
         <ErrorBoundary fallback={
           <div className="p-8 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
             <p className="text-sm text-red-400">Something went wrong loading your bookings.</p>
-            <button onClick={loadBookings} className="mt-3 text-xs text-[#4F6EF7] hover:underline">Try Again</button>
+            <button onClick={loadBookings} className="mt-3 text-xs text-[#3B82F6] hover:underline">Try Again</button>
           </div>
         }>
         {loading ? (
@@ -280,11 +280,11 @@ export default function CustomerBookingsPage() {
                       {/* Date, Time, Location */}
                       <div className="grid grid-cols-2 gap-2 mb-2">
                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <Calendar className="w-3 h-3 text-[#4F6EF7] shrink-0" />
+                          <Calendar className="w-3 h-3 text-[#3B82F6] shrink-0" />
                           {formatDate(booking.visitDate)}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <Clock className="w-3 h-3 text-[#22D3A5] shrink-0" />
+                          <Clock className="w-3 h-3 text-[#10B981] shrink-0" />
                           {booking.visitTime}
                         </div>
                       </div>
@@ -365,7 +365,7 @@ export default function CustomerBookingsPage() {
                 : "Your past and upcoming visits will appear here"}
             </p>
             <button onClick={() => router.push("/customer/dashboard")}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4F6EF7] text-white text-xs font-medium hover:opacity-90 transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 transition-all"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to Dashboard

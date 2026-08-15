@@ -86,9 +86,9 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         toastOptions={{
           duration: 4000,
           style: {
-            background: "#1A1A24",
-            border: "1px solid #2A2A3A",
-            color: "#F0F0F8",
+            background: "#1B1E26",
+            border: "1px solid #272B34",
+            color: "#F2F4F8",
           },
         }}
       />

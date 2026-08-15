@@ -142,10 +142,10 @@ export default function CustomerLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#4F6EF7]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#22D3A5]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#3B82F6]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#10B981]/5 rounded-full blur-3xl" />
       </div>
 
       <motion.div
@@ -156,7 +156,7 @@ export default function CustomerLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4F6EF7] to-[#6B8AFF] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#6B8AFF] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white">LeadBridge</span>
@@ -172,7 +172,7 @@ export default function CustomerLoginPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="p-6 rounded-2xl bg-[#14161C] border border-white/10"
             >
               <label className="text-xs text-gray-500 mb-2 block">Phone Number</label>
               <div className="relative mb-4">
@@ -184,13 +184,13 @@ export default function CustomerLoginPage() {
                   placeholder="+91 98765 43210"
                   type="tel"
                   inputMode="numeric"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                 />
               </div>
               <button
                 onClick={handleSendOTP}
                 disabled={loading || phone.replace(/\D/g, "").length < 10}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -209,7 +209,7 @@ export default function CustomerLoginPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="p-6 rounded-2xl bg-[#111118] border border-white/10"
+              className="p-6 rounded-2xl bg-[#14161C] border border-white/10"
             >
               <div className="flex items-center gap-3 mb-4">
                 <button onClick={() => { setStep("phone"); setOtp(["", "", "", "", "", ""]); }}
@@ -232,7 +232,7 @@ export default function CustomerLoginPage() {
                     value={digit}
                     onChange={(e) => handleOtpChange(i, e.target.value.replace(/\D/g, ""))}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className="w-11 h-12 text-center rounded-xl bg-white/5 border border-white/10 text-white text-lg font-bold focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7]/30 transition-all"
+                    className="w-11 h-12 text-center rounded-xl bg-white/5 border border-white/10 text-white text-lg font-bold focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
@@ -243,7 +243,7 @@ export default function CustomerLoginPage() {
               <button
                 onClick={handleVerifyOTP}
                 disabled={loading || otp.some((d) => !d)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -259,7 +259,7 @@ export default function CustomerLoginPage() {
                   <span className="text-xs text-gray-600">Resend in {countdown}s</span>
                 ) : (
                   <button onClick={handleSendOTP} disabled={loading}
-                    className="text-xs text-[#4F6EF7] hover:underline"
+                    className="text-xs text-[#3B82F6] hover:underline"
                   >
                     Resend OTP
                   </button>

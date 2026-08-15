@@ -317,7 +317,7 @@ export default function EmailCampaignsPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
         >
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-2xl mx-4 p-6 rounded-2xl bg-[#111118] border border-white/10 max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-2xl mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-white">Compose Email Campaign</h2>
@@ -480,7 +480,7 @@ export default function EmailCampaignsPage() {
                 <div className="border-t border-white/10 pt-4">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" checked={enableScheduling} onChange={(e) => setEnableScheduling(e.target.checked)}
-                      className="rounded border-[#2A2A3A] bg-[#1A1A24] text-leadflow-accent"
+                      className="rounded border-[#272B34] bg-[#1B1E26] text-leadflow-accent"
                     />
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <span className="text-sm text-gray-300">Schedule for later</span>
@@ -496,7 +496,7 @@ export default function EmailCampaignsPage() {
                 <div className="border-t border-white/10 pt-4">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" checked={abTestEnabled} onChange={(e) => setAbTestEnabled(e.target.checked)}
-                      className="rounded border-[#2A2A3A] bg-[#1A1A24] text-leadflow-accent"
+                      className="rounded border-[#272B34] bg-[#1B1E26] text-leadflow-accent"
                     />
                     <FlaskConical className="w-4 h-4 text-purple-400" />
                     <span className="text-sm text-gray-300">A/B Test — send two variants</span>

@@ -63,12 +63,12 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="relative py-20 lg:py-32 bg-[#0A0A0F]" id="faq">
+    <section className="relative py-20 lg:py-32 bg-[#0B0D12]" id="faq">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <span className="caption text-[#6B6B8A] mb-4 block">QUESTIONS?</span>
+          <span className="caption text-[#8B93A3] mb-4 block">QUESTIONS?</span>
           <h2 className="h1-text mb-4">Everything you need to know</h2>
-          <p className="text-[16px] text-[#6B6B8A] max-w-[480px] mx-auto">
+          <p className="text-[16px] text-[#8B93A3] max-w-[480px] mx-auto">
             Can&apos;t find what you&apos;re looking for? Reach out to our team.
           </p>
         </div>
@@ -77,15 +77,15 @@ export default function FAQSection() {
           {faqs.map((faq, i) => (
             <div
               key={i}
-              className="rounded-xl border border-[#2A2A3A] bg-[#111118] overflow-hidden transition-colors duration-200 hover:border-[#3A3A52]"
+              className="rounded-xl border border-[#272B34] bg-[#14161C] overflow-hidden transition-colors duration-200 hover:border-[#363B45]"
             >
               <button
                 onClick={() => toggle(i)}
                 className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
               >
-                <span className="text-[14px] font-medium text-[#F0F0F8] flex-1">{faq.q}</span>
+                <span className="text-[14px] font-medium text-[#F2F4F8] flex-1">{faq.q}</span>
                 <ChevronDown
-                  className={`w-4 h-4 text-[#6B6B8A] shrink-0 transition-transform duration-200 ${
+                  className={`w-4 h-4 text-[#8B93A3] shrink-0 transition-transform duration-200 ${
                     openIndex === i ? "rotate-180" : ""
                   }`}
                 />
@@ -99,7 +99,7 @@ export default function FAQSection() {
                     transition={{ duration: 0.2, ease: "easeInOut" }}
                   >
                     <div className="px-6 pb-4 pt-0">
-                      <p className="text-[13px] text-[#6B6B8A] leading-relaxed">{faq.a}</p>
+                      <p className="text-[13px] text-[#8B93A3] leading-relaxed">{faq.a}</p>
                     </div>
                   </motion.div>
                 )}
@@ -110,10 +110,10 @@ export default function FAQSection() {
 
         {/* Bottom CTA */}
         <div className="text-center mt-10">
-          <p className="text-[13px] text-[#6B6B8A] mb-3">Still have questions?</p>
+          <p className="text-[13px] text-[#8B93A3] mb-3">Still have questions?</p>
           <a
-            href="mailto:support@leadbridge.com"
-            className="inline-flex items-center gap-2 text-[14px] text-[#4F6EF7] hover:text-[#4F6EF7]/80 font-medium transition-colors"
+            href="mailto:support@converza.tech"
+            className="inline-flex items-center gap-2 text-[14px] text-[#3B82F6] hover:text-[#3B82F6]/80 font-medium transition-colors"
           >
             Contact our team →
           </a>

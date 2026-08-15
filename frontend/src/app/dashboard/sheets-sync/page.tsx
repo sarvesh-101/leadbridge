@@ -55,8 +55,8 @@ export default function SheetsSyncPage() {
       {/* Instructions */}
       <div className="p-6 rounded-xl bg-white/5 border border-white/10">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#22D3A5]/10 flex items-center justify-center shrink-0">
-            <FileSpreadsheet className="w-5 h-5 text-[#22D3A5]" />
+          <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 flex items-center justify-center shrink-0">
+            <FileSpreadsheet className="w-5 h-5 text-[#10B981]" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">Sync your lead data with Google Sheets</h3>
@@ -74,7 +74,7 @@ export default function SheetsSyncPage() {
             "Works best with the LeadBridge Google Sheets template",
           ].map((tip, i) => (
             <div key={i} className="flex items-start gap-2 text-xs text-gray-500">
-              <CheckCircle2 className="w-3.5 h-3.5 text-[#22D3A5] mt-0.5 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981] mt-0.5 shrink-0" />
               <span>{tip}</span>
             </div>
           ))}
@@ -90,19 +90,19 @@ export default function SheetsSyncPage() {
             <label className="text-xs text-gray-500 mb-1.5 block">Integration ID</label>
             <input value={integrationId} onChange={(e) => setIntegrationId(e.target.value)}
               placeholder="Enter your integration ID from Integrations page"
-              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
             />
           </div>
           <div>
             <label className="text-xs text-gray-500 mb-1.5 block">Google Sheet URL *</label>
             <input value={sheetUrl} onChange={(e) => setSheetUrl(e.target.value)}
               placeholder="https://docs.google.com/spreadsheets/d/..."
-              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
             />
           </div>
 
           <button onClick={handleSync} disabled={syncing || !sheetUrl.trim()}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#22D3A5] to-[#22D3A5]/80 text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#047857] text-white text-sm font-medium hover:bg-[#065F46] disabled:opacity-50 transition-all"
           >
             {syncing ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Syncing...</>
@@ -119,16 +119,16 @@ export default function SheetsSyncPage() {
           className="p-6 rounded-xl bg-white/5 border border-white/10"
         >
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#22D3A5]" />
+            <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
             Sync Results
           </h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="p-3 rounded-lg bg-[#22D3A5]/5">
-              <div className="text-2xl font-bold text-[#22D3A5]">{syncResult.leadsSynced || 0}</div>
+            <div className="p-3 rounded-lg bg-[#10B981]/5">
+              <div className="text-2xl font-bold text-[#10B981]">{syncResult.leadsSynced || 0}</div>
               <div className="text-xs text-gray-500">Leads Synced</div>
             </div>
-            <div className="p-3 rounded-lg bg-[#4F6EF7]/5">
-              <div className="text-2xl font-bold text-[#4F6EF7]">{syncResult.leadsUpdated || 0}</div>
+            <div className="p-3 rounded-lg bg-[#3B82F6]/5">
+              <div className="text-2xl font-bold text-[#3B82F6]">{syncResult.leadsUpdated || 0}</div>
               <div className="text-xs text-gray-500">Leads Updated</div>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function SheetsSyncPage() {
       <div className="p-6 rounded-xl bg-white/5 border border-white/10">
         <h3 className="text-sm font-semibold text-white mb-3">Setup Guide</h3>
         <ol className="space-y-2 text-xs text-gray-500 list-decimal list-inside">
-          <li>Go to the <a href="/dashboard/integrations" className="text-[#4F6EF7] hover:underline">Integrations</a> page and configure Google Sheets</li>
+          <li>Go to the <a href="/dashboard/integrations" className="text-[#3B82F6] hover:underline">Integrations</a> page and configure Google Sheets</li>
           <li>Copy your Integration ID from the integrations list</li>
           <li>Create or open a Google Sheet (use the LeadBridge template for best results)</li>
           <li>Share the sheet with the service account email from integrations</li>

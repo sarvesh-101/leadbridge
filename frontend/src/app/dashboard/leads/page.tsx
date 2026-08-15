@@ -89,7 +89,7 @@ function LeadsPageContent() {
             <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Export CSV</span>
           </button>
-          <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-all">
+          <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-all">
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Add Lead</span>
           </button>
@@ -139,7 +139,7 @@ function LeadsPageContent() {
 
 export default function LeadsPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-[#4F6EF7] animate-spin" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" /></div>}>
       <LeadsPageContent />
     </Suspense>
   );

@@ -98,7 +98,7 @@ export default function AdminHealthPage() {
         <div className="p-8 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
           <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
           <p className="text-sm text-red-300">{error}</p>
-          <button onClick={loadHealth} className="mt-3 text-xs text-[#4F6EF7] hover:underline">
+          <button onClick={loadHealth} className="mt-3 text-xs text-[#3B82F6] hover:underline">
             Try Again
           </button>
         </div>

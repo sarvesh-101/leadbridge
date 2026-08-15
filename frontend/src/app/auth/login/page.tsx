@@ -130,11 +130,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#4F6EF7] opacity-[0.03] blur-[120px]" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#4F6EF7] opacity-[0.03] blur-[100px]" />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[100px]" />
       </div>
 
       <motion.div
@@ -146,26 +146,26 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#4F6EF7] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#3B82F6] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[20px] font-display font-bold text-[#F0F0F8] tracking-[-0.02em]">LeadBridge</span>
+            <span className="text-[20px] font-display font-bold text-[#F2F4F8] tracking-[-0.02em]">LeadBridge</span>
           </Link>
-          <h1 className="text-[24px] font-display font-bold text-[#F0F0F8]">Welcome back</h1>
-          <p className="text-[14px] text-[#6B6B8A] mt-2">Sign in to your account</p>
+          <h1 className="text-[24px] font-display font-bold text-[#F2F4F8]">Welcome back</h1>
+          <p className="text-[14px] text-[#8B93A3] mt-2">Sign in to your account</p>
         </div>
 
-        <div className="p-6 rounded-lg bg-[#111118] border border-[#2A2A3A]">
+        <div className="p-6 rounded-lg bg-[#14161C] border border-[#272B34]">
           {/* Role Toggle */}
-          <div className="flex bg-[#1A1A24] rounded-lg p-1 mb-5">
+          <div className="flex bg-[#1B1E26] rounded-lg p-1 mb-5">
             <button
               type="button"
               onClick={() => { setRole("client"); setError(null); }}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
                 role === "client"
-                  ? "bg-[#4F6EF7] text-white"
-                  : "text-[#6B6B8A] hover:text-[#F0F0F8]"
+                  ? "bg-[#3B82F6] text-white"
+                  : "text-[#8B93A3] hover:text-[#F2F4F8]"
               )}
             >
               <Building2 className="w-4 h-4" />
@@ -177,8 +177,8 @@ export default function LoginPage() {
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all duration-200",
                 role === "admin"
-                  ? "bg-[#4F6EF7] text-white"
-                  : "text-[#6B6B8A] hover:text-[#F0F0F8]"
+                  ? "bg-[#3B82F6] text-white"
+                  : "text-[#8B93A3] hover:text-[#F2F4F8]"
               )}
             >
               <Shield className="w-4 h-4" />
@@ -208,9 +208,9 @@ export default function LoginPage() {
                 <div className="flex items-start gap-2">
                   <Mail className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#F59E0B]" />
                   <div>
-                    <p className="text-[#F0F0F8] font-medium mb-1">Verify your email</p>
-                    <p className="text-[#6B6B8A] leading-relaxed mb-2">
-                      Check <span className="text-[#F0F0F8]">{email || "your inbox"}</span> for the
+                    <p className="text-[#F2F4F8] font-medium mb-1">Verify your email</p>
+                    <p className="text-[#8B93A3] leading-relaxed mb-2">
+                      Check <span className="text-[#F2F4F8]">{email || "your inbox"}</span> for the
                       verification link we sent when you signed up.
                     </p>
                     <div className="flex items-center gap-2">
@@ -218,12 +218,12 @@ export default function LoginPage() {
                         type="button"
                         onClick={handleResendVerification}
                         disabled={resending}
-                        className="px-3 py-1.5 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[12px] font-semibold text-[#F0F0F8] hover:border-[#F59E0B] transition-colors"
+                        className="px-3 py-1.5 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[12px] font-semibold text-[#F2F4F8] hover:border-[#F59E0B] transition-colors"
                       >
                         {resending ? "Sending…" : "Resend email"}
                       </button>
                       {resendSent && !resendFailed && (
-                        <span className="text-[12px] text-[#22D3A5]">✓ Sent again</span>
+                        <span className="text-[12px] text-[#10B981]">✓ Sent again</span>
                       )}
                       {resendFailed && (
                         <span className="text-[12px] text-[#F59E0B]">Could not send — retry in a minute</span>
@@ -235,31 +235,31 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="login-email" className="block text-[13px] font-medium text-[#6B6B8A] mb-1.5">Email</label>
+              <label htmlFor="login-email" className="block text-[13px] font-medium text-[#8B93A3] mb-1.5">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3A3A52]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
                 <input
                   id="login-email" name="email" type="email" autoComplete="email"
                   value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com" required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] text-[#F2F4F8] placeholder-[#363B45] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="login-password" className="block text-[13px] font-medium text-[#6B6B8A] mb-1.5">Password</label>
+              <label htmlFor="login-password" className="block text-[13px] font-medium text-[#8B93A3] mb-1.5">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#3A3A52]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
                 <input
                   id="login-password" name="password" type={showPassword ? "text" : "password"}
                   autoComplete="current-password" value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••" required
-                  className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] transition-colors"
+                  className="w-full pl-10 pr-12 py-2.5 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] text-[#F2F4F8] placeholder-[#363B45] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-colors"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3A3A52] hover:text-[#6B6B8A]">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#363B45] hover:text-[#8B93A3]">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -267,16 +267,16 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="rounded border-[#2A2A3A] bg-[#1A1A24] text-[#4F6EF7] focus:ring-[#4F6EF7]/30" />
-                <span className="text-[12px] text-[#6B6B8A]">Remember me</span>
+                <input type="checkbox" className="rounded border-[#272B34] bg-[#1B1E26] text-[#3B82F6] focus:ring-[#3B82F6]/30" />
+                <span className="text-[12px] text-[#8B93A3]">Remember me</span>
               </label>
-              <Link href="/auth/forgot-password" className="text-[12px] text-[#4F6EF7] hover:underline">Forgot password?</Link>
+              <Link href="/auth/forgot-password" className="text-[12px] text-[#3B82F6] hover:underline">Forgot password?</Link>
             </div>
 
             <button
               type="submit" disabled={loading}
               className={cn(
-                "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#4F6EF7] text-white text-[13px] font-semibold transition-all duration-150 hover:brightness-110 active:scale-[0.98]",
+                "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold transition-all duration-150 hover:brightness-110 active:scale-[0.98]",
                 loading && "opacity-70 cursor-not-allowed"
               )}
             >
@@ -292,10 +292,10 @@ export default function LoginPage() {
               <>
                 <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#2A2A3A]" />
+                    <div className="w-full border-t border-[#272B34]" />
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-[#111118] px-2 text-[#6B6B8A]">or continue with</span>
+                    <span className="bg-[#14161C] px-2 text-[#8B93A3]">or continue with</span>
                   </div>
                 </div>
                 <div ref={googleBtnRef} className="flex justify-center" />
@@ -305,12 +305,12 @@ export default function LoginPage() {
 
           <div className="mt-5 text-center">
             {role === "client" ? (
-              <p className="text-[13px] text-[#6B6B8A]">
+              <p className="text-[13px] text-[#8B93A3]">
                 Don&apos;t have an account?{" "}
-                <Link href="/auth/register" className="text-[#4F6EF7] hover:underline font-medium">Create one</Link>
+                <Link href="/auth/register" className="text-[#3B82F6] hover:underline font-medium">Create one</Link>
               </p>
             ) : (
-              <p className="text-[13px] text-[#6B6B8A]">Admin access is for platform staff only</p>
+              <p className="text-[13px] text-[#8B93A3]">Admin access is for platform staff only</p>
             )}
           </div>
         </div>

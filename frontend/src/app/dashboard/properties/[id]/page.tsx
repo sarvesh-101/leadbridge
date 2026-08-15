@@ -147,10 +147,10 @@ export default function PropertyDetailPage() {
 
       {/* Hero Section */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="relative p-6 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#111118] border border-white/10 overflow-hidden"
+        className="relative p-6 rounded-2xl bg-gradient-to-br from-[#1B1E26] to-[#14161C] border border-white/10 overflow-hidden"
       >
         {/* Background pattern */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#4F6EF7]/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#3B82F6]/5 rounded-full blur-3xl" />
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
@@ -256,7 +256,7 @@ export default function PropertyDetailPage() {
               <h2 className="text-sm font-semibold text-white mb-3">Tags</h2>
               <div className="flex flex-wrap gap-2">
                 {property.tags.map((tag, i) => (
-                  <span key={i} className="text-xs px-3 py-1.5 rounded-lg bg-[#4F6EF7]/10 text-[#4F6EF7] border border-[#4F6EF7]/20">
+                  <span key={i} className="text-xs px-3 py-1.5 rounded-lg bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">
                     {tag}
                   </span>
                 ))}
@@ -273,8 +273,8 @@ export default function PropertyDetailPage() {
               <div className="space-y-2">
                 {(property as any).bookings.map((booking: any) => (
                   <div key={booking.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5">
-                    <div className="w-8 h-8 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center">
-                      <Calendar className="w-4 h-4 text-[#4F6EF7]" />
+                    <div className="w-8 h-8 rounded-full bg-[#3B82F6]/10 flex items-center justify-center">
+                      <Calendar className="w-4 h-4 text-[#3B82F6]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">
@@ -303,7 +303,7 @@ export default function PropertyDetailPage() {
             <h2 className="text-sm font-semibold text-white mb-4">Quick Actions</h2>
             <div className="space-y-2">
               <button onClick={openEditModal}
-                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4F6EF7]/10 text-[#4F6EF7] text-sm font-medium hover:bg-[#4F6EF7]/20 transition-all"
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] text-sm font-medium hover:bg-[#3B82F6]/20 transition-all"
               >
                 <Edit3 className="w-4 h-4" />
                 Edit Property
@@ -356,7 +356,7 @@ export default function PropertyDetailPage() {
           {/* AI Sync status */}
           {property.lastSyncedToAgentAt && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="p-4 rounded-xl bg-[#4F6EF7]/5 border border-[#4F6EF7]/10"
+              className="p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/10"
             >
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-400" />
@@ -377,7 +377,7 @@ export default function PropertyDetailPage() {
             onClick={() => setShowEditModal(false)}
           >
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#111118] border border-white/10 p-6"
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#14161C] border border-white/10 p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
@@ -391,7 +391,7 @@ export default function PropertyDetailPage() {
                 <div>
                   <label className="text-xs text-gray-500 mb-1.5 block">Property Name *</label>
                   <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                   />
                 </div>
 
@@ -399,19 +399,19 @@ export default function PropertyDetailPage() {
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Price (₹)</label>
                     <input value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Bedrooms</label>
                     <input value={editForm.bedrooms} onChange={(e) => setEditForm({ ...editForm, bedrooms: e.target.value })} type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Bathrooms</label>
                     <input value={editForm.bathrooms} onChange={(e) => setEditForm({ ...editForm, bathrooms: e.target.value })} type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                 </div>
@@ -420,7 +420,7 @@ export default function PropertyDetailPage() {
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Area (sqft)</label>
                     <input value={editForm.area} onChange={(e) => setEditForm({ ...editForm, area: e.target.value })} type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
@@ -439,19 +439,19 @@ export default function PropertyDetailPage() {
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Location</label>
                     <input value={editForm.location} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">City</label>
                     <input value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Zone</label>
                     <input value={editForm.zone} onChange={(e) => setEditForm({ ...editForm, zone: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                 </div>
@@ -460,7 +460,7 @@ export default function PropertyDetailPage() {
                   <label className="text-xs text-gray-500 mb-1.5 block">Description</label>
                   <textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50 resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50 resize-none"
                   />
                 </div>
 
@@ -469,7 +469,7 @@ export default function PropertyDetailPage() {
                     <Camera className="w-3 h-3" /> Amenities (comma-separated)
                   </label>
                   <input value={editForm.amenities} onChange={(e) => setEditForm({ ...editForm, amenities: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                   />
                 </div>
 
@@ -478,7 +478,7 @@ export default function PropertyDetailPage() {
                     <Tags className="w-3 h-3" /> Tags (comma-separated)
                   </label>
                   <input value={editForm.tags} onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                   />
                 </div>
 
@@ -500,7 +500,7 @@ export default function PropertyDetailPage() {
                   Cancel
                 </button>
                 <button onClick={handleSaveEdit} disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   Save Changes

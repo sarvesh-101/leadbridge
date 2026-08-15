@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-[#4F6EF7]" />
+            <Shield className="w-5 h-5 text-[#3B82F6]" />
             Admin Dashboard
           </h1>
           <p className="text-xs text-gray-500 mt-1">
@@ -185,7 +185,7 @@ export default function AdminDashboardPage() {
         {/* Lead Funnel Overview */}
         <div className="p-5 rounded-xl bg-white/5 border border-white/10">
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#4F6EF7]" />
+            <TrendingUp className="w-4 h-4 text-[#3B82F6]" />
             Lead Funnel
           </h3>
           {loading ? (
@@ -213,7 +213,7 @@ export default function AdminDashboardPage() {
         {/* Lead Sources */}
         <div className="p-5 rounded-xl bg-white/5 border border-white/10">
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#4F6EF7]" />
+            <Zap className="w-4 h-4 text-[#3B82F6]" />
             Lead Sources
           </h3>
           {loading ? (
@@ -251,12 +251,12 @@ export default function AdminDashboardPage() {
           <Link
             key={action.label}
             href={action.href}
-            className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:border-[#4F6EF7]/30 transition-all group"
+            className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] hover:border-[#3B82F6]/30 transition-all group"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#4F6EF7]/10 flex items-center justify-center mb-3 group-hover:bg-[#4F6EF7]/20 transition-colors">
-              <action.icon className="w-4 h-4 text-[#4F6EF7]" />
+            <div className="w-9 h-9 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center mb-3 group-hover:bg-[#3B82F6]/20 transition-colors">
+              <action.icon className="w-4 h-4 text-[#3B82F6]" />
             </div>
-            <div className="text-sm font-medium text-white group-hover:text-[#4F6EF7] transition-colors">{action.label}</div>
+            <div className="text-sm font-medium text-white group-hover:text-[#3B82F6] transition-colors">{action.label}</div>
             <div className="text-[11px] text-gray-500 mt-0.5">{action.desc}</div>
           </Link>
         ))}
@@ -267,7 +267,7 @@ export default function AdminDashboardPage() {
         <p className="text-[11px] text-gray-600">
           Running in <span className="text-gray-400 font-medium">Production Mode</span> · 
           Voice AI: <span className="text-green-400">Connected</span> · 
-          <Link href="https://omnidim.io" target="_blank" className="text-[#4F6EF7] hover:underline ml-1">Buy Credits →</Link>
+          <Link href="https://omnidim.io" target="_blank" className="text-[#3B82F6] hover:underline ml-1">Buy Credits →</Link>
         </p>
       </div>
     </div>

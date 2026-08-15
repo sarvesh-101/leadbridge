@@ -2,9 +2,9 @@ import { Loader2 } from "lucide-react";
 
 export default function CustomerLoading() {
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
+    <div className="min-h-screen bg-[#0B0D12]">
       {/* Header skeleton */}
-      <div className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <div className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-white/10 animate-pulse" />
           <div className="flex-1 space-y-1">

@@ -46,11 +46,11 @@ const slides = [
 export default function HowItWorksSection() {
   return (
     <MotionConfig reducedMotion="user">
-    <section className="relative py-16 lg:py-24 bg-[#0A0A0F] overflow-hidden">
+    <section className="relative py-16 lg:py-24 bg-[#0B0D12] overflow-hidden">
       {/* Soft radial glow behind the section */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[420px] bg-[#4F6EF7]/10 blur-[120px] rounded-full"
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[420px] bg-[#3B82F6]/10 blur-[120px] rounded-full"
       />
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
@@ -62,7 +62,7 @@ export default function HowItWorksSection() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <h2 className="h1-text px-4">How It Works</h2>
-          <p className="mt-4 text-[16px] text-[#6B6B8A] max-w-[560px] mx-auto px-4">
+          <p className="mt-4 text-[16px] text-[#8B93A3] max-w-[560px] mx-auto px-4">
             Five steps. Zero missed leads. From enquiry to confirmed site visit — on autopilot.
           </p>
         </motion.div>
@@ -71,7 +71,7 @@ export default function HowItWorksSection() {
           {/* Vertical timeline line (desktop) */}
           <div
             aria-hidden
-            className="hidden md:block absolute left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-[#4F6EF7]/40 via-[#2A2A3A] to-transparent"
+            className="hidden md:block absolute left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-[#3B82F6]/40 via-[#272B34] to-transparent"
           />
 
           <div className="space-y-6 md:space-y-8">
@@ -87,21 +87,21 @@ export default function HowItWorksSection() {
                 {/* Number node on the timeline */}
                 <div
                   aria-hidden
-                  className="hidden md:flex absolute left-0 top-6 w-14 h-14 rounded-2xl bg-[#111118] border border-[#2A2A3A] items-center justify-center"
+                  className="hidden md:flex absolute left-0 top-6 w-14 h-14 rounded-2xl bg-[#14161C] border border-[#272B34] items-center justify-center"
                 >
-                  <span className="text-[20px] font-display font-bold text-[#4F6EF7] leading-none">
+                  <span className="text-[20px] font-display font-bold text-[#3B82F6] leading-none">
                     {slide.number}
                   </span>
                 </div>
 
-                <div className="relative p-6 lg:p-8 rounded-2xl bg-[#111118] border border-[#2A2A3A] hover:border-[#4F6EF7]/40 hover:bg-[#14141D] transition-all duration-300">
-                  <span className="md:hidden block text-[40px] font-display font-bold text-[#3A3A52] leading-none mb-3">
+                <div className="relative p-6 lg:p-8 rounded-2xl bg-[#14161C] border border-[#272B34] hover:border-[#3B82F6]/40 hover:bg-[#14141D] transition-all duration-300">
+                  <span className="md:hidden block text-[40px] font-display font-bold text-[#363B45] leading-none mb-3">
                     {slide.number}
                   </span>
-                  <h3 className="text-[20px] lg:text-[22px] font-display font-bold text-[#F0F0F8] mb-2">
+                  <h3 className="text-[20px] lg:text-[22px] font-display font-bold text-[#F2F4F8] mb-2">
                     {slide.title}
                   </h3>
-                  <p className="text-[14px] text-[#6B6B8A] mb-4">
+                  <p className="text-[14px] text-[#8B93A3] mb-4">
                     {slide.body}
                   </p>
 
@@ -110,7 +110,7 @@ export default function HowItWorksSection() {
                       {slide.logos.map((logo) => (
                         <div
                           key={logo}
-                          className="px-3 py-1.5 rounded border border-[#2A2A3A] bg-[#1A1A24] text-[12px] text-[#6B6B8A]"
+                          className="px-3 py-1.5 rounded border border-[#272B34] bg-[#1B1E26] text-[12px] text-[#8B93A3]"
                         >
                           {logo}
                         </div>
@@ -123,7 +123,7 @@ export default function HowItWorksSection() {
                       {Array.from({ length: 20 }).map((_, j) => (
                         <div
                           key={j}
-                          className="w-[2px] bg-[#4F6EF7] rounded-full animate-waveform"
+                          className="w-[2px] bg-[#3B82F6] rounded-full animate-waveform"
                           style={{
                             height: `${Math.random() * 80 + 20}%`,
                             animationDelay: `${j * 0.05}s`,
@@ -140,13 +140,13 @@ export default function HowItWorksSection() {
                           <span
                             className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                               msg.speaker === "AI"
-                                ? "bg-[#1A1A24] text-[#4F6EF7]"
-                                : "bg-[#4F6EF740] text-[#4F6EF7]"
+                                ? "bg-[#1B1E26] text-[#3B82F6]"
+                                : "bg-[#3B82F640] text-[#3B82F6]"
                             }`}
                           >
                             {msg.speaker}
                           </span>
-                          <span className="text-[12px] text-[#F0F0F8]">
+                          <span className="text-[12px] text-[#F2F4F8]">
                             {msg.text}
                           </span>
                         </div>
@@ -155,14 +155,14 @@ export default function HowItWorksSection() {
                   )}
 
                   {slide.typewriterText && (
-                    <div className="p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] max-w-[280px] mt-3">
-                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#2A2A3A]">
-                        <div className="w-6 h-6 rounded-full bg-[#22D3A5]/20 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#22D3A5">
+                    <div className="p-3 rounded-lg bg-[#1B1E26] border border-[#272B34] max-w-[280px] mt-3">
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#272B34]">
+                        <div className="w-6 h-6 rounded-full bg-[#10B981]/20 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#10B981">
                             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
                           </svg>
                         </div>
-                        <span className="text-[12px] font-semibold text-[#F0F0F8]">
+                        <span className="text-[12px] font-semibold text-[#F2F4F8]">
                           WhatsApp
                         </span>
                       </div>
@@ -172,7 +172,7 @@ export default function HowItWorksSection() {
                         .map((line, j) => (
                           <p
                             key={j}
-                            className="text-[12px] text-[#F0F0F8]"
+                            className="text-[12px] text-[#F2F4F8]"
                             style={{ fontWeight: line.includes(":") ? 400 : 600 }}
                           >
                             {line}
@@ -183,11 +183,11 @@ export default function HowItWorksSection() {
 
                   {slide.hasMap && (
                     <div className="flex items-center gap-2 mt-3">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22D3A5" strokeWidth="2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                         <circle cx="12" cy="10" r="3" />
                       </svg>
-                      <span className="text-[12px] text-[#22D3A5]">
+                      <span className="text-[12px] text-[#10B981]">
                         Exclusively yours — one broker per territory
                       </span>
                     </div>

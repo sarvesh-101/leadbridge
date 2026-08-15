@@ -221,8 +221,8 @@ export default function CustomerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F]">
-        <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <div className="min-h-screen bg-[#0B0D12]">
+        <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
           <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg bg-white/10 animate-pulse" />
             <div className="w-24 h-4 bg-white/10 rounded animate-pulse" />
@@ -238,11 +238,11 @@ export default function CustomerDashboardPage() {
 
   if (!customer) {
     return (
-      <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-gray-500 mb-4">Session expired</p>
           <button onClick={() => router.push("/customer/login")}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm"
           >
             Login Again
           </button>
@@ -255,12 +255,12 @@ export default function CustomerDashboardPage() {
   const StatusIcon = statusInfo?.icon || Clock;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F]">
+    <div className="min-h-screen bg-[#0B0D12]">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0A0F]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4F6EF7] to-[#6B8AFF] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#3B82F6] to-[#6B8AFF] flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-semibold text-white">LeadBridge</span>
@@ -281,15 +281,15 @@ export default function CustomerDashboardPage() {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {/* ── Welcome Card ──────────────────────────────────── */}
         <ErrorBoundary fallback={
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#111118] border border-white/10 text-center">
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-[#1B1E26] to-[#14161C] border border-white/10 text-center">
             <p className="text-sm text-gray-400">Welcome back! Please refresh the page.</p>
           </div>
         }>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-2xl bg-gradient-to-br from-[#1A1A24] to-[#111118] border border-white/10"
+            className="p-5 rounded-2xl bg-gradient-to-br from-[#1B1E26] to-[#14161C] border border-white/10"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4F6EF7] to-[#6B8AFF] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#6B8AFF] flex items-center justify-center">
                 <span className="text-white text-sm font-bold">{customer.name[0]}</span>
               </div>
               <div>
@@ -335,7 +335,7 @@ export default function CustomerDashboardPage() {
             <div className="p-5 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
               <AlertCircleIcon />
               <p className="text-sm text-red-400">Failed to load booking details.</p>
-              <button onClick={loadProfile} className="mt-3 text-xs text-[#4F6EF7] hover:underline">
+              <button onClick={loadProfile} className="mt-3 text-xs text-[#3B82F6] hover:underline">
                 Try Again
               </button>
             </div>
@@ -358,12 +358,12 @@ export default function CustomerDashboardPage() {
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                  <Calendar className="w-4 h-4 text-[#4F6EF7] mb-1" />
+                  <Calendar className="w-4 h-4 text-[#3B82F6] mb-1" />
                   <div className="text-sm font-semibold text-white">{formatDate(booking.visitDate)}</div>
                   <div className="text-[11px] text-gray-500">Date</div>
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                  <Clock className="w-4 h-4 text-[#22D3A5] mb-1" />
+                  <Clock className="w-4 h-4 text-[#10B981] mb-1" />
                   <div className="text-sm font-semibold text-white">{booking.visitTime}</div>
                   <div className="text-[11px] text-gray-500">Time</div>
                 </div>
@@ -413,18 +413,18 @@ export default function CustomerDashboardPage() {
                       <label className="text-xs text-gray-500 mb-1 block">New Date</label>
                       <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)}
                         min={new Date().toISOString().split("T")[0]}
-                        className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#4F6EF7]/50"
+                        className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#3B82F6]/50"
                       />
                     </div>
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">New Time</label>
                       <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#4F6EF7]/50"
+                        className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#3B82F6]/50"
                       />
                     </div>
                   </div>
                   <button onClick={handleReschedule} disabled={actionLoading}
-                    className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#4F6EF7] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                    className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-40"
                   >
                     {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                     Confirm Reschedule

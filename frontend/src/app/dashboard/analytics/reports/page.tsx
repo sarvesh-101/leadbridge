@@ -78,7 +78,7 @@ export default function ReportsPage() {
     }
   }
 
-  const chartColors = ["#4F6EF7", "#22D3A5", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4"];
+  const chartColors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4"];
 
   return (
     <div className="space-y-6">

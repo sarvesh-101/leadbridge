@@ -57,7 +57,7 @@ export default function ResultsSection() {
   }, [inView]);
 
   return (
-    <section className="relative py-20 lg:py-32 bg-[#0A0A0F]" ref={ref}>
+    <section className="relative py-20 lg:py-32 bg-[#0B0D12]" ref={ref}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-3 gap-8">
           {stats.map((stat, i) => (
@@ -65,14 +65,14 @@ export default function ResultsSection() {
               key={i}
               className="glass-card p-8 hover:translate-y-[-2px] hover:shadow-lg transition-all duration-200 relative overflow-hidden"
             >
-              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4F6EF7]/50 to-transparent" />
-              <div className="text-[72px] font-display font-bold text-[#F0F0F8] leading-none mb-3">
+              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#3B82F6]/50 to-transparent" />
+              <div className="text-[72px] font-display font-bold text-[#F2F4F8] leading-none mb-3">
                 {`${stat.value}${stat.suffix}`}
               </div>
-              <p className="text-[16px] font-medium text-[#6B6B8A] mb-2">{stat.label}</p>
-              <p className="text-[13px] text-[#3A3A52]">{stat.subtext}</p>
+              <p className="text-[16px] font-medium text-[#8B93A3] mb-2">{stat.label}</p>
+              <p className="text-[13px] text-[#363B45]">{stat.subtext}</p>
               {i < stats.length - 1 && (
-                <div ref={i === 0 ? lineRef : undefined} className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-32 bg-[#2A2A3A] origin-top" />
+                <div ref={i === 0 ? lineRef : undefined} className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-32 bg-[#272B34] origin-top" />
               )}
             </div>
           ))}

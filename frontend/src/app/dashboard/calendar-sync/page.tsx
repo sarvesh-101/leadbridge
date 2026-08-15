@@ -133,7 +133,7 @@ export default function CalendarSyncPage() {
           {connected ? (
             <>
               <button onClick={handleSync} disabled={connecting}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
               >
                 {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                 Sync Now
@@ -149,7 +149,7 @@ export default function CalendarSyncPage() {
             </>
           ) : (
             <button onClick={handleConnect} disabled={connecting}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
             >
               {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LinkIcon className="w-4 h-4" />}
               {connecting ? "Connecting..." : "Connect Google Calendar"}
@@ -168,8 +168,8 @@ export default function CalendarSyncPage() {
             { step: "3", title: "Updates", desc: "Rescheduled or cancelled bookings are updated in real-time. Reminders are synced too." },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-[#4F6EF7]">{item.step}</span>
+              <div className="w-7 h-7 rounded-full bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-[#3B82F6]">{item.step}</span>
               </div>
               <div>
                 <p className="text-sm font-medium text-white">{item.title}</p>

@@ -213,7 +213,7 @@ export default function PropertiesPage() {
             Sync to AI Agent
           </button>
           <button onClick={openCreateModal}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
           >
             <Plus className="w-4 h-4" />
             Add Property
@@ -253,7 +253,7 @@ export default function PropertiesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search properties by name, location..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
           />
         </div>
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
@@ -282,7 +282,7 @@ export default function PropertiesPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02 }}
-                className="group relative p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#4F6EF7]/30 transition-all cursor-pointer"
+                className="group relative p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#3B82F6]/30 transition-all cursor-pointer"
               >
                 {/* Featured badge */}
                 {property.featured && (
@@ -293,7 +293,7 @@ export default function PropertiesPage() {
 
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-sm font-semibold text-white group-hover:text-[#4F6EF7] transition-colors">
+                    <h3 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] transition-colors">
                       {property.name}
                     </h3>
                     {property.location && (
@@ -392,7 +392,7 @@ export default function PropertiesPage() {
             onClick={() => setShowModal(false)}
           >
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#111118] border border-white/10 p-6"
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-[#14161C] border border-white/10 p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
@@ -410,7 +410,7 @@ export default function PropertiesPage() {
                   <label className="text-xs text-gray-500 mb-1.5 block">Property Name *</label>
                   <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Lakeside Villa, 3BHK Apartment"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                   />
                 </div>
 
@@ -420,7 +420,7 @@ export default function PropertiesPage() {
                     <label className="text-xs text-gray-500 mb-1.5 block">Price (₹)</label>
                     <input value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       placeholder="e.g., 7500000" type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   {/* Bedrooms */}
@@ -428,7 +428,7 @@ export default function PropertiesPage() {
                     <label className="text-xs text-gray-500 mb-1.5 block">Bedrooms</label>
                     <input value={formData.bedrooms} onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
                       placeholder="e.g., 3" type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   {/* Bathrooms */}
@@ -436,7 +436,7 @@ export default function PropertiesPage() {
                     <label className="text-xs text-gray-500 mb-1.5 block">Bathrooms</label>
                     <input value={formData.bathrooms} onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
                       placeholder="e.g., 2" type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                 </div>
@@ -447,14 +447,14 @@ export default function PropertiesPage() {
                     <label className="text-xs text-gray-500 mb-1.5 block">Area (sqft)</label>
                     <input value={formData.area} onChange={(e) => setFormData({ ...formData, area: e.target.value })}
                       placeholder="e.g., 1500" type="number"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   {/* Status */}
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Status</label>
                     <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as PropertyStatus })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     >
                       {PROPERTY_STATUS_OPTIONS.map((o) => (
                         <option key={o.value} value={o.value}>{o.label}</option>
@@ -469,21 +469,21 @@ export default function PropertiesPage() {
                     <label className="text-xs text-gray-500 mb-1.5 block">Location / Address</label>
                     <input value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       placeholder="Full address"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">City</label>
                     <input value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="e.g., Mumbai"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-gray-500 mb-1.5 block">Zone / Area</label>
                     <input value={formData.zone} onChange={(e) => setFormData({ ...formData, zone: e.target.value })}
                       placeholder="e.g., Andheri West"
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
                 </div>
@@ -494,7 +494,7 @@ export default function PropertiesPage() {
                   <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Describe the property — key features, nearby landmarks, etc."
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50 resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50 resize-none"
                   />
                 </div>
 
@@ -505,7 +505,7 @@ export default function PropertiesPage() {
                   </label>
                   <input value={formData.amenities} onChange={(e) => setFormData({ ...formData, amenities: e.target.value })}
                     placeholder="e.g., Swimming Pool, Gym, Parking, Security"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                   />
                 </div>
 
@@ -516,7 +516,7 @@ export default function PropertiesPage() {
                   </label>
                   <input value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                     placeholder="e.g., Corner Unit, New Construction, Furnished"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                   />
                 </div>
 
@@ -554,7 +554,7 @@ export default function PropertiesPage() {
                   Cancel
                 </button>
                 <button onClick={handleSave} disabled={actionLoading === "save"}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
                 >
                   {actionLoading === "save" ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {editingProperty ? "Update Property" : "Create Property"}
@@ -573,7 +573,7 @@ export default function PropertiesPage() {
             onClick={() => setDeleteId(null)}
           >
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="w-full max-w-sm rounded-2xl bg-[#111118] border border-white/10 p-6 text-center"
+              className="w-full max-w-sm rounded-2xl bg-[#14161C] border border-white/10 p-6 text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">

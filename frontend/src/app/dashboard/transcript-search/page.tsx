@@ -78,12 +78,12 @@ export default function TranscriptSearchPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown}
               placeholder='Search transcripts — e.g., "budget", "Andheri", "ready to move"...'
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
               autoFocus
             />
           </div>
           <button onClick={handleSearch} disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#4F6EF7] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             Search
@@ -100,7 +100,7 @@ export default function TranscriptSearchPage() {
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
             className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white text-xs"
           />
-          <button onClick={loadStats} className="ml-auto text-xs text-[#4F6EF7] hover:underline">Show stats</button>
+          <button onClick={loadStats} className="ml-auto text-xs text-[#3B82F6] hover:underline">Show stats</button>
         </div>
       </div>
 
@@ -138,8 +138,8 @@ export default function TranscriptSearchPage() {
             >
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-[#4F6EF7]/10 flex items-center justify-center shrink-0">
-                    <Phone className="w-4 h-4 text-[#4F6EF7]" />
+                  <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
+                    <Phone className="w-4 h-4 text-[#3B82F6]" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">{r.lead?.name || "Unknown"}</p>
@@ -162,7 +162,7 @@ export default function TranscriptSearchPage() {
 
               {r.transcript && (
                 <details className="group">
-                  <summary className="text-xs text-[#4F6EF7] cursor-pointer hover:underline">View transcript</summary>
+                  <summary className="text-xs text-[#3B82F6] cursor-pointer hover:underline">View transcript</summary>
                   <div className="mt-2 p-3 rounded-lg bg-black/20 border border-white/5 max-h-48 overflow-y-auto">
                     <pre className="text-xs text-gray-400 whitespace-pre-wrap font-mono leading-relaxed">{r.transcript}</pre>
                   </div>

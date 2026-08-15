@@ -53,7 +53,7 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
       // Globe - Wireframe Sphere
       const geometry = new THREE.SphereGeometry(2, 32, 32);
       const material = new THREE.MeshBasicMaterial({
-        color: 0x4f6ef7,
+        color: 0x3b82f6,
         wireframe: true,
         transparent: true,
         opacity: 0.15,
@@ -65,7 +65,7 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
       // Inner wireframe
       const innerGeo = new THREE.SphereGeometry(1.95, 24, 24);
       const innerMat = new THREE.MeshBasicMaterial({
-        color: 0x4f6ef7,
+        color: 0x3b82f6,
         wireframe: true,
         transparent: true,
         opacity: 0.08,
@@ -82,7 +82,7 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
         if (i % 2 === 0) {
           particlePositions.push(pos.getX(i), pos.getY(i), pos.getZ(i));
           const brightness = 0.4 + Math.random() * 0.6;
-          particleColors.push(0.31 * brightness, 0.43 * brightness, 0.97 * brightness);
+          particleColors.push(0.23 * brightness, 0.51 * brightness, 0.96 * brightness);
         }
       }
       const particleGeo = new THREE.BufferGeometry();
@@ -101,7 +101,7 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
 
       // Lat/Long rings
       const ringMaterial = new THREE.LineBasicMaterial({
-        color: 0x4f6ef7,
+        color: 0x3b82f6,
         transparent: true,
         opacity: 0.1,
       });

@@ -47,7 +47,7 @@ const NOTIF_COLORS: Record<string, string> = {
   FOLLOWUP_D3_SENT: "text-purple-400 bg-purple-500/10",
   COLD_LEAD: "text-gray-400 bg-gray-500/10",
   CONVERTED: "text-emerald-400 bg-emerald-500/10",
-  LEAD_NEW: "text-[#4F6EF7] bg-[#4F6EF7]/10",
+  LEAD_NEW: "text-[#3B82F6] bg-[#3B82F6]/10",
 };
 
 export function NotificationDropdown() {
@@ -148,10 +148,10 @@ export function NotificationDropdown() {
       {/* Bell Button */}
       <button
         onClick={handleOpen}
-        className="relative p-2 rounded-lg hover:bg-[#1A1A24] transition-colors"
+        className="relative p-2 rounded-lg hover:bg-[#1B1E26] transition-colors"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
-        <Bell className="w-4 h-4 text-[#6B6B8A]" />
+        <Bell className="w-4 h-4 text-[#8B93A3]" />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex items-center justify-center min-w-[14px] h-[14px] rounded-full bg-[#F43F5E] text-white text-[9px] font-bold px-0.5">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -167,14 +167,14 @@ export function NotificationDropdown() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-[380px] max-h-[480px] rounded-xl border border-[#2A2A3A] bg-[#111118] shadow-2xl z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-[380px] max-h-[480px] rounded-xl border border-[#272B34] bg-[#14161C] shadow-2xl z-50 overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#2A2A3A]">
-              <h3 className="text-[13px] font-semibold text-[#F0F0F8]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#272B34]">
+              <h3 className="text-[13px] font-semibold text-[#F2F4F8]">
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="ml-2 text-[11px] text-[#6B6B8A] font-normal">
+                  <span className="ml-2 text-[11px] text-[#8B93A3] font-normal">
                     ({unreadCount} unread)
                   </span>
                 )}
@@ -183,7 +183,7 @@ export function NotificationDropdown() {
                 <button
                   onClick={handleMarkAllRead}
                   disabled={markingAll}
-                  className="text-[11px] text-[#4F6EF7] hover:text-[#6B8AFF] transition-colors disabled:opacity-40 flex items-center gap-1"
+                  className="text-[11px] text-[#3B82F6] hover:text-[#6B8AFF] transition-colors disabled:opacity-40 flex items-center gap-1"
                 >
                   {markingAll ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -222,8 +222,8 @@ export function NotificationDropdown() {
                         if (isUnread) handleMarkRead(notif.id);
                       }}
                       className={cn(
-                        "w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-[#1A1A24] transition-colors border-b border-[#2A2A3A]/50 last:border-0",
-                        isUnread && "bg-[#4F6EF7]/[0.03]"
+                        "w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-[#1B1E26] transition-colors border-b border-[#272B34]/50 last:border-0",
+                        isUnread && "bg-[#3B82F6]/[0.03]"
                       )}
                     >
                       <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", colorClass)}>
@@ -232,19 +232,19 @@ export function NotificationDropdown() {
                       <div className="flex-1 min-w-0">
                         <p className={cn(
                           "text-[12px] leading-relaxed",
-                          isUnread ? "text-[#F0F0F8] font-medium" : "text-[#6B6B8A]"
+                          isUnread ? "text-[#F2F4F8] font-medium" : "text-[#8B93A3]"
                         )}>
                           {notif.message.length > 120
                             ? notif.message.substring(0, 120) + "..."
                             : notif.message}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] text-[#3A3A52]">{formatDate(notif.sentAt)}</span>
+                          <span className="text-[10px] text-[#363B45]">{formatDate(notif.sentAt)}</span>
                           {notif.status === "failed" && (
                             <span className="text-[10px] text-red-400/60">Failed to send</span>
                           )}
                           {isUnread && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#4F6EF7]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
                           )}
                         </div>
                       </div>
@@ -253,9 +253,9 @@ export function NotificationDropdown() {
                 })
               ) : (
                 <div className="p-8 text-center">
-                  <Bell className="w-8 h-8 text-[#3A3A52] mx-auto mb-2" />
-                  <p className="text-[13px] text-[#6B6B8A]">No notifications yet</p>
-                  <p className="text-[11px] text-[#3A3A52] mt-1">
+                  <Bell className="w-8 h-8 text-[#363B45] mx-auto mb-2" />
+                  <p className="text-[13px] text-[#8B93A3]">No notifications yet</p>
+                  <p className="text-[11px] text-[#363B45] mt-1">
                     Updates about leads, bookings, and calls will appear here
                   </p>
                 </div>

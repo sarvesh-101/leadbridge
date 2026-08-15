@@ -373,11 +373,11 @@ export default function VoiceAIPage() {
             <div className="p-5 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Bot className="w-5 h-5 text-[#4F6EF7]" />
+                  <Bot className="w-5 h-5 text-[#3B82F6]" />
                   <h2 className="text-base font-semibold text-white">AI Agents</h2>
                 </div>
                 <button onClick={() => setShowCreateAgent(!showCreateAgent)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4F6EF7]/10 text-[#4F6EF7] text-xs font-medium hover:bg-[#4F6EF7]/20"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3B82F6]/10 text-[#3B82F6] text-xs font-medium hover:bg-[#3B82F6]/20"
                 >
                   <Plus className="w-3.5 h-3.5" /> {showCreateAgent ? "Cancel" : "New Agent"}
                 </button>
@@ -389,18 +389,18 @@ export default function VoiceAIPage() {
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden mb-4"
                   >
-                    <div className="p-4 rounded-xl bg-[#1A1A24] border border-[#2A2A3A] space-y-3">
+                    <div className="p-4 rounded-xl bg-[#1B1E26] border border-[#272B34] space-y-3">
                       <div>
                         <label className="block text-xs text-gray-400 mb-1">Agent Name *</label>
                         <input value={newAgentName} onChange={e => setNewAgentName(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                           placeholder="e.g., Property Assistant" />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-xs text-gray-400 mb-1">Language</label>
                           <select value={newAgentLanguage} onChange={e => setNewAgentLanguage(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                           >
                             <option value="hinglish">Hinglish</option>
                             <option value="hi-IN">Hindi</option>
@@ -411,7 +411,7 @@ export default function VoiceAIPage() {
                         <div>
                           <label className="block text-xs text-gray-400 mb-1">Voice ID</label>
                           <input value={newAgentVoice} onChange={e => setNewAgentVoice(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                             placeholder="Default ElevenLabs" />
                         </div>
                       </div>
@@ -419,7 +419,7 @@ export default function VoiceAIPage() {
                         <label className="block text-xs text-gray-400 mb-1">Instructions</label>
                         <textarea value={newAgentPrompt} onChange={e => setNewAgentPrompt(e.target.value)}
                           rows={3}
-                          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                           placeholder="Tell the agent how to behave and what to ask..."
                         />
                       </div>
@@ -428,7 +428,7 @@ export default function VoiceAIPage() {
                           className="px-4 py-2 rounded-lg border border-white/10 text-gray-400 text-xs hover:bg-white/5"
                         >Cancel</button>
                         <button onClick={handleCreateAgent} disabled={creatingAgent || !newAgentName.trim()}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#4F6EF7] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50"
                         >
                           {creatingAgent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                           Create Agent
@@ -453,20 +453,20 @@ export default function VoiceAIPage() {
                       <div key={agent.id}
                         className={cn(
                           "flex items-center justify-between p-3 rounded-lg border transition-all",
-                          isActive ? "bg-[#4F6EF7]/5 border-[#4F6EF7]/30" : "bg-[#1A1A24] border-[#2A2A3A] hover:border-[#3A3A52]"
+                          isActive ? "bg-[#3B82F6]/5 border-[#3B82F6]/30" : "bg-[#1B1E26] border-[#272B34] hover:border-[#363B45]"
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn(
                             "w-9 h-9 rounded-full flex items-center justify-center shrink-0",
-                            isActive ? "bg-[#4F6EF7]/20 text-[#4F6EF7]" : "bg-white/5 text-gray-400"
+                            isActive ? "bg-[#3B82F6]/20 text-[#3B82F6]" : "bg-white/5 text-gray-400"
                           )}>
                             {isActive ? <Radio className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-white truncate">{agent.name}</span>
-                              {isActive && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#22D3A5]/10 text-[#22D3A5] font-medium">Active</span>}
+                              {isActive && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#10B981]/10 text-[#10B981] font-medium">Active</span>}
                             </div>
                             <div className="text-xs text-gray-500 mt-0.5">
                               ID: {agent.id} · {agent.languages?.join(", ") || "Hinglish"} · {agent.status || "active"}
@@ -476,7 +476,7 @@ export default function VoiceAIPage() {
                         <div className="flex items-center gap-1.5 shrink-0">
                           {!isActive && (
                             <button onClick={() => handleSelectAgent(agent.id)}
-                              className="px-3 py-1.5 rounded-lg bg-[#4F6EF7]/10 text-[#4F6EF7] text-xs hover:bg-[#4F6EF7]/20"
+                              className="px-3 py-1.5 rounded-lg bg-[#3B82F6]/10 text-[#3B82F6] text-xs hover:bg-[#3B82F6]/20"
                             >Assign</button>
                           )}
                           <button onClick={() => handleDeleteAgent(agent.id)}
@@ -496,7 +496,7 @@ export default function VoiceAIPage() {
             <div className="p-5 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Smartphone className="w-5 h-5 text-[#22D3A5]" />
+                  <Smartphone className="w-5 h-5 text-[#10B981]" />
                   <h2 className="text-base font-semibold text-white">Phone Numbers</h2>
                 </div>
                 <div className="flex items-center gap-2">
@@ -506,7 +506,7 @@ export default function VoiceAIPage() {
                     <ArrowRight className="w-3.5 h-3.5" /> Import
                   </button>
                   <button onClick={() => setShowBuyModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#22D3A5]/10 text-[#22D3A5] text-xs font-medium hover:bg-[#22D3A5]/20"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#10B981]/10 text-[#10B981] text-xs font-medium hover:bg-[#10B981]/20"
                   >
                     <Plus className="w-3.5 h-3.5" /> Buy Number
                   </button>
@@ -519,7 +519,7 @@ export default function VoiceAIPage() {
                   <p className="text-sm text-gray-400">No phone numbers</p>
                   <p className="text-xs text-gray-600 mt-1">Buy or import a number to enable outbound calling.</p>
                   <button onClick={() => setShowBuyModal(true)}
-                    className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#22D3A5]/10 text-[#22D3A5] text-xs font-medium hover:bg-[#22D3A5]/20"
+                    className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#10B981]/10 text-[#10B981] text-xs font-medium hover:bg-[#10B981]/20"
                   >
                     <Plus className="w-3.5 h-3.5" /> Buy a Phone Number
                   </button>
@@ -532,12 +532,12 @@ export default function VoiceAIPage() {
                       <div key={pn.id}
                         className={cn(
                           "flex items-center justify-between p-3 rounded-lg border",
-                          isAttached ? "bg-[#22D3A5]/5 border-[#22D3A5]/20" : "bg-[#1A1A24] border-[#2A2A3A]"
+                          isAttached ? "bg-[#10B981]/5 border-[#10B981]/20" : "bg-[#1B1E26] border-[#272B34]"
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0",
-                            isAttached ? "bg-[#22D3A5]/20 text-[#22D3A5]" : "bg-white/5 text-gray-400"
+                            isAttached ? "bg-[#10B981]/20 text-[#10B981]" : "bg-white/5 text-gray-400"
                           )}>
                             <Phone className="w-4 h-4" />
                           </div>
@@ -557,7 +557,7 @@ export default function VoiceAIPage() {
                           ) : (
                             agentId && (
                               <button onClick={() => handleAttachPhone(pn.id, agentId)}
-                                className="px-3 py-1.5 rounded-lg bg-[#22D3A5]/10 text-[#22D3A5] text-xs hover:bg-[#22D3A5]/20"
+                                className="px-3 py-1.5 rounded-lg bg-[#10B981]/10 text-[#10B981] text-xs hover:bg-[#10B981]/20"
                               >Attach to Agent</button>
                             )
                           )}
@@ -584,7 +584,7 @@ export default function VoiceAIPage() {
               </div>
 
               {uploading && (
-                <div className="flex items-center gap-2 p-3 mb-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A]">
+                <div className="flex items-center gap-2 p-3 mb-3 rounded-lg bg-[#1B1E26] border border-[#272B34]">
                   <Loader2 className="w-4 h-4 animate-spin text-[#C9A84C]" />
                   <span className="text-sm text-gray-400">Uploading document...</span>
                 </div>
@@ -600,7 +600,7 @@ export default function VoiceAIPage() {
                 <div className="space-y-2">
                   {knowledgeDocs.map((doc) => (
                     <div key={doc.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A]"
+                      className="flex items-center justify-between p-3 rounded-lg bg-[#1B1E26] border border-[#272B34]"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-full bg-[#C9A84C]/20 flex items-center justify-center shrink-0">
@@ -631,33 +631,33 @@ export default function VoiceAIPage() {
             {/* Agent Status Card */}
             <div className="p-5 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <Activity className="w-5 h-5 text-[#4F6EF7]" />
+                <Activity className="w-5 h-5 text-[#3B82F6]" />
                 <h2 className="text-base font-semibold text-white">Status</h2>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1A1A24]">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1B1E26]">
                   <span className="text-xs text-gray-400">AI Agent</span>
                   <span className={cn("text-xs font-medium flex items-center gap-1.5",
-                    hasAgent ? "text-[#22D3A5]" : "text-amber-400"
+                    hasAgent ? "text-[#10B981]" : "text-amber-400"
                   )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", hasAgent ? "bg-[#22D3A5]" : "bg-amber-400")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", hasAgent ? "bg-[#10B981]" : "bg-amber-400")} />
                     {hasAgent ? activeAgent?.name || "Ready" : "Not configured"}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1A1A24]">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1B1E26]">
                   <span className="text-xs text-gray-400">Phone Number</span>
                   <span className={cn("text-xs font-medium flex items-center gap-1.5",
-                    hasPhoneConnected ? "text-[#22D3A5]" : "text-amber-400"
+                    hasPhoneConnected ? "text-[#10B981]" : "text-amber-400"
                   )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", hasPhoneConnected ? "bg-[#22D3A5]" : "bg-amber-400")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", hasPhoneConnected ? "bg-[#10B981]" : "bg-amber-400")} />
                     {hasPhoneConnected ? "Connected" : "Not connected"}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1A1A24]">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1B1E26]">
                   <span className="text-xs text-gray-400">Phone Setup</span>
                   <span className="text-xs font-medium text-white">{phoneSetupStatus.replace(/_/g, " ")}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1A1A24]">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-[#1B1E26]">
                   <span className="text-xs text-gray-400">Knowledge Docs</span>
                   <span className="text-xs font-medium text-white">{knowledgeDocs.length}</span>
                 </div>
@@ -667,32 +667,32 @@ export default function VoiceAIPage() {
             {/* Quick Actions */}
             <div className="p-5 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="w-5 h-5 text-[#4F6EF7]" />
+                <BarChart3 className="w-5 h-5 text-[#3B82F6]" />
                 <h2 className="text-base font-semibold text-white">Quick Actions</h2>
               </div>
               <div className="space-y-2">
                 {!hasAgent && (
                   <button onClick={() => setShowCreateAgent(true)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] hover:border-[#4F6EF7]/30 text-left group"
+                    className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1B1E26] border border-[#272B34] hover:border-[#3B82F6]/30 text-left group"
                   >
                     <div className="flex items-center gap-3">
-                      <Bot className="w-4 h-4 text-[#4F6EF7]" />
+                      <Bot className="w-4 h-4 text-[#3B82F6]" />
                       <span className="text-xs text-white">Create AI Agent</span>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-[#4F6EF7]" />
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-[#3B82F6]" />
                   </button>
                 )}
                 <button onClick={() => setShowBuyModal(true)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] hover:border-[#22D3A5]/30 text-left group"
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1B1E26] border border-[#272B34] hover:border-[#10B981]/30 text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <Phone className="w-4 h-4 text-[#22D3A5]" />
+                    <Phone className="w-4 h-4 text-[#10B981]" />
                     <span className="text-xs text-white">Buy Phone Number</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-[#22D3A5]" />
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-[#10B981]" />
                 </button>
                 <button onClick={handleTestCall} disabled={testCallLoading || !hasAgent}
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] hover:border-emerald-500/30 text-left group disabled:opacity-50"
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1B1E26] border border-[#272B34] hover:border-emerald-500/30 text-left group disabled:opacity-50"
                 >
                   <div className="flex items-center gap-3">
                     <Play className="w-4 h-4 text-emerald-400" />
@@ -701,7 +701,7 @@ export default function VoiceAIPage() {
                   <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:text-emerald-400" />
                 </button>
                 <Link href="/dashboard/settings"
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] hover:border-white/20 text-left group"
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1B1E26] border border-[#272B34] hover:border-white/20 text-left group"
                 >
                   <div className="flex items-center gap-3">
                     <BarChart3 className="w-4 h-4 text-gray-400" />
@@ -758,7 +758,7 @@ export default function VoiceAIPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-md rounded-2xl bg-[#111118] border border-[#2A2A3A] overflow-hidden"
+              className="w-full max-w-md rounded-2xl bg-[#14161C] border border-[#272B34] overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
               <div className="p-6">
@@ -773,7 +773,7 @@ export default function VoiceAIPage() {
                   <div>
                     <label className="block text-xs text-gray-400 mb-1.5">Region</label>
                     <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#3B82F6]/50"
                     >
                       <option value="india">India</option>
                     </select>
@@ -800,7 +800,7 @@ export default function VoiceAIPage() {
                   >Cancel</button>
                   {!buyResult?.success ? (
                     <button onClick={handleBuyNumber} disabled={buyLoading}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#22D3A5] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#10B981] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                     >
                       {buyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
                       {buyLoading ? "Purchasing..." : "Buy Number"}
@@ -813,7 +813,7 @@ export default function VoiceAIPage() {
                 </div>
 
                 {/* Fallback to provider dashboard */}
-                <div className="mt-4 pt-4 border-t border-[#2A2A3A]">
+                <div className="mt-4 pt-4 border-t border-[#272B34]">
                   <p className="text-[11px] text-gray-500 mb-2">Can&apos;t buy here? Get one from your provider directly:</p>
                   <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
                     className="flex items-center justify-center gap-1.5 w-full px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-xs hover:bg-white/10"
@@ -846,7 +846,7 @@ export default function VoiceAIPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-md rounded-2xl bg-[#111118] border border-[#2A2A3A] overflow-hidden"
+              className="w-full max-w-md rounded-2xl bg-[#14161C] border border-[#272B34] overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
               <div className="p-6">
@@ -867,8 +867,8 @@ export default function VoiceAIPage() {
                         className={cn(
                           "p-3 rounded-xl border text-xs text-center font-medium transition-all",
                           importProvider === p
-                            ? "bg-[#4F6EF7]/10 border-[#4F6EF7]/40 text-[#4F6EF7]"
-                            : "bg-[#1A1A24] border-[#2A2A3A] text-gray-500 hover:border-[#3A3A52]"
+                            ? "bg-[#3B82F6]/10 border-[#3B82F6]/40 text-[#3B82F6]"
+                            : "bg-[#1B1E26] border-[#272B34] text-gray-500 hover:border-[#363B45]"
                         )}
                       >
                         {p === "exotel" ? "Exotel" : "Twilio"}
@@ -880,7 +880,7 @@ export default function VoiceAIPage() {
                     <label className="block text-xs text-gray-400 mb-1.5">Phone Number *</label>
                     <input value={importPhone} onChange={e => setImportPhone(e.target.value)}
                       placeholder="e.g., +919876543210"
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
 
@@ -888,7 +888,7 @@ export default function VoiceAIPage() {
                     <label className="block text-xs text-gray-400 mb-1.5">Number SID *</label>
                     <input value={importSid} onChange={e => setImportSid(e.target.value)}
                       placeholder="e.g., EX123456 or PNxxxxxxxx"
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                     />
                   </div>
 
@@ -898,7 +898,7 @@ export default function VoiceAIPage() {
                         <label className="block text-xs text-gray-400 mb-1.5">Exotel API Key *</label>
                         <input value={importApiKey} onChange={e => setImportApiKey(e.target.value)}
                           placeholder="Exotel API key"
-                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                         />
                       </div>
                       <div>
@@ -906,14 +906,14 @@ export default function VoiceAIPage() {
                         <input value={importApiToken} onChange={e => setImportApiToken(e.target.value)}
                           type="password"
                           placeholder="Exotel API token"
-                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                         />
                       </div>
                       <div>
                         <label className="block text-xs text-gray-400 mb-1.5">Subdomain</label>
                         <input value={importSubdomain} onChange={e => setImportSubdomain(e.target.value)}
                           placeholder="api.exotel.com"
-                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                          className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                         />
                       </div>
                     </>
@@ -923,7 +923,7 @@ export default function VoiceAIPage() {
                       <input value={importApiToken} onChange={e => setImportApiToken(e.target.value)}
                         type="password"
                         placeholder="Twilio auth token"
-                        className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#4F6EF7]/50"
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
                       />
                     </div>
                   )}
@@ -949,7 +949,7 @@ export default function VoiceAIPage() {
                   >Cancel</button>
                   {!importResult || !importResult.success ? (
                     <button onClick={handleImportNumber} disabled={importLoading || !importPhone.trim() || !importSid.trim() || !importApiToken.trim() || (importProvider === "exotel" && !importApiKey.trim())}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#4F6EF7] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#3B82F6] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                     >
                       {importLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                       {importLoading ? "Importing..." : "Import Number"}

@@ -29,18 +29,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!mounted || !isAuthenticated || user?.role !== "admin") {
     return (
-      <div className="h-screen bg-[#0A0A0F] flex items-center justify-center">
+      <div className="h-screen bg-[#0B0D12] flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-2 border-leadflow-500 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex bg-[#0A0A0F] overflow-hidden">
+    <div className="h-screen flex bg-[#0B0D12] overflow-hidden">
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar />
-        <main className="flex-1 overflow-y-auto p-6 bg-[#0A0A0F]">
+        <main className="flex-1 overflow-y-auto p-6 bg-[#0B0D12]">
           <ErrorBoundary>
             {children}
           </ErrorBoundary>

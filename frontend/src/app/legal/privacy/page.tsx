@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Privacy Policy</h1>
-              <p className="text-gray-500 text-sm">Last updated: June 13, 2026</p>
+              <p className="text-gray-500 text-sm">Last updated: August 10, 2026</p>
             </div>
           </div>
         </div>
@@ -112,6 +112,12 @@ export default function PrivacyPolicyPage() {
               <li>Object to processing of your data</li>
               <li>Withdraw consent at any time (where processing is based on consent)</li>
             </ul>
+            <p className="mt-3">
+              <strong>Under the Digital Personal Data Protection Act, 2023 (DPDP Act),</strong> you can
+              withdraw your consent and request full erasure of your personal data at any time. To do
+              so, open <strong>Dashboard → Settings → Privacy &amp; Data</strong> and click
+              <strong> "Request data erasure"</strong>. We process such requests within 30 days.
+            </p>
           </section>
 
           <section>
@@ -144,8 +150,8 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-lg font-semibold text-white mb-3">10. Contact</h2>
             <p>
               For privacy-related inquiries, please contact us at{" "}
-              <a href="mailto:privacy@leadbridge.com" className="text-leadflow-accent hover:underline">
-                privacy@leadbridge.com
+              <a href="mailto:support@converza.tech" className="text-leadflow-accent hover:underline">
+                support@converza.tech
               </a>.
             </p>
           </section>

@@ -7,53 +7,53 @@
 
 @layer base {
   :root {
-    --background: 10 10 15;
-    --foreground: 240 240 248;
-    --card: 17 17 24;
-    --card-foreground: 240 240 248;
-    --popover: 17 17 24;
-    --popover-foreground: 240 240 248;
-    --primary: 239 84% 67%;
-    --primary-foreground: 240 240 248;
-    --secondary: 26 26 36;
-    --secondary-foreground: 240 240 248;
-    --muted: 26 26 36;
-    --muted-foreground: 107 107 138;
-    --accent: 239 84% 67%;
-    --accent-foreground: 240 240 248;
+    --background: 222 25% 6%;
+    --foreground: 220 25% 96%;
+    --card: 221 18% 10%;
+    --card-foreground: 220 25% 96%;
+    --popover: 221 18% 10%;
+    --popover-foreground: 220 25% 96%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 220 25% 96%;
+    --secondary: 223 18% 13%;
+    --secondary-foreground: 220 25% 96%;
+    --muted: 223 18% 13%;
+    --muted-foreground: 219 14% 59%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 220 25% 96%;
     --destructive: 0 62.8% 50%;
-    --destructive-foreground: 240 240 248;
-    --border: 42 42 58;
-    --input: 26 26 36;
-    --ring: 239 84% 67%;
+    --destructive-foreground: 220 25% 96%;
+    --border: 222 13% 18%;
+    --input: 223 18% 13%;
+    --ring: 217 91% 60%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 10 10 15;
-    --foreground: 240 240 248;
-    --card: 17 17 24;
-    --card-foreground: 240 240 248;
-    --popover: 17 17 24;
-    --popover-foreground: 240 240 248;
-    --primary: 239 84% 67%;
-    --primary-foreground: 240 240 248;
-    --secondary: 26 26 36;
-    --secondary-foreground: 240 240 248;
-    --muted: 26 26 36;
-    --muted-foreground: 107 107 138;
-    --accent: 239 84% 67%;
-    --accent-foreground: 240 240 248;
+    --background: 222 25% 6%;
+    --foreground: 220 25% 96%;
+    --card: 221 18% 10%;
+    --card-foreground: 220 25% 96%;
+    --popover: 221 18% 10%;
+    --popover-foreground: 220 25% 96%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 220 25% 96%;
+    --secondary: 223 18% 13%;
+    --secondary-foreground: 220 25% 96%;
+    --muted: 223 18% 13%;
+    --muted-foreground: 219 14% 59%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 220 25% 96%;
     --destructive: 0 62.8% 50%;
-    --destructive-foreground: 240 240 248;
-    --border: 42 42 58;
-    --input: 26 26 36;
-    --ring: 239 84% 67%;
+    --destructive-foreground: 220 25% 96%;
+    --border: 222 13% 18%;
+    --input: 223 18% 13%;
+    --ring: 217 91% 60%;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #2A2A3A transparent;
+    scrollbar-color: #272B34 transparent;
   }
 
   *::-webkit-scrollbar {
@@ -66,7 +66,7 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: #2A2A3A;
+    background-color: #272B34;
     border-radius: 3px;
   }
 
@@ -80,7 +80,7 @@
   /* See tailwind.config.ts for available color tokens */
 
   ::selection {
-    background-color: rgba(79, 110, 247, 0.3);
+    background-color: rgba(59, 130, 246, 0.3);
     color: hsl(var(--foreground));
   }
 
@@ -96,7 +96,7 @@
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #6B6B8A;
+    color: #8B93A3;
   }
 
   .hero-text {
@@ -104,7 +104,7 @@
     font-weight: 700;
     font-size: clamp(56px, 8vw, 96px);
     letter-spacing: -0.04em;
-    color: #F0F0F8;
+    color: #F2F4F8;
   }
 
   .h1-text {
@@ -112,35 +112,35 @@
     font-weight: 600;
     font-size: clamp(36px, 5vw, 56px);
     letter-spacing: -0.03em;
-    color: #F0F0F8;
+    color: #F2F4F8;
   }
 
   .h2-text {
     font-family: 'Clash Display', Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 28px;
-    color: #F0F0F8;
+    color: #F2F4F8;
   }
 
   .h3-text {
     font-family: Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 20px;
-    color: #F0F0F8;
+    color: #F2F4F8;
   }
 
   .body-text {
     font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 15px;
-    color: #6B6B8A;
+    color: #8B93A3;
   }
 
   .small-text {
     font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 13px;
-    color: #6B6B8A;
+    color: #8B93A3;
   }
 
   .mono-text {
@@ -150,24 +150,24 @@
   }
 
   .glass-card {
-    background-color: #111118;
-    border: 1px solid #2A2A3A;
+    background-color: #14161C;
+    border: 1px solid #272B34;
     border-radius: 0.5rem;
   }
 
   .surface-card {
-    background-color: #1A1A24;
-    border: 1px solid #2A2A3A;
+    background-color: #1B1E26;
+    border: 1px solid #272B34;
     border-radius: 0.5rem;
   }
 
   .brand-glow {
-    box-shadow: 0 0 32px #4F6EF740;
+    box-shadow: 0 0 32px #3B82F640;
   }
 
   .brand-border-glow {
-    border-color: #4F6EF7;
-    box-shadow: 0 0 16px #4F6EF740;
+    border-color: #3B82F6;
+    box-shadow: 0 0 16px #3B82F640;
   }
 }
 

@@ -46,7 +46,7 @@ function AcceptInviteForm() {
 
   if (!token || !email) {
     return (
-      <div className="w-full max-w-md p-8 rounded-2xl bg-[#111118] border border-white/10 text-center">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-[#14161C] border border-white/10 text-center">
         <XCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
         <h1 className="text-lg font-semibold text-white mb-2">Invalid Invitation</h1>
         <p className="text-sm text-gray-500 mb-6">This invitation link is invalid or has expired.</p>
@@ -62,7 +62,7 @@ function AcceptInviteForm() {
   if (accepted) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-2xl bg-[#111118] border border-white/10 text-center"
+        className="w-full max-w-md p-8 rounded-2xl bg-[#14161C] border border-white/10 text-center"
       >
         <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
         <h1 className="text-lg font-semibold text-white mb-2">Welcome to the Team!</h1>
@@ -81,13 +81,13 @@ function AcceptInviteForm() {
       className="w-full max-w-md"
     >
       <div className="flex items-center justify-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-[#4F6EF7] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-[#3B82F6] flex items-center justify-center">
           <Users className="w-5 h-5 text-white" />
         </div>
         <span className="text-xl font-bold text-white">LeadBridge</span>
       </div>
 
-      <div className="p-8 rounded-2xl bg-[#111118] border border-white/10">
+      <div className="p-8 rounded-2xl bg-[#14161C] border border-white/10">
         <h1 className="text-xl font-semibold text-white mb-2">You're Invited!</h1>
         <p className="text-sm text-gray-500 mb-6">
           Set up your account for <strong className="text-white">{email}</strong>
@@ -135,10 +135,10 @@ function AcceptInviteForm() {
 
 export default function AcceptInvitePage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center p-4">
       <Suspense fallback={
         <div className="flex items-center justify-center">
-          <Loader2 className="w-6 h-6 text-[#4F6EF7] animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#3B82F6] animate-spin" />
         </div>
       }>
         <AcceptInviteForm />

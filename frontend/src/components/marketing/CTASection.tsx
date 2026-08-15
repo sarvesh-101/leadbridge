@@ -19,10 +19,10 @@ export default function CTASection() {
       : "🏙️  Every city is still open. Be the first broker to claim yours.";
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0A0A0F]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0B0D12]">
       {/* Radial gradient background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#4F6EF7] opacity-[0.03] blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[120px]" />
       </div>
 
       {/* Globe - bottom center, half cropped */}
@@ -38,20 +38,20 @@ export default function CTASection() {
           still available.
         </h2>
 
-        <p className="text-[18px] text-[#6B6B8A] max-w-[540px] mx-auto mb-12">
+        <p className="text-[18px] text-[#8B93A3] max-w-[540px] mx-auto mb-12">
           We&apos;re onboarding one broker per city. Request yours before someone else does.
         </p>
 
         <div className="flex justify-center mb-8">
           <Link
             href="/auth/register"
-            className="inline-flex items-center gap-3 px-10 py-4 rounded-lg bg-[#4F6EF7] text-white text-[20px] font-semibold transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
-            style={{ height: "64px", boxShadow: "0 0 32px #4F6EF740" }}
+            className="inline-flex items-center gap-3 px-10 py-4 rounded-lg bg-[#3B82F6] text-white text-[20px] font-semibold transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
+            style={{ height: "64px", boxShadow: "0 0 32px #3B82F640" }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 0 64px rgba(79, 110, 247, 0.6)";
+              e.currentTarget.style.boxShadow = "0 0 64px rgba(59, 130, 246, 0.6)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "0 0 32px rgba(79, 110, 247, 0.25)";
+              e.currentTarget.style.boxShadow = "0 0 32px rgba(59, 130, 246, 0.25)";
             }}
           >
             Request Your City
@@ -73,7 +73,7 @@ export default function CTASection() {
         </div>
 
         {/* Real urgency line (live from DB, no fake timestamps) */}
-        <div className="text-[13px] text-[#6B6B8A] font-mono">
+        <div className="text-[13px] text-[#8B93A3] font-mono">
           {urgencyLine}
         </div>
       </div>

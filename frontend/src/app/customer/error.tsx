@@ -19,7 +19,7 @@ export default function CustomerError({
     error.message?.toLowerCase().includes("session");
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center p-4">
       <div className="text-center max-w-md">
         <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-7 h-7 text-red-400" />
@@ -42,7 +42,7 @@ export default function CustomerError({
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={reset}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4F6EF7] text-white text-sm font-medium hover:brightness-110 transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#3B82F6] text-white text-sm font-medium hover:brightness-110 transition-all"
           >
             <RefreshCw className="w-4 h-4" />
             Try Again
@@ -50,7 +50,7 @@ export default function CustomerError({
           {isAuthError && (
             <a
               href="/customer/login"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#2A2A3A] text-gray-300 text-sm font-medium hover:bg-[#1A1A24] transition-all"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-[#272B34] text-gray-300 text-sm font-medium hover:bg-[#1B1E26] transition-all"
             >
               <LogIn className="w-4 h-4" />
               Log In

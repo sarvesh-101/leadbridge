@@ -60,36 +60,36 @@ export function LeadDetailPanel({ lead, open, onClose }: LeadDetailPanelProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-[480px] bg-[#111118] border-l border-[#2A2A3A] shadow-2xl z-50 overflow-hidden xl:absolute xl:right-0 xl:top-0 xl:bottom-0 xl:z-auto"
+            className="fixed right-0 top-0 h-full w-full max-w-[480px] bg-[#14161C] border-l border-[#272B34] shadow-2xl z-50 overflow-hidden xl:absolute xl:right-0 xl:top-0 xl:bottom-0 xl:z-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-[#2A2A3A]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#272B34]">
               <div className="flex-1 min-w-0">
-                <h2 className="text-[16px] font-semibold text-[#F0F0F8] truncate">
+                <h2 className="text-[16px] font-semibold text-[#F2F4F8] truncate">
                   {lead.name}
                 </h2>
-                <p className="text-[12px] text-[#6B6B8A] font-mono">{lead.phone}</p>
+                <p className="text-[12px] text-[#8B93A3] font-mono">{lead.phone}</p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-[#1A1A24] transition-colors"
+                className="p-2 rounded-lg hover:bg-[#1B1E26] transition-colors"
               >
-                <X className="w-4 h-4 text-[#6B6B8A]" />
+                <X className="w-4 h-4 text-[#8B93A3]" />
               </button>
             </div>
 
             {/* Meta bar */}
-            <div className="flex items-center gap-2 px-5 py-3 border-b border-[#2A2A3A]">
+            <div className="flex items-center gap-2 px-5 py-3 border-b border-[#272B34]">
               <LeadStatusBadge status={lead.status as LeadStatus} pulse={lead.status === "CALLING"} />
-              <span className="text-[12px] px-2 py-0.5 rounded bg-[#1A1A24] text-[#6B6B8A] border border-[#2A2A3A]">
+              <span className="text-[12px] px-2 py-0.5 rounded bg-[#1B1E26] text-[#8B93A3] border border-[#272B34]">
                 {lead.source}
               </span>
               {lead.score > 0 && (
                 <span className={cn(
                   "text-[12px] px-2 py-0.5 rounded border",
-                  lead.score >= 70 ? "bg-[#22D3A5]/10 text-[#22D3A5] border-[#22D3A5]/30" :
+                  lead.score >= 70 ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30" :
                   lead.score >= 40 ? "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30" :
-                  "bg-[#1A1A24] text-[#6B6B8A] border-[#2A2A3A]"
+                  "bg-[#1B1E26] text-[#8B93A3] border-[#272B34]"
                 )}>
                   Score: {lead.score}
                 </span>
@@ -97,7 +97,7 @@ export function LeadDetailPanel({ lead, open, onClose }: LeadDetailPanelProps) {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-[#2A2A3A] px-3 overflow-x-auto scrollbar-hide">
+            <div className="flex border-b border-[#272B34] px-3 overflow-x-auto scrollbar-hide">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -105,8 +105,8 @@ export function LeadDetailPanel({ lead, open, onClose }: LeadDetailPanelProps) {
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-2.5 text-[12px] font-medium border-b-2 transition-colors shrink-0",
                     activeTab === tab.id
-                      ? "border-[#4F6EF7] text-[#4F6EF7]"
-                      : "border-transparent text-[#6B6B8A] hover:text-[#F0F0F8]"
+                      ? "border-[#3B82F6] text-[#3B82F6]"
+                      : "border-transparent text-[#8B93A3] hover:text-[#F2F4F8]"
                   )}
                 >
                   {tab.icon}
@@ -137,7 +137,7 @@ function OverviewTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
     { label: "Location", value: lead.location || "—", icon: <MapPin className="w-4 h-4" /> },
     { label: "Timeline", value: lead.timeline || "—", icon: <Clock className="w-4 h-4" /> },
     { label: "Property", value: lead.propertyType ? `${lead.bedrooms || ""} ${lead.propertyType}`.trim() : "—", icon: <Activity className="w-4 h-4" /> },
-    { label: "Sentiment", value: lead.sentiment || "—", icon: lead.sentiment === "positive" ? <ThumbsUp className="w-4 h-4 text-[#22D3A5]" /> : lead.sentiment === "negative" ? <ThumbsDown className="w-4 h-4 text-[#F43F5E]" /> : <Meh className="w-4 h-4 text-[#F59E0B]" /> },
+    { label: "Sentiment", value: lead.sentiment || "—", icon: lead.sentiment === "positive" ? <ThumbsUp className="w-4 h-4 text-[#10B981]" /> : lead.sentiment === "negative" ? <ThumbsDown className="w-4 h-4 text-[#F43F5E]" /> : <Meh className="w-4 h-4 text-[#F59E0B]" /> },
     { label: "Language", value: lead.callLanguage || "—", icon: <MessageSquare className="w-4 h-4" /> },
   ];
 
@@ -145,8 +145,8 @@ function OverviewTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
     { event: "Lead received", date: lead.receivedAt, icon: <Activity className="w-3.5 h-3.5" /> },
     ...(lead.firstCalledAt ? [{ event: "First call attempted", date: lead.firstCalledAt, icon: <Phone className="w-3.5 h-3.5" /> }] : []),
     ...(lead.bookedAt ? [{ event: "Visit booked", date: lead.bookedAt, icon: <Calendar className="w-3.5 h-3.5" /> }] : []),
-    ...(lead.visitedAt ? [{ event: "Customer visited", date: lead.visitedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#22D3A5]" /> }] : []),
-    ...(lead.convertedAt ? [{ event: "Deal closed", date: lead.convertedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#22D3A5]" /> }] : []),
+    ...(lead.visitedAt ? [{ event: "Customer visited", date: lead.visitedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> }] : []),
+    ...(lead.convertedAt ? [{ event: "Deal closed", date: lead.convertedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> }] : []),
     ...(lead.coldAt ? [{ event: "Lead marked cold", date: lead.coldAt, icon: <XCircle className="w-3.5 h-3.5 text-[#F43F5E]" /> }] : []),
   ];
 
@@ -155,19 +155,19 @@ function OverviewTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
       {/* Qualification Grid */}
       <div className="grid grid-cols-2 gap-3">
         {qualFields.map((field) => (
-          <div key={field.label} className="flex items-start gap-3 p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A]">
-            <div className="mt-0.5 text-[#6B6B8A]">{field.icon}</div>
+          <div key={field.label} className="flex items-start gap-3 p-3 rounded-lg bg-[#1B1E26] border border-[#272B34]">
+            <div className="mt-0.5 text-[#8B93A3]">{field.icon}</div>
             <div>
-              <p className="text-[11px] text-[#6B6B8A] caption">{field.label}</p>
-              <p className="text-[13px] font-medium text-[#F0F0F8]">{field.value}</p>
+              <p className="text-[11px] text-[#8B93A3] caption">{field.label}</p>
+              <p className="text-[13px] font-medium text-[#F2F4F8]">{field.value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* AI Summary */}
-      <div className="p-4 rounded-lg bg-[#1A1A24] border-l-[3px] border-[#4F6EF7]">
-        <p className="text-[12px] italic text-[#6B6B8A]">
+      <div className="p-4 rounded-lg bg-[#1B1E26] border-l-[3px] border-[#3B82F6]">
+        <p className="text-[12px] italic text-[#8B93A3]">
           {lead.score >= 70
             ? "High-intent buyer — ready to close. Recommended: priority call and site visit scheduling."
             : lead.score >= 40
@@ -183,14 +183,14 @@ function OverviewTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
           {timeline.map((item, i) => (
             <div key={i} className="flex items-start gap-3 pb-3 relative">
               {i < timeline.length - 1 && (
-                <div className="absolute left-[11px] top-5 bottom-0 w-px bg-[#2A2A3A]" />
+                <div className="absolute left-[11px] top-5 bottom-0 w-px bg-[#272B34]" />
               )}
-              <div className="mt-0.5 text-[#6B6B8A] bg-[#1A1A24] rounded-full p-1">
+              <div className="mt-0.5 text-[#8B93A3] bg-[#1B1E26] rounded-full p-1">
                 {item.icon}
               </div>
               <div>
-                <p className="text-[13px] text-[#F0F0F8]">{item.event}</p>
-                <p className="text-[12px] text-[#6B6B8A]">{fmt(item.date)}</p>
+                <p className="text-[13px] text-[#F2F4F8]">{item.event}</p>
+                <p className="text-[12px] text-[#8B93A3]">{fmt(item.date)}</p>
               </div>
             </div>
           ))}
@@ -200,12 +200,12 @@ function OverviewTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
       {/* Action buttons */}
       <div className="flex gap-3">
         {lead.status === "REMINDED" && (
-          <button className="flex-1 px-4 py-2 rounded-lg bg-[#22D3A5] hover:brightness-110 text-black text-[13px] font-semibold transition-all">
+          <button className="flex-1 px-4 py-2 rounded-lg bg-[#10B981] hover:brightness-110 text-black text-[13px] font-semibold transition-all">
             Mark Visited
           </button>
         )}
         {(lead.status === "VISITED" || lead.status === "BOOKED") && (
-          <button className="flex-1 px-4 py-2 rounded-lg bg-[#22D3A5] hover:brightness-110 text-black text-[13px] font-semibold transition-all">
+          <button className="flex-1 px-4 py-2 rounded-lg bg-[#10B981] hover:brightness-110 text-black text-[13px] font-semibold transition-all">
             Mark Converted
           </button>
         )}
@@ -219,7 +219,7 @@ function CallsTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | nul
   const calls = (lead.calls || []) as Call[];
   if (calls.length === 0) {
     return (
-      <div className="p-5 text-center text-[#6B6B8A]">
+      <div className="p-5 text-center text-[#8B93A3]">
         <Phone className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-[13px]">No calls yet</p>
       </div>
@@ -229,24 +229,24 @@ function CallsTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | nul
   return (
     <div className="p-5 space-y-3">
       {calls.map((call) => (
-        <div key={call.id} className="p-4 rounded-lg bg-[#1A1A24] border border-[#2A2A3A]">
+        <div key={call.id} className="p-4 rounded-lg bg-[#1B1E26] border border-[#272B34]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] text-[#6B6B8A] font-medium">{call.type}</span>
+            <span className="text-[11px] text-[#8B93A3] font-medium">{call.type}</span>
             <span className={cn(
               "text-[11px] font-medium px-2 py-0.5 rounded",
-              call.status === "COMPLETED" ? "bg-[#22D3A5]/10 text-[#22D3A5]" :
+              call.status === "COMPLETED" ? "bg-[#10B981]/10 text-[#10B981]" :
               call.status === "FAILED" || call.status === "NO_ANSWER" ? "bg-[#F43F5E]/10 text-[#F43F5E]" :
-              "bg-[#4F6EF7]/10 text-[#4F6EF7]"
+              "bg-[#3B82F6]/10 text-[#3B82F6]"
             )}>
               {call.status}
             </span>
           </div>
-          <p className="text-[12px] text-[#6B6B8A]">{fmt(call.createdAt)}</p>
-          {call.duration && <p className="text-[12px] text-[#6B6B8A] mt-1">{call.duration}s duration</p>}
+          <p className="text-[12px] text-[#8B93A3]">{fmt(call.createdAt)}</p>
+          {call.duration && <p className="text-[12px] text-[#8B93A3] mt-1">{call.duration}s duration</p>}
           {call.summary && (
             <details className="mt-2">
-              <summary className="text-[12px] font-medium text-[#4F6EF7] cursor-pointer">View summary</summary>
-              <p className="text-[13px] text-[#6B6B8A] mt-2">{call.summary}</p>
+              <summary className="text-[12px] font-medium text-[#3B82F6] cursor-pointer">View summary</summary>
+              <p className="text-[13px] text-[#8B93A3] mt-2">{call.summary}</p>
             </details>
           )}
         </div>
@@ -260,7 +260,7 @@ function BookingTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | n
   const booking = lead.booking as Booking | undefined;
   if (!booking) {
     return (
-      <div className="p-5 text-center text-[#6B6B8A]">
+      <div className="p-5 text-center text-[#8B93A3]">
         <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-[13px]">No visit booked yet</p>
       </div>
@@ -269,33 +269,33 @@ function BookingTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | n
 
   return (
     <div className="p-5 space-y-4">
-      <div className="p-5 rounded-lg bg-[#22D3A5]/10 border border-[#22D3A5]/30">
+      <div className="p-5 rounded-lg bg-[#10B981]/10 border border-[#10B981]/30">
         <div className="flex items-center gap-2 mb-4">
-          <Calendar className="w-5 h-5 text-[#22D3A5]" />
-          <h3 className="text-[15px] font-semibold text-[#F0F0F8]">Visit Scheduled</h3>
+          <Calendar className="w-5 h-5 text-[#10B981]" />
+          <h3 className="text-[15px] font-semibold text-[#F2F4F8]">Visit Scheduled</h3>
         </div>
 
         <div className="space-y-3">
           <div>
-            <p className="text-[24px] font-display font-bold text-[#F0F0F8]">
+            <p className="text-[24px] font-display font-bold text-[#F2F4F8]">
               {booking.visitDate ? new Date(booking.visitDate).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }) : "—"}
             </p>
-            <p className="text-[15px] text-[#22D3A5] font-medium">{booking.visitTime}</p>
+            <p className="text-[15px] text-[#10B981] font-medium">{booking.visitTime}</p>
           </div>
 
           {booking.propertyAddress && (
             <div className="flex items-start gap-2">
-              <MapPin className="w-4 h-4 text-[#6B6B8A] mt-0.5" />
-              <p className="text-[13px] text-[#6B6B8A]">{booking.propertyAddress}</p>
+              <MapPin className="w-4 h-4 text-[#8B93A3] mt-0.5" />
+              <p className="text-[13px] text-[#8B93A3]">{booking.propertyAddress}</p>
             </div>
           )}
         </div>
 
         <div className="flex gap-3 mt-5">
-          <button className="px-4 py-2 rounded-lg bg-[#22D3A5] hover:brightness-110 text-black text-[13px] font-semibold transition-all">
+          <button className="px-4 py-2 rounded-lg bg-[#10B981] hover:brightness-110 text-black text-[13px] font-semibold transition-all">
             Mark as Visited
           </button>
-          <button className="px-4 py-2 rounded-lg border border-[#2A2A3A] text-[#6B6B8A] hover:text-[#F0F0F8] hover:bg-[#1A1A24] text-[13px] font-medium transition-all">
+          <button className="px-4 py-2 rounded-lg border border-[#272B34] text-[#8B93A3] hover:text-[#F2F4F8] hover:bg-[#1B1E26] text-[13px] font-medium transition-all">
             Reschedule
           </button>
         </div>
@@ -309,7 +309,7 @@ function MessagesTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
   const notifications = (lead.customerNotifications || []) as CustomerNotification[];
   if (notifications.length === 0) {
     return (
-      <div className="p-5 text-center text-[#6B6B8A]">
+      <div className="p-5 text-center text-[#8B93A3]">
         <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p className="text-[13px]">No messages sent yet</p>
       </div>
@@ -319,19 +319,19 @@ function MessagesTab({ lead, fmt }: { lead: Lead; fmt: (d: string | undefined | 
   return (
     <div className="p-5 space-y-3">
       {notifications.map((n) => (
-        <div key={n.id} className="p-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A]">
+        <div key={n.id} className="p-3 rounded-lg bg-[#1B1E26] border border-[#272B34]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[12px] font-medium text-[#6B6B8A]">{n.type} · {n.channel}</span>
+            <span className="text-[12px] font-medium text-[#8B93A3]">{n.type} · {n.channel}</span>
             <span className={cn(
               "text-[11px] px-1.5 py-0.5 rounded",
-              n.status === "sent" || n.status === "delivered" ? "bg-[#22D3A5]/10 text-[#22D3A5]" :
+              n.status === "sent" || n.status === "delivered" ? "bg-[#10B981]/10 text-[#10B981]" :
               "bg-[#F43F5E]/10 text-[#F43F5E]"
             )}>
               {n.status}
             </span>
           </div>
-          <p className="text-[13px] text-[#F0F0F8] line-clamp-2">{n.message}</p>
-          <p className="text-[11px] text-[#6B6B8A] mt-1">{fmt(n.sentAt)}</p>
+          <p className="text-[13px] text-[#F2F4F8] line-clamp-2">{n.message}</p>
+          <p className="text-[11px] text-[#8B93A3] mt-1">{fmt(n.sentAt)}</p>
         </div>
       ))}
     </div>
@@ -348,15 +348,15 @@ function NotesTab() {
         placeholder="Add a note about this lead..."
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        className="w-full h-32 px-4 py-3 rounded-lg bg-[#1A1A24] border border-[#2A2A3A] text-[13px] text-[#F0F0F8] placeholder-[#3A3A52] focus:outline-none focus:border-[#4F6EF7] focus:ring-1 focus:ring-[#4F6EF7] resize-none transition-colors"
+        className="w-full h-32 px-4 py-3 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] text-[#F2F4F8] placeholder-[#363B45] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] resize-none transition-colors"
       />
       <button
         disabled={!note.trim()}
-        className="w-full px-4 py-2 rounded-lg bg-[#4F6EF7] hover:brightness-110 text-white text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-4 py-2 rounded-lg bg-[#3B82F6] hover:brightness-110 text-white text-[13px] font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Save Note
       </button>
-      <p className="text-[12px] text-[#6B6B8A] text-center italic">
+      <p className="text-[12px] text-[#8B93A3] text-center italic">
         Notes are visible to your team only
       </p>
     </div>

@@ -225,7 +225,7 @@ export function CustomerActivityPanel({ leadId }: { leadId: string }) {
             className={cn(
               "px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all",
               filter === f.id
-                ? "bg-[#4F6EF7] text-white"
+                ? "bg-[#3B82F6] text-white"
                 : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
             )}
           >
@@ -338,11 +338,11 @@ function WhatsAppItem({ item, fmt, formatDateFull }: {
     <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors group">
       <div className={cn(
         "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-        isBot ? "bg-[#22D3A5]/10" : isIncoming ? "bg-[#4F6EF7]/10" : "bg-white/5"
+        isBot ? "bg-[#10B981]/10" : isIncoming ? "bg-[#3B82F6]/10" : "bg-white/5"
       )}>
         <Icon className={cn(
           "w-4 h-4",
-          isBot ? "text-[#22D3A5]" : isIncoming ? "text-[#4F6EF7]" : "text-gray-400"
+          isBot ? "text-[#10B981]" : isIncoming ? "text-[#3B82F6]" : "text-gray-400"
         )} />
       </div>
       <div className="flex-1 min-w-0">
