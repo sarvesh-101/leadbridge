@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-leadflow-500/10 blur-[120px]" />
         <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-leadflow-accent/10 blur-[100px]" />

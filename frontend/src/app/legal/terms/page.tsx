@@ -3,7 +3,7 @@ import { Zap, ArrowLeft } from "lucide-react";
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-[#0a0a1a]">
+    <div className="min-h-screen bg-[#0B0D12]">
       <div className="max-w-3xl mx-auto px-4 py-16">
         {/* Header */}
         <div className="mb-8">
