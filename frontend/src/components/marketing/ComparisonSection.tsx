@@ -6,7 +6,7 @@ import { Check, X } from "lucide-react";
 
 const comparisons = [
   { metric: "Response time", bridge: "≤60 seconds", traditional: "4-8 hours" },
-  { metric: "Calls per day", bridge: "Unlimited (24/7)", traditional: "~40/day" },
+  { metric: "Calls per day", bridge: "24/7 answering", traditional: "~40/day" },
   { metric: "Languages", bridge: "Hinglish, Hindi, English", traditional: "1 language" },
   { metric: "Working hours", bridge: "24/7 including holidays", traditional: "9 AM - 6 PM" },
   { metric: "Lead scoring", bridge: "AI-driven (0-100)", traditional: "Manual guesswork" },

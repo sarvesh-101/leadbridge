@@ -103,6 +103,9 @@ Healthy at every duration. Offline top-ups are safe to keep selling.
    options that were considered (may matter later):
    - **B. Raise PRO price** to ₹75–80K/mo if we want to sell more than 2,000 calls/mo — re-prices
      the "unlimited" promise and needs landing-page + Razorpay plan updates.
+     ✅ Landing-page "unlimited" claims already removed 2026-08-16 (pricing card, billing page,
+     FAQ, wizard, trial banner, comparison table, fact sheet, onboarding guide — PRO now shows
+     "2,000 AI calls"). Razorpay plan IDs unchanged (cap enforced server-side).
    - **C. Monitor weekly** (`docs` checklist 6.1 cost-per-call) and raise the cap when real data
      proves longer calls are rare. When real call durations come in from Phase 4.2, re-run this
      table and tune the cap.

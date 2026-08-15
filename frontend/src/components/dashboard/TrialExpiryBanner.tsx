@@ -78,7 +78,7 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
             <p className="text-xs text-gray-500 mt-1">
               {isUrgent
                 ? "Upgrade now to keep your leads, calls, and campaigns running without interruption."
-                : "Upgrade to a paid plan to unlock unlimited calls, advanced campaigns, and priority support."
+                : "Upgrade to a paid plan for more AI calls, advanced campaigns, and priority support."
               }
             </p>
             <div className="flex items-center gap-3 mt-3">

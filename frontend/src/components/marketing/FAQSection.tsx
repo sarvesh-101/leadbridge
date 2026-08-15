@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "Starter plan is ₹18,000/mo for 100 AI calls. Growth is ₹35,000/mo for 500 calls. Pro is ₹60,000/mo for unlimited calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
+    a: "Starter plan is ₹18,000/mo for 100 AI calls. Growth is ₹35,000/mo for 500 calls. Pro is ₹60,000/mo for 2,000 calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
   },
   {
     q: "What languages does the AI speak?",
@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "How is this different from a telecaller?",
-    a: "A telecaller costs ₹20,000-₹30,000/mo, handles ~40 calls/day, works limited hours, and takes breaks. LeadBridge costs less, handles unlimited concurrent calls, works 24/7, never gets tired, and calls every lead within 60 seconds — including weekends and holidays.",
+    a: "A telecaller costs ₹20,000-₹30,000/mo, handles ~40 calls/day, works limited hours, and takes breaks. LeadBridge costs less, works 24/7, never gets tired, and calls every lead within 60 seconds — including weekends and holidays.",
   },
   {
     q: "Can I customize the call script?",

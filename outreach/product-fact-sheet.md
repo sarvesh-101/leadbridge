@@ -68,7 +68,7 @@
 |---|---|---|
 | Starter | ₹18,000/mo | Solo agents getting started with AI coverage |
 | Growth | ₹35,000/mo | Small teams (500 calls/mo included) — most popular |
-| Pro | ₹60,000/mo | High-volume agencies (unlimited daily leads, priority) |
+| Pro | ₹60,000/mo | High-volume agencies (2,000 AI calls/mo, 50,000 leads, priority) |
 
 *Every plan: dedicated number, AI voice agent, WhatsApp + SMS follow-ups, call
 recordings, transcripts, analytics dashboard, customer portal, GST invoice,

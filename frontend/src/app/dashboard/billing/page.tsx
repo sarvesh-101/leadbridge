@@ -53,9 +53,9 @@ const PLANS = [
     name: "Pro",
     price: "₹60,000",
     period: "/month",
-    description: "For established enterprises with unlimited access",
+    description: "For high-volume agencies needing large call capacity",
     features: [
-      "Unlimited AI calls",
+      "2,000 AI calls/month",
       "Full qualification + booking",
       "WhatsApp notifications",
       "7-day follow-up automation",

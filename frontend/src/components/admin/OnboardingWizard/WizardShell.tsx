@@ -301,8 +301,8 @@ function Step5() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { name: "Starter", price: "₹18,000", calls: "100" },
-          { name: "Growth", price: "₹35,000", calls: "300", popular: true },
-          { name: "Pro", price: "₹60,000", calls: "Unlimited" },
+          { name: "Growth", price: "₹35,000", calls: "500", popular: true },
+          { name: "Pro", price: "₹60,000", calls: "2,000" },
         ].map((plan) => (
           <div
             key={plan.name}

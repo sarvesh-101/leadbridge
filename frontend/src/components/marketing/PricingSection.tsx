@@ -4,7 +4,9 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 
 // Source of truth: server/src/routes/client/billing.ts → PLAN_DEFINITIONS
-// STARTER users 5 / leads 500 / calls 100 · GROWTH 15 / 3000 / 500 · PRO 50 / 50000 / unlimited
+// STARTER users 5 / leads 500 / calls 100 · GROWTH 15 / 3000 / 500 ·
+// PRO 50 / 50000 / calls 2000 (PRO_MONTHLY_CALL_CAP — Phase 2.2 margin fix;
+// NOT unlimited: the platform pays per-minute while PRO is flat ₹60K)
 const plans = [
   {
     name: "Starter",
@@ -45,7 +47,7 @@ const plans = [
   {
     name: "Pro",
     price: "₹60,000",
-    calls: "Unlimited calls",
+    calls: "2,000 AI calls",
     users: "50",
     leads: "50,000",
     dedicatedNumber: true,
