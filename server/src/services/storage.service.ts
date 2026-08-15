@@ -67,14 +67,20 @@ export async function getSignedUrl(
 
 /**
  * Delete a file from storage.
+ *
+ * Uses the CURRENT Supabase bulk-delete API: DELETE /object/{bucket} with a
+ * `prefixes` body. The older DELETE /object/{bucket}/{path} endpoint returns
+ * 400 on newer Supabase projects (verified live 2026-08-10).
  */
 export async function deleteFile(bucket: string, path: string): Promise<boolean> {
   try {
-    await supabaseApi.delete(`/object/${bucket}/${path}`);
-    logger.info({ bucket, path }, "File deleted from Supabase");
+    const response = await supabaseApi.delete(`/object/${bucket}`, {
+      data: { prefixes: [path] },
+    });
+    logger.info({ bucket, path, status: response.status }, "File deleted from Supabase");
     return true;
   } catch (error: any) {
-    logger.error({ err: error.message, bucket, path }, "File deletion failed");
+    logger.error({ err: error.response?.data?.error || error.message, bucket, path }, "File deletion failed");
     return false;
   }
 }

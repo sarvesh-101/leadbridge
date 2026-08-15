@@ -102,6 +102,7 @@ describe("Email verification flow (FIX Round-2 #3)", () => {
         ownerName: "Test Owner",
         phone: "+919876543210",
         city: "Mumbai",
+        consent: true, // DPDP Phase 1.3
       },
     });
     expect(reg.statusCode).toBe(201);
@@ -110,6 +111,10 @@ describe("Email verification flow (FIX Round-2 #3)", () => {
     expect(regBody.emailSent).toBe(true);
     expect(regBody.accessToken).toBeUndefined(); // no tokens until verified
     expect(mockSendEmail).toHaveBeenCalledTimes(1);
+    // DPDP: consent must be persisted with the account
+    expect(prisma.client.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ consentGivenAt: expect.any(Date) }) })
+    );
 
     // 2. Login is BLOCKED while unverified
     prisma.client.findUnique.mockResolvedValueOnce({ ...baseClient, passwordHash });
@@ -165,6 +170,7 @@ describe("Email verification flow (FIX Round-2 #3)", () => {
         ownerName: "New Owner",
         phone: "+919876543211",
         city: "Delhi",
+        consent: true, // DPDP Phase 1.3
       },
     });
     expect(reg.statusCode).toBe(201);
@@ -172,6 +178,25 @@ describe("Email verification flow (FIX Round-2 #3)", () => {
     expect(body.requiresVerification).toBe(true);
     expect(body.emailSent).toBe(false);
     expect(body.message).toContain("could not be sent");
+  });
+
+  it("register returns 400 when consent to the Privacy Policy is not given (DPDP Phase 1.3)", async () => {
+    const reg = await app.inject({
+      method: "POST",
+      url: "/api/v1/auth/register",
+      payload: {
+        email: "noconsent@test.com",
+        password: "Password123",
+        businessName: "No Consent Realty",
+        ownerName: "No Consent",
+        phone: "+919876543213",
+        city: "Mumbai",
+        // consent omitted / false
+      },
+    });
+    expect(reg.statusCode).toBe(400);
+    expect(reg.json().consentRequired).toBe(true);
+    expect(prisma.client.create).not.toHaveBeenCalled();
   });
 
   it("register returns 409 for an existing email", async () => {
@@ -187,6 +212,7 @@ describe("Email verification flow (FIX Round-2 #3)", () => {
         ownerName: "Dup",
         phone: "+919876543212",
         city: "Mumbai",
+        consent: true, // DPDP Phase 1.3 — consent passes, then duplicate-email 409 fires
       },
     });
     expect(reg.statusCode).toBe(409);

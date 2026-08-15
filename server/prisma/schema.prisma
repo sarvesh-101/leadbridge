@@ -121,6 +121,12 @@ model Client {
   verificationToken      String?  @unique
   verificationTokenExpiresAt DateTime?
 
+  // DPDP (India DPDP Act 2023) — consent & data erasure tracking (Phase 1.3)
+  consentGivenAt         DateTime? // when the broker consented to the Privacy Policy
+  consentVersion         String    @default("1.0") // Privacy Policy version consented to
+  dataErasureRequestedAt DateTime? // broker requested full account+data erasure (DPDP right)
+  dataErasureProcessedAt DateTime? // when an admin completed the erasure
+
   // Omnidimension AI Voice Agent
   omnidimensionAgentId Int?     @unique
   omniAgentId         String?  @unique  // OmniDimension agent UUID (string format)

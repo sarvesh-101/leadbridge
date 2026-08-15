@@ -121,9 +121,12 @@ const envSchema = z.object({
 
   // FIX Round-2 #4: hard monthly call cap for PRO. PLAN_DEFINITIONS.PRO.calls is
   // 999999 ("unlimited"), but the platform pays per-minute while PRO is flat
-  // ₹60K/mo — unbounded cost risk. 0 = no cap (dangerous); default 5000 keeps
-  // margin safe (₹4.6/min × ~2min avg ≈ ₹9.2/call × 5000 ≈ ₹46K < ₹60K revenue).
-  PRO_MONTHLY_CALL_CAP: z.coerce.number().default(5000),
+  // ₹60K/mo — unbounded cost risk. 0 = no cap (dangerous).
+  // 2026-08-15 (Phase 2.2 margin analysis, docs/plan-margins.md): lowered from 5000
+  // to 2000 — at the old cap, 4-min avg calls (realistic for sales calls) made PRO
+  // loss-making (−₹32K/mo). At 2000, worst case (6-min avg) is still ~8% margin.
+  // Re-tune after Phase 4.2 real call-duration data.
+  PRO_MONTHLY_CALL_CAP: z.coerce.number().default(2000),
 
   // ─── SMS & Email Forwarding ─────────────────────────────
   // The Twilio number that brokers forward portal SMS to
@@ -142,3 +145,8 @@ if (!parsed.success) {
 
 export const config = parsed.data;
 export type Config = typeof config;
+
+// DPDP Phase 1.3 — the Privacy Policy version that signup consent refers to.
+// Bump when the policy at /legal/privacy changes meaningfully (then re-consent
+// existing brokers in Settings → Privacy & Data).
+export const PRIVACY_POLICY_VERSION = "1.0";

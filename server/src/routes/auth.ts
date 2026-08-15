@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../plugins/auth";
-import { config } from "../config";
+import { config, PRIVACY_POLICY_VERSION } from "../config";
 import { sendEmail } from "../services/email.service";
 
 // Google OAuth client (only initialized if GOOGLE_CLIENT_ID is set)
@@ -28,6 +28,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
           city: { type: "string", minLength: 1 },
           zone: { type: "string" },
           ownerWhatsapp: { type: "string" },
+          // DPDP Phase 1.3: explicit consent to the Privacy Policy (required)
+          consent: { type: "boolean" },
         },
       },
     },
@@ -41,9 +43,19 @@ export default async function authRoutes(fastify: FastifyInstance) {
       city: string;
       zone?: string;
       ownerWhatsapp?: string;
+      consent?: boolean;
     };
   }>, reply: FastifyReply) => {
-    const { email, password, businessName, ownerName, phone, city, zone, ownerWhatsapp } = request.body;
+    const { email, password, businessName, ownerName, phone, city, zone, ownerWhatsapp, consent } = request.body;
+
+    // DPDP Phase 1.3: no account without explicit consent to the Privacy Policy.
+    // (Enforced in code — not the JSON schema — so the error message is clear.)
+    if (!consent) {
+      return reply.status(400).send({
+        error: "You must accept the Privacy Policy and consent to data processing to create an account.",
+        consentRequired: true,
+      });
+    }
 
     // Check if email already exists
     const existing = await fastify.prisma.client.findUnique({ where: { email } });
@@ -82,6 +94,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
         emailVerified: false,
         verificationToken,
         verificationTokenExpiresAt,
+        // DPDP Phase 1.3: record when + which version of the Privacy Policy
+        // the broker consented to at signup.
+        consentGivenAt: new Date(),
+        consentVersion: PRIVACY_POLICY_VERSION,
       },
     });
 
@@ -479,6 +495,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
             // FIX Round-2 #3: Google already verified the email — skip the
             // email-verification step for OAuth signups.
             emailVerified: true,
+            // DPDP Phase 1.3: Google OAuth screen itself is the consent
+            // moment — record it.
+            consentGivenAt: new Date(),
+            consentVersion: PRIVACY_POLICY_VERSION,
           },
         });
       }

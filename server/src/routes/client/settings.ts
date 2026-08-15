@@ -3,6 +3,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Prisma } from "@prisma/client";
 import { getBrokerCredits } from "../../services/credit-manager.service";
 import { getMonthlyLeadsLimit } from "../../utils/lead-limits";
+import { PRIVACY_POLICY_VERSION } from "../../config";
 
 export default async function clientSettingsRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -208,5 +209,110 @@ export default async function clientSettingsRoutes(fastify: FastifyInstance) {
       select: { callScript: true, language: true },
     });
     return { script: client?.callScript, language: client?.language };
+  });
+
+  // ─── DPDP Phase 1.3 — Privacy: consent + data erasure ─────────
+  // Erasure SLA promised in the Privacy Policy (section 4 / 6).
+  const ERASURE_SLA_DAYS = 30;
+
+  // Get current consent + erasure state (for the Settings → Privacy tab)
+  fastify.get("/me/privacy", async (request: FastifyRequest) => {
+    const client = await fastify.prisma.client.findUnique({
+      where: { id: request.clientId },
+      select: {
+        consentGivenAt: true,
+        consentVersion: true,
+        dataErasureRequestedAt: true,
+        dataErasureProcessedAt: true,
+      },
+    });
+    if (!client) {
+      return { error: "Client not found" };
+    }
+    return {
+      consentGivenAt: client.consentGivenAt,
+      consentVersion: client.consentVersion,
+      consentActive: !!client.consentGivenAt,
+      erasureRequested: !!client.dataErasureRequestedAt,
+      erasureRequestedAt: client.dataErasureRequestedAt,
+      erasureProcessedAt: client.dataErasureProcessedAt,
+      slaDays: ERASURE_SLA_DAYS,
+      privacyPolicyUrl: "/legal/privacy",
+    };
+  });
+
+  // Re-affirm consent to the current Privacy Policy version
+  fastify.post("/me/privacy/consent", async (request: FastifyRequest, reply: FastifyReply) => {
+    await fastify.prisma.client.update({
+      where: { id: request.clientId },
+      data: { consentGivenAt: new Date(), consentVersion: PRIVACY_POLICY_VERSION },
+    });
+    return { consentGivenAt: new Date(), consentVersion: PRIVACY_POLICY_VERSION };
+  });
+
+  // DPDP right to erasure / consent withdrawal. Sets a request flag + notifies
+  // admins (the actual deletion is a supervised admin action so the broker
+  // keeps access until it is carried out).
+  // Atomic: the conditional updateMany ensures only ONE concurrent request
+  // wins the flag (no duplicate notifications on double-submit).
+  fastify.post("/me/privacy/erasure-request", async (request: FastifyRequest, reply: FastifyReply) => {
+    const client = await fastify.prisma.client.findUnique({
+      where: { id: request.clientId },
+      select: {
+        businessName: true,
+        email: true,
+        dataErasureRequestedAt: true,
+        dataErasureProcessedAt: true,
+      },
+    });
+    if (!client) {
+      return reply.status(404).send({ error: "Client not found" });
+    }
+
+    if (client.dataErasureProcessedAt) {
+      return reply.status(400).send({ error: "Your data erasure has already been processed." });
+    }
+
+    const requestedAt = new Date();
+    const updated = await fastify.prisma.client.updateMany({
+      where: {
+        id: request.clientId,
+        dataErasureRequestedAt: null,
+        dataErasureProcessedAt: null,
+      },
+      data: { dataErasureRequestedAt: requestedAt },
+    });
+
+    if (updated.count > 0) {
+      await fastify.prisma.ownerNotification.create({
+        data: {
+          clientId: request.clientId!,
+          type: "DATA_ERASURE_REQUEST",
+          message: `${client.businessName} (${client.email}) requested full account & data erasure (DPDP). Complete the deletion and set dataErasureProcessedAt.`,
+          status: "sent",
+        },
+      });
+      fastify.log.info(
+        { clientId: request.clientId, email: client.email },
+        "DPDP data erasure request recorded"
+      );
+    }
+
+    // Idempotent response: if a concurrent request already set the flag, report
+    // the original requestedAt (re-read for the real value).
+    const existing = await fastify.prisma.client.findUnique({
+      where: { id: request.clientId },
+      select: { dataErasureRequestedAt: true, dataErasureProcessedAt: true },
+    });
+    if (existing?.dataErasureProcessedAt) {
+      return reply.status(400).send({ error: "Your data erasure has already been processed." });
+    }
+
+    return {
+      erasureRequested: true,
+      erasureRequestedAt: existing?.dataErasureRequestedAt ?? requestedAt,
+      slaDays: ERASURE_SLA_DAYS,
+      message: `Your request has been received. We will delete your account and personal data within ${ERASURE_SLA_DAYS} days, as stated in our Privacy Policy.`,
+    };
   });
 }

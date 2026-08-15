@@ -67,7 +67,7 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
 
   // ─── List Clients ─────────────────────────────────────────────
   fastify.get("/admin/clients", async (request: FastifyRequest, reply: FastifyReply) => {
-    const { search, page = "1", limit = "20" } = request.query as Record<string, string>;
+    const { search, page = "1", limit = "20", erasureRequested } = request.query as Record<string, string>;
 
     const where: Record<string, unknown> = {};
     if (search) {
@@ -76,6 +76,11 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
         { email: { contains: search, mode: "insensitive" } },
         { ownerName: { contains: search, mode: "insensitive" } },
       ];
+    }
+    // DPDP Phase 1.3: ?erasureRequested=true → only brokers who asked to
+    // have their account + data deleted (so the erasure queue is one click away).
+    if (erasureRequested === "true") {
+      where.dataErasureRequestedAt = { not: null };
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -185,6 +190,8 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
     "onboardingComplete", "onboardingStep", "callScript", "knowledgeBase",
     "agentVoiceId", "leadSources", "omnidimensionAgentId", "omniAgentId",
     "omniPhoneNumberId", "omniPhoneNumber", "phoneSetupStatus",
+    // DPDP Phase 1.3: admin marks the erasure as carried out
+    "dataErasureProcessedAt",
   ] as const;
 
   fastify.patch("/admin/clients/:id", async (request: FastifyRequest<{
