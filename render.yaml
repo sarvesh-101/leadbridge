@@ -95,10 +95,14 @@ services:
       - key: FORWARDING_EMAIL
         value: forward@converza.tech
       - key: OMNIDIM_COST_PER_MINUTE
-        value: "0.10"
+        value: "4.6"
       - key: PHONE_NUMBER_MONTHLY_COST
-        value: "2.00"
+        value: "200"
       - key: BROKER_CALL_PRICE
-        value: "2.00"
+        value: "70"
+      - key: AVG_CALL_DURATION_MINUTES
+        value: "2"
+      - key: CREDIT_WARN_THRESHOLD_PERCENT
+        value: "20"
       - key: PRO_MONTHLY_CALL_CAP
         value: "2000"
