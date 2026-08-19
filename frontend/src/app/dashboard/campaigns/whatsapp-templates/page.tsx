@@ -130,7 +130,7 @@ const TEMPLATES = [
     id: "cold_lead_owner",
     category: "Owner",
     icon: X,
-    color: "text-gray-400",
+    color: "text-[#9FB0A6]",
     bg: "bg-gray-500/10",
     title: "Lead Marked Cold (Owner)",
     description: "Notification when a lead goes cold after 3 follow-ups",
@@ -227,8 +227,8 @@ export default function WhatsAppTemplatesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">WhatsApp Templates</h1>
-        <p className="text-gray-400 mt-1">Preview all automated WhatsApp notification templates</p>
+        <h1 className="text-2xl font-bold text-[#F0F7F3]">WhatsApp Templates</h1>
+        <p className="text-[#9FB0A6] mt-1">Preview all automated WhatsApp notification templates</p>
       </div>
 
       {/* Category filter */}
@@ -238,8 +238,8 @@ export default function WhatsAppTemplatesPage() {
             className={cn(
               "px-4 py-2 rounded-xl text-sm font-medium transition-all",
               activeCategory === cat
-                ? "bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30"
-                : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+                ? "bg-[#34D399]/15 text-[#6FE3B0] border border-[#34D399]/40"
+                : "bg-[#101713] text-[#9FB0A6] border border-white/10 hover:bg-white/[0.06]"
             )}
           >
             {cat}
@@ -253,7 +253,7 @@ export default function WhatsAppTemplatesPage() {
           const Icon = template.icon;
           return (
             <motion.div key={template.id} layout
-              className="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group"
+              className="p-5 rounded-xl app-card app-card-hover app-card-hover hover:bg-white/[0.06] transition-all cursor-pointer group"
               onClick={() => openPreview(template)}
             >
               <div className="flex items-center gap-3 mb-4">
@@ -261,14 +261,14 @@ export default function WhatsAppTemplatesPage() {
                   <Icon className={cn("w-5 h-5", template.color)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{template.title}</p>
-                  <p className="text-xs text-gray-500">{template.category}</p>
+                  <p className="text-sm font-semibold text-[#F0F7F3] truncate">{template.title}</p>
+                  <p className="text-xs text-[#9FB0A6]">{template.category}</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-400 line-clamp-2 mb-3">{template.description}</p>
+              <p className="text-xs text-[#9FB0A6] line-clamp-2 mb-3">{template.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-gray-500">{template.variables.length} variables</span>
-                <div className="flex items-center gap-1 text-xs text-[#3B82F6] opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[10px] text-[#9FB0A6]">{template.variables.length} variables</span>
+                <div className="flex items-center gap-1 text-xs text-[#6FE3B0] opacity-0 group-hover:opacity-100 transition-opacity">
                   <Eye className="w-3.5 h-3.5" /> Preview
                 </div>
               </div>
@@ -282,7 +282,7 @@ export default function WhatsAppTemplatesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setPreviewing(null)}
         >
-          <div className="w-full max-w-2xl rounded-2xl bg-[#14161C] border border-[#272B34] overflow-hidden"
+          <div className="w-full max-w-2xl rounded-2xl app-card overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             {(() => {
@@ -293,24 +293,24 @@ export default function WhatsAppTemplatesPage() {
 
               return (
                 <>
-                  <div className="p-6 border-b border-[#272B34]">
+                  <div className="p-6 border-b border-white/10">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", template.bg)}>
                           <Icon className={cn("w-5 h-5", template.color)} />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-white">{template.title}</h3>
-                          <p className="text-xs text-gray-500">{template.description}</p>
+                          <h3 className="text-lg font-semibold text-[#F0F7F3]">{template.title}</h3>
+                          <p className="text-xs text-[#9FB0A6]">{template.description}</p>
                         </div>
                       </div>
-                      <button onClick={() => setPreviewing(null)} className="text-gray-500 hover:text-white">
+                      <button onClick={() => setPreviewing(null)} className="text-[#9FB0A6] hover:text-[#F0F7F3]">
                         <X className="w-5 h-5" />
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {template.variables.map(v => (
-                        <span key={v} className="text-[10px] px-2 py-0.5 rounded-full bg-[#1B1E26] text-[#3B82F6] border border-[#3B82F6]/20 font-mono">
+                        <span key={v} className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-[#6FE3B0] border border-[#34D399]/30 font-mono">
                           {`{{${v}}}`}
                         </span>
                       ))}
@@ -319,19 +319,19 @@ export default function WhatsAppTemplatesPage() {
                   <div className="p-6 space-y-4">
                     {/* Phone preview */}
                     <div className="max-w-sm mx-auto">
-                      <div className="rounded-2xl bg-[#0B0D12] border border-[#272B34] overflow-hidden">
-                        <div className="p-3 border-b border-[#272B34] flex items-center gap-3">
+                      <div className="rounded-2xl bg-[#0A0F0C] border border-white/10 overflow-hidden">
+                        <div className="p-3 border-b border-white/10 flex items-center gap-3">
                           <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", template.bg)}>
                             <Icon className={cn("w-4 h-4", template.color)} />
                           </div>
                           <div>
-                            <p className="text-xs font-medium text-white">LeadBridge</p>
-                            <p className="text-[10px] text-gray-500">WhatsApp</p>
+                            <p className="text-xs font-medium text-[#F0F7F3]">LeadBridge</p>
+                            <p className="text-[10px] text-[#9FB0A6]">WhatsApp</p>
                           </div>
                         </div>
                         <div className="p-4">
-                          <div className="bg-[#1B1E26] rounded-xl p-4 max-w-[90%]">
-                            <pre className="text-xs text-gray-300 whitespace-pre-wrap font-sans leading-relaxed">{message}</pre>
+                          <div className="bg-white/[0.06] rounded-xl p-4 max-w-[90%]">
+                            <pre className="text-xs text-[#9FB0A6] whitespace-pre-wrap font-sans leading-relaxed">{message}</pre>
                           </div>
                         </div>
                       </div>

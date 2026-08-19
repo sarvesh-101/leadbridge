@@ -33,7 +33,7 @@ interface PaymentLinkItem {
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   PAID: "bg-green-500/10 text-green-400 border-green-500/20",
-  CANCELLED: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+  CANCELLED: "bg-gray-500/10 text-[#9FB0A6] border-gray-500/20",
   EXPIRED: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
@@ -143,11 +143,11 @@ export default function PaymentLinksPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Payment Links</h1>
-          <p className="text-gray-400 mt-1">Create and share payment links with leads</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Payment Links</h1>
+          <p className="text-[#9FB0A6] mt-1">Create and share payment links with leads</p>
         </div>
         <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
         >
           <Plus className="w-4 h-4" /> New Payment Link
         </button>
@@ -162,10 +162,10 @@ export default function PaymentLinksPage() {
             { label: "Pending", value: summary.pending, icon: Clock, color: "text-amber-400" },
             { label: "Collected", value: `₹${(summary.totalCollected || 0).toLocaleString("en-IN")}`, icon: IndianRupee, color: "text-emerald-400" },
           ].map((s) => (
-            <div key={s.label} className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div key={s.label} className="p-4 rounded-xl app-card">
               <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-              <div className="text-xl font-bold text-white">{s.value}</div>
-              <div className="text-xs text-gray-500">{s.label}</div>
+              <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
+              <div className="text-xs text-[#9FB0A6]">{s.label}</div>
             </div>
           ))}
         </div>
@@ -174,13 +174,13 @@ export default function PaymentLinksPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
           />
         </div>
         <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm"
+          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm"
         >
           <option value="all">All Status</option>
           <option value="PENDING">Pending</option>
@@ -192,7 +192,7 @@ export default function PaymentLinksPage() {
 
       {/* List */}
       {loading ? (
-        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 bg-white/5 rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 bg-[#101713] rounded-xl animate-pulse" />)}</div>
       ) : displayLinks.length === 0 ? (
         <EmptyState icon={Link} title="No payment links yet" description="Create your first payment link to collect payments from leads"
           action={{ label: "Create Payment Link", onClick: () => setShowCreate(true) }}
@@ -201,20 +201,20 @@ export default function PaymentLinksPage() {
         <div className="space-y-3">
           {displayLinks.map((link, i) => (
             <motion.div key={link.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-all"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6]/20 to-[#6B8AFF]/20 flex items-center justify-center shrink-0">
-                <IndianRupee className="w-5 h-5 text-[#3B82F6]" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
+                <IndianRupee className="w-5 h-5 text-[#6FE3B0]" />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-lg font-bold text-white font-mono">₹{link.amount.toLocaleString("en-IN")}</span>
+                  <span className="text-lg font-bold text-[#F0F7F3] font-mono">₹{link.amount.toLocaleString("en-IN")}</span>
                   <span className={cn("text-[11px] px-1.5 py-0.5 rounded-full border", STATUS_STYLES[link.status])}>
                     {link.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-0.5">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[#9FB0A6] mt-0.5">
                   {link.lead?.name && <span>{link.lead.name}</span>}
                   {link.description && <span>• {link.description}</span>}
                   <span>• {formatDate(link.createdAt)}</span>
@@ -222,9 +222,9 @@ export default function PaymentLinksPage() {
                 </div>
                 {link.shortUrl && (
                   <div className="flex items-center gap-1.5 mt-1">
-                    <code className="text-[11px] text-[#3B82F6] bg-[#3B82F6]/5 px-1.5 py-0.5 rounded truncate max-w-[200px]">{link.shortUrl}</code>
+                    <code className="text-[11px] text-[#6FE3B0] bg-[#34D399]/10 px-1.5 py-0.5 rounded truncate max-w-[200px]">{link.shortUrl}</code>
                     <button onClick={() => { navigator.clipboard.writeText(link.shortUrl); toast.success("Copied!"); }}
-                      className="p-0.5 text-gray-500 hover:text-white transition-colors">
+                      className="p-0.5 text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors">
                       <Copy className="w-3 h-3" />
                     </button>
                   </div>
@@ -236,19 +236,19 @@ export default function PaymentLinksPage() {
                   <>
                     <button onClick={() => handleSend(link.id, "whatsapp")}
                       disabled={actionLoading === `send-${link.id}`}
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20 transition-colors">
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-[#34D399]/15 text-[#34D399] hover:bg-[#34D399]/25 transition-colors">
                       {actionLoading === `send-${link.id}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                       Send
                     </button>
                     <button onClick={() => handleCancel(link.id)}
                       disabled={actionLoading === `cancel-${link.id}`}
-                      className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Cancel">
+                      className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Cancel">
                       <XCircle className="w-4 h-4" />
                     </button>
                   </>
                 )}
                 <a href={link.shortUrl} target="_blank" rel="noopener noreferrer"
-                  className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors" title="Open link">
+                  className="p-2 rounded-lg text-[#9FB0A6] hover:text-[#F0F7F3] hover:bg-white/[0.06] transition-colors" title="Open link">
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
@@ -266,41 +266,41 @@ export default function PaymentLinksPage() {
             onClick={() => setShowCreate(false)}
           >
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="w-full max-w-md rounded-2xl bg-[#14161C] border border-white/10 p-6"
+              className="w-full max-w-md rounded-2xl app-card p-6"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-white">New Payment Link</h2>
-                <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+                <h2 className="text-lg font-bold text-[#F0F7F3]">New Payment Link</h2>
+                <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1.5 block">Amount (₹) *</label>
+                  <label className="text-xs text-[#9FB0A6] mb-1.5 block">Amount (₹) *</label>
                   <input value={newAmount} onChange={(e) => setNewAmount(e.target.value)} type="number" min={1}
                     placeholder="e.g., 50000"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500 mb-1.5 block">Description</label>
+                  <label className="text-xs text-[#9FB0A6] mb-1.5 block">Description</label>
                   <input value={newDescription} onChange={(e) => setNewDescription(e.target.value)}
                     placeholder="e.g., Booking fee for 3BHK Apartment"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
                   />
-                </div>                      <p className="text-xs text-gray-500 bg-white/[0.03] px-3 py-2 rounded-lg">
+                </div>                      <p className="text-xs text-[#9FB0A6] bg-white/[0.03] px-3 py-2 rounded-lg">
                   To associate a lead, create the payment link from the lead&apos;s detail page.
                 </p>
 
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
                   <button onClick={() => setShowCreate(false)}
-                    className="px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/5"
+                    className="px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
                   >Cancel</button>
                   <button onClick={handleCreate} disabled={!newAmount || actionLoading === "create"}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
                   >
                     {actionLoading === "create" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link className="w-4 h-4" />}
                     Create Link

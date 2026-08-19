@@ -100,8 +100,8 @@ export default function AnalyticsPage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
                 isActive
-                  ? "border-[#3B82F6] text-[#3B82F6]"
-                  : "border-transparent text-[#8B93A3] hover:text-white hover:border-[#8B93A3]/30"
+                  ? "border-[#34D399]/50 text-[#6FE3B0]"
+                  : "border-transparent text-[#9FB0A6] hover:text-[#F0F7F3] hover:border-[#5C6B62]/30"
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -115,21 +115,21 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {metrics.map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-            className="p-4 rounded-xl bg-white/5 border border-white/10"
+            className="p-4 rounded-xl app-card"
           >
             {loading ? (
               <div className="animate-pulse space-y-2">
-                <div className="h-6 w-16 bg-white/10 rounded" />
-                <div className="h-3 w-20 bg-white/10 rounded" />
+                <div className="h-6 w-16 bg-white/[0.06] rounded" />
+                <div className="h-3 w-20 bg-white/[0.06] rounded" />
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-2">
-                  <m.icon className="w-4 h-4 text-gray-500" />
-                  <span className="text-xs text-gray-500">{m.label}</span>
+                  <m.icon className="w-4 h-4 text-[#9FB0A6]" />
+                  <span className="text-xs text-[#9FB0A6]">{m.label}</span>
                 </div>
-                <div className="text-lg font-bold text-white">{m.value}</div>
-                <span className="text-xs text-gray-500 mt-1">
+                <div className="text-lg font-bold text-[#F0F7F3]">{m.value}</div>
+                <span className="text-xs text-[#9FB0A6] mt-1">
                   {m.label.includes("Rate") ? "of total leads" : "this month"}
                 </span>
               </>
@@ -139,21 +139,21 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Conversion Funnel */}
-      <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-        <h2 className="text-lg font-semibold text-white mb-6">Lead Funnel</h2>
+      <div className="p-6 rounded-xl app-card">
+        <h2 className="text-lg font-semibold text-[#F0F7F3] mb-6">Lead Funnel</h2>
         {loading ? (
           <div className="animate-pulse space-y-4">
-            {[1,2,3,4,5].map(i => <div key={i} className="h-8 bg-white/10 rounded" />)}
+            {[1,2,3,4,5].map(i => <div key={i} className="h-8 bg-white/[0.06] rounded" />)}
           </div>
         ) : funnelStages.length > 0 ? (
           <div className="space-y-3">
             {funnelStages.map((stage) => (
               <div key={stage.stage}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-400">{stage.stage.replace(/_/g, " ")}</span>
-                  <span className="text-white font-medium">{stage.count}</span>
+                  <span className="text-[#9FB0A6]">{stage.stage.replace(/_/g, " ")}</span>
+                  <span className="text-[#F0F7F3] font-medium">{stage.count}</span>
                 </div>
-                <div className="h-7 rounded-lg bg-white/5 overflow-hidden">
+                <div className="h-7 rounded-lg bg-[#101713] overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${stage.percentage}%` }}
@@ -161,31 +161,31 @@ export default function AnalyticsPage() {
                     className={cn("h-full rounded-lg flex items-center justify-end pr-2", stage.color)}
                     style={{ minWidth: stage.percentage > 0 ? "20px" : "0" }}
                   >
-                    <span className="text-xs text-white font-medium">{stage.percentage}%</span>
+                    <span className="text-xs text-[#F0F7F3] font-medium">{stage.percentage}%</span>
                   </motion.div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm text-center py-8">No lead data available yet</p>
+          <p className="text-[#9FB0A6] text-sm text-center py-8">No lead data available yet</p>
         )}
       </div>
 
       {/* Sources & Performance */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-          <h2 className="text-lg font-semibold text-white mb-4">Leads by Source</h2>
+        <div className="p-6 rounded-xl app-card">
+          <h2 className="text-lg font-semibold text-[#F0F7F3] mb-4">Leads by Source</h2>
           {loading ? (
-            <div className="animate-pulse space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-5 bg-white/10 rounded" />)}</div>
+            <div className="animate-pulse space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-5 bg-white/[0.06] rounded" />)}</div>
           ) : leadsBySource.length > 0 ? (
             <div className="space-y-3">
               {leadsBySource.map((s: SourceItem, i: number) => (
                 <div key={s.source} className="flex items-center gap-3">
                   <div className={cn("w-2 h-2 rounded-full", sourceColors[i % sourceColors.length])} />
-                  <span className="text-sm text-gray-400 flex-1 capitalize">{s.source}</span>
-                  <span className="text-sm text-white font-medium">{s._count?.id || 0}</span>
-                  <div className="w-24 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                  <span className="text-sm text-[#9FB0A6] flex-1 capitalize">{s.source}</span>
+                  <span className="text-sm text-[#F0F7F3] font-medium">{s._count?.id || 0}</span>
+                  <div className="w-24 h-1.5 rounded-full bg-[#101713] overflow-hidden">
                     <div className={cn("h-full rounded-full", sourceColors[i % sourceColors.length])}
                       style={{ width: `${maxSourceCount > 0 ? ((s._count?.id || 0) / maxSourceCount) * 100 : 0}%` }} />
                   </div>
@@ -193,14 +193,14 @@ export default function AnalyticsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm text-center py-8">No source data yet</p>
+            <p className="text-[#9FB0A6] text-sm text-center py-8">No source data yet</p>
           )}
         </div>
 
-        <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-          <h2 className="text-lg font-semibold text-white mb-4">Key Rates</h2>
+        <div className="p-6 rounded-xl app-card">
+          <h2 className="text-lg font-semibold text-[#F0F7F3] mb-4">Key Rates</h2>
           {loading ? (
-            <div className="animate-pulse space-y-4">{[1,2,3,4].map(i => <div key={i} className="h-16 bg-white/10 rounded" />)}</div>
+            <div className="animate-pulse space-y-4">{[1,2,3,4].map(i => <div key={i} className="h-16 bg-white/[0.06] rounded" />)}</div>
           ) : (
             <div className="space-y-5">
               {[
@@ -211,18 +211,18 @@ export default function AnalyticsPage() {
               ].map((rate) => (
                 <div key={rate.label}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-400">{rate.label}</span>
-                    <span className="text-white font-medium">{rate.value}%</span>
+                    <span className="text-[#9FB0A6]">{rate.label}</span>
+                    <span className="text-[#F0F7F3] font-medium">{rate.value}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-2 rounded-full bg-[#101713] overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${rate.value}%` }}
                       transition={{ duration: 0.6 }}
-                      className="h-full rounded-full bg-gradient-to-r from-leadflow-500 to-leadflow-accent"
+                      className="h-full rounded-full bg-gradient-to-r from-[#1B4332] to-[#2D6A4F]"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{rate.desc}</p>
+                  <p className="text-xs text-[#9FB0A6] mt-1">{rate.desc}</p>
                 </div>
               ))}
             </div>

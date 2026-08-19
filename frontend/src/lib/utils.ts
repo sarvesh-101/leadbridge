@@ -61,10 +61,10 @@ export function getStatusColor(status: string): string {
     confirmed: "text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30",
     visited: "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30",
     cancelled: "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30",
-    completed: "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/30",
+    completed: "text-gray-600 bg-gray-50 dark:text-[#7C8781] dark:bg-gray-900/30",
     no_show: "text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/30",
   };
-  return colors[status] || "text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-900/30";
+  return colors[status] || "text-gray-600 bg-gray-50 dark:text-[#7C8781] dark:bg-gray-900/30";
 }
 
 export function formatPhone(phone: string | undefined | null): string {
@@ -117,7 +117,7 @@ export function debounce<T extends (...args: any[]) => any>(
 export function getScoreColor(score: number): string {
   if (score >= 70) return "text-green-600 dark:text-green-400";
   if (score >= 40) return "text-amber-600 dark:text-amber-400";
-  return "text-gray-500 dark:text-gray-400";
+  return "text-[#7C8781] dark:text-[#7C8781]";
 }
 
 export function getScoreBarColor(score: number): string {

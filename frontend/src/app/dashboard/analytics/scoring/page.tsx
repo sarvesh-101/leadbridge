@@ -83,11 +83,11 @@ export default function ScoringAnalyticsPage() {
     return (
       <div className="space-y-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 bg-white/10 rounded" />
+          <div className="h-8 w-48 bg-white/[0.06] rounded" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-white/5 rounded-xl" />)}
+            {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-[#101713] rounded-xl" />)}
           </div>
-          <div className="h-64 bg-white/5 rounded-xl" />
+          <div className="h-64 bg-[#101713] rounded-xl" />
         </div>
       </div>
     );
@@ -98,13 +98,13 @@ export default function ScoringAnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Scoring Analytics</h1>
-          <p className="text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Scoring Analytics</h1>
+          <p className="text-[#9FB0A6] mt-1">
             Monitor scoring accuracy and refine lead prediction weights
           </p>
         </div>
         <button onClick={loadData}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/5 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
         >
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
@@ -121,32 +121,32 @@ export default function ScoringAnalyticsPage() {
               { label: "Precision", value: `${accuracyData.precision}%`, icon: Target, color: accuracyData.precision >= 70 ? "text-green-400" : "text-amber-400" },
             ].map((s, i) => (
               <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className="p-4 rounded-xl bg-white/5 border border-white/10"
+                className="p-4 rounded-xl app-card"
               >
                 <s.icon className={cn("w-5 h-5 mb-1", s.color)} />
-                <div className="text-xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-gray-500">{s.label}</div>
+                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
+                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
               </motion.div>
             ))}
           </div>
 
           {/* Calibration Curve */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-white/5 border border-white/10"
+            className="p-6 rounded-xl app-card"
           >
-            <h2 className="text-sm font-semibold text-white mb-4">Score Calibration</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Score Calibration</h2>
+            <p className="text-xs text-[#9FB0A6] mb-4">
               Higher score bands should have higher conversion rates. A well-calibrated model shows a clear upward staircase.
             </p>
             <div className="space-y-3">
               {accuracyData.calibration.map((band) => (
                 <div key={band.scoreBand}>
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-gray-400">Score {band.scoreBand}</span>
-                    <span className="text-gray-500">{band.leads} leads · {band.converted} converted</span>
+                    <span className="text-[#9FB0A6]">Score {band.scoreBand}</span>
+                    <span className="text-[#9FB0A6]">{band.leads} leads · {band.converted} converted</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 h-5 rounded-full bg-white/5 overflow-hidden">
+                    <div className="flex-1 h-5 rounded-full bg-[#101713] overflow-hidden">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all duration-500",
@@ -171,20 +171,20 @@ export default function ScoringAnalyticsPage() {
 
           {/* Factor Performance */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-xl bg-white/5 border border-white/10"
+            className="p-6 rounded-xl app-card"
           >
-            <h2 className="text-sm font-semibold text-white mb-4">Factor Performance Analysis</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Factor Performance Analysis</h2>
+            <p className="text-xs text-[#9FB0A6] mb-4">
               How each scoring factor correlates with actual conversion rates.
             </p>
             <div className="space-y-2">
               {accuracyData.topFactorPerformance.map((fp) => (
                 <div key={fp.factor}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10"
+                  className="flex items-center justify-between p-3 rounded-lg app-card"
                 >
                   <div className="flex-1">
-                    <div className="text-sm text-white">{FACTOR_LABELS[fp.factor] || fp.factor}</div>
-                    <div className="text-xs text-gray-500">Avg score: {fp.avgScore}</div>
+                    <div className="text-sm text-[#F0F7F3]">{FACTOR_LABELS[fp.factor] || fp.factor}</div>
+                    <div className="text-xs text-[#9FB0A6]">Avg score: {fp.avgScore}</div>
                   </div>
                   <div className={cn(
                     "text-sm font-mono font-medium",
@@ -203,12 +203,12 @@ export default function ScoringAnalyticsPage() {
       {/* Weight Recalibration */}
       {recalibration && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="p-6 rounded-xl bg-white/5 border border-white/10"
+          className="p-6 rounded-xl app-card"
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-white">Weight Optimization</h2>
-              <p className="text-xs text-gray-500 mt-1">
+              <h2 className="text-sm font-semibold text-[#F0F7F3]">Weight Optimization</h2>
+              <p className="text-xs text-[#9FB0A6] mt-1">
                 {recalibration.requiresMoreData
                   ? "Need at least 20 scored leads with outcomes before recalibrating."
                   : `Recalibration confidence: ${recalibration.confidence}`}
@@ -242,28 +242,28 @@ export default function ScoringAnalyticsPage() {
                   <div key={factor}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-lg border",
-                      changed ? "bg-[#3B82F6]/5 border-[#3B82F6]/20" : "bg-white/5 border-white/10"
+                      changed ? "bg-[#34D399]/10 border-[#34D399]/30" : "bg-[#101713] border-white/10"
                     )}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-white">{FACTOR_LABELS[factor] || factor}</span>
+                        <span className="text-sm text-[#F0F7F3]">{FACTOR_LABELS[factor] || factor}</span>
                         {changed && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-[#3B82F6]/10 text-[#3B82F6]">
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-[#34D399]/15 text-[#6FE3B0]">
                             Recommended change
                           </span>
                         )}
                       </div>
                       {change && (
-                        <p className="text-xs text-gray-500 mt-0.5">{change.reason}</p>
+                        <p className="text-xs text-[#9FB0A6] mt-0.5">{change.reason}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-sm font-mono">
-                      <span className="text-gray-400">{Math.round(currentWeight * 100)}%</span>
+                      <span className="text-[#9FB0A6]">{Math.round(currentWeight * 100)}%</span>
                       {changed && (
                         <>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#3B82F6]" />
-                          <span className="text-[#3B82F6] font-semibold">{Math.round(recommended * 100)}%</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-[#6FE3B0]" />
+                          <span className="text-[#6FE3B0] font-semibold">{Math.round(recommended * 100)}%</span>
                         </>
                       )}
                     </div>

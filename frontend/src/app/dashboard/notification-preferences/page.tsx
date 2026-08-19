@@ -23,7 +23,7 @@ interface EventTypeOption {
 }
 
 const CHANNELS = [
-  { value: "whatsapp", label: "WhatsApp", icon: MessageSquare, color: "text-[#10B981]" },
+  { value: "whatsapp", label: "WhatsApp", icon: MessageSquare, color: "text-[#34D399]" },
   { value: "sms", label: "SMS", icon: Smartphone, color: "text-blue-400" },
   { value: "email", label: "Email", icon: Mail, color: "text-amber-400" },
 ];
@@ -107,17 +107,17 @@ export default function NotificationPreferencesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Notification Preferences</h1>
-          <p className="text-gray-400 mt-1">Choose which events trigger notifications and how you receive them</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Notification Preferences</h1>
+          <p className="text-[#9FB0A6] mt-1">Choose which events trigger notifications and how you receive them</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={handleReset}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
           >
             <RefreshCw className="w-4 h-4" /> Reset
           </button>
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             Save Preferences
@@ -126,12 +126,12 @@ export default function NotificationPreferencesPage() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-3">{[1,2,3,4,5].map(i => <div key={i} className="h-16 bg-[#101713] rounded-xl animate-pulse" />)}</div>
       ) : preferences.length === 0 ? (
-        <div className="text-center py-16 rounded-xl bg-white/5 border border-white/10">
-          <Bell className="w-12 h-12 text-gray-500 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-white mb-2">No preferences configured</h3>
-          <p className="text-sm text-gray-500">Default preferences will be created when you save your first settings</p>
+        <div className="text-center py-16 rounded-xl app-card">
+          <Bell className="w-12 h-12 text-[#9FB0A6] mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No preferences configured</h3>
+          <p className="text-sm text-[#9FB0A6]">Default preferences will be created when you save your first settings</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -139,17 +139,17 @@ export default function NotificationPreferencesPage() {
             const eventLabel = eventTypes.find((e) => e.value === pref.eventType)?.label || pref.eventType.replace(/_/g, " ");
             return (
               <motion.div key={pref.id || pref.eventType} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
-                className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-all"
+                className="flex items-center gap-4 p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
               >
                 {/* Toggle */}
                 <button onClick={() => toggleEvent(pref.eventType)}
                   className={cn(
                     "relative w-11 h-6 rounded-full transition-colors shrink-0",
-                    pref.enabled ? "bg-[#10B981]" : "bg-white/10"
+                    pref.enabled ? "bg-[#34D399]" : "bg-white/[0.06]"
                   )}
                 >
                   <div className={cn(
-                    "absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform shadow-sm",
+                    "absolute top-0.5 w-5 h-5 rounded-full bg-[#101713] transition-transform shadow-sm",
                     pref.enabled ? "translate-x-[22px]" : "translate-x-0.5"
                   )} />
                 </button>
@@ -157,8 +157,8 @@ export default function NotificationPreferencesPage() {
                 {/* Event label */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    {pref.enabled ? <Bell className="w-4 h-4 text-[#10B981]" /> : <BellOff className="w-4 h-4 text-gray-500" />}
-                    <span className="text-sm font-medium text-white">{eventLabel}</span>
+                    {pref.enabled ? <Bell className="w-4 h-4 text-[#34D399]" /> : <BellOff className="w-4 h-4 text-[#9FB0A6]" />}
+                    <span className="text-sm font-medium text-[#F0F7F3]">{eventLabel}</span>
                   </div>
                 </div>
 
@@ -171,8 +171,8 @@ export default function NotificationPreferencesPage() {
                         className={cn(
                           "flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-all",
                           active
-                            ? `${ch.color} bg-white/5 border-white/10`
-                            : "text-gray-600 border-transparent hover:text-gray-400"
+                            ? `${ch.color} bg-[#101713] border-white/10`
+                            : "text-gray-600 border-transparent hover:text-[#9FB0A6]"
                         )}
                         title={ch.label}
                       >
@@ -189,12 +189,12 @@ export default function NotificationPreferencesPage() {
       )}
 
       {/* Info */}
-      <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+      <div className="p-4 rounded-xl app-card">
         <div className="flex items-start gap-3">
-          <Bell className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+          <Bell className="w-5 h-5 text-[#9FB0A6] mt-0.5 shrink-0" />
           <div>
-            <h3 className="text-sm font-medium text-white mb-1">How notifications work</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <h3 className="text-sm font-medium text-[#F0F7F3] mb-1">How notifications work</h3>
+            <p className="text-xs text-[#9FB0A6] leading-relaxed">
               Notifications are sent in real-time via WebSocket when the dashboard is open.
               WhatsApp and SMS notifications are sent through your configured integrations.
               Email notifications require SMTP configuration.

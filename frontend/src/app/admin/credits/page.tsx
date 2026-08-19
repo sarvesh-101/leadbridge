@@ -134,18 +134,18 @@ export default function AdminCreditsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Platform Credits & Costs</h1>
-          <p className="text-gray-400 mt-1">Track OmniDimension credit consumption and broker profitability</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Platform Credits & Costs</h1>
+          <p className="text-[#9FB0A6] mt-1">Track OmniDimension credit consumption and broker profitability</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => { loadOverview(); loadBrokers(); }}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm hover:bg-white/10 transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl app-card app-card-hover text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
           >
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
             Refresh
           </button>
           <button onClick={() => setShowTopUp(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
           >
             <Plus className="w-4 h-4" /> Top Up Credits
           </button>
@@ -156,7 +156,7 @@ export default function AdminCreditsPage() {
       {loading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1,2,3,4].map(i => (
-            <div key={i} className="h-28 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-28 rounded-xl app-card animate-pulse" />
           ))}
         </div>
       ) : credit ? (
@@ -184,24 +184,24 @@ export default function AdminCreditsPage() {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
                 <Wallet className="w-4 h-4 text-blue-400" />
-                <span className="text-xs text-gray-500">Minutes Purchased</span>
+                <span className="text-xs text-[#9FB0A6]">Minutes Purchased</span>
               </div>
-              <div className="text-xl font-bold text-white">{credit.totalMinutesPurchased.toLocaleString()}</div>
-              <p className="text-[11px] text-gray-500 mt-1">
+              <div className="text-xl font-bold text-[#F0F7F3]">{credit.totalMinutesPurchased.toLocaleString()}</div>
+              <p className="text-[11px] text-[#9FB0A6] mt-1">
                 Month: {credit.billingMonth}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
                 <Phone className="w-4 h-4 text-amber-400" />
-                <span className="text-xs text-gray-500">Minutes Used</span>
+                <span className="text-xs text-[#9FB0A6]">Minutes Used</span>
               </div>
-              <div className="text-xl font-bold text-white">{credit.minutesUsed.toLocaleString()}</div>
+              <div className="text-xl font-bold text-[#F0F7F3]">{credit.minutesUsed.toLocaleString()}</div>
               <div className="flex items-center gap-1 mt-1">
-                <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                   <div 
                     className={cn(
                       "h-full rounded-full",
@@ -220,31 +220,31 @@ export default function AdminCreditsPage() {
                 </span>
               </div>
             </div>
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-4 h-4 text-green-400" />
-                <span className="text-xs text-gray-500">Total Cost</span>
+                <span className="text-xs text-[#9FB0A6]">Total Cost</span>
               </div>
-              <div className="text-xl font-bold text-white">₹{fm(credit.totalCost)}</div>
-              <p className="text-[11px] text-gray-500 mt-1">@ ₹{credit.effectiveCostPerMinute}/min avg</p>
+              <div className="text-xl font-bold text-[#F0F7F3]">₹{fm(credit.totalCost)}</div>
+              <p className="text-[11px] text-[#9FB0A6] mt-1">@ ₹{credit.effectiveCostPerMinute}/min avg</p>
             </div>
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-4 h-4 text-purple-400" />
-                <span className="text-xs text-gray-500">Phone Numbers</span>
+                <span className="text-xs text-[#9FB0A6]">Phone Numbers</span>
               </div>
-              <div className="text-xl font-bold text-white">{credit.phoneNumbersActive}</div>
-              <p className="text-[11px] text-gray-500 mt-1">@ ₹{credit.costPerPhoneMonthly}/mo each</p>
+              <div className="text-xl font-bold text-[#F0F7F3]">{credit.phoneNumbersActive}</div>
+              <p className="text-[11px] text-[#9FB0A6] mt-1">@ ₹{credit.costPerPhoneMonthly}/mo each</p>
             </div>
           </div>
 
           {/* Recent Transactions */}
           {overview.recentTransactions.length > 0 && (
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-semibold text-white mb-4">Recent Transactions</h3>
+            <div className="p-5 rounded-xl app-card">
+              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">Recent Transactions</h3>
               <div className="space-y-2">
                 {overview.recentTransactions.slice(0, 10).map((tx) => (
-                  <div key={tx.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
+                  <div key={tx.id} className="flex items-center gap-3 p-3 rounded-lg bg-[#101713]">
                     <div className={cn(
                       "w-8 h-8 rounded-lg flex items-center justify-center",
                       tx.type === "PURCHASE" ? "bg-green-500/20" :
@@ -259,8 +259,8 @@ export default function AdminCreditsPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">{tx.description || `${tx.type} transaction`}</p>
-                      <p className="text-[11px] text-gray-500">
+                      <p className="text-sm text-[#F0F7F3] truncate">{tx.description || `${tx.type} transaction`}</p>
+                      <p className="text-[11px] text-[#9FB0A6]">
                         {new Date(tx.createdAt).toLocaleString("en-IN")}
                       </p>
                     </div>
@@ -273,7 +273,7 @@ export default function AdminCreditsPage() {
                         {tx.type === "PURCHASE" ? "+" : tx.type === "CONSUME" ? "-" : "~"}₹{fm(tx.amount)}
                       </p>
                       {tx.minutes > 0 && (
-                        <p className="text-[11px] text-gray-500">{tx.minutes} min</p>
+                        <p className="text-[11px] text-[#9FB0A6]">{tx.minutes} min</p>
                       )}
                     </div>
                   </div>
@@ -283,12 +283,12 @@ export default function AdminCreditsPage() {
           )}
         </>
       ) : (
-        <div className="p-8 rounded-xl bg-white/5 border border-white/10 text-center">
+        <div className="p-8 rounded-xl app-card text-center">
           <Wallet className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-white mb-1">No Credit Data Yet</h3>
-          <p className="text-sm text-gray-500 mb-4">Top up platform credits to start tracking costs</p>
+          <h3 className="text-base font-semibold text-[#F0F7F3] mb-1">No Credit Data Yet</h3>
+          <p className="text-sm text-[#9FB0A6] mb-4">Top up platform credits to start tracking costs</p>
           <button onClick={() => setShowTopUp(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
           >
             <Plus className="w-4 h-4" /> Add Credits
           </button>
@@ -296,21 +296,21 @@ export default function AdminCreditsPage() {
       )}
 
       {/* Broker Profitability */}
-      <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-        <h3 className="text-sm font-semibold text-white mb-4">Broker Profitability</h3>
+      <div className="p-5 rounded-xl app-card">
+        <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">Broker Profitability</h3>
 
         {brokerSummary && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-            <div className="p-3 rounded-lg bg-white/5">
-              <p className="text-[11px] text-gray-500">Total Revenue</p>
+            <div className="p-3 rounded-lg bg-[#101713]">
+              <p className="text-[11px] text-[#9FB0A6]">Total Revenue</p>
               <p className="text-lg font-bold text-green-400">₹{fm(brokerSummary.totalRevenue)}</p>
             </div>
-            <div className="p-3 rounded-lg bg-white/5">
-              <p className="text-[11px] text-gray-500">Total Cost</p>
+            <div className="p-3 rounded-lg bg-[#101713]">
+              <p className="text-[11px] text-[#9FB0A6]">Total Cost</p>
               <p className="text-lg font-bold text-amber-400">₹{fm(brokerSummary.totalCost)}</p>
             </div>
-            <div className="p-3 rounded-lg bg-white/5">
-              <p className="text-[11px] text-gray-500">Total Profit</p>
+            <div className="p-3 rounded-lg bg-[#101713]">
+              <p className="text-[11px] text-[#9FB0A6]">Total Profit</p>
               <p className={cn(
                 "text-lg font-bold",
                 brokerSummary.totalProfit >= 0 ? "text-green-400" : "text-red-400"
@@ -318,8 +318,8 @@ export default function AdminCreditsPage() {
                 {brokerSummary.totalProfit >= 0 ? "+" : ""}₹{fm(brokerSummary.totalProfit)}
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-white/5">
-              <p className="text-[11px] text-gray-500">Margin</p>
+            <div className="p-3 rounded-lg bg-[#101713]">
+              <p className="text-[11px] text-[#9FB0A6]">Margin</p>
               <p className={cn(
                 "text-lg font-bold",
                 brokerSummary.overallMarginPercent >= 50 ? "text-green-400" :
@@ -327,7 +327,7 @@ export default function AdminCreditsPage() {
               )}>
                 {brokerSummary.overallMarginPercent}%
               </p>
-              <p className="text-[11px] text-gray-500">
+              <p className="text-[11px] text-[#9FB0A6]">
                 {brokerSummary.brokersInProfit}/{brokerSummary.totalBrokers} in profit
               </p>
             </div>
@@ -337,7 +337,7 @@ export default function AdminCreditsPage() {
         {brokerLoading ? (
           <div className="space-y-3">
             {[1,2,3].map(i => (
-              <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse" />
+              <div key={i} className="h-16 rounded-lg bg-[#101713] animate-pulse" />
             ))}
           </div>
         ) : brokers.length > 0 ? (
@@ -345,23 +345,23 @@ export default function AdminCreditsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Broker</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Plan</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Calls</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Cost</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Revenue</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Profit</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Margin</th>
-                  <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">₹/Call</th>
+                  <th className="text-left py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Broker</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Plan</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Calls</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Cost</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Revenue</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Profit</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Margin</th>
+                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">₹/Call</th>
                 </tr>
               </thead>
               <tbody>
                 {brokers.map((b) => (
-                  <tr key={b.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr key={b.id} className="border-b border-white/10 hover:bg-white/[0.06] transition-colors">
                     <td className="py-3 px-2">
                       <div>
-                        <p className="text-white font-medium truncate max-w-[200px]">{b.businessName}</p>
-                        <p className="text-[11px] text-gray-500">{b.ownerName}</p>
+                        <p className="text-[#F0F7F3] font-medium truncate max-w-[200px]">{b.businessName}</p>
+                        <p className="text-[11px] text-[#9FB0A6]">{b.ownerName}</p>
                       </div>
                     </td>
                     <td className="text-right py-3 px-2">
@@ -369,12 +369,12 @@ export default function AdminCreditsPage() {
                         "text-xs px-2 py-0.5 rounded-full font-medium",
                         b.plan === "PRO" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
                         b.plan === "GROWTH" ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
-                        "bg-gray-500/10 text-gray-400 border border-gray-500/20"
+                        "bg-gray-500/10 text-[#9FB0A6] border border-gray-500/20"
                       )}>
                         {b.plan}
                       </span>
                     </td>
-                    <td className="text-right py-3 px-2 text-white">
+                    <td className="text-right py-3 px-2 text-[#F0F7F3]">
                       {b.callsUsed}/{b.callsLimit}
                     </td>
                     <td className="text-right py-3 px-2 text-amber-400">
@@ -391,7 +391,7 @@ export default function AdminCreditsPage() {
                     </td>
                     <td className="text-right py-3 px-2">
                       <div className="flex items-center justify-end gap-1.5">
-                        <div className="w-16 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                           <div 
                             className={cn(
                               "h-full rounded-full",
@@ -401,10 +401,10 @@ export default function AdminCreditsPage() {
                             style={{ width: `${Math.max(0, Math.min(100, b.profitMarginPercent))}%` }}
                           />
                         </div>
-                        <span className="text-white text-xs font-mono w-10 text-right">{b.profitMarginPercent}%</span>
+                        <span className="text-[#F0F7F3] text-xs font-mono w-10 text-right">{b.profitMarginPercent}%</span>
                       </div>
                     </td>
-                    <td className="text-right py-3 px-2 text-gray-400">
+                    <td className="text-right py-3 px-2 text-[#9FB0A6]">
                       ₹{b.costPerCall}
                     </td>
                   </tr>
@@ -413,7 +413,7 @@ export default function AdminCreditsPage() {
             </table>
           </div>
         ) : (
-          <p className="text-sm text-gray-500 text-center py-8">No broker data available yet</p>
+          <p className="text-sm text-[#9FB0A6] text-center py-8">No broker data available yet</p>
         )}
       </div>
 
@@ -424,50 +424,50 @@ export default function AdminCreditsPage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
+              className="w-full max-w-md mx-4 p-6 rounded-2xl app-card"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-white">Top Up Platform Credits</h2>
-                <button onClick={() => setShowTopUp(false)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+                <h2 className="text-lg font-semibold text-[#F0F7F3]">Top Up Platform Credits</h2>
+                <button onClick={() => setShowTopUp(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Minutes Purchased</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Minutes Purchased</label>
                   <input value={topUpMinutes} onChange={(e) => setTopUpMinutes(e.target.value)}
                     type="number" min="1" placeholder="e.g., 3571"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                     autoFocus
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">3571 min = 1 OmniDimension Growth Plan</p>
+                  <p className="text-[11px] text-[#9FB0A6] mt-1">3571 min = 1 OmniDimension Growth Plan</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Total Cost (₹)</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Total Cost (₹)</label>
                   <input value={topUpCost} onChange={(e) => setTopUpCost(e.target.value)}
                     type="number" min="0" step="0.01" placeholder="e.g., 16600"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">₹16,600 for OmniDimension Growth Plan</p>
+                  <p className="text-[11px] text-[#9FB0A6] mt-1">₹16,600 for OmniDimension Growth Plan</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Description (optional)</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Description (optional)</label>
                   <input value={topUpDesc} onChange={(e) => setTopUpDesc(e.target.value)}
                     placeholder="e.g., OmniDimension Growth - July 2026"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-3 mt-6">
                 <button onClick={() => setShowTopUp(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/5"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
                 <button onClick={handleTopUp} disabled={!topUpMinutes || !topUpCost || topUpLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
                   {topUpLoading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>

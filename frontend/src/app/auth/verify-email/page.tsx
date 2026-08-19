@@ -46,10 +46,10 @@ function VerifyEmailContent() {
   }, [searchParams, login, router]);
 
   return (
-    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#0A0F0C] flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[120px]" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[100px]" />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#34D399] opacity-[0.07] blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#1B4332] opacity-40 blur-[100px]" />
       </div>
 
       <motion.div
@@ -60,41 +60,41 @@ function VerifyEmailContent() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#3B82F6] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+              <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
-            <span className="text-[20px] font-display font-bold text-[#F2F4F8] tracking-[-0.02em]">LeadBridge</span>
+            <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">LeadBridge</span>
           </Link>
         </div>
 
-        <div className="p-6 rounded-lg bg-[#14161C] border border-[#272B34]">
+        <div className="p-6 rounded-lg glass-card">
           {status === "loading" && (
             <div className="text-center py-6">
-              <Loader2 className="w-8 h-8 mx-auto mb-4 text-[#3B82F6] animate-spin" />
-              <p className="text-[14px] text-[#8B93A3]">Verifying your email…</p>
+              <Loader2 className="w-8 h-8 mx-auto mb-4 text-[#34D399] animate-spin" />
+              <p className="text-[14px] text-[#9FB0A6]">Verifying your email…</p>
             </div>
           )}
 
           {status === "success" && (
             <div className="text-center py-6">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center">
-                <Mail className="w-6 h-6 text-[#10B981]" />
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#34D399]/10 border border-[#34D399]/30 flex items-center justify-center shadow-[0_0_24px_rgba(52,211,153,0.25)]">
+                <Mail className="w-6 h-6 text-[#34D399]" />
               </div>
-              <h2 className="text-[18px] font-display font-bold text-[#F2F4F8] mb-2">Email verified!</h2>
-              <p className="text-[13px] text-[#8B93A3] mb-2">Taking you to your dashboard…</p>
+              <h2 className="text-[18px] font-display font-bold text-[#F0F7F3] mb-2">Email verified!</h2>
+              <p className="text-[13px] text-[#9FB0A6] mb-2">Taking you to your dashboard…</p>
             </div>
           )}
 
           {status === "error" && (
             <div className="text-center py-6">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#F43F5E]/10 border border-[#F43F5E]/30 flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-[#F43F5E]" />
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#FB7185]/10 border border-[#FB7185]/30 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-[#FB7185]" />
               </div>
-              <h2 className="text-[18px] font-display font-bold text-[#F2F4F8] mb-2">Verification failed</h2>
-              <p className="text-[13px] text-[#8B93A3] leading-relaxed mb-5">{error}</p>
+              <h2 className="text-[18px] font-display font-bold text-[#F0F7F3] mb-2">Verification failed</h2>
+              <p className="text-[13px] text-[#9FB0A6] leading-relaxed mb-5">{error}</p>
               <Link
                 href="/auth/login"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold hover:brightness-110 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[13px] font-bold hover:shadow-[0_0_24px_rgba(52,211,153,0.4)] transition-all"
               >
                 Go to login <ArrowRight className="w-4 h-4" />
               </Link>

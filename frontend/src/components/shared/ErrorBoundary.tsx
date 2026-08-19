@@ -45,8 +45,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
             <AlertTriangle className="w-6 h-6 text-red-400" />
           </div>
-          <h2 className="text-lg font-semibold text-white mb-2">Something went wrong</h2>
-          <p className="text-sm text-gray-400 text-center max-w-md mb-6">
+          <h2 className="text-lg font-semibold text-[#F0F7F3] mb-2">Something went wrong</h2>
+          <p className="text-sm text-[#9FB0A6] text-center max-w-md mb-6">
             An unexpected error occurred. You can try refreshing this section or
             return to the dashboard.
           </p>
@@ -58,7 +58,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <div className="flex items-center gap-3">
             <button
               onClick={this.handleReset}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-sm font-medium hover:brightness-110 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1B4332] text-white text-sm font-medium hover:brightness-110 transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Try Again
@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <Link
               href="/dashboard"
               onClick={this.handleReset}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#272B34] text-gray-300 text-sm font-medium hover:bg-[#1B1E26] transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06] transition-all"
             >
               <Home className="w-4 h-4" />
               Dashboard

@@ -113,11 +113,11 @@ export default function AdminTerritoriesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Territory Management</h1>
-          <p className="text-gray-400 mt-1">{territories.length} total territories</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Territory Management</h1>
+          <p className="text-[#9FB0A6] mt-1">{territories.length} total territories</p>
         </div>
         <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
         >
           <Plus className="w-4 h-4" /> Create Territory
         </button>
@@ -130,16 +130,16 @@ export default function AdminTerritoriesPage() {
           { label: "Available", value: available, icon: CheckCircle, color: "from-green-500 to-green-600" },
           { label: "Locked", value: locked, icon: Lock, color: "from-orange-500 to-orange-600" },
         ].map((s) => (
-          <div key={s.label} className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <div key={s.label} className="p-4 rounded-xl app-card">
             {loading ? (
-              <div className="animate-pulse"><div className="h-8 w-12 bg-white/10 rounded" /></div>
+              <div className="animate-pulse"><div className="h-8 w-12 bg-white/[0.06] rounded" /></div>
             ) : (
               <>
                 <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", s.color)}>
                   <s.icon className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-gray-500">{s.label}</div>
+                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
+                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
               </>
             )}
           </div>
@@ -149,14 +149,14 @@ export default function AdminTerritoriesPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search territories..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
           />
         </div>
         <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm"
+          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm"
         >
           <option value="all">All Tiers</option>
           <option value="1">Metro (T1)</option>
@@ -169,27 +169,27 @@ export default function AdminTerritoriesPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className="h-16 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-16 rounded-xl app-card animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 rounded-xl bg-white/5 border border-white/10">
-          <MapPin className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-          <h3 className="text-lg font-medium text-white mb-2">No territories found</h3>
-          <p className="text-sm text-gray-500">Create your first territory to get started</p>
+        <div className="text-center py-16 rounded-xl app-card">
+          <MapPin className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
+          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No territories found</h3>
+          <p className="text-sm text-[#9FB0A6]">Create your first territory to get started</p>
         </div>
       ) : (
         <div className="space-y-2">
           {filtered.map((t, i) => (
             <motion.div key={t.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
-              className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+              className="flex items-center gap-4 p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center shrink-0">
                 <Globe className="w-5 h-5 text-indigo-400" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-[#F0F7F3]">
                     {t.city}{t.zone ? ` - ${t.zone}` : ""}
                   </span>
                   <span className={cn(
@@ -200,10 +200,10 @@ export default function AdminTerritoriesPage() {
                   )}>
                     {t.clientId ? "Occupied" : t.locked ? "Locked" : "Available"}
                   </span>
-                  <span className="text-xs text-gray-500">{TIER_LABELS[t.tier] || `Tier ${t.tier}`}</span>
+                  <span className="text-xs text-[#9FB0A6]">{TIER_LABELS[t.tier] || `Tier ${t.tier}`}</span>
                 </div>
                 {t.client && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-[#9FB0A6] mt-1">
                     <Users className="w-3 h-3 inline mr-1" />
                     {t.client.businessName} · {t.client.ownerName}
                   </p>
@@ -215,7 +215,7 @@ export default function AdminTerritoriesPage() {
                   className={cn(
                     "p-2 rounded-lg border transition-colors",
                     t.locked ? "border-orange-500/20 text-orange-400 hover:bg-orange-500/10" :
-                    "border-white/10 text-gray-400 hover:bg-white/5",
+                    "border-white/10 text-[#9FB0A6] hover:bg-white/[0.06]",
                     t.clientId ? "opacity-30 cursor-not-allowed" : ""
                   )}
                   title={t.locked ? "Unlock" : "Lock"}
@@ -254,34 +254,34 @@ export default function AdminTerritoriesPage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
+              className="w-full max-w-md mx-4 p-6 rounded-2xl app-card"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-white">Create Territory</h2>
-                <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+                <h2 className="text-lg font-semibold text-[#F0F7F3]">Create Territory</h2>
+                <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">City *</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">City *</label>
                   <input value={newCity} onChange={(e) => setNewCity(e.target.value)}
                     placeholder="e.g., Mumbai"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Zone (optional)</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Zone (optional)</label>
                   <input value={newZone} onChange={(e) => setNewZone(e.target.value)}
                     placeholder="e.g., Andheri"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Tier</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Tier</label>
                   <select value={newTier} onChange={(e) => setNewTier(parseInt(e.target.value))}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm"
                   >
                     <option value={1}>Metro (Tier 1) — ₹14,999/mo</option>
                     <option value={2}>Tier 2 City — ₹9,999/mo</option>
@@ -292,12 +292,12 @@ export default function AdminTerritoriesPage() {
 
               <div className="flex items-center gap-3 mt-6">
                 <button onClick={() => setShowCreate(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/5"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
                 <button onClick={handleCreate} disabled={!newCity.trim() || actionLoading === "create"}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
                   {actionLoading === "create" ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</> : "Create"}
                 </button>

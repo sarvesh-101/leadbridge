@@ -165,22 +165,22 @@ export default function MessagesPage() {
 
   return (
     <div className="h-[calc(100vh-8rem)] -mx-4 sm:-mx-6 lg:-mx-8">
-      <div className="flex h-full bg-[#0B0D12]">
+      <div className="flex h-full bg-[#0A0F0C]">
         {/* Conversation List */}
         <div className={cn(
-          "w-full sm:w-80 lg:w-96 border-r border-white/5 flex flex-col bg-[#14161C]",
+          "w-full sm:w-80 lg:w-96 border-r border-white/10 flex flex-col bg-[#101713]",
           !showMobileList && "hidden sm:flex"
         )}>
           {/* Header */}
-          <div className="p-4 border-b border-white/5">
-            <h2 className="text-sm font-semibold text-white mb-3">Messages</h2>
+          <div className="p-4 border-b border-white/10">
+            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-3">Messages</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9FB0A6]" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search conversations..."
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
+                className="w-full pl-9 pr-4 py-2 rounded-lg app-card text-xs text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
               />
             </div>
           </div>
@@ -191,10 +191,10 @@ export default function MessagesPage() {
               <div className="p-4 space-y-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="animate-pulse flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/5" />
+                    <div className="w-10 h-10 rounded-full bg-[#101713]" />
                     <div className="flex-1 space-y-1.5">
-                      <div className="h-3 bg-white/5 rounded w-24" />
-                      <div className="h-2.5 bg-white/5 rounded w-32" />
+                      <div className="h-3 bg-[#101713] rounded w-24" />
+                      <div className="h-2.5 bg-[#101713] rounded w-32" />
                     </div>
                   </div>
                 ))}
@@ -207,29 +207,29 @@ export default function MessagesPage() {
                     key={conv.leadId}
                     onClick={() => setSelectedLeadId(conv.leadId)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left border-b border-white/5",
-                      selectedLeadId === conv.leadId && "bg-[#3B82F6]/10"
+                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.06] transition-colors text-left border-b border-white/10",
+                      selectedLeadId === conv.leadId && "bg-[#34D399]/15"
                     )}
                   >
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3B82F6]/20 to-[#6B8AFF]/20 flex items-center justify-center">
-                        <span className="text-sm font-medium text-[#3B82F6]">{conv.name[0]}</span>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center">
+                        <span className="text-sm font-medium text-[#6FE3B0]">{conv.name[0]}</span>
                       </div>
                       {unread > 0 && (
-                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#3B82F6] border-2 border-[#14161C]" />
+                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#34D399] border-2 border-[#0A0F0C]" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-white truncate">{conv.name}</span>
+                        <span className="text-sm font-medium text-[#F0F7F3] truncate">{conv.name}</span>
                         {conv.lastMessage && (
-                          <span className="text-[10px] text-gray-500 shrink-0 ml-2">
+                          <span className="text-[10px] text-[#9FB0A6] shrink-0 ml-2">
                             {formatDate(conv.lastMessage.sentAt)}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-gray-500 truncate">
+                        <span className="text-xs text-[#9FB0A6] truncate">
                           {conv.lastMessage ? conv.lastMessage.message : "No messages yet"}
                         </span>
                       </div>
@@ -238,8 +238,8 @@ export default function MessagesPage() {
                           "text-[10px] px-1.5 py-0.5 rounded",
                           conv.status === "BOOKED" ? "bg-green-500/10 text-green-400" :
                           conv.status === "CONVERTED" ? "bg-emerald-500/10 text-emerald-400" :
-                          conv.status === "COLD" ? "bg-gray-500/10 text-gray-400" :
-                          "bg-white/5 text-gray-500"
+                          conv.status === "COLD" ? "bg-gray-500/10 text-[#9FB0A6]" :
+                          "bg-[#101713] text-[#9FB0A6]"
                         )}>
                           {STATUS_LABELS[conv.status] || conv.status}
                         </span>
@@ -247,7 +247,7 @@ export default function MessagesPage() {
                           <span className={cn(
                             "text-[10px]",
                             conv.score >= 70 ? "text-green-400" :
-                            conv.score >= 40 ? "text-amber-400" : "text-gray-500"
+                            conv.score >= 40 ? "text-amber-400" : "text-[#9FB0A6]"
                           )}>
                             {conv.score}
                           </span>
@@ -260,7 +260,7 @@ export default function MessagesPage() {
             ) : (
               <div className="p-8 text-center">
                 <MessageSquare className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No conversations yet</p>
+                <p className="text-sm text-[#9FB0A6]">No conversations yet</p>
                 <p className="text-xs text-gray-600 mt-1">Messages from leads will appear here</p>
               </div>
             )}
@@ -269,42 +269,42 @@ export default function MessagesPage() {
 
         {/* Chat Pane */}
         <div className={cn(
-          "flex-1 flex flex-col bg-[#0B0D12]",
+          "flex-1 flex flex-col bg-[#0A0F0C]",
           showMobileList && "hidden sm:flex"
         )}>
           {selectedLeadId && selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-[#14161C]">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-[#101713]">
                 <button onClick={() => { setSelectedLeadId(null); setShowMobileList(true); }}
-                  className="sm:hidden p-1 -ml-1 rounded-lg hover:bg-white/5"
+                  className="sm:hidden p-1 -ml-1 rounded-lg hover:bg-white/[0.06]"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-400" />
+                  <ChevronLeft className="w-5 h-5 text-[#9FB0A6]" />
                 </button>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#3B82F6]/20 to-[#6B8AFF]/20 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-medium text-[#3B82F6]">{selectedConversation.name[0]}</span>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-medium text-[#6FE3B0]">{selectedConversation.name[0]}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white">{selectedConversation.name}</span>
-                    <a href={`tel:${selectedConversation.phone}`} className="text-[10px] text-gray-500 hover:text-[#3B82F6]">
+                    <span className="text-sm font-medium text-[#F0F7F3]">{selectedConversation.name}</span>
+                    <a href={`tel:${selectedConversation.phone}`} className="text-[10px] text-[#9FB0A6] hover:text-[#6FE3B0]">
                       {selectedConversation.phone}
                     </a>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                  <div className="flex items-center gap-2 text-[10px] text-[#9FB0A6]">
                     <span>{selectedConversation.source}</span>
                     <span>·</span>
                     <span>{STATUS_LABELS[selectedConversation.status] || selectedConversation.status}</span>
                   </div>
                 </div>
                 <a href={`https://wa.me/${selectedConversation.phone.replace(/\D/g, "")}`} target="_blank"
-                  className="p-2 rounded-lg hover:bg-white/5 text-gray-400"
+                  className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
                   title="Open in WhatsApp"
                 >
                   <MessageSquare className="w-4 h-4" />
                 </a>
                 <a href={`tel:${selectedConversation.phone}`}
-                  className="p-2 rounded-lg hover:bg-white/5 text-gray-400"
+                  className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
                   title="Call"
                 >
                   <Phone className="w-4 h-4" />
@@ -315,7 +315,7 @@ export default function MessagesPage() {
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                 {messages.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-sm text-gray-500">No messages yet</p>
+                    <p className="text-sm text-[#9FB0A6]">No messages yet</p>
                     <p className="text-xs text-gray-600 mt-1">Send a message to start the conversation</p>
                   </div>
                 ) : (
@@ -336,7 +336,7 @@ export default function MessagesPage() {
                           "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-medium",
                           showAvatar ? "flex" : "invisible",
                           isLead
-                            ? "bg-[#3B82F6]/20 text-[#3B82F6]"
+                            ? "bg-[#34D399]/25 text-[#6FE3B0]"
                             : isBot
                             ? "bg-purple-500/20 text-purple-400"
                             : "bg-green-500/20 text-green-400"
@@ -348,21 +348,21 @@ export default function MessagesPage() {
                         <div className={cn(
                           "max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed",
                           isLead
-                            ? "bg-white/10 text-white rounded-tl-sm"
-                            : "bg-[#3B82F6] text-white rounded-tr-sm"
+                            ? "bg-white/[0.06] text-[#F0F7F3] rounded-tl-sm"
+                            : "bg-[#1B4332] text-white rounded-tr-sm"
                         )}>
                           <p className="whitespace-pre-wrap break-words">{msg.message}</p>
                           <div className={cn(
                             "flex items-center gap-1 mt-1",
                             isLead ? "justify-start" : "justify-end"
                           )}>
-                            <span className="text-[10px] text-white/50">
+                            <span className="text-[10px] text-[#F0F7F3]/50">
                               {new Date(msg.sentAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                             {!isLead && (
-                              msg.status === "sent" ? <CheckCheck className="w-3 h-3 text-white/50" /> :
+                              msg.status === "sent" ? <CheckCheck className="w-3 h-3 text-[#F0F7F3]/50" /> :
                               msg.status === "failed" ? <AlertCircle className="w-3 h-3 text-red-300" /> :
-                              <Clock className="w-3 h-3 text-white/50" />
+                              <Clock className="w-3 h-3 text-[#F0F7F3]/50" />
                             )}
                           </div>
                         </div>
@@ -374,7 +374,7 @@ export default function MessagesPage() {
               </div>
 
               {/* Input */}
-              <div className="p-4 border-t border-white/5 bg-[#14161C]">
+              <div className="p-4 border-t border-white/10 bg-[#101713]">
                 <div className="flex items-end gap-2">
                   <div className="flex-1 relative">
                     <textarea
@@ -384,7 +384,7 @@ export default function MessagesPage() {
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
                       rows={1}
-                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50 resize-none min-h-[40px] max-h-[120px]"
+                      className="w-full px-4 py-2.5 rounded-xl app-card text-sm text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50 resize-none min-h-[40px] max-h-[120px]"
                       style={{ height: "auto" }}
                       onInput={(e) => {
                         const target = e.currentTarget;
@@ -396,7 +396,7 @@ export default function MessagesPage() {
                   <button
                     onClick={handleSend}
                     disabled={sending || !inputText.trim()}
-                    className="flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white hover:opacity-90 transition-all disabled:opacity-40 shrink-0"
+                    className="flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] hover:opacity-90 transition-all disabled:opacity-40 shrink-0"
                   >
                     {sending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -414,11 +414,11 @@ export default function MessagesPage() {
             /* Empty state */
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-full bg-[#101713] flex items-center justify-center mx-auto mb-4">
                   <MessageSquare className="w-8 h-8 text-gray-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-1">Select a conversation</h3>
-                <p className="text-sm text-gray-500">Choose a lead from the list to start chatting</p>
+                <h3 className="text-lg font-semibold text-[#F0F7F3] mb-1">Select a conversation</h3>
+                <p className="text-sm text-[#9FB0A6]">Choose a lead from the list to start chatting</p>
               </div>
             </div>
           )}

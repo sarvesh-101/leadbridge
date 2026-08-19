@@ -109,56 +109,56 @@ export default function RegisterPage() {
   const passwordStrength = passwordChecks.filter((c) => c.pass).length;
 
   return (
-    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center relative overflow-hidden py-12">
+    <div className="min-h-screen bg-[#0A0F0C] flex items-center justify-center relative overflow-hidden py-12">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[120px]" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[100px]" />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#34D399] opacity-[0.07] blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#1B4332] opacity-40 blur-[100px]" />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative w-full max-w-lg mx-4">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#3B82F6] flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+              <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
-            <span className="text-[20px] font-display font-bold text-[#F2F4F8] tracking-[-0.02em]">LeadBridge</span>
+            <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">LeadBridge</span>
           </Link>
-          <h1 className="text-[24px] font-display font-bold text-[#F2F4F8]">Create your account</h1>
-          <p className="text-[14px] text-[#8B93A3] mt-2">Start your 14-day free trial</p>
+          <h1 className="text-[24px] font-display font-bold text-[#F0F7F3]">Create your account</h1>
+          <p className="text-[14px] text-[#9FB0A6] mt-2">Start your 14-day free trial</p>
         </div>
 
-        <div className="p-6 rounded-lg bg-[#14161C] border border-[#272B34]">
+        <div className="p-6 rounded-lg glass-card">
           {pendingEmail ? (
             /* FIX Round-2 #3: verification-required success screen */
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center py-6">
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 flex items-center justify-center">
-                <Mail className="w-6 h-6 text-[#10B981]" />
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#34D399]/10 border border-[#34D399]/30 flex items-center justify-center">
+                <Mail className="w-6 h-6 text-[#34D399]" />
               </div>
-              <h2 className="text-[18px] font-display font-bold text-[#F2F4F8] mb-2">Check your email</h2>
-              <p className="text-[13px] text-[#8B93A3] leading-relaxed mb-1">
+              <h2 className="text-[18px] font-display font-bold text-[#F0F7F3] mb-2">Check your email</h2>
+              <p className="text-[13px] text-[#9FB0A6] leading-relaxed mb-1">
                 We sent a verification link to{" "}
-                <span className="text-[#F2F4F8] font-medium">{pendingEmail}</span>
+                <span className="text-[#F0F7F3] font-medium">{pendingEmail}</span>
               </p>
-              <p className="text-[13px] text-[#8B93A3] leading-relaxed mb-5">
+              <p className="text-[13px] text-[#9FB0A6] leading-relaxed mb-5">
                 Click the link to activate your 14-day free trial and log in.
               </p>
               {emailWarning && (
-                <p className="flex items-center gap-2 p-3 rounded-lg bg-[#F59E0B]/10 border border-[#F59E0B]/25 text-[#F59E0B] text-[12px] text-left mb-4">
+                <p className="flex items-center gap-2 p-3 rounded-lg bg-[#E8C468]/10 border border-[#E8C468]/25 text-[#E8C468] text-[12px] text-left mb-4">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   The verification email could not be sent right now. Use the
                   resend button below to try again.
                 </p>
               )}
               {resendSent && (
-                <p className="text-[12px] text-[#10B981] mb-3">✓ Verification email sent again</p>
+                <p className="text-[12px] text-[#34D399] mb-3">✓ Verification email sent again</p>
               )}
               <div className="flex items-center justify-center gap-2">
                 <button type="button" onClick={handleResend} disabled={resending}
-                  className="px-4 py-2.5 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] font-semibold text-[#F2F4F8] hover:border-[#3B82F6] transition-colors">
+                  className="px-4 py-2.5 rounded-lg bg-white/[0.06] border border-white/15 text-[13px] font-semibold text-[#F0F7F3] hover:border-[#34D399]/50 transition-colors">
                   {resending ? "Sending…" : "Resend email"}
                 </button>
                 <Link href="/auth/login"
-                  className="px-4 py-2.5 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold hover:brightness-110 transition-all">
+                  className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[13px] font-bold hover:shadow-[0_0_24px_rgba(52,211,153,0.4)] transition-all">
                   Go to login
                 </Link>
               </div>
@@ -167,7 +167,7 @@ export default function RegisterPage() {
           <>
           {error && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 p-3 rounded-lg bg-[#F43F5E]/10 border border-[#F43F5E]/20 text-[#F43F5E] text-[13px] mb-4">
+              className="flex items-center gap-2 p-3 rounded-lg bg-[#FB7185]/10 border border-[#FB7185]/25 text-[#FB7185] text-[13px] mb-4">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               {error}
             </motion.div>
@@ -176,14 +176,14 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="grid grid-cols-2 gap-4">
               <Field label="First Name" error={fieldErrors.firstName}>
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
                 <input id="reg-firstname" value={formData.firstName}
                   onChange={(e) => updateField("firstName", e.target.value)}
                   placeholder="John" required
                   className={inputClass(fieldErrors.firstName)} />
               </Field>
               <Field label="Last Name">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
                 <input value={formData.lastName}
                   onChange={(e) => updateField("lastName", e.target.value)}
                   placeholder="Doe" className={inputClass()} />
@@ -191,14 +191,14 @@ export default function RegisterPage() {
             </div>
 
             <Field label="Email" error={fieldErrors.email}>
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
               <input type="email" autoComplete="email" value={formData.email}
                 onChange={(e) => updateField("email", e.target.value)}
                 placeholder="you@company.com" required className={inputClass(fieldErrors.email)} />
             </Field>
 
             <Field label="Phone" error={fieldErrors.phone}>
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
               <input type="tel" autoComplete="tel" value={formData.phone}
                 onChange={(e) => updateField("phone", e.target.value)}
                 placeholder="+91 98765 43210" required className={inputClass(fieldErrors.phone)} />
@@ -206,13 +206,13 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <Field label="Company" error={fieldErrors.companyName}>
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
                 <input value={formData.companyName}
                   onChange={(e) => updateField("companyName", e.target.value)}
                   placeholder="Your Business" required className={inputClass(fieldErrors.companyName)} />
               </Field>
               <Field label="City" error={fieldErrors.city}>
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
                 <input value={formData.city}
                   onChange={(e) => updateField("city", e.target.value)}
                   placeholder="Mumbai" required className={inputClass(fieldErrors.city)} />
@@ -220,14 +220,14 @@ export default function RegisterPage() {
             </div>
 
             <Field label="Password" error={fieldErrors.password}>
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#363B45]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
               <input type={showPassword ? "text" : "password"} autoComplete="new-password"
                 value={formData.password}
                 onChange={(e) => updateField("password", e.target.value)}
                 placeholder="Min. 8 characters" required minLength={8}
                 className={inputClass(fieldErrors.password, true)} />
               <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#363B45] hover:text-[#8B93A3]">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7C73] hover:text-[#9FB0A6]">
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </Field>
@@ -239,8 +239,8 @@ export default function RegisterPage() {
                     <div key={level} className={cn(
                       "h-1 flex-1 rounded-full transition-all duration-300",
                       passwordStrength >= level
-                        ? level === 1 ? "bg-[#F43F5E]" : level === 2 ? "bg-[#F59E0B]" : "bg-[#10B981]"
-                        : "bg-[#272B34]"
+                        ? level === 1 ? "bg-[#FB7185]" : level === 2 ? "bg-[#E8C468]" : "bg-[#34D399]"
+                        : "bg-white/10"
                     )} />
                   ))}
                 </div>
@@ -248,9 +248,9 @@ export default function RegisterPage() {
                   {passwordChecks.map((check) => (
                     <p key={check.label} className={cn(
                       "text-[11px] flex items-center gap-1.5",
-                      check.pass ? "text-[#10B981]" : "text-[#363B45]"
+                      check.pass ? "text-[#34D399]" : "text-[#6B7C73]"
                     )}>
-                      <span className={cn("w-1 h-1 rounded-full", check.pass ? "bg-[#10B981]" : "bg-[#363B45]")} />
+                      <span className={cn("w-1 h-1 rounded-full", check.pass ? "bg-[#34D399]" : "bg-[#6B7C73]")} />
                       {check.label}
                     </p>
                   ))}
@@ -262,8 +262,8 @@ export default function RegisterPage() {
             <label className={cn(
               "flex items-start gap-2.5 cursor-pointer select-none rounded-lg p-3 border transition-colors",
               fieldErrors.consent
-                ? "border-[#F43F5E]/50 bg-[#F43F5E]/5"
-                : "border-[#272B34] bg-[#1B1E26]/60 hover:border-[#3B82F6]/40"
+                ? "border-[#FB7185]/50 bg-[#FB7185]/5"
+                : "border-white/10 bg-white/[0.03] hover:border-[#34D399]/40"
             )}>
               <input type="checkbox" checked={consent}
                 onChange={(e) => {
@@ -272,28 +272,28 @@ export default function RegisterPage() {
                     setFieldErrors((prev) => { const n = { ...prev }; delete n.consent; return n; });
                   }
                 }}
-                className="mt-0.5 w-4 h-4 rounded border-[#363B45] bg-[#1B1E26] accent-[#3B82F6] focus:ring-[#3B82F6]/50 focus:ring-1"
+                className="mt-0.5 w-4 h-4 rounded border-[#6B7C73] bg-white/[0.06] accent-[#34D399] focus:ring-[#34D399]/50 focus:ring-1"
               />
-              <span className="text-[12px] text-[#8B93A3] leading-relaxed">
+              <span className="text-[12px] text-[#9FB0A6] leading-relaxed">
                 I have read and agree to the{" "}
-                <Link href="/legal/terms" className="text-[#3B82F6] hover:underline">Terms of Service</Link>{" "}
+                <Link href="/legal/terms" className="text-[#6FE3B0] hover:underline">Terms of Service</Link>{" "}
                 and{" "}
-                <Link href="/legal/privacy" className="text-[#3B82F6] hover:underline">Privacy Policy</Link>,
+                <Link href="/legal/privacy" className="text-[#6FE3B0] hover:underline">Privacy Policy</Link>,
                 and I consent to LeadBridge processing my information as described in the Privacy
                 Policy. I can withdraw consent anytime.
               </span>
             </label>
             {fieldErrors.consent && (
-              <p className="mt-1 text-[11px] text-[#F43F5E]">{fieldErrors.consent}</p>
+              <p className="mt-1 text-[11px] text-[#FB7185]">{fieldErrors.consent}</p>
             )}
 
             <button type="submit" disabled={loading}
               className={cn(
-                "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold transition-all duration-150 hover:brightness-110 active:scale-[0.98]",
+                "w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[13px] font-bold transition-all duration-150 hover:shadow-[0_0_32px_rgba(52,211,153,0.4)] active:scale-[0.98]",
                 loading && "opacity-70 cursor-not-allowed"
               )}>
               {loading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-[#0A0F0C]/30 border-t-[#0A0F0C] rounded-full animate-spin" />
               ) : (
                 <>Create Account <ArrowRight className="w-4 h-4" /></>
               )}
@@ -301,9 +301,9 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-5 text-center">
-            <p className="text-[13px] text-[#8B93A3]">
+            <p className="text-[13px] text-[#9FB0A6]">
               Already have an account?{" "}
-              <Link href="/auth/login" className="text-[#3B82F6] hover:underline font-medium">Sign in</Link>
+              <Link href="/auth/login" className="text-[#6FE3B0] hover:underline font-medium">Sign in</Link>
             </p>
           </div>
           </>
@@ -318,19 +318,19 @@ export default function RegisterPage() {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-[12px] text-[#8B93A3] mb-1.5">{label}</label>
+      <label className="block text-[12px] text-[#9FB0A6] mb-1.5">{label}</label>
       <div className="relative">{children}</div>
-      {error && <p className="mt-1 text-[11px] text-[#F43F5E]">{error}</p>}
+      {error && <p className="mt-1 text-[11px] text-[#FB7185]">{error}</p>}
     </div>
   );
 }
 
 function inputClass(error?: string, hasRightIcon?: boolean) {
   return cn(
-    "w-full py-2.5 rounded-lg bg-[#1B1E26] border text-[13px] text-[#F2F4F8] placeholder-[#363B45] focus:outline-none focus:ring-1 transition-colors",
+    "w-full py-2.5 rounded-lg bg-white/[0.05] border text-[13px] text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:ring-1 transition-colors",
     error
-      ? "border-[#F43F5E]/50 focus:border-[#F43F5E]/50 focus:ring-[#F43F5E]/30"
-      : "border-[#272B34] focus:border-[#3B82F6] focus:ring-[#3B82F6]/50",
+      ? "border-[#FB7185]/50 focus:border-[#FB7185]/50 focus:ring-[#FB7185]/30"
+      : "border-white/10 focus:border-[#34D399]/60 focus:ring-[#34D399]/30",
     hasRightIcon ? "pl-10 pr-10" : "pl-10 pr-4"
   );
 }

@@ -29,7 +29,7 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: "bg-purple-500/10 text-purple-400 border-purple-500/30",
   AGENT: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-  VIEWER: "bg-gray-500/10 text-gray-400 border-gray-500/30",
+  VIEWER: "bg-gray-500/10 text-[#9FB0A6] border-gray-500/30",
 };
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
@@ -132,11 +132,11 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Team</h1>
-          <p className="text-gray-400 mt-1">Manage your team members and permissions</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Team</h1>
+          <p className="text-[#9FB0A6] mt-1">Manage your team members and permissions</p>
         </div>
         <button onClick={() => setShowInvite(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
         >
           <Plus className="w-4 h-4" /> Invite Member
         </button>
@@ -149,14 +149,14 @@ export default function TeamPage() {
           { icon: Mail, label: "Pending Invites", value: loading ? "—" : pendingInvites.length, color: "text-yellow-400" },
           { icon: Shield, label: "Roles", value: loading ? "—" : "ADMIN · AGENT · VIEWER", color: "text-purple-400" },
         ].map((s) => (
-          <div key={s.label} className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <div key={s.label} className="p-4 rounded-xl app-card">
             {loading ? (
-              <div className="animate-pulse"><div className="h-7 w-12 bg-white/10 rounded" /></div>
+              <div className="animate-pulse"><div className="h-7 w-12 bg-white/[0.06] rounded" /></div>
             ) : (
               <>
                 <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-                <div className="text-xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-gray-500">{s.label}</div>
+                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
+                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
               </>
             )}
           </div>
@@ -180,16 +180,16 @@ export default function TeamPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2].map(i => (
-            <div key={i} className="h-20 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-20 rounded-xl app-card animate-pulse" />
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="text-center py-16 rounded-xl bg-white/5 border border-white/10">
-          <Users className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-          <h3 className="text-lg font-medium text-white mb-2">No team members yet</h3>
-          <p className="text-sm text-gray-500 mb-6">Invite your first team member to get started</p>
+        <div className="text-center py-16 rounded-xl app-card">
+          <Users className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
+          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No team members yet</h3>
+          <p className="text-sm text-[#9FB0A6] mb-6">Invite your first team member to get started</p>
           <button onClick={() => setShowInvite(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
           >
             <Plus className="w-4 h-4" /> Invite Member
           </button>
@@ -198,14 +198,14 @@ export default function TeamPage() {
         <div className="space-y-3">
           {members.map((member, i) => (
             <motion.div key={member.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-              className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+              className="flex items-center gap-4 p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-leadflow-500/20 to-leadflow-accent/20 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-leadflow-accent">{member.name[0]?.toUpperCase()}</span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-[#2D6A4F]">{member.name[0]?.toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-white">{member.name}</span>
+                  <span className="text-sm font-medium text-[#F0F7F3]">{member.name}</span>
                   <div className="flex items-center gap-1.5">
                     {/* Role selector */}
                     <div className="relative group">
@@ -232,19 +232,19 @@ export default function TeamPage() {
                     </span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">{member.email}</p>
+                <p className="text-xs text-[#9FB0A6] mt-0.5">{member.email}</p>
               </div>
               <div className="shrink-0">
                 {member.status === "PENDING" ? (
                   <button onClick={() => setDeleteConfirmId(member.id)}
-                    className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-all"
                     title="Cancel invitation"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 ) : (
                   <button onClick={() => setDeleteConfirmId(member.id)}
-                    className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-all"
                     title="Remove member"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -263,34 +263,34 @@ export default function TeamPage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
+              className="w-full max-w-md mx-4 p-6 rounded-2xl app-card"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-white">Invite Team Member</h2>
-                <button onClick={() => setShowInvite(false)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+                <h2 className="text-lg font-semibold text-[#F0F7F3]">Invite Team Member</h2>
+                <button onClick={() => setShowInvite(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Name</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Name</label>
                   <input value={inviteName} onChange={(e) => setInviteName(e.target.value)}
                     placeholder="e.g., Priya Sharma"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Email</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Email</label>
                   <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)}
                     type="email"
                     placeholder="priya@example.com"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Role</label>
+                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Role</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(["ADMIN", "AGENT", "VIEWER"] as const).map((role) => (
                       <button key={role} onClick={() => setInviteRole(role)}
@@ -298,7 +298,7 @@ export default function TeamPage() {
                           "p-3 rounded-xl border text-xs text-center transition-all",
                           inviteRole === role
                             ? ROLE_COLORS[role]
-                            : "border-white/10 text-gray-500 hover:bg-white/5"
+                            : "border-white/10 text-[#9FB0A6] hover:bg-white/[0.06]"
                         )}
                       >
                         <div className="flex justify-center mb-1">{ROLE_ICONS[role]}</div>
@@ -306,7 +306,7 @@ export default function TeamPage() {
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">{ROLE_DESCRIPTIONS[inviteRole]}</p>
+                  <p className="text-xs text-[#9FB0A6] mt-2">{ROLE_DESCRIPTIONS[inviteRole]}</p>
                 </div>
               </div>
 
@@ -319,7 +319,7 @@ export default function TeamPage() {
                       <p className="text-xs font-medium text-amber-300 mb-1">
                         The invite email couldn&apos;t be sent (email provider issue).
                       </p>
-                      <p className="text-[11px] text-gray-400 mb-2">
+                      <p className="text-[11px] text-[#9FB0A6] mb-2">
                         Share this invite link with {inviteResult.email} manually:
                       </p>
                       <code className="block text-[11px] text-amber-200 bg-black/30 px-2.5 py-2 rounded-lg break-all font-mono">
@@ -338,13 +338,13 @@ export default function TeamPage() {
 
               <div className="flex items-center gap-3 mt-6">
                 <button onClick={() => { setShowInvite(false); setInviteResult(null); }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/5"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Close
                 </button>
                 {!inviteResult ? (
                   <button onClick={handleInvite} disabled={!inviteEmail.trim() || !inviteName.trim() || actionLoading === "invite"}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
                   >
                     {actionLoading === "invite" ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
@@ -354,7 +354,7 @@ export default function TeamPage() {
                   </button>
                 ) : (
                   <button onClick={() => { setShowInvite(false); setInviteResult(null); setInviteEmail(""); setInviteName(""); setInviteRole("AGENT"); }}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
                   >
                     Done
                   </button>
@@ -373,14 +373,14 @@ export default function TeamPage() {
             onClick={() => setDeleteConfirmId(null)}
           >
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-sm mx-4 p-6 rounded-2xl bg-[#14161C] border border-white/10"
+              className="w-full max-w-sm mx-4 p-6 rounded-2xl app-card"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-sm font-semibold text-white mb-2">Remove Team Member?</h3>
-              <p className="text-xs text-gray-500 mb-6">They will lose access to this account immediately.</p>
+              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-2">Remove Team Member?</h3>
+              <p className="text-xs text-[#9FB0A6] mb-6">They will lose access to this account immediately.</p>
               <div className="flex items-center gap-3">
                 <button onClick={() => setDeleteConfirmId(null)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/5"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>

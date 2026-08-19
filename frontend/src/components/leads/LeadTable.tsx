@@ -70,7 +70,7 @@ export function LeadTable({
             type="checkbox"
             checked={table.getIsAllRowsSelected()}
             onChange={table.getToggleAllRowsSelectedHandler()}
-            className="rounded border-[#272B34] bg-[#1B1E26]"
+            className="rounded border-[#E4E7DF] bg-[#F1F3EE]"
           />
         ),
         cell: ({ row }) => (
@@ -78,7 +78,7 @@ export function LeadTable({
             type="checkbox"
             checked={row.getIsSelected()}
             onChange={row.getToggleSelectedHandler()}
-            className="rounded border-[#272B34] bg-[#1B1E26]"
+            className="rounded border-[#E4E7DF] bg-[#F1F3EE]"
           />
         ),
         size: 40,
@@ -91,7 +91,7 @@ export function LeadTable({
           return (
             <button
               onClick={() => onLeadClick(row.original)}
-              className="flex items-center gap-2 text-left font-medium text-[#F2F4F8] hover:text-[#3B82F6] transition-colors"
+              className="flex items-center gap-2 text-left font-medium text-[#1E2B24] hover:text-[#1B4332] transition-colors"
             >
               {isCalling && <CallingPulse size="sm" />}
               {row.original.name}
@@ -106,7 +106,7 @@ export function LeadTable({
           const isCalling = row.original.status === "CALLING";
           return (
             <div className="flex items-center gap-2">
-              <span className="text-[13px] font-mono text-[#8B93A3]">{row.original.phone}</span>
+              <span className="text-[13px] font-mono text-[#5C6B62]">{row.original.phone}</span>
               {isCalling && <CallingWaveform />}
             </div>
           );
@@ -116,7 +116,7 @@ export function LeadTable({
         accessorKey: "source",
         header: "Source",
         cell: ({ row }) => (
-          <span className="text-[12px] px-2 py-0.5 rounded bg-[#1B1E26] text-[#8B93A3] border border-[#272B34]">
+          <span className="text-[12px] px-2 py-0.5 rounded bg-[#F1F3EE] text-[#5C6B62] border border-[#E4E7DF]">
             {row.original.source}
           </span>
         ),
@@ -125,7 +125,7 @@ export function LeadTable({
         accessorKey: "receivedAt",
         header: "Received",
         cell: ({ row }) => (
-          <span className="text-[12px] text-[#8B93A3]">{formatDate(row.original.receivedAt)}</span>
+          <span className="text-[12px] text-[#5C6B62]">{formatDate(row.original.receivedAt)}</span>
         ),
       },
       {
@@ -143,13 +143,13 @@ export function LeadTable({
         header: "Score",
         cell: ({ row }) => {
           const score = row.original.score || 0;
-          const color = score >= 70 ? "bg-[#10B981]" : score >= 40 ? "bg-[#F59E0B]" : "bg-[#8B93A3]";
+          const color = score >= 70 ? "bg-[#047857]" : score >= 40 ? "bg-[#B45309]" : "bg-[#5C6B62]";
           return (
             <div className="flex items-center gap-2">
-              <div className="w-16 h-1.5 rounded-full bg-[#1B1E26] overflow-hidden">
+              <div className="w-16 h-1.5 rounded-full bg-[#F1F3EE] overflow-hidden">
                 <div className={cn("h-full rounded-full transition-all", color)} style={{ width: `${score}%` }} />
               </div>
-              <span className="text-[12px] font-medium text-[#8B93A3] font-mono">{score}</span>
+              <span className="text-[12px] font-medium text-[#5C6B62] font-mono">{score}</span>
             </div>
           );
         },
@@ -158,7 +158,7 @@ export function LeadTable({
         accessorKey: "budget",
         header: "Budget",
         cell: ({ row }) => (
-          <span className="text-[13px] text-[#8B93A3]">{row.original.budget ? formatCurrency(row.original.budget) : "—"}</span>
+          <span className="text-[13px] text-[#5C6B62]">{row.original.budget ? formatCurrency(row.original.budget) : "—"}</span>
         ),
       },
       {
@@ -166,9 +166,9 @@ export function LeadTable({
         header: "Visit",
         cell: ({ row }) => {
           const booking = row.original.booking;
-          if (!booking) return <span className="text-[13px] text-[#363B45]">—</span>;
+          if (!booking) return <span className="text-[13px] text-[#8A948C]">—</span>;
           return (
-            <div className="flex items-center gap-1 text-[13px] text-[#8B93A3]">
+            <div className="flex items-center gap-1 text-[13px] text-[#5C6B62]">
               <Calendar className="w-3 h-3" />
               {formatDate(booking.visitDate)}, {booking.visitTime}
             </div>
@@ -181,9 +181,9 @@ export function LeadTable({
         cell: ({ row }) => (
           <button
             onClick={() => onLeadClick(row.original)}
-            className="p-1.5 rounded-lg hover:bg-[#1B1E26] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#F1F3EE] transition-colors"
           >
-            <MoreHorizontal className="w-4 h-4 text-[#8B93A3]" />
+            <MoreHorizontal className="w-4 h-4 text-[#5C6B62]" />
           </button>
         ),
         size: 40,
@@ -204,11 +204,11 @@ export function LeadTable({
 
   if (loading) {
     return (
-      <div className="rounded-lg bg-[#14161C] border border-[#272B34] overflow-hidden">
+      <div className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] overflow-hidden">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-14 px-4 flex items-center border-b border-[#272B34] last:border-b-0">
-            <div className="h-4 w-24 bg-[#1B1E26] rounded animate-pulse" />
-            <div className="h-4 w-20 bg-[#1B1E26] rounded animate-pulse ml-8" />
+          <div key={i} className="h-14 px-4 flex items-center border-b border-[#E4E7DF] last:border-b-0">
+            <div className="h-4 w-24 bg-[#F1F3EE] rounded animate-pulse" />
+            <div className="h-4 w-20 bg-[#F1F3EE] rounded animate-pulse ml-8" />
           </div>
         ))}
       </div>
@@ -217,11 +217,11 @@ export function LeadTable({
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-lg bg-[#14161C] border border-[#272B34]">
+      <div className="overflow-x-auto rounded-lg bg-[#FFFFFF] border border-[#E4E7DF]">
         <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-[#272B34]">
+              <tr key={headerGroup.id} className="border-b border-[#E4E7DF]">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
@@ -230,7 +230,7 @@ export function LeadTable({
                   >
                     {header.isPlaceholder ? null : (
                       <button
-                        className="flex items-center gap-1 hover:text-[#F2F4F8] transition-colors"
+                        className="flex items-center gap-1 hover:text-[#1E2B24] transition-colors"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -247,7 +247,7 @@ export function LeadTable({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-[#272B34]">
+          <tbody className="divide-y divide-[#E4E7DF]">
             {table.getRowModel().rows.map((row) => {
               const isCalling = row.original.status === "CALLING";
               return (
@@ -258,15 +258,15 @@ export function LeadTable({
                   className={cn(
                     "h-14 transition-colors cursor-pointer relative",
                     isCalling
-                      ? "bg-gradient-to-r from-[#3B82F6]/10 to-transparent"
-                      : "hover:bg-[#1B1E26]",
-                    row.getIsSelected() && "bg-[#3B82F6]/5"
+                      ? "bg-gradient-to-r from-[#1B4332]/10 to-transparent"
+                      : "hover:bg-[#F1F3EE]",
+                    row.getIsSelected() && "bg-[#1B4332]/5"
                   )}
                   onClick={() => onLeadClick(row.original)}
                 >
                   {/* Calling pulse animated left border */}
                   {isCalling && (
-                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#3B82F6] animate-pulse-border" />
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#1B4332] animate-pulse-border" />
                   )}
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3 whitespace-nowrap">

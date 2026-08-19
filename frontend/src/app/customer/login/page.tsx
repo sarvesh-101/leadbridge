@@ -142,10 +142,10 @@ export default function CustomerLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0A0F0C] aurora-backdrop flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#3B82F6]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#10B981]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#34D399]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#34D399]/10 rounded-full blur-3xl" />
       </div>
 
       <motion.div
@@ -156,13 +156,13 @@ export default function CustomerLoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#6B8AFF] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-white">LeadBridge</span>
+            <span className="text-xl font-bold text-[#F0F7F3]">LeadBridge</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Track Your Visit</h1>
-          <p className="text-sm text-gray-500">Enter your phone number to view and manage your booking</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3] mb-2">Track Your Visit</h1>
+          <p className="text-sm text-[#9FB0A6]">Enter your phone number to view and manage your booking</p>
         </div>
 
         <AnimatePresence mode="wait">
@@ -172,11 +172,11 @@ export default function CustomerLoginPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="p-6 rounded-2xl bg-[#14161C] border border-white/10"
+              className="p-6 rounded-2xl app-card"
             >
-              <label className="text-xs text-gray-500 mb-2 block">Phone Number</label>
+              <label className="text-xs text-[#9FB0A6] mb-2 block">Phone Number</label>
               <div className="relative mb-4">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
                 <input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))}
@@ -184,13 +184,13 @@ export default function CustomerLoginPage() {
                   placeholder="+91 98765 43210"
                   type="tel"
                   inputMode="numeric"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
                 />
               </div>
               <button
                 onClick={handleSendOTP}
                 disabled={loading || phone.replace(/\D/g, "").length < 10}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -209,17 +209,17 @@ export default function CustomerLoginPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="p-6 rounded-2xl bg-[#14161C] border border-white/10"
+              className="p-6 rounded-2xl app-card"
             >
               <div className="flex items-center gap-3 mb-4">
                 <button onClick={() => { setStep("phone"); setOtp(["", "", "", "", "", ""]); }}
-                  className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400"
+                  className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
                 <div>
-                  <p className="text-sm text-white font-medium">Enter OTP</p>
-                  <p className="text-xs text-gray-500">Sent to {phone.replace(/(\d{2})\d{6}(\d{2})/, "$1******$2")}</p>
+                  <p className="text-sm text-[#F0F7F3] font-medium">Enter OTP</p>
+                  <p className="text-xs text-[#9FB0A6]">Sent to {phone.replace(/(\d{2})\d{6}(\d{2})/, "$1******$2")}</p>
                 </div>
               </div>
 
@@ -232,7 +232,7 @@ export default function CustomerLoginPage() {
                     value={digit}
                     onChange={(e) => handleOtpChange(i, e.target.value.replace(/\D/g, ""))}
                     onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className="w-11 h-12 text-center rounded-xl bg-white/5 border border-white/10 text-white text-lg font-bold focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all"
+                    className="w-11 h-12 text-center rounded-xl app-card text-[#F0F7F3] text-lg font-bold focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#1B4332]/30 transition-all"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
@@ -243,7 +243,7 @@ export default function CustomerLoginPage() {
               <button
                 onClick={handleVerifyOTP}
                 disabled={loading || otp.some((d) => !d)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -259,7 +259,7 @@ export default function CustomerLoginPage() {
                   <span className="text-xs text-gray-600">Resend in {countdown}s</span>
                 ) : (
                   <button onClick={handleSendOTP} disabled={loading}
-                    className="text-xs text-[#3B82F6] hover:underline"
+                    className="text-xs text-[#6FE3B0] hover:underline"
                   >
                     Resend OTP
                   </button>

@@ -141,11 +141,11 @@ export default function ImportLeadsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Import Leads</h1>
-          <p className="text-gray-400 mt-1">Bulk upload leads from a CSV file</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Import Leads</h1>
+          <p className="text-[#9FB0A6] mt-1">Bulk upload leads from a CSV file</p>
         </div>
         <button onClick={handleDownloadSample}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/5 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
         >
           <Download className="w-4 h-4" />
           Download Sample CSV
@@ -153,22 +153,22 @@ export default function ImportLeadsPage() {
       </div>
 
       {/* Instructions */}
-      <div className="p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/10">
+      <div className="p-4 rounded-xl bg-[#34D399]/10 border border-[#34D399]/50/10">
         <div className="flex items-start gap-3">
-          <FileSpreadsheet className="w-5 h-5 text-[#3B82F6] mt-0.5" />
+          <FileSpreadsheet className="w-5 h-5 text-[#6FE3B0] mt-0.5" />
           <div>
-            <h3 className="text-sm font-medium text-white mb-1">CSV Format</h3>
-            <p className="text-xs text-gray-400">
-              Columns: <code className="text-[#3B82F6]">name</code> (required),{" "}
-              <code className="text-[#3B82F6]">phone</code> (required),{" "}
-              <code className="text-gray-500">email</code>,{" "}
-              <code className="text-gray-500">source</code>,{" "}
-              <code className="text-gray-500">budget</code>,{" "}
-              <code className="text-gray-500">location</code>,{" "}
-              <code className="text-gray-500">timeline</code>,{" "}
-              <code className="text-gray-500">propertyType</code>,{" "}
-              <code className="text-gray-500">bedrooms</code>,{" "}
-              <code className="text-gray-500">notes</code>
+            <h3 className="text-sm font-medium text-[#F0F7F3] mb-1">CSV Format</h3>
+            <p className="text-xs text-[#9FB0A6]">
+              Columns: <code className="text-[#6FE3B0]">name</code> (required),{" "}
+              <code className="text-[#6FE3B0]">phone</code> (required),{" "}
+              <code className="text-[#9FB0A6]">email</code>,{" "}
+              <code className="text-[#9FB0A6]">source</code>,{" "}
+              <code className="text-[#9FB0A6]">budget</code>,{" "}
+              <code className="text-[#9FB0A6]">location</code>,{" "}
+              <code className="text-[#9FB0A6]">timeline</code>,{" "}
+              <code className="text-[#9FB0A6]">propertyType</code>,{" "}
+              <code className="text-[#9FB0A6]">bedrooms</code>,{" "}
+              <code className="text-[#9FB0A6]">notes</code>
             </p>
             <p className="text-xs text-gray-600 mt-2">
               Max 500 leads per import. Duplicates (same phone in last 30 days) are auto-skipped.
@@ -187,8 +187,8 @@ export default function ImportLeadsPage() {
           className={cn(
             "relative p-12 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all",
             dragOver
-              ? "border-[#3B82F6] bg-[#3B82F6]/5"
-              : "border-white/10 bg-white/5 hover:border-[#3B82F6]/30 hover:bg-white/10"
+              ? "border-[#34D399]/50 bg-[#34D399]/10"
+              : "border-white/10 bg-[#101713] hover:border-[#34D399]/40 hover:bg-white/[0.06]"
           )}
         >
           <input
@@ -199,14 +199,14 @@ export default function ImportLeadsPage() {
             className="hidden"
           />
           {loading ? (
-            <Loader2 className="w-12 h-12 text-[#3B82F6] mx-auto mb-4 animate-spin" />
+            <Loader2 className="w-12 h-12 text-[#6FE3B0] mx-auto mb-4 animate-spin" />
           ) : (
             <>
               <Upload className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white mb-1">
+              <h3 className="text-lg font-semibold text-[#F0F7F3] mb-1">
                 Drop your CSV here
               </h3>
-              <p className="text-sm text-gray-500">or click to browse files</p>
+              <p className="text-sm text-[#9FB0A6]">or click to browse files</p>
               <p className="text-xs text-gray-600 mt-2">Supports .csv files up to 10MB</p>
             </>
           )}
@@ -224,15 +224,15 @@ export default function ImportLeadsPage() {
               {[
                 { label: "Total Rows", value: preview.total, icon: ListChecks, color: "text-blue-400" },
                 { label: "Valid to Import", value: preview.valid, icon: CheckCircle2, color: "text-green-400" },
-                { label: "Duplicates", value: preview.duplicates, icon: AlertTriangle, color: preview.duplicates > 0 ? "text-amber-400" : "text-gray-500" },
-                { label: "Errors", value: preview.errors, icon: XCircle, color: preview.errors > 0 ? "text-red-400" : "text-gray-500" },
+                { label: "Duplicates", value: preview.duplicates, icon: AlertTriangle, color: preview.duplicates > 0 ? "text-amber-400" : "text-[#9FB0A6]" },
+                { label: "Errors", value: preview.errors, icon: XCircle, color: preview.errors > 0 ? "text-red-400" : "text-[#9FB0A6]" },
               ].map((s, i) => (
                 <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                  className="p-4 rounded-xl bg-white/5 border border-white/10"
+                  className="p-4 rounded-xl app-card"
                 >
                   <s.icon className={cn("w-5 h-5 mb-1", s.color)} />
-                  <div className="text-xl font-bold text-white">{s.value}</div>
-                  <div className="text-xs text-gray-500">{s.label}</div>
+                  <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
+                  <div className="text-xs text-[#9FB0A6]">{s.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -276,14 +276,14 @@ export default function ImportLeadsPage() {
 
             {/* Preview Table */}
             {preview.preview.length > 0 && (
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                <h3 className="text-sm font-semibold text-white mb-3">
+              <div className="p-4 rounded-xl app-card">
+                <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">
                   Preview ({preview.preview.length} of {preview.valid} rows)
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-white/10 text-gray-500">
+                      <tr className="border-b border-white/10 text-[#9FB0A6]">
                         <th className="text-left py-2 pr-4">Name</th>
                         <th className="text-left py-2 pr-4">Phone</th>
                         <th className="text-left py-2 pr-4">Email</th>
@@ -292,11 +292,11 @@ export default function ImportLeadsPage() {
                     </thead>
                     <tbody>
                       {preview.preview.map((row, i) => (
-                        <tr key={i} className="border-b border-white/5 text-gray-300">
+                        <tr key={i} className="border-b border-white/10 text-[#9FB0A6]">
                           <td className="py-2 pr-4">{row.name}</td>
                           <td className="py-2 pr-4">{row.phone}</td>
-                          <td className="py-2 pr-4 text-gray-500">{row.email || "—"}</td>
-                          <td className="py-2 text-gray-500">{row.source}</td>
+                          <td className="py-2 pr-4 text-[#9FB0A6]">{row.email || "—"}</td>
+                          <td className="py-2 text-[#9FB0A6]">{row.source}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -309,12 +309,12 @@ export default function ImportLeadsPage() {
             {/* Actions */}
             <div className="flex items-center justify-end gap-3">
               <button onClick={reset}
-                className="px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
               >
                 Choose Different File
               </button>
               <button onClick={handleImport} disabled={importing || preview.valid === 0}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
               >
                 {importing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -332,35 +332,35 @@ export default function ImportLeadsPage() {
       <AnimatePresence>
         {importResult && (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center"
+            className="p-8 rounded-2xl app-card text-center"
           >
             <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-8 h-8 text-green-400" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">Import Complete!</h2>
-            <p className="text-gray-400 mb-6">{importResult.message}</p>
+            <h2 className="text-xl font-bold text-[#F0F7F3] mb-2">Import Complete!</h2>
+            <p className="text-[#9FB0A6] mb-6">{importResult.message}</p>
             <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-6">
-              <div className="p-3 rounded-xl bg-white/5">
+              <div className="p-3 rounded-xl bg-[#101713]">
                 <div className="text-lg font-bold text-green-400">{importResult.imported}</div>
-                <div className="text-xs text-gray-500">Imported</div>
+                <div className="text-xs text-[#9FB0A6]">Imported</div>
               </div>
-              <div className="p-3 rounded-xl bg-white/5">
-                <div className="text-lg font-bold text-gray-400">{importResult.skipped}</div>
-                <div className="text-xs text-gray-500">Skipped</div>
+              <div className="p-3 rounded-xl bg-[#101713]">
+                <div className="text-lg font-bold text-[#9FB0A6]">{importResult.skipped}</div>
+                <div className="text-xs text-[#9FB0A6]">Skipped</div>
               </div>
-              <div className="p-3 rounded-xl bg-white/5">
-                <div className="text-lg font-bold text-white">{importResult.total}</div>
-                <div className="text-xs text-gray-500">Total</div>
+              <div className="p-3 rounded-xl bg-[#101713]">
+                <div className="text-lg font-bold text-[#F0F7F3]">{importResult.total}</div>
+                <div className="text-xs text-[#9FB0A6]">Total</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <button onClick={reset}
-                className="px-4 py-2.5 rounded-xl border border-white/10 text-gray-300 text-sm hover:bg-white/5 transition-all"
+                className="px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
               >
                 Import Another File
               </button>
               <a href="/dashboard/leads"
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-sm font-medium hover:opacity-90 transition-all"
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
               >
                 View Leads
               </a>

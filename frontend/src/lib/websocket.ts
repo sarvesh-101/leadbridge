@@ -139,7 +139,10 @@ class WebSocketClient {
         });
 
         const response = await fetch(`${apiBase}/leads?${params}`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "ngrok-skip-browser-warning": "true",
+          },
         });
 
         if (response.ok) {

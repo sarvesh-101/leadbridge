@@ -78,7 +78,7 @@ export function FeatureGate({
   const content = (
     <div className={cn(
       "relative group",
-      card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-white/10 hover:bg-white/[0.05] transition-all",
+      card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-white/10 hover:bg-white/[0.03] transition-all",
       className
     )}>
       {/* Lock overlay */}
@@ -87,12 +87,12 @@ export function FeatureGate({
         !card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-white/10"
       )}>
         <div className="w-12 h-12 rounded-2xl bg-gray-500/10 border border-gray-500/20 flex items-center justify-center mb-4">
-          <Lock className="w-5 h-5 text-gray-500" />
+          <Lock className="w-5 h-5 text-[#9FB0A6]" />
         </div>
-        <h3 className="text-base font-semibold text-white mb-1">
+        <h3 className="text-base font-semibold text-[#F0F7F3] mb-1">
           {upgradeMessage || `${featureName} is a ${requiredPlanName} feature`}
         </h3>
-        <p className="text-sm text-gray-500 mb-4 max-w-sm">
+        <p className="text-sm text-[#9FB0A6] mb-4 max-w-sm">
           {currentPlan === "STARTER"
             ? `Upgrade to ${requiredPlanName} (${requiredPrice}) or higher to unlock ${featureName}.`
             : currentPlan && PLAN_ORDER[currentPlan] < PLAN_ORDER[requiredPlan]
@@ -102,7 +102,7 @@ export function FeatureGate({
         </p>
         <Link
           href="/dashboard/billing"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium hover:opacity-90 transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
         >
           <Crown className="w-4 h-4" />
           Upgrade Now

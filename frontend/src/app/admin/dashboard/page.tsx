@@ -47,8 +47,8 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-        <p className="text-gray-400 mt-1">Platform overview and system health</p>
+        <h1 className="text-2xl font-bold text-[#F0F7F3]">Admin Dashboard</h1>
+        <p className="text-[#9FB0A6] mt-1">Platform overview and system health</p>
       </div>
 
       {/* System Health */}
@@ -65,8 +65,8 @@ export default function AdminDashboardPage() {
             <WifiOff className="w-5 h-5 text-yellow-400" />
           )}
           <div className="flex-1">
-            <p className="text-sm font-medium text-white capitalize">{health.status}</p>
-            <div className="flex items-center gap-4 text-xs text-gray-400 mt-1">
+            <p className="text-sm font-medium text-[#F0F7F3] capitalize">{health.status}</p>
+            <div className="flex items-center gap-4 text-xs text-[#9FB0A6] mt-1">
               <span className={cn("flex items-center gap-1", health.checks?.postgres === "healthy" ? "text-green-400" : "text-red-400")}>
                 <span className="w-1.5 h-1.5 rounded-full bg-current" /> PostgreSQL
               </span>
@@ -75,7 +75,7 @@ export default function AdminDashboardPage() {
               </span>
             </div>
           </div>
-          <span className="text-xs text-gray-500">v{health.version}</span>
+          <span className="text-xs text-[#9FB0A6]">v{health.version}</span>
         </div>
       )}
 
@@ -83,22 +83,22 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {statCards.map((card, i) => (
           <motion.div key={card.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-            className="p-4 rounded-xl bg-white/5 border border-white/10"
+            className="p-4 rounded-xl app-card"
           >
             {loading ? (
               <div className="animate-pulse space-y-2">
-                <div className="h-8 w-12 bg-white/10 rounded" />
-                <div className="h-3 w-20 bg-white/10 rounded" />
+                <div className="h-8 w-12 bg-white/[0.06] rounded" />
+                <div className="h-3 w-20 bg-white/[0.06] rounded" />
               </div>
             ) : (
               <>
                 <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", card.color)}>
                   <card.icon className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-xl font-bold text-white">
+                <div className="text-xl font-bold text-[#F0F7F3]">
                   {card.prefix || ""}{card.value}{card.suffix || ""}
                 </div>
-                <div className="text-xs text-gray-500">{card.sub}</div>
+                <div className="text-xs text-[#9FB0A6]">{card.sub}</div>
               </>
             )}
           </motion.div>
@@ -108,8 +108,8 @@ export default function AdminDashboardPage() {
       {/* Lead & Call Metrics */}
       {!loading && analytics && (
         <div className="grid lg:grid-cols-2 gap-6">
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-            <h2 className="text-sm font-semibold text-white mb-4">Lead Overview</h2>
+          <div className="p-6 rounded-xl app-card">
+            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Lead Overview</h2>
             <div className="space-y-4">
               {[
                 { label: "Total Leads", value: analytics.leads?.total ?? 0, max: analytics.leads?.total || 1 },
@@ -119,11 +119,11 @@ export default function AdminDashboardPage() {
               ].map((item) => (
                 <div key={item.label}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-400">{item.label}</span>
-                    <span className="text-white font-medium">{item.value.toLocaleString()}</span>
+                    <span className="text-[#9FB0A6]">{item.label}</span>
+                    <span className="text-[#F0F7F3] font-medium">{item.value.toLocaleString()}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-leadflow-500 to-leadflow-accent"
+                  <div className="h-2 rounded-full bg-[#101713] overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-[#1B4332] to-[#2D6A4F]"
                       style={{ width: `${Math.min(100, (item.value / item.max) * 100)}%` }} />
                   </div>
                 </div>
@@ -131,22 +131,22 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-            <h2 className="text-sm font-semibold text-white mb-4">Revenue</h2>
+          <div className="p-6 rounded-xl app-card">
+            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Revenue</h2>
             <div className="space-y-5">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-[#101713]">
                 <div>
-                  <p className="text-sm text-gray-400">Monthly Recurring Revenue</p>
-                  <p className="text-2xl font-bold text-white mt-1">₹{analytics.revenue?.mrr?.toLocaleString() ?? 0}</p>
+                  <p className="text-sm text-[#9FB0A6]">Monthly Recurring Revenue</p>
+                  <p className="text-2xl font-bold text-[#F0F7F3] mt-1">₹{analytics.revenue?.mrr?.toLocaleString() ?? 0}</p>
                 </div>
                 <ArrowUp className="w-8 h-8 text-green-400" />
               </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-white/5">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-[#101713]">
                 <div>
-                  <p className="text-sm text-gray-400">Annual Run Rate</p>
-                  <p className="text-2xl font-bold text-white mt-1">₹{analytics.revenue?.arr?.toLocaleString() ?? 0}</p>
+                  <p className="text-sm text-[#9FB0A6]">Annual Run Rate</p>
+                  <p className="text-2xl font-bold text-[#F0F7F3] mt-1">₹{analytics.revenue?.arr?.toLocaleString() ?? 0}</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-leadflow-accent" />
+                <TrendingUp className="w-8 h-8 text-[#2D6A4F]" />
               </div>
             </div>
           </div>
@@ -155,20 +155,20 @@ export default function AdminDashboardPage() {
 
       {/* Usage & Engagement */}
       {!loading && usage && (
-        <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-          <h2 className="text-sm font-semibold text-white mb-4">Usage & Engagement</h2>
+        <div className="p-6 rounded-xl app-card">
+          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Usage & Engagement</h2>
           <div className="flex items-center gap-8">
             <div>
-              <p className="text-sm text-gray-400">Total Users</p>
-              <p className="text-2xl font-bold text-white">{usage.totalUsers}</p>
+              <p className="text-sm text-[#9FB0A6]">Total Users</p>
+              <p className="text-2xl font-bold text-[#F0F7F3]">{usage.totalUsers}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Active Today</p>
-              <p className="text-2xl font-bold text-white">{usage.activeUsersToday}</p>
+              <p className="text-sm text-[#9FB0A6]">Active Today</p>
+              <p className="text-2xl font-bold text-[#F0F7F3]">{usage.activeUsersToday}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Engagement Rate</p>
-              <p className="text-2xl font-bold text-white">{usage.engagementRate}%</p>
+              <p className="text-sm text-[#9FB0A6]">Engagement Rate</p>
+              <p className="text-2xl font-bold text-[#F0F7F3]">{usage.engagementRate}%</p>
             </div>
           </div>
         </div>

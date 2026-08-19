@@ -29,10 +29,10 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D12] flex items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-leadflow-500/10 blur-[120px]" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-leadflow-accent/10 blur-[100px]" />
+    <div className="min-h-screen bg-[#0A0F0C] flex items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#34D399] opacity-[0.07] blur-[120px]" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-[#1B4332] opacity-40 blur-[100px]" />
       </div>
 
       <motion.div
@@ -43,40 +43,40 @@ export default function ForgotPasswordPage() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-leadflow-500 to-leadflow-accent flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+              <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
-            <span className="text-xl font-bold text-white">LeadFlow AI</span>
+            <span className="text-xl font-bold text-[#F0F7F3]">LeadBridge</span>
           </Link>
-          <h1 className="text-2xl font-bold text-white">Reset your password</h1>
-          <p className="text-gray-400 mt-2">
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Reset your password</h1>
+          <p className="text-[#9FB0A6] mt-2">
             {sent
               ? "Check your email for the reset link"
               : "Enter your email and we&apos;ll send you a reset link"}
           </p>
         </div>
 
-        <div className="p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
+        <div className="p-8 rounded-2xl glass-card">
           {sent ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-4 space-y-4"
             >
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
-                <CheckCircle className="w-8 h-8 text-emerald-400" />
+              <div className="w-16 h-16 rounded-full bg-[#34D399]/10 border border-[#34D399]/25 flex items-center justify-center mx-auto shadow-[0_0_24px_rgba(52,211,153,0.2)]">
+                <CheckCircle className="w-8 h-8 text-[#34D399]" />
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                If an account with <span className="text-white font-medium">{email}</span> exists,
+              <p className="text-[#9FB0A6] text-sm leading-relaxed">
+                If an account with <span className="text-[#F0F7F3] font-medium">{email}</span> exists,
                 a password reset link has been sent. Please check your inbox and follow the
                 instructions.
               </p>
-              <p className="text-gray-500 text-xs">
+              <p className="text-[#6B7C73] text-xs">
                 Didn&apos;t receive it? Check your spam folder or try again.
               </p>
               <Link
                 href="/auth/login"
-                className="inline-flex items-center gap-2 text-sm text-leadflow-accent hover:underline font-medium"
+                className="inline-flex items-center gap-2 text-sm text-[#6FE3B0] hover:underline font-medium"
               >
                 <ArrowLeft className="w-4 h-4" /> Back to login
               </Link>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-4"
+                  className="flex items-center gap-2 p-3 rounded-lg bg-[#FB7185]/10 border border-[#FB7185]/25 text-[#FB7185] text-sm mb-4"
                 >
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   {error}
@@ -96,11 +96,11 @@ export default function ForgotPasswordPage() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label htmlFor="reset-email" className="block text-sm font-medium text-gray-300 mb-2">
+                  <label htmlFor="reset-email" className="block text-sm font-medium text-[#9FB0A6] mb-2">
                     Email address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
                     <input
                       id="reset-email"
                       name="email"
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@company.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-leadflow-500/50 focus:ring-1 focus:ring-leadflow-500/30 transition-all"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60 focus:ring-1 focus:ring-[#34D399]/30 transition-all"
                       required
                     />
                   </div>
@@ -119,12 +119,12 @@ export default function ForgotPasswordPage() {
                   type="submit"
                   disabled={loading}
                   className={cn(
-                    "w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white font-medium transition-all duration-300",
-                    loading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"
+                    "w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] font-bold transition-all duration-300 hover:shadow-[0_0_32px_rgba(52,211,153,0.4)]",
+                    loading ? "opacity-70 cursor-not-allowed" : ""
                   )}
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#0A0F0C]/30 border-t-[#0A0F0C] rounded-full animate-spin" />
                   ) : (
                     <>Send Reset Link <ArrowRight className="w-4 h-4" /></>
                   )}
@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
               <div className="mt-6 text-center">
                 <Link
                   href="/auth/login"
-                  className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-300"
+                  className="inline-flex items-center gap-2 text-sm text-[#9FB0A6] hover:text-[#F0F7F3]"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back to login
                 </Link>

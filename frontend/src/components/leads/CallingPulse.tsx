@@ -19,15 +19,15 @@ export function CallingPulse({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
       style={{ width: containerSize, height: containerSize }}
     >
       {/* Ring 1 */}
-      <span className="absolute inset-0 rounded-full border border-[#3B82F6] animate-sonar-ring" />
+      <span className="absolute inset-0 rounded-full border border-[#1B4332] animate-sonar-ring" />
       {/* Ring 2 (offset by half-cycle) */}
       <span
-        className="absolute inset-0 rounded-full border border-[#3B82F6]"
+        className="absolute inset-0 rounded-full border border-[#1B4332]"
         style={{ animation: "sonar-ring 1.5s ease-out infinite 0.75s" }}
       />
       {/* Center dot */}
       <span
-        className="absolute rounded-full bg-[#3B82F6]"
+        className="absolute rounded-full bg-[#1B4332]"
         style={{
           width: "40%",
           height: "40%",
@@ -47,7 +47,7 @@ export function CallingWaveform() {
       {[0, 0.15, 0.3].map((delay, i) => (
         <span
           key={i}
-          className="w-[2px] bg-[#3B82F6] rounded-full animate-waveform"
+          className="w-[2px] bg-[#1B4332] rounded-full animate-waveform"
           style={{
             height: 4,
             animationDelay: `${delay}s`,

@@ -1,6 +1,4 @@
 .next
 node_modules
-.cache
-*.tsbuildinfo
-coverage
-.vercel
+npm-debug.log*
+.next/cache

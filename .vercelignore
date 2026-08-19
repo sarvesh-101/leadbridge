@@ -1,0 +1,18 @@
+# Large local-only files (Postgres installers, logs, build artifacts)
+postgres_installer.exe
+temppostgres-*.exe
+postgres.zip
+*.exe
+*.zip
+*.log
+*.rdb
+build-verify.log
+frontend-dev.log
+backend-dev.log
+
+# Frontend build + deps
+node_modules
+.next
+
+# Vercel
+.vercel

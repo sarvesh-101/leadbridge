@@ -40,16 +40,16 @@ export default function WizardShell() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
+    <div className="min-h-screen bg-[#FAF9F5]">
       {/* Header */}
-      <div className="border-b border-[#272B34] bg-[#14161C]">
+      <div className="border-b border-[#E4E7DF] bg-[#FFFFFF]">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Link href="/admin/dashboard" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-[#3B82F6] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[#1B4332] flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-[15px] font-display font-bold text-[#F2F4F8]">LeadBridge</span>
-            <span className="text-[12px] text-[#8B93A3]">· Admin</span>
+            <span className="text-[15px] font-display font-bold text-[#1E2B24]">LeadBridge</span>
+            <span className="text-[12px] text-[#5C6B62]">· Admin</span>
           </Link>
 
           {/* Stepper */}
@@ -62,8 +62,8 @@ export default function WizardShell() {
                     step.id < currentStep
                       ? "bg-[#047857] border-[#047857] text-white"
                       : step.id === currentStep
-                      ? "bg-[#3B82F6] border-[#3B82F6] text-white"
-                      : "bg-transparent border-[#272B34] text-[#8B93A3]"
+                      ? "bg-[#1B4332] border-[#1B4332] text-white"
+                      : "bg-transparent border-[#E4E7DF] text-[#5C6B62]"
                   )}>
                     {step.id < currentStep ? (
                       <Check className="w-4 h-4" />
@@ -73,7 +73,7 @@ export default function WizardShell() {
                   </div>
                   <span className={cn(
                     "text-[10px] mt-1 font-medium hidden sm:block",
-                    step.id === currentStep ? "text-[#F2F4F8]" : "text-[#8B93A3]"
+                    step.id === currentStep ? "text-[#1E2B24]" : "text-[#5C6B62]"
                   )}>
                     {step.label}
                   </span>
@@ -81,7 +81,7 @@ export default function WizardShell() {
                 {i < STEPS.length - 1 && (
                   <div className={cn(
                     "flex-1 h-[2px] mx-2 transition-colors duration-300",
-                    step.id < currentStep ? "bg-[#10B981]" : "bg-[#272B34]"
+                    step.id < currentStep ? "bg-[#047857]" : "bg-[#E4E7DF]"
                   )} />
                 )}
               </div>
@@ -114,11 +114,11 @@ export default function WizardShell() {
         </div>
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#272B34]">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#E4E7DF]">
           <button
             onClick={goBack}
             disabled={currentStep === 1}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#272B34] text-[13px] text-[#8B93A3] hover:bg-[#1B1E26] hover:text-[#F2F4F8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E4E7DF] text-[13px] text-[#5C6B62] hover:bg-[#F1F3EE] hover:text-[#1E2B24] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -127,13 +127,13 @@ export default function WizardShell() {
           {currentStep < 6 ? (
             <button
               onClick={goNext}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold hover:brightness-110 transition-all"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#1B4332] text-white text-[13px] font-semibold hover:brightness-110 transition-all"
             >
               Continue
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
-            <button className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#10B981] text-black text-[13px] font-semibold hover:brightness-110 transition-all">
+            <button className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#047857] text-black text-[13px] font-semibold hover:brightness-110 transition-all">
               <Check className="w-4 h-4" />
               Create Client
             </button>
@@ -149,8 +149,8 @@ export default function WizardShell() {
 function Step1() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#F2F4F8]">Business Information</h2>
-      <p className="text-[14px] text-[#8B93A3]">Enter the broker&apos;s business details.</p>
+      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Business Information</h2>
+      <p className="text-[14px] text-[#5C6B62]">Enter the broker&apos;s business details.</p>
       <div className="grid grid-cols-2 gap-4">
         <InputField label="Business Name" placeholder="e.g. Sharma Realty" />
         <InputField label="Owner Name" placeholder="e.g. Rajesh Sharma" />
@@ -164,8 +164,8 @@ function Step1() {
 function Step2() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#F2F4F8]">Territory Selection</h2>
-      <p className="text-[14px] text-[#8B93A3]">Assign the exclusive territory for this broker.</p>
+      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Territory Selection</h2>
+      <p className="text-[14px] text-[#5C6B62]">Assign the exclusive territory for this broker.</p>
       <div className="grid grid-cols-2 gap-4">
         <InputField label="City" placeholder="e.g. Mumbai" />
         <InputField label="Zone / Area" placeholder="e.g. Andheri West" />
@@ -177,8 +177,8 @@ function Step2() {
 function Step3() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#F2F4F8]">Contact Settings</h2>
-      <p className="text-[14px] text-[#8B93A3]">Set up WhatsApp and calling preferences.</p>
+      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Contact Settings</h2>
+      <p className="text-[14px] text-[#5C6B62]">Set up WhatsApp and calling preferences.</p>
       <div className="grid grid-cols-2 gap-4">
         <InputField label="WhatsApp Number" placeholder="+91 98765 43210" />
         <InputField label="Calling Language" placeholder="e.g. Hindi, English" />
@@ -227,21 +227,21 @@ Kya main aapki site visit book kar doon?`);
 
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#F2F4F8]">Script Configuration</h2>
-      <p className="text-[14px] text-[#8B93A3]">Configure the AI calling script. Hover over lines to highlight.</p>
+      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Script Configuration</h2>
+      <p className="text-[14px] text-[#5C6B62]">Configure the AI calling script. Hover over lines to highlight.</p>
 
       <div className="grid grid-cols-2 gap-6">
         {/* Left: Editor */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[12px] text-[#8B93A3]">Script Editor</span>
+            <span className="text-[12px] text-[#5C6B62]">Script Editor</span>
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3B82F6] text-white text-[12px] font-medium hover:brightness-110 disabled:opacity-60 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1B4332] text-white text-[12px] font-medium hover:brightness-110 disabled:opacity-60 transition-all"
             >
               {generating ? (
-                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-[#D8DDD3] border-t-white rounded-full animate-spin" />
               ) : (
                 <Zap className="w-3.5 h-3.5" />
               )}
@@ -251,30 +251,30 @@ Kya main aapki site visit book kar doon?`);
           <textarea
             value={script}
             onChange={(e) => setScript(e.target.value)}
-            className="w-full h-[300px] px-4 py-3 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] text-[#F2F4F8] font-mono leading-relaxed focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] resize-none transition-colors"
+            className="w-full h-[300px] px-4 py-3 rounded-lg bg-[#F1F3EE] border border-[#E4E7DF] text-[13px] text-[#1E2B24] font-mono leading-relaxed focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] resize-none transition-colors"
             placeholder="Enter the AI calling script..."
           />
         </div>
 
         {/* Right: Phone Preview */}
         <div>
-          <span className="text-[12px] text-[#8B93A3] mb-2 block">Live Preview</span>
-          <div className="rounded-lg bg-[#0B0D12] border border-[#272B34] p-4 h-[300px] flex flex-col">
+          <span className="text-[12px] text-[#5C6B62] mb-2 block">Live Preview</span>
+          <div className="rounded-lg bg-[#FAF9F5] border border-[#E4E7DF] p-4 h-[300px] flex flex-col">
             {/* Phone frame */}
             <div className="flex-1 flex flex-col">
-              <div className="flex items-center gap-3 mb-3 pb-3 border-b border-[#272B34]">
-                <div className="w-8 h-8 rounded-full bg-[#10B981]/20 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-[#10B981]" />
+              <div className="flex items-center gap-3 mb-3 pb-3 border-b border-[#E4E7DF]">
+                <div className="w-8 h-8 rounded-full bg-[#047857]/20 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-[#047857]" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-medium text-[#F2F4F8]">LeadBridge AI</p>
-                  <p className="text-[11px] text-[#10B981]">Calling...</p>
+                  <p className="text-[13px] font-medium text-[#1E2B24]">LeadBridge AI</p>
+                  <p className="text-[11px] text-[#047857]">Calling...</p>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto space-y-3">
                 {script.split("\n").filter(Boolean).map((line, i) => (
                   <div key={i} className="flex justify-end">
-                    <div className="max-w-[85%] px-3 py-2 rounded-lg bg-[#1B1E26] text-[13px] text-[#F2F4F8] rounded-br-sm leading-relaxed">
+                    <div className="max-w-[85%] px-3 py-2 rounded-lg bg-[#F1F3EE] text-[13px] text-[#1E2B24] rounded-br-sm leading-relaxed">
                       {line}
                     </div>
                   </div>
@@ -282,7 +282,7 @@ Kya main aapki site visit book kar doon?`);
               </div>
             </div>
             <div className="mt-2 text-center">
-              <button className="px-4 py-1.5 rounded-full bg-[#10B981] text-black text-[11px] font-semibold hover:brightness-110 transition-all">
+              <button className="px-4 py-1.5 rounded-full bg-[#047857] text-black text-[11px] font-semibold hover:brightness-110 transition-all">
                 Preview Audio
               </button>
             </div>
@@ -296,8 +296,8 @@ Kya main aapki site visit book kar doon?`);
 function Step5() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#F2F4F8]">Pricing Plan</h2>
-      <p className="text-[14px] text-[#8B93A3]">Select the plan and set call limits.</p>
+      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Pricing Plan</h2>
+      <p className="text-[14px] text-[#5C6B62]">Select the plan and set call limits.</p>
       <div className="grid grid-cols-3 gap-4">
         {[
           { name: "Starter", price: "₹18,000", calls: "100" },
@@ -309,16 +309,16 @@ function Step5() {
             className={cn(
               "p-5 rounded-lg border cursor-pointer transition-all hover:translate-y-[-2px]",
               plan.popular
-                ? "border-[#3B82F6] bg-[#3B82F6]/5"
-                : "border-[#272B34] bg-[#14161C] hover:border-[#3B82F6]/50"
+                ? "border-[#1B4332] bg-[#1B4332]/5"
+                : "border-[#E4E7DF] bg-[#FFFFFF] hover:border-[#1B4332]/50"
             )}
           >
             {plan.popular && (
-              <span className="text-[10px] font-semibold text-[#C9A84C] uppercase tracking-wider">Recommended</span>
+              <span className="text-[10px] font-semibold text-[#B8860B] uppercase tracking-wider">Recommended</span>
             )}
-            <h3 className="text-[18px] font-display font-bold text-[#F2F4F8] mt-1">{plan.name}</h3>
-            <p className="text-[24px] font-display font-bold text-[#F2F4F8] mt-2">{plan.price}<span className="text-[12px] text-[#8B93A3]">/mo</span></p>
-            <p className="text-[13px] text-[#8B93A3] mt-1">{plan.calls} AI calls</p>
+            <h3 className="text-[18px] font-display font-bold text-[#1E2B24] mt-1">{plan.name}</h3>
+            <p className="text-[24px] font-display font-bold text-[#1E2B24] mt-2">{plan.price}<span className="text-[12px] text-[#5C6B62]">/mo</span></p>
+            <p className="text-[13px] text-[#5C6B62] mt-1">{plan.calls} AI calls</p>
           </div>
         ))}
       </div>
@@ -329,9 +329,9 @@ function Step5() {
 function Step6() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#F2F4F8]">Review & Confirm</h2>
-      <p className="text-[14px] text-[#8B93A3]">Review the client details before creating the account.</p>
-      <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-6 space-y-3">
+      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Review & Confirm</h2>
+      <p className="text-[14px] text-[#5C6B62]">Review the client details before creating the account.</p>
+      <div className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-6 space-y-3">
         {[
           ["Business", "Sharma Realty"],
           ["Owner", "Rajesh Sharma"],
@@ -340,9 +340,9 @@ function Step6() {
           ["Script", "4 lines configured"],
           ["Status", "Active immediately"],
         ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between py-2 border-b border-[#272B34] last:border-0">
-            <span className="text-[13px] text-[#8B93A3]">{label}</span>
-            <span className="text-[13px] text-[#F2F4F8] font-medium">{value}</span>
+          <div key={label} className="flex items-center justify-between py-2 border-b border-[#E4E7DF] last:border-0">
+            <span className="text-[13px] text-[#5C6B62]">{label}</span>
+            <span className="text-[13px] text-[#1E2B24] font-medium">{value}</span>
           </div>
         ))}
       </div>
@@ -354,11 +354,11 @@ function Step6() {
 function InputField({ label, placeholder, type = "text" }: { label: string; placeholder: string; type?: string }) {
   return (
     <div>
-      <label className="block text-[12px] text-[#8B93A3] mb-1.5">{label}</label>
+      <label className="block text-[12px] text-[#5C6B62] mb-1.5">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full px-3 py-2.5 rounded-lg bg-[#1B1E26] border border-[#272B34] text-[13px] text-[#F2F4F8] placeholder-[#363B45] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-colors"
+        className="w-full px-3 py-2.5 rounded-lg bg-[#F1F3EE] border border-[#E4E7DF] text-[13px] text-[#1E2B24] placeholder-[#8A948C] focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors"
       />
     </div>
   );

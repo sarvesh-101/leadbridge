@@ -16,7 +16,9 @@ import { sendTextMessage } from "../../services/whatsapp.service";
 export default async function adminWhatsAppRoutes(fastify: FastifyInstance) {
   // ─── GET /admin/whatsapp/config — Full WhatsApp configuration status ──
   fastify.get("/admin/whatsapp/config", async (_request: FastifyRequest, reply: FastifyReply) => {
-    const webhookUrl = `${config.FRONTEND_URL?.replace(/\/+$/, "") || "https://leadbridge.com"}/api/v1/webhooks/whatsapp`;
+    // Use WEBHOOK_URL (backend) when available; fall back to FRONTEND_URL for local dev
+    const backendBase = (config.WEBHOOK_URL || config.FRONTEND_URL || "https://leadbridge.com").replace(/\/+$/, "");
+    const webhookUrl = `${backendBase}/api/v1/webhooks/whatsapp`;
 
     const envVars = {
       WHATSAPP_TOKEN: {

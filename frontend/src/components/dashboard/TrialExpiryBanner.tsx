@@ -75,7 +75,7 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
                 : `You're on a free trial — ${daysRemaining} day${daysRemaining === 1 ? "" : "s"} remaining`
               }
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-[#7C8781] mt-1">
               {isUrgent
                 ? "Upgrade now to keep your leads, calls, and campaigns running without interruption."
                 : "Upgrade to a paid plan for more AI calls, advanced campaigns, and priority support."
@@ -88,7 +88,7 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
                   "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all",
                   isUrgent
                     ? "bg-red-500/20 text-red-300 hover:bg-red-500/30"
-                    : "bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white hover:opacity-90"
+                    : "bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] text-white hover:opacity-90"
                 )}
               >
                 {isUrgent ? "Upgrade Now" : "View Plans"}
@@ -105,7 +105,7 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
           {/* Dismiss */}
           <button
             onClick={() => setDismissed(true)}
-            className="shrink-0 p-1 rounded-md hover:bg-white/5 text-gray-500 hover:text-gray-300 transition-colors"
+            className="shrink-0 p-1 rounded-md hover:bg-[#F1F3EE] text-[#7C8781] hover:text-[#5C6B62] transition-colors"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />

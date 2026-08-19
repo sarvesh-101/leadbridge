@@ -86,10 +86,10 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
   };
 
   const getLeadColor = (lead: Lead) => {
-    if (lead.score >= 80) return "border-l-[#10B981]";
-    if (lead.score >= 60) return "border-l-[#3B82F6]";
-    if (lead.score >= 40) return "border-l-[#F59E0B]";
-    return "border-l-[#8B93A3]";
+    if (lead.score >= 80) return "border-l-[#047857]";
+    if (lead.score >= 60) return "border-l-[#1B4332]";
+    if (lead.score >= 40) return "border-l-[#B45309]";
+    return "border-l-[#5C6B62]";
   };
 
   if (loading) {
@@ -97,9 +97,9 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
       <div className="flex gap-4 overflow-x-auto pb-4">
         {PIPELINE_COLUMNS.slice(0, 4).map((col) => (
           <div key={col.id} className="flex-shrink-0 w-72 space-y-3">
-            <div className="h-6 w-20 bg-white/10 rounded animate-pulse" />
+            <div className="h-6 w-20 bg-[#F1F3EE] rounded animate-pulse" />
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-white/5 rounded-xl animate-pulse" />
+              <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />
             ))}
           </div>
         ))}
@@ -122,9 +122,9 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
             <div className="flex items-center justify-between mb-3 px-1">
               <div className="flex items-center gap-2">
                 <div className={cn("w-2.5 h-2.5 rounded-full", column.color.split(" ")[0])} />
-                <h3 className="text-sm font-semibold text-white">{column.label}</h3>
+                <h3 className="text-sm font-semibold text-ink">{column.label}</h3>
               </div>
-              <span className="text-xs text-[#8B93A3] font-mono bg-[#1B1E26] px-2 py-0.5 rounded-full">
+              <span className="text-xs text-[#5C6B62] font-mono bg-[#F1F3EE] px-2 py-0.5 rounded-full">
                 {columnLeads.length}
               </span>
             </div>
@@ -141,30 +141,30 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
                   draggable
                   onDragStart={() => handleDragStart(lead.id)}
                   className={cn(
-                    "p-3 rounded-xl bg-[#14161C] border border-[#272B34] border-l-4 cursor-grab active:cursor-grabbing hover:border-[#3B82F6]/50 transition-all",
+                    "p-3 rounded-xl bg-[#FFFFFF] border border-[#E4E7DF] border-l-4 cursor-grab active:cursor-grabbing hover:border-[#1B4332]/50 transition-all",
                     getLeadColor(lead)
                   )}
                 >
                   <Link href={`/dashboard/leads/${lead.id}`} className="block">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#3B82F6]/60 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#1B4332] to-[#1B4332]/60 flex items-center justify-center">
                         <span className="text-[10px] font-semibold text-white">
                           {lead.name[0].toUpperCase()}
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-white truncate flex-1">{lead.name}</span>
+                      <span className="text-sm font-medium text-ink truncate flex-1">{lead.name}</span>
                       {lead.score > 0 && (
                         <span className={cn(
                           "text-[10px] font-mono font-bold px-1.5 py-0.5 rounded",
-                          lead.score >= 80 ? "bg-[#10B981]/20 text-[#10B981]" :
-                          lead.score >= 60 ? "bg-[#3B82F6]/20 text-[#3B82F6]" :
-                          "bg-[#F59E0B]/20 text-[#F59E0B]"
+                          lead.score >= 80 ? "bg-[#047857]/20 text-[#047857]" :
+                          lead.score >= 60 ? "bg-[#1B4332]/20 text-[#1B4332]" :
+                          "bg-[#B45309]/20 text-[#B45309]"
                         )}>
                           {lead.score}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] text-[#8B93A3]">
+                    <div className="flex items-center gap-3 text-[11px] text-[#5C6B62]">
                       <span className="flex items-center gap-1">
                         <Phone className="w-3 h-3" />
                         {lead.phone.slice(-4)}
@@ -172,14 +172,14 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
                       <span>{lead.source}</span>
                     </div>
                     {lead.budget && (
-                      <p className="text-[11px] text-[#8B93A3] mt-1">💰 {lead.budget}</p>
+                      <p className="text-[11px] text-[#5C6B62] mt-1">💰 {lead.budget}</p>
                     )}
                   </Link>
                 </motion.div>
               ))}
               {columnLeads.length === 0 && (
-                <div className="p-4 rounded-xl border border-dashed border-[#272B34] text-center">
-                  <p className="text-[11px] text-[#363B45]">Drop leads here</p>
+                <div className="p-4 rounded-xl border border-dashed border-[#E4E7DF] text-center">
+                  <p className="text-[11px] text-[#8A948C]">Drop leads here</p>
                 </div>
               )}
             </div>

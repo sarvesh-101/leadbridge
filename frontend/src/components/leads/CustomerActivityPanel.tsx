@@ -169,16 +169,16 @@ export function CustomerActivityPanel({ leadId }: { leadId: string }) {
       <div className="space-y-3">
         <div className="flex gap-3 mb-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-1 h-12 rounded-xl bg-white/5 animate-pulse" />
+            <div key={i} className="flex-1 h-12 rounded-xl bg-white animate-pulse" />
           ))}
         </div>
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10 animate-pulse">
+          <div key={i} className="p-4 rounded-xl bg-white border border-[#E4E7DF] animate-pulse">
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/10" />
+              <div className="w-8 h-8 rounded-lg bg-[#F1F3EE]" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 w-32 bg-white/10 rounded" />
-                <div className="h-3 w-48 bg-white/5 rounded" />
+                <div className="h-3 w-32 bg-[#F1F3EE] rounded" />
+                <div className="h-3 w-48 bg-white rounded" />
               </div>
             </div>
           </div>
@@ -194,19 +194,19 @@ export function CustomerActivityPanel({ leadId }: { leadId: string }) {
         <div className="grid grid-cols-4 gap-2">
           <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-center">
             <div className="text-lg font-bold text-blue-400">{stats.totalLogins}</div>
-            <div className="text-[10px] text-gray-500">Logins</div>
+            <div className="text-[10px] text-[#7C8781]">Logins</div>
           </div>
           <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-center">
             <div className="text-lg font-bold text-amber-400">{stats.totalBookingActions}</div>
-            <div className="text-[10px] text-gray-500">Actions</div>
+            <div className="text-[10px] text-[#7C8781]">Actions</div>
           </div>
           <div className="p-3 rounded-xl bg-green-500/5 border border-green-500/10 text-center">
             <div className="text-lg font-bold text-green-400">{stats.totalWhatsApp}</div>
-            <div className="text-[10px] text-gray-500">WhatsApp</div>
+            <div className="text-[10px] text-[#7C8781]">WhatsApp</div>
           </div>
           <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/10 text-center">
             <div className="text-lg font-bold text-purple-400">{stats.totalNotified}</div>
-            <div className="text-[10px] text-gray-500">Notified</div>
+            <div className="text-[10px] text-[#7C8781]">Notified</div>
           </div>
         </div>
       )}
@@ -225,14 +225,14 @@ export function CustomerActivityPanel({ leadId }: { leadId: string }) {
             className={cn(
               "px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all",
               filter === f.id
-                ? "bg-[#3B82F6] text-white"
-                : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                ? "bg-[#1B4332] text-white"
+                : "bg-white text-[#7C8781] hover:bg-[#E9ECE5] hover:text-ink"
             )}
           >
             {f.label}
           </button>
         ))}
-        <button onClick={loadActivity} className="ml-auto p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+        <button onClick={loadActivity} className="ml-auto p-1.5 rounded-lg hover:bg-[#F1F3EE] text-[#7C8781]">
           <RefreshCw className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -241,7 +241,7 @@ export function CustomerActivityPanel({ leadId }: { leadId: string }) {
       {combined.length === 0 ? (
         <div className="text-center py-12">
           <Activity className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">No activity recorded yet</p>
+          <p className="text-sm text-[#7C8781]">No activity recorded yet</p>
           <p className="text-xs text-gray-600 mt-1">
             Customer portal actions and WhatsApp messages will appear here
           </p>
@@ -294,22 +294,22 @@ function AuditItem({ item, fmt, formatDateFull }: {
   const hasDetails = changes && Object.keys(changes).length > 0;
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors group">
+    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F7F8F4] transition-colors group">
       <div className={cn(
         "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-        Config?.color || "bg-white/5"
+        Config?.color || "bg-white"
       )}>
-        <Icon className={cn("w-4 h-4", Config?.color?.split(" ")[0] || "text-gray-400")} />
+        <Icon className={cn("w-4 h-4", Config?.color?.split(" ")[0] || "text-[#7C8781]")} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-white">{label}</p>
-          <span className="text-[10px] text-gray-600 shrink-0 group-hover:text-gray-500 transition-colors">
+          <p className="text-xs font-medium text-ink">{label}</p>
+          <span className="text-[10px] text-gray-600 shrink-0 group-hover:text-[#7C8781] transition-colors">
             {fmt(item.date)}
           </span>
         </div>
         {hasDetails && (
-          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
+          <p className="text-[11px] text-[#7C8781] mt-0.5 line-clamp-1">
             {changes?.leadName ? `${changes.leadName} — ` : ""}
             {changes?.newDate ? `Rescheduled to ${changes.newDate} at ${changes.newTime}` : ""}
             {changes?.reason ? `Reason: ${changes.reason}` : ""}
@@ -335,23 +335,23 @@ function WhatsAppItem({ item, fmt, formatDateFull }: {
   const isIncoming = item.action === "INCOMING_WHATSAPP";
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors group">
+    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F7F8F4] transition-colors group">
       <div className={cn(
         "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-        isBot ? "bg-[#10B981]/10" : isIncoming ? "bg-[#3B82F6]/10" : "bg-white/5"
+        isBot ? "bg-[#047857]/10" : isIncoming ? "bg-[#1B4332]/10" : "bg-white"
       )}>
         <Icon className={cn(
           "w-4 h-4",
-          isBot ? "text-[#10B981]" : isIncoming ? "text-[#3B82F6]" : "text-gray-400"
+          isBot ? "text-[#047857]" : isIncoming ? "text-[#1B4332]" : "text-[#7C8781]"
         )} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-white">{Config.label}</p>
+          <p className="text-xs font-medium text-ink">{Config.label}</p>
           <span className="text-[10px] text-gray-600 shrink-0">{fmt(item.date)}</span>
         </div>
         {item.message && (
-          <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2">{item.message}</p>
+          <p className="text-[11px] text-[#7C8781] mt-0.5 line-clamp-2">{item.message}</p>
         )}
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-[9px] text-gray-700">{formatDateFull(item.date)}</span>
@@ -377,17 +377,17 @@ function NotificationItem({ item, fmt, formatDateFull }: {
   formatDateFull: (d: string) => string;
 }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors group">
+    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F7F8F4] transition-colors group">
       <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
         <AlertTriangle className="w-4 h-4 text-purple-400" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-white">{item.action.replace(/_/g, " ")}</p>
+          <p className="text-xs font-medium text-ink">{item.action.replace(/_/g, " ")}</p>
           <span className="text-[10px] text-gray-600 shrink-0">{fmt(item.date)}</span>
         </div>
         {item.message && (
-          <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2">{item.message}</p>
+          <p className="text-[11px] text-[#7C8781] mt-0.5 line-clamp-2">{item.message}</p>
         )}
       </div>
     </div>

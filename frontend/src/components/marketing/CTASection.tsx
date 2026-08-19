@@ -19,14 +19,17 @@ export default function CTASection() {
       : "🏙️  Every city is still open. Be the first broker to claim yours.";
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0B0D12]">
-      {/* Radial gradient background */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0A0F0C]">
+      {/* Aurora background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#3B82F6] opacity-[0.03] blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#34D399] opacity-[0.08] blur-[130px]" />
+        <div className="absolute top-[-100px] right-[-80px] w-[400px] h-[400px] rounded-full bg-[#E8C468] opacity-[0.06] blur-[110px]" />
+        <div className="absolute inset-0 bg-grid-dark opacity-50" />
+        <div className="absolute inset-0 bg-grain" />
       </div>
 
       {/* Globe - bottom center, half cropped */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-60 pointer-events-none">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-70 pointer-events-none">
         <GlobeCanvas />
       </div>
 
@@ -35,23 +38,23 @@ export default function CTASection() {
         <h2 className="hero-text leading-[0.95] mb-6">
           Your city is
           <br />
-          still available.
+          <span className="text-gradient-emerald">still available.</span>
         </h2>
 
-        <p className="text-[18px] text-[#8B93A3] max-w-[540px] mx-auto mb-12">
+        <p className="text-[18px] text-[#9FB0A6] max-w-[540px] mx-auto mb-12">
           We&apos;re onboarding one broker per city. Request yours before someone else does.
         </p>
 
         <div className="flex justify-center mb-8">
           <Link
             href="/auth/register"
-            className="inline-flex items-center gap-3 px-10 py-4 rounded-lg bg-[#3B82F6] text-white text-[20px] font-semibold transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
-            style={{ height: "64px", boxShadow: "0 0 32px #3B82F640" }}
+            className="inline-flex items-center gap-3 px-10 py-4 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[20px] font-bold transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]"
+            style={{ height: "64px", boxShadow: "0 0 32px rgba(52, 211, 153, 0.4)" }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 0 64px rgba(59, 130, 246, 0.6)";
+              e.currentTarget.style.boxShadow = "0 0 64px rgba(52, 211, 153, 0.7)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "0 0 32px rgba(59, 130, 246, 0.25)";
+              e.currentTarget.style.boxShadow = "0 0 32px rgba(52, 211, 153, 0.4)";
             }}
           >
             Request Your City
@@ -73,7 +76,7 @@ export default function CTASection() {
         </div>
 
         {/* Real urgency line (live from DB, no fake timestamps) */}
-        <div className="text-[13px] text-[#8B93A3] font-mono">
+        <div className="text-[13px] text-[#9FB0A6] font-mono">
           {urgencyLine}
         </div>
       </div>

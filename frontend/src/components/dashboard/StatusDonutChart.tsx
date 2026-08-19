@@ -9,28 +9,28 @@ interface StatusDonutChartProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  BOOKED: "#10B981",
-  CONVERTED: "#10B981",
-  VISITED: "#10B981",
-  CALLING: "#3B82F6",
-  PENDING: "#8B93A3",
-  REMINDED: "#3B82F6",
-  FOLLOWUP_D1: "#F59E0B",
-  FOLLOWUP_D2: "#F59E0B",
-  FOLLOWUP_D3: "#F59E0B",
-  REBOOKED: "#10B981",
-  NO_ANSWER: "#F59E0B",
-  FAQ_ONLY: "#3B82F6",
-  NO_SHOW: "#F43F5E",
-  COLD: "#F43F5E",
-  CALL_FAILED: "#F43F5E",
+  BOOKED: "#047857",
+  CONVERTED: "#047857",
+  VISITED: "#047857",
+  CALLING: "#1B4332",
+  PENDING: "#5C6B62",
+  REMINDED: "#1B4332",
+  FOLLOWUP_D1: "#B45309",
+  FOLLOWUP_D2: "#B45309",
+  FOLLOWUP_D3: "#B45309",
+  REBOOKED: "#047857",
+  NO_ANSWER: "#B45309",
+  FAQ_ONLY: "#1B4332",
+  NO_SHOW: "#E11D48",
+  COLD: "#E11D48",
+  CALL_FAILED: "#E11D48",
 };
 
-const FALLBACK_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#F43F5E", "#8B93A3", "#C9A84C"];
+const FALLBACK_COLORS = ["#1B4332", "#047857", "#B45309", "#E11D48", "#5C6B62", "#B8860B"];
 
 export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
   if (loading) {
-    return <div className="h-[320px] rounded-lg bg-[#14161C] border border-[#272B34] animate-pulse" />;
+    return <div className="h-[320px] rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] animate-pulse" />;
   }
 
   const chartData = data.map((d, i) => ({
@@ -41,8 +41,8 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="h-[320px] rounded-lg bg-[#14161C] border border-[#272B34] p-5 flex items-center justify-center">
-        <p className="text-[13px] text-[#8B93A3]">No leads yet</p>
+      <div className="h-[320px] rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-5 flex items-center justify-center">
+        <p className="text-[13px] text-[#5C6B62]">No leads yet</p>
       </div>
     );
   }
@@ -51,7 +51,7 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg bg-[#14161C] border border-[#272B34] p-5"
+      className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-5"
     >
       <h3 className="caption mb-4">Lead Status Distribution</h3>
       <ResponsiveContainer width="100%" height={260}>
@@ -71,10 +71,10 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1B1E26",
-              border: "1px solid #272B34",
+              backgroundColor: "#F1F3EE",
+              border: "1px solid #E4E7DF",
               borderRadius: "8px",
-              color: "#F2F4F8",
+              color: "#1E2B24",
               fontSize: "12px",
             }}
           />
@@ -82,7 +82,7 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
             verticalAlign="bottom"
             height={36}
             formatter={(value: string) => (
-              <span className="text-[12px] text-[#8B93A3]">{value}</span>
+              <span className="text-[12px] text-[#5C6B62]">{value}</span>
             )}
           />
         </PieChart>

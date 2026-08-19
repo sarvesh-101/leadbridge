@@ -57,22 +57,24 @@ export default function ResultsSection() {
   }, [inView]);
 
   return (
-    <section className="relative py-20 lg:py-32 bg-[#0B0D12]" ref={ref}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-3 gap-8">
+    <section className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" ref={ref}>
+      {/* aurora accent */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[400px] rounded-full bg-[#1B4332] opacity-40 blur-[130px] pointer-events-none" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="grid md:grid-cols-3 gap-6">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="glass-card p-8 hover:translate-y-[-2px] hover:shadow-lg transition-all duration-200 relative overflow-hidden"
+              className="glass-card p-8 hover:translate-y-[-2px] hover:shadow-[0_8px_40px_rgba(52,211,153,0.12)] transition-all duration-200 relative overflow-hidden"
             >
-              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#3B82F6]/50 to-transparent" />
-              <div className="text-[72px] font-display font-bold text-[#F2F4F8] leading-none mb-3">
+              <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#34D399]/60 to-transparent" />
+              <div className="text-[72px] font-display font-bold text-gradient-emerald leading-none mb-3">
                 {`${stat.value}${stat.suffix}`}
               </div>
-              <p className="text-[16px] font-medium text-[#8B93A3] mb-2">{stat.label}</p>
-              <p className="text-[13px] text-[#363B45]">{stat.subtext}</p>
+              <p className="text-[16px] font-medium text-[#9FB0A6] mb-2">{stat.label}</p>
+              <p className="text-[13px] text-[#6B7C73]">{stat.subtext}</p>
               {i < stats.length - 1 && (
-                <div ref={i === 0 ? lineRef : undefined} className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-32 bg-[#272B34] origin-top" />
+                <div ref={i === 0 ? lineRef : undefined} className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-32 bg-white/10 origin-top" />
               )}
             </div>
           ))}

@@ -6,54 +6,55 @@
 @tailwind utilities;
 
 @layer base {
+  /* Deep forest aurora theme — near-black green canvas, emerald + gold glows */
   :root {
-    --background: 222 25% 6%;
-    --foreground: 220 25% 96%;
-    --card: 221 18% 10%;
-    --card-foreground: 220 25% 96%;
-    --popover: 221 18% 10%;
-    --popover-foreground: 220 25% 96%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 220 25% 96%;
-    --secondary: 223 18% 13%;
-    --secondary-foreground: 220 25% 96%;
-    --muted: 223 18% 13%;
-    --muted-foreground: 219 14% 59%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 220 25% 96%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 220 25% 96%;
-    --border: 222 13% 18%;
-    --input: 223 18% 13%;
-    --ring: 217 91% 60%;
-    --radius: 0.5rem;
+    --background: 150 25% 4%;
+    --foreground: 120 25% 95%;
+    --card: 152 20% 8%;
+    --card-foreground: 120 25% 95%;
+    --popover: 152 20% 8%;
+    --popover-foreground: 120 25% 95%;
+    --primary: 155 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 152 18% 12%;
+    --secondary-foreground: 120 25% 95%;
+    --muted: 152 18% 12%;
+    --muted-foreground: 150 10% 60%;
+    --accent: 155 60% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 152 16% 14%;
+    --input: 152 16% 14%;
+    --ring: 155 60% 45%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222 25% 6%;
-    --foreground: 220 25% 96%;
-    --card: 221 18% 10%;
-    --card-foreground: 220 25% 96%;
-    --popover: 221 18% 10%;
-    --popover-foreground: 220 25% 96%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 220 25% 96%;
-    --secondary: 223 18% 13%;
-    --secondary-foreground: 220 25% 96%;
-    --muted: 223 18% 13%;
-    --muted-foreground: 219 14% 59%;
-    --accent: 217 91% 60%;
-    --accent-foreground: 220 25% 96%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 220 25% 96%;
-    --border: 222 13% 18%;
-    --input: 223 18% 13%;
-    --ring: 217 91% 60%;
+    --background: 150 25% 4%;
+    --foreground: 120 25% 95%;
+    --card: 152 20% 8%;
+    --card-foreground: 120 25% 95%;
+    --popover: 152 20% 8%;
+    --popover-foreground: 120 25% 95%;
+    --primary: 155 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 152 18% 12%;
+    --secondary-foreground: 120 25% 95%;
+    --muted: 152 18% 12%;
+    --muted-foreground: 150 10% 60%;
+    --accent: 155 60% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 152 16% 14%;
+    --input: 152 16% 14%;
+    --ring: 155 60% 45%;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #272B34 transparent;
+    scrollbar-color: #24332C transparent;
   }
 
   *::-webkit-scrollbar {
@@ -66,7 +67,7 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: #272B34;
+    background-color: #24332C;
     border-radius: 3px;
   }
 
@@ -76,11 +77,8 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Use Tailwind utility classes (bg-surface, text-text-primary, etc.) instead of raw hex values */
-  /* See tailwind.config.ts for available color tokens */
-
   ::selection {
-    background-color: rgba(59, 130, 246, 0.3);
+    background-color: rgba(52, 211, 153, 0.25);
     color: hsl(var(--foreground));
   }
 
@@ -96,7 +94,7 @@
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #8B93A3;
+    color: #6FE3B0;
   }
 
   .hero-text {
@@ -104,7 +102,7 @@
     font-weight: 700;
     font-size: clamp(56px, 8vw, 96px);
     letter-spacing: -0.04em;
-    color: #F2F4F8;
+    color: #F0F7F3;
   }
 
   .h1-text {
@@ -112,35 +110,35 @@
     font-weight: 600;
     font-size: clamp(36px, 5vw, 56px);
     letter-spacing: -0.03em;
-    color: #F2F4F8;
+    color: #F0F7F3;
   }
 
   .h2-text {
     font-family: 'Clash Display', Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 28px;
-    color: #F2F4F8;
+    color: #F0F7F3;
   }
 
   .h3-text {
     font-family: Inter, system-ui, sans-serif;
     font-weight: 600;
     font-size: 20px;
-    color: #F2F4F8;
+    color: #F0F7F3;
   }
 
   .body-text {
     font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 15px;
-    color: #8B93A3;
+    color: #9FB0A6;
   }
 
   .small-text {
     font-family: Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 13px;
-    color: #8B93A3;
+    color: #9FB0A6;
   }
 
   .mono-text {
@@ -149,25 +147,106 @@
     font-size: 13px;
   }
 
+  /* Glassmorphism card — translucent, blurred, glowing border */
   .glass-card {
-    background-color: #14161C;
-    border: 1px solid #272B34;
-    border-radius: 0.5rem;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
   .surface-card {
-    background-color: #1B1E26;
-    border: 1px solid #272B34;
-    border-radius: 0.5rem;
+    background-color: #101713;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+  }
+
+  /* App card — glassy surface with a soft top-edge highlight.
+     Uses a gradient + inset highlight instead of backdrop-filter so the
+     ~400 dashboard cards stay cheap to render while still reading as glass. */
+  .app-card {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.015) 45%, rgba(255, 255, 255, 0.02) 100%),
+      #101713;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 10px 30px -18px rgba(0, 0, 0, 0.6);
+  }
+
+  .app-card-hover {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .app-card-hover:hover {
+    border-color: rgba(52, 211, 153, 0.35);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 24px -6px rgba(52, 211, 153, 0.25),
+      0 12px 32px -16px rgba(0, 0, 0, 0.7);
   }
 
   .brand-glow {
-    box-shadow: 0 0 32px #3B82F640;
+    box-shadow: 0 8px 40px rgba(52, 211, 153, 0.25);
   }
 
   .brand-border-glow {
-    border-color: #3B82F6;
-    box-shadow: 0 0 16px #3B82F640;
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 0 24px rgba(52, 211, 153, 0.2);
+  }
+}
+
+@layer utilities {
+  /* ─── Aurora / creative background helpers ─────────────────── */
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+
+  .text-gradient-emerald {
+    background: linear-gradient(100deg, #6FE3B0 0%, #34D399 45%, #B9E4C9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(100deg, #F2D27E 0%, #E8C468 50%, #B8860B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+
+  /* Fixed aurora backdrop for app shells (dashboard/admin/customer) */
+  .aurora-backdrop {
+    background:
+      radial-gradient(900px 500px at 8% -10%, rgba(52, 211, 153, 0.07), transparent 60%),
+      radial-gradient(700px 420px at 95% 5%, rgba(232, 196, 104, 0.05), transparent 55%),
+      radial-gradient(800px 600px at 50% 115%, rgba(27, 67, 50, 0.35), transparent 65%);
+  }
+
+  @keyframes aurora-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -30px) scale(1.08); }
+    66% { transform: translate(-30px, 25px) scale(0.95); }
+  }
+
+  .animate-aurora {
+    animation: aurora-drift 18s ease-in-out infinite;
   }
 }
 

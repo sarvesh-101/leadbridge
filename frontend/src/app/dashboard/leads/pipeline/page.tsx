@@ -44,11 +44,11 @@ export default function PipelinePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Lead Pipeline</h1>
-          <p className="text-sm text-gray-400 mt-1">Drag & drop leads to update their status</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Lead Pipeline</h1>
+          <p className="text-sm text-[#9FB0A6] mt-1">Drag & drop leads to update their status</p>
         </div>
         <Link href="/dashboard/leads"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-gray-300 text-sm hover:bg-white/10 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
         >
           <LayoutList className="w-4 h-4" />
           <span className="hidden sm:inline">Table View</span>

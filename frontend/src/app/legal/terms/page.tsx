@@ -3,27 +3,27 @@ import { Zap, ArrowLeft } from "lucide-react";
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
+    <div className="min-h-screen bg-[#0A0F0C]">
       <div className="max-w-3xl mx-auto px-4 py-16">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-gray-300 mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-[#9FB0A6] hover:text-[#F0F7F3] mb-6">
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-leadflow-500 to-leadflow-accent flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+              <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Terms of Service</h1>
-              <p className="text-gray-500 text-sm">Last updated: June 13, 2026</p>
+              <h1 className="text-2xl font-bold text-[#F0F7F3]">Terms of Service</h1>
+              <p className="text-[#9FB0A6] text-sm">Last updated: June 13, 2026</p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-8 text-gray-300 leading-relaxed">
+        <div className="space-y-8 text-[#9FB0A6] leading-relaxed">
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">1. Acceptance of Terms</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">1. Acceptance of Terms</h2>
             <p>
               By accessing or using LeadFlow AI ("the Platform"), you agree to be bound by these Terms of Service.
               If you do not agree to all the terms, you may not access or use the Platform.
@@ -31,7 +31,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">2. Description of Service</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">2. Description of Service</h2>
             <p>
               LeadFlow AI provides an AI-powered lead management, appointment booking, customer follow-up,
               and conversion management platform for businesses. The Platform includes features such as
@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">3. User Accounts</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">3. User Accounts</h2>
             <p className="mb-3">
               You are responsible for maintaining the confidentiality of your account credentials and
               for all activities that occur under your account. You must notify us immediately of any
@@ -53,7 +53,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">4. Subscription and Billing</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">4. Subscription and Billing</h2>
             <p className="mb-3">
               The Platform is offered on a subscription basis. Paid plans are billed monthly or annually
               as selected during signup. All fees are non-refundable except as required by applicable law.
@@ -65,10 +65,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">5. Data Privacy</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">5. Data Privacy</h2>
             <p className="mb-3">
               Your use of the Platform is subject to our{" "}
-              <Link href="/legal/privacy" className="text-leadflow-accent hover:underline">Privacy Policy</Link>.
+              <Link href="/legal/privacy" className="text-[#6FE3B0] hover:underline">Privacy Policy</Link>.
               We process lead data, call recordings, and WhatsApp messages as described in our Privacy Policy.
             </p>
             <p>
@@ -78,7 +78,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">6. Acceptable Use</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">6. Acceptable Use</h2>
             <p className="mb-3">You agree not to:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Use the Platform for any unlawful purpose or in violation of any applicable law</li>
@@ -90,7 +90,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">7. AI Calling Compliance</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">7. AI Calling Compliance</h2>
             <p className="mb-3">
               When using the AI calling features, you represent and warrant that:
             </p>
@@ -103,7 +103,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">8. Limitation of Liability</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">8. Limitation of Liability</h2>
             <p>
               To the maximum extent permitted by law, LeadFlow AI shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages arising out of or relating to your
@@ -113,7 +113,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">9. Termination</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">9. Termination</h2>
             <p>
               We reserve the right to suspend or terminate your account for violation of these Terms.
               You may terminate your account at any time. Upon termination, your data will be deleted
@@ -122,7 +122,7 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">10. Changes to Terms</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">10. Changes to Terms</h2>
             <p>
               We may modify these Terms at any time. We will notify you of material changes via email
               or through the Platform. Continued use after changes constitutes acceptance of the new Terms.
@@ -130,10 +130,10 @@ export default function TermsOfServicePage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">11. Contact</h2>
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">11. Contact</h2>
             <p>
               For questions about these Terms, please contact us at{" "}
-              <a href="mailto:support@converza.tech" className="text-leadflow-accent hover:underline">
+              <a href="mailto:support@converza.tech" className="text-[#6FE3B0] hover:underline">
                 support@converza.tech
               </a>.
             </p>
@@ -141,8 +141,8 @@ export default function TermsOfServicePage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center">
-          <Link href="/" className="text-gray-400 hover:text-gray-300 text-sm">
-            &copy; {new Date().getFullYear()} LeadFlow AI. All rights reserved.
+          <Link href="/" className="text-[#9FB0A6] hover:text-[#F0F7F3] text-sm">
+            &copy; {new Date().getFullYear()} LeadBridge. All rights reserved.
           </Link>
         </div>
       </div>

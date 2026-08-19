@@ -81,10 +81,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   return (
     <motion.aside
       animate={{ width: isOpen ? 240 : 64 }}
-      className="h-screen bg-[#14161C] border-r border-[#272B34] flex flex-col overflow-hidden shrink-0"
+      className="h-screen bg-[#101713]/85 backdrop-blur-xl border-r border-white/10 flex flex-col overflow-hidden shrink-0"
     >
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-[#272B34]">
+      <div className="flex items-center justify-between px-4 h-14 border-b border-white/10">
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -93,22 +93,22 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               exit={{ opacity: 0 }}
               className="flex items-center gap-3"
             >
-              <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center">
-                <Zap className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_16px_rgba(52,211,153,0.35)]">
+                <Zap className="w-4 h-4 text-[#0A0F0C]" />
               </div>
-              <span className="text-[16px] font-display font-bold text-[#F2F4F8]">LeadBridge</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="text-[16px] font-display font-bold text-[#F0F7F3]">LeadBridge</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
             </motion.div>
           )}
         </AnimatePresence>
         <button
           onClick={onToggle}
-          className="p-1.5 rounded-lg hover:bg-[#1B1E26] transition-colors"
+          className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors"
         >
           {isOpen ? (
-            <ChevronLeft className="w-4 h-4 text-[#8B93A3]" />
+            <ChevronLeft className="w-4 h-4 text-[#9FB0A6]" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-[#8B93A3]" />
+            <ChevronRight className="w-4 h-4 text-[#9FB0A6]" />
           )}
         </button>
       </div>
@@ -125,10 +125,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 relative",
                 isActive
-                  ? "bg-[#3B82F6]/10 text-[#3B82F6]"
+                  ? "bg-[#34D399]/15 text-[#6FE3B0] shadow-[inset_0_0_0_1px_rgba(52,211,153,0.25),0_0_16px_-4px_rgba(52,211,153,0.3)]"
                   : isLocked
-                  ? "text-[#4B4B6A] cursor-not-allowed"
-                  : "text-[#8B93A3] hover:bg-[#1B1E26] hover:text-[#F2F4F8]"
+                  ? "text-[#9FB0A6] cursor-not-allowed"
+                  : "text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3]"
               )}
               onClick={(e) => isLocked ? e.preventDefault() : undefined}
               title={isLocked ? `Requires ${item.requiredPlan} plan` : item.label}
@@ -136,8 +136,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               <span className="shrink-0 relative">
                 {item.icon}
                 {isLocked && (
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#272B34] flex items-center justify-center">
-                    <Lock className="w-2.5 h-2.5 text-[#8B93A3]" />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#24332C] flex items-center justify-center">
+                    <Lock className="w-2.5 h-2.5 text-[#9FB0A6]" />
                   </span>
                 )}
               </span>
@@ -154,12 +154,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 )}
               </AnimatePresence>
               {isLocked && isOpen && (
-                <span className="ml-auto text-[10px] uppercase tracking-wider text-[#4B4B6A]">
+                <span className="ml-auto text-[10px] uppercase tracking-wider text-[#9FB0A6]">
                   {item.requiredPlan}
                 </span>
               )}
               {item.badge && isOpen && (
-                <span className="ml-auto bg-[#F43F5E] text-white text-[11px] rounded-full px-1.5 py-0.5">
+                <span className="ml-auto bg-[#FB7185] text-white text-[11px] rounded-full px-1.5 py-0.5">
                   {item.badge}
                 </span>
               )}
@@ -167,7 +167,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[#3B82F6] rounded-r-full"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[#34D399] rounded-r-full shadow-[0_0_8px_#34D399]"
                 />
               )}
             </Link>
@@ -176,23 +176,23 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       </nav>
 
       {/* Bottom: User section */}
-      <div className="border-t border-[#272B34] p-3">
+      <div className="border-t border-white/10 p-3">
         {isOpen ? (
           <div className="space-y-2">
             <div className="flex items-center gap-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#3B82F6]/60 flex items-center justify-center flex-shrink-0">
-                <span className="text-white text-[13px] font-semibold">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center flex-shrink-0 shadow-[0_0_16px_rgba(52,211,153,0.3)]">
+                <span className="text-[#0A0F0C] text-[13px] font-bold">
                   {(user?.name || user?.businessName || "U")[0].toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#F2F4F8] truncate">
+                <p className="text-[13px] font-medium text-[#F0F7F3] truncate">
                   {user?.businessName || user?.name || "User"}
                 </p>
                 <span className={cn(
                   "text-[11px] font-medium",
-                  planBadge === "PRO" ? "text-[#C9A84C]" :
-                  planBadge === "GROWTH" ? "text-[#3B82F6]" : "text-[#8B93A3]"
+                  planBadge === "PRO" ? "text-[#E8C468]" :
+                  planBadge === "GROWTH" ? "text-[#6FE3B0]" : "text-[#9FB0A6]"
                 )}>
                   {planBadge}
                 </span>
@@ -200,7 +200,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             </div>
             <button
               onClick={logout}
-              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-[#8B93A3] hover:text-[#F43F5E] hover:bg-[#1B1E26] transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-[#9FB0A6] hover:text-[#FB7185] hover:bg-white/[0.06] transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               Logout
@@ -209,7 +209,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         ) : (
           <button
             onClick={logout}
-            className="flex items-center justify-center w-full p-2 rounded-lg text-[#8B93A3] hover:text-[#F43F5E] hover:bg-[#1B1E26] transition-colors"
+            className="flex items-center justify-center w-full p-2 rounded-lg text-[#9FB0A6] hover:text-[#FB7185] hover:bg-white/[0.06] transition-colors"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -218,10 +218,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Admin switch to broker view */}
       {isAdmin && isOpen && (
-        <div className="px-4 py-2 border-t border-[#272B34]">
+        <div className="px-4 py-2 border-t border-white/10">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-[12px] text-[#8B93A3] hover:text-[#F2F4F8] transition-colors"
+            className="flex items-center gap-2 text-[12px] text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors"
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
             Switch to Broker View

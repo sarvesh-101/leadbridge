@@ -77,11 +77,11 @@ export default function AdminHealthPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Integration Health</h1>
-          <p className="text-gray-400 mt-1">Live status of every external service — know exactly what's configured and what's missing</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Integration Health</h1>
+          <p className="text-[#9FB0A6] mt-1">Live status of every external service — know exactly what's configured and what's missing</p>
         </div>
         <button onClick={loadHealth} disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400 hover:bg-white/10 hover:text-white disabled:opacity-50 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl app-card app-card-hover text-sm text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3] disabled:opacity-50 transition-all"
         >
           <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
           Refresh
@@ -91,14 +91,14 @@ export default function AdminHealthPage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-24 rounded-xl app-card animate-pulse" />
           ))}
         </div>
       ) : error ? (
         <div className="p-8 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
           <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
           <p className="text-sm text-red-300">{error}</p>
-          <button onClick={loadHealth} className="mt-3 text-xs text-[#3B82F6] hover:underline">
+          <button onClick={loadHealth} className="mt-3 text-xs text-[#6FE3B0] hover:underline">
             Try Again
           </button>
         </div>
@@ -119,7 +119,7 @@ export default function AdminHealthPage() {
               <WifiOff className="w-6 h-6 text-amber-400 shrink-0" />
             )}
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-[#F0F7F3]">
                 {health.status === "all-configured"
                   ? "✅ All integrations configured"
                   : `⚠️ ${health.unconfigured.length} integration${health.unconfigured.length > 1 ? "s" : ""} not configured`}
@@ -131,8 +131,8 @@ export default function AdminHealthPage() {
               )}
             </div>
             <div className="text-right shrink-0">
-              <div className="text-2xl font-bold text-white">{configuredCount}/{totalCount}</div>
-              <div className="text-xs text-gray-500">configured</div>
+              <div className="text-2xl font-bold text-[#F0F7F3]">{configuredCount}/{totalCount}</div>
+              <div className="text-xs text-[#9FB0A6]">configured</div>
             </div>
           </motion.div>
 
@@ -148,7 +148,7 @@ export default function AdminHealthPage() {
                 <motion.div key={key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                   className={cn(
                     "p-5 rounded-xl border transition-all",
-                    isOkRedis ? "bg-white/5 border-white/10" : "bg-red-500/5 border-red-500/20"
+                    isOkRedis ? "bg-[#101713] border-white/10" : "bg-red-500/5 border-red-500/20"
                   )}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -160,8 +160,8 @@ export default function AdminHealthPage() {
                         {meta.icon}
                       </div>
                       <div>
-                        <h3 className="text-sm font-semibold text-white">{meta.label}</h3>
-                        <p className="text-[11px] text-gray-500">{meta.desc}</p>
+                        <h3 className="text-sm font-semibold text-[#F0F7F3]">{meta.label}</h3>
+                        <p className="text-[11px] text-[#9FB0A6]">{meta.desc}</p>
                       </div>
                     </div>
                     {isOkRedis ? (
@@ -173,7 +173,7 @@ export default function AdminHealthPage() {
 
                   {/* Extra detail */}
                   {key === "voice_ai" && status.circuitState && (
-                    <div className="mt-3 text-[11px] text-gray-400">
+                    <div className="mt-3 text-[11px] text-[#9FB0A6]">
                       Circuit: <span className={cn("font-medium", status.circuitState === "CLOSED" ? "text-green-400" : "text-red-400")}>{status.circuitState}</span>
                       {typeof status.circuitFailureCount === "number" && status.circuitFailureCount > 0 && (
                         <span className="text-red-400"> • {status.circuitFailureCount} failures</span>
@@ -181,18 +181,18 @@ export default function AdminHealthPage() {
                     </div>
                   )}
                   {key === "phone" && status.provider && (
-                    <div className="mt-3 text-[11px] text-gray-400">
-                      Provider: <span className="text-gray-300 font-medium">{status.provider}</span>
+                    <div className="mt-3 text-[11px] text-[#9FB0A6]">
+                      Provider: <span className="text-[#9FB0A6] font-medium">{status.provider}</span>
                     </div>
                   )}
                   {key === "sms_forwarding" && (
-                    <div className="mt-3 text-[11px] text-gray-400">
-                      Number: <span className="font-mono text-gray-300">{status.forwardingNumber || "— not set —"}</span>
+                    <div className="mt-3 text-[11px] text-[#9FB0A6]">
+                      Number: <span className="font-mono text-[#9FB0A6]">{status.forwardingNumber || "— not set —"}</span>
                     </div>
                   )}
                   {key === "email_forwarding" && (
-                    <div className="mt-3 text-[11px] text-gray-400">
-                      Email: <span className="font-mono text-gray-300">{status.forwardingEmail || "— not set —"}</span>
+                    <div className="mt-3 text-[11px] text-[#9FB0A6]">
+                      Email: <span className="font-mono text-[#9FB0A6]">{status.forwardingEmail || "— not set —"}</span>
                     </div>
                   )}
 

@@ -30,12 +30,12 @@ const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const ACTIVITY_BG: Record<string, string> = {
-  lead_new: "bg-[#3B82F6]/10 text-[#3B82F6]",
-  call_started: "bg-[#F59E0B]/10 text-[#F59E0B]",
-  call_completed: "bg-[#10B981]/10 text-[#10B981]",
-  booking_made: "bg-[#10B981]/10 text-[#10B981]",
-  status_change: "bg-[#3B82F6]/10 text-[#3B82F6]",
-  notification_sent: "bg-[#3B82F6]/10 text-[#3B82F6]",
+  lead_new: "bg-[#1B4332]/10 text-[#1B4332]",
+  call_started: "bg-[#B45309]/10 text-[#B45309]",
+  call_completed: "bg-[#047857]/10 text-[#047857]",
+  booking_made: "bg-[#047857]/10 text-[#047857]",
+  status_change: "bg-[#1B4332]/10 text-[#1B4332]",
+  notification_sent: "bg-[#1B4332]/10 text-[#1B4332]",
 };
 
 export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
@@ -43,7 +43,7 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
     return (
       <div className="space-y-3">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-[60px] rounded-lg bg-[#1B1E26] animate-pulse" />
+          <div key={i} className="h-[60px] rounded-lg bg-[#F1F3EE] animate-pulse" />
         ))}
       </div>
     );
@@ -59,27 +59,27 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#1B1E26] transition-colors"
+            className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#F1F3EE] transition-colors"
           >
-            <div className={cn("p-1.5 rounded-full", ACTIVITY_BG[activity.type] || "bg-[#1B1E26] text-[#8B93A3]")}>
+            <div className={cn("p-1.5 rounded-full", ACTIVITY_BG[activity.type] || "bg-[#F1F3EE] text-[#5C6B62]")}>
               {ACTIVITY_ICONS[activity.type] || <Activity className="w-3.5 h-3.5" />}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-[#F2F4F8] truncate">
+              <p className="text-[13px] font-medium text-[#1E2B24] truncate">
                 {activity.title}
               </p>
-              <p className="text-[12px] text-[#8B93A3] truncate">
+              <p className="text-[12px] text-[#5C6B62] truncate">
                 {activity.description}
               </p>
             </div>
-            <p className="text-[11px] text-[#8B93A3] whitespace-nowrap flex-shrink-0">
+            <p className="text-[11px] text-[#5C6B62] whitespace-nowrap flex-shrink-0">
               {formatDate(activity.timestamp)}
             </p>
           </motion.div>
         ))}
       </AnimatePresence>
       {activities.length === 0 && (
-        <p className="text-center text-[#8B93A3] text-[13px] py-8">
+        <p className="text-center text-[#5C6B62] text-[13px] py-8">
           No recent activity
         </p>
       )}

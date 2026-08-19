@@ -109,31 +109,31 @@ export default function AdminQueuesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-white">Queue Monitor</h1>
-            <p className="text-gray-400 mt-1">BullMQ job queues and worker health</p>
+            <h1 className="text-2xl font-bold text-[#F0F7F3]">Queue Monitor</h1>
+            <p className="text-[#9FB0A6] mt-1">BullMQ job queues and worker health</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {/* Auto-refresh toggle */}
-          <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-xs text-[#9FB0A6] cursor-pointer select-none">
             <button onClick={() => setAutoRefresh(!autoRefresh)}
               className={cn(
                 "w-8 h-4 rounded-full transition-colors relative",
-                autoRefresh ? "bg-leadflow-500" : "bg-white/10"
+                autoRefresh ? "bg-[#1B4332]" : "bg-white/[0.06]"
               )}
             >
               <span className={cn(
-                "absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform",
+                "absolute top-0.5 w-3 h-3 rounded-full bg-[#101713] transition-transform",
                 autoRefresh ? "translate-x-4" : "translate-x-0.5"
               )} />
             </button>
             Auto-refresh
           </label>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-[#9FB0A6]">
             {lastRefresh.toLocaleTimeString()}
           </span>
           <button onClick={loadData}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/10"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl app-card app-card-hover text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
           >
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Refresh
           </button>
@@ -156,7 +156,7 @@ export default function AdminQueuesPage() {
               Redis
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-xs text-[#9FB0A6]">
             <span className="flex items-center gap-1">
               <span className={cn("w-2 h-2 rounded-full", data.available ? "bg-green-400" : "bg-yellow-400")} />
               Queue Worker
@@ -177,13 +177,13 @@ export default function AdminQueuesPage() {
             { label: "Failed", value: totalFailed, icon: AlertCircle, color: "from-red-500 to-red-600" },
           ].map((card) => (
             <motion.div key={card.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-xl bg-white/5 border border-white/10"
+              className="p-4 rounded-xl app-card"
             >
               <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", card.color)}>
                 <card.icon className="w-4 h-4 text-white" />
               </div>
-              <div className="text-xl font-bold text-white">{card.value.toLocaleString()}</div>
-              <div className="text-xs text-gray-500">{card.label}</div>
+              <div className="text-xl font-bold text-[#F0F7F3]">{card.value.toLocaleString()}</div>
+              <div className="text-xs text-[#9FB0A6]">{card.label}</div>
             </motion.div>
           ))}
         </div>
@@ -193,19 +193,19 @@ export default function AdminQueuesPage() {
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-20 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-20 rounded-xl app-card animate-pulse" />
           ))}
         </div>
       )}
 
       {/* Error State */}
       {error && !loading && (
-        <div className="text-center py-16 rounded-xl bg-white/5 border border-white/10">
+        <div className="text-center py-16 rounded-xl app-card">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
-          <h3 className="text-lg font-medium text-white mb-2">Failed to load queue stats</h3>
-          <p className="text-sm text-gray-500 mb-6">{error}</p>
+          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">Failed to load queue stats</h3>
+          <p className="text-sm text-[#9FB0A6] mb-6">{error}</p>
           <button onClick={loadData}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
           >
             <RefreshCw className="w-4 h-4" /> Retry
           </button>
@@ -214,10 +214,10 @@ export default function AdminQueuesPage() {
 
       {/* Redis Unavailable */}
       {!loading && data && !data.available && (
-        <div className="text-center py-16 rounded-xl bg-white/5 border border-white/10">
-          <Server className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-          <h3 className="text-lg font-medium text-white mb-2">Redis Disconnected</h3>
-          <p className="text-sm text-gray-500">
+        <div className="text-center py-16 rounded-xl app-card">
+          <Server className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
+          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">Redis Disconnected</h3>
+          <p className="text-sm text-[#9FB0A6]">
             Queue monitoring requires Redis to be running. <br />
             Start Redis and restart the server to see queue metrics.
           </p>
@@ -227,7 +227,7 @@ export default function AdminQueuesPage() {
       {/* Queue Details */}
       {!loading && data?.available && data.queues && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-white">Queue Details</h2>
+          <h2 className="text-sm font-semibold text-[#F0F7F3]">Queue Details</h2>
 
           {data.queues.map((queue, i) => {
             const maxVal = Math.max(queue.waiting, queue.active, 1);
@@ -239,14 +239,14 @@ export default function AdminQueuesPage() {
                   "p-5 rounded-xl border transition-all",
                   hasFailed ? "bg-red-500/5 border-red-500/20" :
                   queue.paused ? "bg-yellow-500/5 border-yellow-500/20" :
-                  "bg-white/5 border-white/10 hover:bg-white/10"
+                  "bg-[#101713] border-white/10 hover:bg-white/[0.06]"
                 )}
               >
                 {/* Header Row */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white capitalize">{queue.name}</span>
+                      <span className="text-sm font-medium text-[#F0F7F3] capitalize">{queue.name}</span>
                       {queue.paused && (
                         <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400">PAUSED</span>
                       )}
@@ -256,7 +256,7 @@ export default function AdminQueuesPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-[#9FB0A6] mt-0.5">
                       {queue.total} total · {queue.completed.toLocaleString()} completed today
                     </p>
                   </div>
@@ -278,7 +278,7 @@ export default function AdminQueuesPage() {
                     {queue.completed > 500 && (
                       <button onClick={() => handleFlush(queue.name)}
                         disabled={actionLoading === `flush-${queue.name}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-gray-400 text-xs font-medium hover:bg-white/10 disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.06] disabled:opacity-50"
                       >
                         {actionLoading === `flush-${queue.name}` ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -292,7 +292,7 @@ export default function AdminQueuesPage() {
                 </div>
 
                 {/* Bar Chart */}
-                <div className="h-2.5 rounded-full bg-white/5 overflow-hidden flex">
+                <div className="h-2.5 rounded-full bg-[#101713] overflow-hidden flex">
                   {queue.waiting > 0 && (
                     <div
                       className="h-full bg-violet-500 transition-all"
@@ -315,12 +315,12 @@ export default function AdminQueuesPage() {
                     { label: "Waiting", value: queue.waiting, icon: Clock, color: "text-violet-400" },
                     { label: "Active", value: queue.active, icon: Play, color: "text-amber-400" },
                     { label: "Delayed", value: queue.delayed, icon: ArrowDown, color: "text-blue-400" },
-                    { label: "Failed", value: queue.failed, icon: AlertCircle, color: hasFailed ? "text-red-400" : "text-gray-500" },
+                    { label: "Failed", value: queue.failed, icon: AlertCircle, color: hasFailed ? "text-red-400" : "text-[#9FB0A6]" },
                   ].map((s) => (
                     <div key={s.label}>
                       <div className="flex items-center gap-1">
                         <s.icon className={cn("w-3 h-3", s.color)} />
-                        <span className="text-xs text-gray-500">{s.label}</span>
+                        <span className="text-xs text-[#9FB0A6]">{s.label}</span>
                       </div>
                       <p className={cn("text-sm font-semibold mt-0.5", s.color)}>
                         {s.value.toLocaleString()}

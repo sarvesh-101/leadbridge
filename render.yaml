@@ -1,0 +1,104 @@
+services:
+  - type: web
+    name: leadbridge-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_PRISMA
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://leadbridge-seven.vercel.app
+      - key: PHONE_PROVIDER
+        value: omnidimension
+      - key: VOICE_AI_PROVIDER
+        value: omnidimension
+      - key: DEMO_MODE
+        value: "false"
+      - key: OMNIDIM_API_KEY
+        sync: false
+      - key: OMNIDIM_BASE_URL
+        value: https://backend.omnidim.io/api/v1
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        value: https://api.deepseek.com
+      - key: DEEPSEEK_MODEL
+        value: deepseek-chat
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_ID
+        value: "1226070940590994"
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_BUSINESS_ACCOUNT_ID
+        value: "1008711545369398"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: RAZORPAY_PLAN_STARTER
+        value: plan_TLa2O5pEwG46mP
+      - key: RAZORPAY_PLAN_GROWTH
+        value: plan_TLa2OL7fmEXbnz
+      - key: RAZORPAY_PLAN_PRO
+        value: plan_TLa2OaHr2MHxTe
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: FROM_NAME
+        value: LeadBridge
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: MESSAGEBIRD_API_KEY
+        sync: false
+      - key: SMS_SENDER_ID
+        value: LeadBrg
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: SUPABASE_URL
+        value: https://oavzflfdjluxvdlymbug.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_RECORDINGS_BUCKET
+        value: call-recordings
+      - key: FORWARDING_EMAIL
+        value: forward@converza.tech
+      - key: OMNIDIM_COST_PER_MINUTE
+        value: "0.10"
+      - key: PHONE_NUMBER_MONTHLY_COST
+        value: "2.00"
+      - key: BROKER_CALL_PRICE
+        value: "2.00"
+      - key: PRO_MONTHLY_CALL_CAP
+        value: "2000"

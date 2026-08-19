@@ -113,15 +113,15 @@ export default function FeatureShowcase() {
   }, [inView]);
 
   return (
-    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0B0D12] overflow-hidden" id="features">
+    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="features">
       {/* Background glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-[#3B82F6] opacity-[0.02] blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-[#34D399] opacity-[0.05] blur-[150px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
-          <span className="caption text-[#3B82F6] mb-4 block">POWERED BY AI</span>
+          <span className="caption text-gradient-emerald mb-4 block">POWERED BY AI</span>
           <h2 className="h1-text mb-4">Everything you need to convert more leads</h2>
-          <p className="text-[16px] text-[#8B93A3] max-w-[600px] mx-auto">
+          <p className="text-[16px] text-[#9FB0A6] max-w-[600px] mx-auto">
             From the moment a lead comes in to the moment they visit — every step is automated, optimized, and trackable.
           </p>
         </div>
@@ -132,24 +132,24 @@ export default function FeatureShowcase() {
             return (
               <div
                 key={i}
-                className="feature-card group relative p-6 rounded-xl bg-[#14161C] border border-[#272B34] hover:border-[#363B45] transition-all duration-300 hover:translate-y-[-2px]"
+                className="feature-card group relative p-6 rounded-xl glass-card hover:border-[#34D399]/40 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_40px_rgba(52,211,153,0.12)]"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-[#3B82F6]" />
+                  <div className="w-10 h-10 rounded-lg bg-[#34D399]/10 border border-[#34D399]/25 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(52,211,153,0.15)]">
+                    <Icon className="w-5 h-5 text-[#34D399]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[15px] font-semibold text-[#F2F4F8] mb-1.5 group-hover:text-white transition-colors">
+                    <h3 className="text-[15px] font-semibold text-[#F0F7F3] mb-1.5 group-hover:text-white transition-colors">
                       {feature.title}
                     </h3>
-                    <p className="text-[13px] text-[#8B93A3] leading-relaxed">
+                    <p className="text-[13px] text-[#9FB0A6] leading-relaxed">
                       {feature.description}
                     </p>
                   </div>
                 </div>
                 {/* Hover glow */}
                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: "radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(59, 130, 246, 0.04), transparent 40%)" }}
+                  style={{ background: "radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(52, 211, 153, 0.08), transparent 40%)" }}
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.parentElement?.getBoundingClientRect();
                     if (rect) {

@@ -32,7 +32,7 @@ export function RealtimeStatusDot() {
           connected ? "bg-green-500" : "bg-gray-400"
         )}
       />
-      <span className="text-xs text-gray-500 dark:text-gray-400">
+      <span className="text-xs text-[#9FB0A6] dark:text-[#9FB0A6]">
         {connected ? "Live" : "Offline"}
       </span>
     </div>

@@ -53,10 +53,10 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
       // Globe - Wireframe Sphere
       const geometry = new THREE.SphereGeometry(2, 32, 32);
       const material = new THREE.MeshBasicMaterial({
-        color: 0x3b82f6,
+        color: 0x34d399,
         wireframe: true,
         transparent: true,
-        opacity: 0.15,
+        opacity: 0.16,
       });
       const globe = new THREE.Mesh(geometry, material);
       scene.add(globe);
@@ -65,10 +65,10 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
       // Inner wireframe
       const innerGeo = new THREE.SphereGeometry(1.95, 24, 24);
       const innerMat = new THREE.MeshBasicMaterial({
-        color: 0x3b82f6,
+        color: 0x34d399,
         wireframe: true,
         transparent: true,
-        opacity: 0.08,
+        opacity: 0.09,
       });
       const innerGlobe = new THREE.Mesh(innerGeo, innerMat);
       scene.add(innerGlobe);
@@ -82,7 +82,7 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
         if (i % 2 === 0) {
           particlePositions.push(pos.getX(i), pos.getY(i), pos.getZ(i));
           const brightness = 0.4 + Math.random() * 0.6;
-          particleColors.push(0.23 * brightness, 0.51 * brightness, 0.96 * brightness);
+          particleColors.push(0.2 * brightness, 0.83 * brightness, 0.6 * brightness);
         }
       }
       const particleGeo = new THREE.BufferGeometry();
@@ -101,9 +101,9 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
 
       // Lat/Long rings
       const ringMaterial = new THREE.LineBasicMaterial({
-        color: 0x3b82f6,
+        color: 0x34d399,
         transparent: true,
-        opacity: 0.1,
+        opacity: 0.12,
       });
       for (let angle = -60; angle <= 60; angle += 30) {
         if (angle === 0) continue;

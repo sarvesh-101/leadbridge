@@ -110,21 +110,21 @@ export default function CustomerChatPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
+    <div className="min-h-screen bg-[#0A0F0C] aurora-backdrop">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0A0F0C]/80 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
+          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#10B981] to-[#10B981] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34D399] to-[#34D399] flex items-center justify-center">
             <MessageSquare className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-sm font-semibold text-white">WhatsApp Chat</h1>
+            <h1 className="text-sm font-semibold text-[#F0F7F3]">WhatsApp Chat</h1>
             <p className="text-[10px] text-green-400">AI Assistant</p>
           </div>
-          <button onClick={loadChat} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
+          <button onClick={loadChat} className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
           </button>
         </div>
@@ -136,7 +136,7 @@ export default function CustomerChatPage() {
           <div className="p-8 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
             <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
             <p className="text-sm text-red-400">Failed to load chat history.</p>
-            <p className="text-xs text-gray-500 mt-1">You can still contact your broker via WhatsApp.</p>
+            <p className="text-xs text-[#9FB0A6] mt-1">You can still contact your broker via WhatsApp.</p>
           </div>
         }>
         <div className="space-y-4 mb-4">
@@ -144,7 +144,7 @@ export default function CustomerChatPage() {
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex gap-3 animate-pulse" style={{ justifyContent: i % 2 === 0 ? "flex-end" : "flex-start" }}>
-                  <div className={cn("w-3/4 h-12 rounded-2xl bg-white/5")} />
+                  <div className={cn("w-3/4 h-12 rounded-2xl bg-[#101713]")} />
                 </div>
               ))}
             </div>
@@ -153,9 +153,9 @@ export default function CustomerChatPage() {
               <div key={gi}>
                 {/* Date separator */}
                 <div className="flex items-center gap-3 mb-4 mt-2">
-                  <div className="flex-1 h-px bg-white/5" />
+                  <div className="flex-1 h-px bg-[#101713]" />
                   <span className="text-[10px] text-gray-600 font-medium">{group.date}</span>
-                  <div className="flex-1 h-px bg-white/5" />
+                  <div className="flex-1 h-px bg-[#101713]" />
                 </div>
 
                 <div className="space-y-3">
@@ -178,15 +178,15 @@ export default function CustomerChatPage() {
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1",
                           isBot
-                            ? "bg-gradient-to-br from-[#10B981] to-[#10B981]"
+                            ? "bg-gradient-to-br from-[#34D399] to-[#34D399]"
                             : isIncoming
-                              ? "bg-[#3B82F6]/20"
-                              : "bg-white/10"
+                              ? "bg-[#34D399]/25"
+                              : "bg-white/[0.06]"
                         )}>
                           {isBot ? (
-                            <Bot className="w-3.5 h-3.5 text-white" />
+                            <Bot className="w-3.5 h-3.5 text-[#F0F7F3]" />
                           ) : (
-                            <User className="w-3.5 h-3.5 text-gray-300" />
+                            <User className="w-3.5 h-3.5 text-[#9FB0A6]" />
                           )}
                         </div>
 
@@ -195,10 +195,10 @@ export default function CustomerChatPage() {
                           <div className={cn(
                             "px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed",
                             isBot
-                              ? "bg-[#10B981]/10 border border-[#10B981]/15 text-gray-200 rounded-tl-sm"
+                              ? "bg-[#34D399]/15 border border-[#34D399]/50/15 text-[#9FB0A6] rounded-tl-sm"
                               : isIncoming
-                                ? "bg-[#3B82F6]/10 border border-[#3B82F6]/15 text-gray-200"
-                                : "bg-[#3B82F6] text-white rounded-tr-sm"
+                                ? "bg-[#34D399]/15 border border-[#34D399]/50/15 text-[#9FB0A6]"
+                                : "bg-[#1B4332] text-white rounded-tr-sm"
                           )}>
                             {msg.type === "OTP_SENT" ? (
                               <div className="flex items-center gap-1.5">
@@ -229,8 +229,8 @@ export default function CustomerChatPage() {
               className="text-center py-12"
             >
               <MessageSquare className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-              <h2 className="text-sm font-semibold text-white mb-1">No Messages Yet</h2>
-              <p className="text-xs text-gray-500 mb-4">
+              <h2 className="text-sm font-semibold text-[#F0F7F3] mb-1">No Messages Yet</h2>
+              <p className="text-xs text-[#9FB0A6] mb-4">
                 Start a conversation with the AI assistant on WhatsApp
               </p>
             </motion.div>
@@ -240,18 +240,18 @@ export default function CustomerChatPage() {
         </ErrorBoundary>
 
         {/* Fixed bottom bar with WhatsApp link */}
-        <div className="sticky bottom-4 bg-[#14161C] border border-white/10 rounded-2xl p-3">
+        <div className="sticky bottom-4 app-card rounded-2xl p-3">
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <p className="text-xs text-white font-medium">Chat with AI Assistant</p>
-              <p className="text-[10px] text-gray-500">Reply on WhatsApp for quick help</p>
+              <p className="text-xs text-[#F0F7F3] font-medium">Chat with AI Assistant</p>
+              <p className="text-[10px] text-[#9FB0A6]">Reply on WhatsApp for quick help</p>
             </div>
             {waLink ? (
               <a
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#047857] text-white text-xs font-medium hover:bg-[#065F46] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#34D399] text-white text-xs font-medium hover:bg-[#065F46] transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 Open WhatsApp
@@ -260,7 +260,7 @@ export default function CustomerChatPage() {
             ) : (
               <a
                 href={`tel:${customer?.clientContact}`}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1B4332] text-white text-xs font-medium hover:opacity-90 transition-colors"
               >
                 <Phone className="w-3.5 h-3.5" />
                 Call Broker

@@ -54,7 +54,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body className="min-h-screen bg-[#0B0D12] text-[#F2F4F8] antialiased">
+      <body className="min-h-screen bg-[#0A0F0C] text-[#F0F7F3] antialiased">
         <QueryProvider>
           {children}
         </QueryProvider>

@@ -178,7 +178,7 @@ export default function DashboardPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-lg bg-[#14161C] border border-[#272B34] p-4 sm:p-5"
+            className="rounded-lg app-card p-4 sm:p-5"
           >
             <h3 className="caption mb-4">Recent Activity</h3>
             <ActivityFeed activities={activity} loading={loading} />
@@ -190,58 +190,58 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-lg bg-[#14161C] border border-[#272B34] p-5"
+          className="rounded-lg app-card p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="caption flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#10B981]" />
+              <Zap className="w-4 h-4 text-[#34D399]" />
               Hot Leads
             </h3>
-            <Link href="/dashboard/leads" className="text-[11px] text-[#3B82F6] hover:text-[#3B82F6]/80 font-medium transition-colors">
+            <Link href="/dashboard/leads" className="text-[11px] text-[#6FE3B0] hover:text-[#6FE3B0]/80 font-medium transition-colors">
               View all
             </Link>
           </div>
           {hotLeadsLoading ? (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="h-14 rounded-lg bg-[#1B1E26] animate-pulse" />
+                <div key={i} className="h-14 rounded-lg bg-white/[0.06] animate-pulse" />
               ))}
             </div>
           ) : hotLeads.length > 0 ? (
             <div className="space-y-2">
               {hotLeads.map((lead: any, i: number) => (
                 <Link key={lead.id} href={`/dashboard/leads/${lead.id}`}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-[#1B1E26] border border-[#272B34] hover:bg-[#1B1E26]/80 transition-all group"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:bg-white/[0.06]/80 transition-all group"
                 >
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono",
-                    lead.score >= 80 ? "bg-[#10B981]/20 text-[#10B981]" :
-                    lead.score >= 70 ? "bg-[#10B981]/10 text-[#10B981]" :
-                    "bg-[#F59E0B]/10 text-[#F59E0B]"
+                    lead.score >= 80 ? "bg-[#34D399]/25 text-[#34D399]" :
+                    lead.score >= 70 ? "bg-[#34D399]/15 text-[#34D399]" :
+                    "bg-[#E8C468]/15 text-[#E8C468]"
                   )}>
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[#F2F4F8] truncate">{lead.name}</p>
-                    <p className="text-[11px] text-[#8B93A3]">{lead.source} · Score: {lead.score}</p>
+                    <p className="text-[13px] font-medium text-[#F0F7F3] truncate">{lead.name}</p>
+                    <p className="text-[11px] text-[#9FB0A6]">{lead.source} · Score: {lead.score}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={cn(
                       "w-1.5 h-1.5 rounded-full",
-                      lead.score >= 80 ? "bg-[#10B981]" :
-                      lead.score >= 70 ? "bg-[#10B981]/70" :
-                      "bg-[#F59E0B]"
+                      lead.score >= 80 ? "bg-[#34D399]" :
+                      lead.score >= 70 ? "bg-[#34D399]/70" :
+                      "bg-[#B45309]"
                     )} />
-                    <ChevronRight className="w-3.5 h-3.5 text-[#363B45] group-hover:text-[#8B93A3] transition-colors" />
+                    <ChevronRight className="w-3.5 h-3.5 text-[#6B7C73] group-hover:text-[#9FB0A6] transition-colors" />
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <BrainCircuit className="w-8 h-8 text-[#363B45] mx-auto mb-2" />
-              <p className="text-[13px] text-[#8B93A3]">No scored leads yet</p>
-              <p className="text-[11px] text-[#363B45] mt-1">Scores appear after AI calls complete</p>
+              <BrainCircuit className="w-8 h-8 text-[#6B7C73] mx-auto mb-2" />
+              <p className="text-[13px] text-[#9FB0A6]">No scored leads yet</p>
+              <p className="text-[11px] text-[#6B7C73] mt-1">Scores appear after AI calls complete</p>
             </div>
           )}
         </motion.div>
@@ -251,26 +251,26 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="rounded-lg bg-[#14161C] border border-[#272B34] p-5"
+          className="rounded-lg app-card p-5"
         >
           <h3 className="caption mb-4">Today&apos;s Visits</h3>
           {todayBookings.length > 0 ? (
             <div className="space-y-2">
               {todayBookings.map((booking: BookingItem, i: number) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-[#1B1E26] border border-[#272B34]">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981]" />
+                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-white/10">
+                  <div className="w-2 h-2 rounded-full bg-[#34D399]" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[#F2F4F8] truncate">
+                    <p className="text-[13px] font-medium text-[#F0F7F3] truncate">
                       {booking.lead?.name || "Unknown"}
                     </p>
-                    <p className="text-[12px] text-[#8B93A3]">{booking.visitTime} · {booking.lead?.source || ""}</p>
+                    <p className="text-[12px] text-[#9FB0A6]">{booking.visitTime} · {booking.lead?.source || ""}</p>
                   </div>
-                  <span className="text-[11px] text-[#10B981] font-mono">{booking.visitTime}</span>
+                  <span className="text-[11px] text-[#34D399] font-mono">{booking.visitTime}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[13px] text-[#8B93A3] text-center py-8">
+            <p className="text-[13px] text-[#9FB0A6] text-center py-8">
               No visits scheduled today
             </p>
           )}

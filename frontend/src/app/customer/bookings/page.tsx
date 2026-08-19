@@ -40,7 +40,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   VISITED: { label: "Visited", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
   NO_SHOW: { label: "Missed", color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
   RESCHEDULED: { label: "Rescheduled", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
-  CANCELLED: { label: "Cancelled", color: "text-gray-400", bg: "bg-gray-500/10 border-gray-500/20" },
+  CANCELLED: { label: "Cancelled", color: "text-[#9FB0A6]", bg: "bg-gray-500/10 border-gray-500/20" },
 };
 
 export default function CustomerBookingsPage() {
@@ -146,18 +146,18 @@ export default function CustomerBookingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
+    <div className="min-h-screen bg-[#0A0F0C] aurora-backdrop">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0A0F0C]/80 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
+          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">
-            <h1 className="text-sm font-semibold text-white">Booking History</h1>
-            <p className="text-[10px] text-gray-500">Your property visits</p>
+            <h1 className="text-sm font-semibold text-[#F0F7F3]">Booking History</h1>
+            <p className="text-[10px] text-[#9FB0A6]">Your property visits</p>
           </div>
-          <button onClick={loadBookings} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
+          <button onClick={loadBookings} className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
           </button>
         </div>
@@ -166,19 +166,19 @@ export default function CustomerBookingsPage() {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-4">
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
-            <div className="text-lg font-bold text-white">{bookings.length}</div>
-            <div className="text-[10px] text-gray-500">Total</div>
+          <div className="p-3 rounded-xl app-card text-center">
+            <div className="text-lg font-bold text-[#F0F7F3]">{bookings.length}</div>
+            <div className="text-[10px] text-[#9FB0A6]">Total</div>
           </div>
           <div className="p-3 rounded-xl bg-green-500/5 border border-green-500/10 text-center">
             <div className="text-lg font-bold text-green-400">{activeCount}</div>
-            <div className="text-[10px] text-gray-500">Active</div>
+            <div className="text-[10px] text-[#9FB0A6]">Active</div>
           </div>
           <div className="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-center">
             <div className="text-lg font-bold text-emerald-400">
               {bookings.filter((b) => b.status === "VISITED").length}
             </div>
-            <div className="text-[10px] text-gray-500">Visited</div>
+            <div className="text-[10px] text-[#9FB0A6]">Visited</div>
           </div>
         </div>
 
@@ -191,8 +191,8 @@ export default function CustomerBookingsPage() {
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all",
                 filter === s
-                  ? "bg-[#3B82F6] text-white"
-                  : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+                  ? "bg-[#1B4332] text-white"
+                  : "bg-[#101713] text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3]"
               )}
             >
               {s === "all" ? "All" : (STATUS_CONFIG[s]?.label || s)}
@@ -204,21 +204,21 @@ export default function CustomerBookingsPage() {
         <ErrorBoundary fallback={
           <div className="p-8 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
             <p className="text-sm text-red-400">Something went wrong loading your bookings.</p>
-            <button onClick={loadBookings} className="mt-3 text-xs text-[#3B82F6] hover:underline">Try Again</button>
+            <button onClick={loadBookings} className="mt-3 text-xs text-[#6FE3B0] hover:underline">Try Again</button>
           </div>
         }>
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-5 rounded-2xl bg-white/5 border border-white/10 animate-pulse">
+              <div key={i} className="p-5 rounded-2xl app-card animate-pulse">
                 <div className="flex gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-white/10" />
+                  <div className="w-12 h-12 rounded-xl bg-white/[0.06]" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-32 bg-white/10 rounded" />
-                    <div className="h-3 w-48 bg-white/10 rounded" />
+                    <div className="h-4 w-32 bg-white/[0.06] rounded" />
+                    <div className="h-3 w-48 bg-white/[0.06] rounded" />
                     <div className="flex gap-2 mt-3">
-                      <div className="h-3 w-20 bg-white/10 rounded" />
-                      <div className="h-3 w-20 bg-white/10 rounded" />
+                      <div className="h-3 w-20 bg-white/[0.06] rounded" />
+                      <div className="h-3 w-20 bg-white/[0.06] rounded" />
                     </div>
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export default function CustomerBookingsPage() {
         ) : sorted.length > 0 ? (
           <AnimatePresence mode="popLayout">
             {sorted.map((booking, i) => {
-              const statusInfo = STATUS_CONFIG[booking.status] || { label: booking.status, color: "text-gray-400", bg: "bg-white/5 border-white/10" };
+              const statusInfo = STATUS_CONFIG[booking.status] || { label: booking.status, color: "text-[#9FB0A6]", bg: "bg-[#101713] border-white/10" };
               const past = isPastBooking(booking);
               const canConfirm = booking.status === "REMINDED" && !past;
               const needsAction = booking.status === "REMINDED";
@@ -246,27 +246,27 @@ export default function CustomerBookingsPage() {
                     needsAction
                       ? "border-amber-500/30 bg-amber-500/5"
                       : statusInfo.bg,
-                    !needsAction && "hover:bg-white/[0.07] cursor-default"
+                    !needsAction && "hover:bg-white/[0.06] cursor-default"
                   )}
                 >
                   <div className="flex items-start gap-3">
                     {/* Property icon */}
                     <div className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                      needsAction ? "bg-amber-500/20" : "bg-white/5"
+                      needsAction ? "bg-amber-500/20" : "bg-[#101713]"
                     )}>
-                      <Home className={cn("w-5 h-5", needsAction ? "text-amber-400" : "text-gray-400")} />
+                      <Home className={cn("w-5 h-5", needsAction ? "text-amber-400" : "text-[#9FB0A6]")} />
                     </div>
 
                     <div className="flex-1 min-w-0">
                       {/* Header row */}
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="min-w-0">
-                          <h3 className="text-sm font-semibold text-white truncate">
+                          <h3 className="text-sm font-semibold text-[#F0F7F3] truncate">
                             {booking.propertyName || booking.property?.name || "Property Visit"}
                           </h3>
                           {booking.propertyName && booking.property?.name && (
-                            <p className="text-[11px] text-gray-500 truncate">{booking.property.name}</p>
+                            <p className="text-[11px] text-[#9FB0A6] truncate">{booking.property.name}</p>
                           )}
                         </div>
                         <span className={cn(
@@ -279,24 +279,24 @@ export default function CustomerBookingsPage() {
 
                       {/* Date, Time, Location */}
                       <div className="grid grid-cols-2 gap-2 mb-2">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <Calendar className="w-3 h-3 text-[#3B82F6] shrink-0" />
+                        <div className="flex items-center gap-1.5 text-xs text-[#9FB0A6]">
+                          <Calendar className="w-3 h-3 text-[#6FE3B0] shrink-0" />
                           {formatDate(booking.visitDate)}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <Clock className="w-3 h-3 text-[#10B981] shrink-0" />
+                        <div className="flex items-center gap-1.5 text-xs text-[#9FB0A6]">
+                          <Clock className="w-3 h-3 text-[#34D399] shrink-0" />
                           {booking.visitTime}
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-1.5 text-xs text-gray-500 mb-2">
+                      <div className="flex items-start gap-1.5 text-xs text-[#9FB0A6] mb-2">
                         <MapPin className="w-3 h-3 text-red-400 mt-0.5 shrink-0" />
                         <span className="line-clamp-1">{booking.propertyAddress}</span>
                       </div>
 
                       {/* Property details */}
                       {booking.property?.price && (
-                        <div className="flex items-center gap-3 text-[11px] text-gray-500 mb-2">
+                        <div className="flex items-center gap-3 text-[11px] text-[#9FB0A6] mb-2">
                           <span className="flex items-center gap-1">
                             <IndianRupee className="w-3 h-3" />
                             {booking.property.price.toLocaleString("en-IN")}
@@ -337,7 +337,7 @@ export default function CustomerBookingsPage() {
                               sessionStorage.setItem("customer_booking", JSON.stringify(booking));
                               router.push("/customer/dashboard");
                             }}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 text-gray-400 text-[11px] hover:bg-white/10 transition-all"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#101713] text-[#9FB0A6] text-[11px] hover:bg-white/[0.06] transition-all"
                           >
                             <Calendar className="w-3 h-3" />
                             Manage
@@ -355,17 +355,17 @@ export default function CustomerBookingsPage() {
           </AnimatePresence>
         ) : (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="p-8 rounded-2xl bg-white/5 border border-white/10 text-center"
+            className="p-8 rounded-2xl app-card text-center"
           >
             <Calendar className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-            <h2 className="text-base font-semibold text-white mb-1">No Bookings Found</h2>
-            <p className="text-xs text-gray-500 mb-4">
+            <h2 className="text-base font-semibold text-[#F0F7F3] mb-1">No Bookings Found</h2>
+            <p className="text-xs text-[#9FB0A6] mb-4">
               {filter !== "all"
                 ? `No bookings with status "${STATUS_CONFIG[filter]?.label || filter}"`
                 : "Your past and upcoming visits will appear here"}
             </p>
             <button onClick={() => router.push("/customer/dashboard")}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#3B82F6] text-white text-xs font-medium hover:opacity-90 transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1B4332] text-white text-xs font-medium hover:opacity-90 transition-all"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to Dashboard

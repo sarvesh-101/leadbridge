@@ -127,7 +127,7 @@ export default function DocumentsPage() {
       case "VERIFIED": return "bg-green-500/10 text-green-400";
       case "UPLOADED": return "bg-amber-500/10 text-amber-400";
       case "REJECTED": return "bg-red-500/10 text-red-400";
-      default: return "bg-gray-500/10 text-gray-400";
+      default: return "bg-gray-500/10 text-[#9FB0A6]";
     }
   };
 
@@ -135,7 +135,7 @@ export default function DocumentsPage() {
     switch (type) {
       case "aadhar": case "pan": case "passport": case "voter_id": case "driving_license":
         return <FileType className="w-4 h-4 text-blue-400" />;
-      default: return <FileText className="w-4 h-4 text-gray-400" />;
+      default: return <FileText className="w-4 h-4 text-[#9FB0A6]" />;
     }
   };
 
@@ -144,8 +144,8 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Lead Documents</h1>
-          <p className="text-gray-400 mt-1">Manage KYC documents uploaded by leads</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">Lead Documents</h1>
+          <p className="text-[#9FB0A6] mt-1">Manage KYC documents uploaded by leads</p>
         </div>
       </div>
 
@@ -157,14 +157,14 @@ export default function DocumentsPage() {
           { label: "Pending Review", value: pendingCount, icon: Clock, color: "text-amber-400" },
           { label: "Leads with Docs", value: new Set(documents.map(d => d.lead?.name)).size, icon: FileText, color: "text-purple-400" },
         ].map((s) => (
-          <div key={s.label} className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <div key={s.label} className="p-4 rounded-xl app-card">
             {loading ? (
-              <div className="animate-pulse"><div className="h-7 w-12 bg-white/10 rounded" /></div>
+              <div className="animate-pulse"><div className="h-7 w-12 bg-white/[0.06] rounded" /></div>
             ) : (
               <>
                 <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-                <div className="text-xl font-bold text-white">{s.value}</div>
-                <div className="text-xs text-gray-500">{s.label}</div>
+                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
+                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
               </>
             )}
           </div>
@@ -174,14 +174,14 @@ export default function DocumentsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by file name or lead name..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#3B82F6]/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
           />
         </div>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm"
+          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm"
         >
           <option value="all">All Status</option>
           <option value="UPLOADED">Pending</option>
@@ -192,7 +192,7 @@ export default function DocumentsPage() {
 
       {/* Document List */}
       {loading ? (
-        <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-20 bg-[#101713] rounded-xl animate-pulse" />)}</div>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={FileText}
@@ -203,20 +203,20 @@ export default function DocumentsPage() {
         <div className="space-y-2">
           {filtered.map((doc, i) => (
             <motion.div key={doc.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
-              className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/[0.07] transition-all"
+              className="flex items-center gap-4 p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl app-card flex items-center justify-center shrink-0">
                 {typeIcon(doc.type)}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-white truncate">{doc.fileName}</span>
+                  <span className="text-sm font-medium text-[#F0F7F3] truncate">{doc.fileName}</span>
                   <span className={cn("text-[11px] px-1.5 py-0.5 rounded-full", statusColor(doc.status))}>
                     {doc.status}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                <div className="flex items-center gap-3 text-xs text-[#9FB0A6] mt-0.5">
                   <span>{DOC_TYPE_LABELS[doc.type] || doc.type}</span>
                   {doc.lead?.name && <span>• {doc.lead.name}</span>}
                   <span>• {(doc.fileSize / 1024).toFixed(0)} KB</span>
@@ -240,12 +240,12 @@ export default function DocumentsPage() {
                 )}
                 {doc.url && (
                   <a href={doc.url} target="_blank" rel="noopener noreferrer"
-                    className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors" title="View">
+                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-[#F0F7F3] hover:bg-white/[0.06] transition-colors" title="View">
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
                 <button onClick={() => handleDelete(doc.id, doc.leadId)}
-                  className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Delete">
+                  className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Delete">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

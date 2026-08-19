@@ -46,7 +46,7 @@ const PLANS = [
       "Advanced analytics",
     ],
     highlighted: true,
-    color: "from-leadflow-500 to-leadflow-accent",
+    color: "from-[#1B4332] to-[#2D6A4F]",
   },
   {
     id: "PRO",
@@ -248,8 +248,8 @@ export default function BillingPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Billing</h1>
-        <p className="text-gray-400 mt-1">Manage your subscription, usage, and invoices</p>
+        <h1 className="text-2xl font-bold text-[#F0F7F3]">Billing</h1>
+        <p className="text-[#9FB0A6] mt-1">Manage your subscription, usage, and invoices</p>
       </div>
 
       {/* ─── Alerts Section ─────────────────────────────────── */}
@@ -306,7 +306,7 @@ export default function BillingPage() {
             </div>
             <Link
               href="/dashboard/billing?tab=usage"
-              className="shrink-0 px-3 py-1.5 rounded-lg bg-white/10 text-gray-200 text-xs font-medium hover:bg-white/20 transition-all"
+              className="shrink-0 px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.06] transition-all"
               onClick={() => setActiveTab("usage")}
             >
               View Usage
@@ -339,13 +339,13 @@ export default function BillingPage() {
 
       {/* ─── Current Plan Card ──────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1 }}
-        className="p-6 rounded-xl bg-white/5 border border-white/10"
+        className="p-6 rounded-xl app-card"
       >
         {loading ? (
           <div className="animate-pulse space-y-3">
-            <div className="h-5 w-32 bg-white/10 rounded" />
-            <div className="h-4 w-48 bg-white/10 rounded" />
-            <div className="h-2 w-full bg-white/10 rounded" />
+            <div className="h-5 w-32 bg-white/[0.06] rounded" />
+            <div className="h-4 w-48 bg-white/[0.06] rounded" />
+            <div className="h-2 w-full bg-white/[0.06] rounded" />
           </div>
         ) : billing ? (
           <div className="space-y-4">
@@ -356,30 +356,30 @@ export default function BillingPage() {
                   "w-12 h-12 rounded-xl flex items-center justify-center",
                   isPastDue || isCancelled
                     ? "bg-red-500/20"
-                    : "bg-gradient-to-br from-leadflow-500/20 to-leadflow-accent/20"
+                    : "bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20"
                 )}>
                   {isPastDue || isCancelled ? (
                     <AlertCircle className="w-6 h-6 text-red-400" />
                   ) : (
-                    <CreditCard className="w-6 h-6 text-leadflow-accent" />
+                    <CreditCard className="w-6 h-6 text-[#2D6A4F]" />
                   )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-lg font-semibold text-white capitalize">
+                    <h2 className="text-lg font-semibold text-[#F0F7F3] capitalize">
                       {billing.plan?.toLowerCase() || "—"} Plan
                     </h2>
                     <span className={cn(
                       "text-xs px-2 py-0.5 rounded-full font-medium",
                       isPastDue ? "bg-red-500/10 text-red-400 border border-red-500/20" :
-                      isCancelled ? "bg-gray-500/10 text-gray-400 border border-gray-500/20" :
+                      isCancelled ? "bg-gray-500/10 text-[#9FB0A6] border border-gray-500/20" :
                       isTrial ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
                       "bg-green-500/10 text-green-400 border border-green-500/20"
                     )}>
                       {billing.planStatus || "—"}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-[#9FB0A6] mt-1">
                     {isTrial && billing.trialEndsAt ? (
                       <>Trial ends {new Date(billing.trialEndsAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</>
                     ) : isPastDue ? (
@@ -397,22 +397,22 @@ export default function BillingPage() {
 
               {/* Usage right side */}
               <div className="text-right">
-                <div className="text-sm text-gray-500">Usage this month</div>
-                <div className="text-lg font-bold text-white">
+                <div className="text-sm text-[#9FB0A6]">Usage this month</div>
+                <div className="text-lg font-bold text-[#F0F7F3]">
                   {billing.usage.callsThisMonth} / {billing.usage.totalAvailable} calls
                 </div>
-                <div className="mt-1.5 h-2 w-36 ml-auto rounded-full bg-white/10 overflow-hidden">
+                <div className="mt-1.5 h-2 w-36 ml-auto rounded-full bg-white/[0.06] overflow-hidden">
                   <div
                     className={cn(
                       "h-full rounded-full transition-all duration-500",
                       billing.usage.usagePercent >= 90 ? "bg-red-500" :
                       billing.usage.usagePercent >= 75 ? "bg-amber-500" :
-                      "bg-gradient-to-r from-leadflow-500 to-leadflow-accent"
+                      "bg-gradient-to-r from-[#1B4332] to-[#2D6A4F]"
                     )}
                     style={{ width: `${Math.min(100, billing.usage.usagePercent)}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-gray-500 mt-1">
+                <p className="text-[11px] text-[#9FB0A6] mt-1">
                   {billing.usage.totalRemaining} remaining
                   {billing.usage.rolloverCalls > 0 && ` (${billing.usage.rolloverCalls} rolled over)`}
                 </p>
@@ -436,8 +436,8 @@ export default function BillingPage() {
           </div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-sm text-gray-500">Unable to load billing info</p>
-            <button onClick={loadBilling} className="mt-2 text-xs text-leadflow-accent hover:underline">
+            <p className="text-sm text-[#9FB0A6]">Unable to load billing info</p>
+            <button onClick={loadBilling} className="mt-2 text-xs text-[#2D6A4F] hover:underline">
               Retry
             </button>
           </div>
@@ -496,8 +496,8 @@ export default function BillingPage() {
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
               activeTab === tab.id
-                ? "bg-leadflow-500/20 text-leadflow-accent border border-leadflow-500/30"
-                : "bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10"
+                ? "bg-[#34D399]/25 text-[#2D6A4F] border border-[#34D399]/40"
+                : "bg-[#101713] text-[#9FB0A6] border border-white/10 hover:bg-white/[0.06]"
             )}
           >
             <tab.icon className="w-4 h-4" /> {tab.label}
@@ -516,22 +516,22 @@ export default function BillingPage() {
                   className={cn(
                     "relative p-6 rounded-2xl border transition-all duration-300",
                     plan.highlighted
-                      ? "bg-gradient-to-b from-leadflow-500/10 to-leadflow-accent/5 border-leadflow-500/30 scale-105"
-                      : "bg-white/5 border-white/10 hover:border-white/20"
+                      ? "bg-gradient-to-b from-[#1B4332]/10 to-[#2D6A4F]/5 border-[#34D399]/40 scale-105"
+                      : "bg-[#101713] border-white/10 hover:border-white/20"
                   )}
                 >
                   {plan.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-xs font-medium text-white">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] text-xs font-medium text-white">
                       Most Popular
                     </div>
                   )}
 
                   <div className="text-center mb-6 mt-2">
-                    <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
+                    <h3 className="text-lg font-semibold text-[#F0F7F3]">{plan.name}</h3>
+                    <p className="text-sm text-[#9FB0A6] mt-1">{plan.description}</p>
                     <div className="mt-4">
-                      <span className="text-3xl font-bold text-white">{plan.price}</span>
-                      <span className="text-sm text-gray-500">{plan.period}</span>
+                      <span className="text-3xl font-bold text-[#F0F7F3]">{plan.price}</span>
+                      <span className="text-sm text-[#9FB0A6]">{plan.period}</span>
                     </div>
                   </div>
 
@@ -539,7 +539,7 @@ export default function BillingPage() {
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2 text-sm">
                         <Check className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-300">{feature}</span>
+                        <span className="text-[#9FB0A6]">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -550,10 +550,10 @@ export default function BillingPage() {
                     className={cn(
                       "w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all duration-300",
                       isCurrent
-                        ? "bg-white/5 text-gray-500 cursor-default"
+                        ? "bg-[#101713] text-[#9FB0A6] cursor-default"
                         : plan.highlighted
-                        ? "bg-gradient-to-r from-leadflow-500 to-leadflow-accent text-white hover:opacity-90"
-                        : "border border-white/10 text-white hover:bg-white/10"
+                        ? "bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] hover:opacity-90"
+                        : "border border-white/10 text-[#F0F7F3] hover:bg-white/[0.06]"
                     )}
                   >
                     {upgrading === plan.id ? (
@@ -570,15 +570,15 @@ export default function BillingPage() {
           </div>
 
           {/* Payment Info */}
-          <div className="mt-6 p-6 rounded-xl bg-white/5 border border-white/10">
+          <div className="mt-6 p-6 rounded-xl app-card">
             <div className="flex items-start gap-4">
-              <Shield className="w-5 h-5 text-gray-400 mt-0.5" />
+              <Shield className="w-5 h-5 text-[#9FB0A6] mt-0.5" />
               <div>
-                <h3 className="text-sm font-medium text-white">Secure payments powered by Razorpay</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="text-sm font-medium text-[#F0F7F3]">Secure payments powered by Razorpay</h3>
+                <p className="text-sm text-[#9FB0A6] mt-1">
                   All payments are processed securely through Razorpay. GST invoices will be generated and emailed upon payment. 18% GST applies to all plans.
                 </p>
-                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 flex-wrap">
+                <div className="flex items-center gap-4 mt-3 text-xs text-[#9FB0A6] flex-wrap">
                   <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> 256-bit SSL</span>
                   <span className="flex items-center gap-1"><Check className="w-3 h-3" /> PCI Compliant</span>
                   <span className="flex items-center gap-1"><FileText className="w-3 h-3" /> GST Invoice</span>
@@ -592,10 +592,10 @@ export default function BillingPage() {
 
       {/* ─── INVOICES TAB ───────────────────────────────────── */}
       {activeTab === "invoices" && (
-        <div className="p-6 rounded-xl bg-white/5 border border-white/10">
+        <div className="p-6 rounded-xl app-card">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">Invoice History</h2>
-            <button onClick={loadInvoices} className="p-2 rounded-lg hover:bg-white/5 text-gray-400 transition-colors">
+            <h2 className="text-lg font-semibold text-[#F0F7F3]">Invoice History</h2>
+            <button onClick={loadInvoices} className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
               <RefreshCw className={cn("w-4 h-4", invoicesLoading && "animate-spin")} />
             </button>
           </div>
@@ -603,7 +603,7 @@ export default function BillingPage() {
           {invoicesLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse" />
+                <div key={i} className="h-16 rounded-lg bg-[#101713] animate-pulse" />
               ))}
             </div>
           ) : invoices.length > 0 ? (
@@ -611,13 +611,13 @@ export default function BillingPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Invoice</th>
-                    <th className="text-left py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Date</th>
-                    <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Amount</th>
-                    <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">GST</th>
-                    <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Total</th>
-                    <th className="text-center py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">Status</th>
-                    <th className="text-right py-3 px-2 text-gray-500 font-medium text-[11px] uppercase">PDF</th>
+                    <th className="text-left py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Invoice</th>
+                    <th className="text-left py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Date</th>
+                    <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Amount</th>
+                    <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">GST</th>
+                    <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Total</th>
+                    <th className="text-center py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Status</th>
+                    <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">PDF</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -626,15 +626,15 @@ export default function BillingPage() {
                     const gstAmount = inv.gstAmount || 0;
                     const totalWithGst = inv.totalAmount || inv.amount;
                     return (
-                      <tr key={inv.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <tr key={inv.id} className="border-b border-white/10 hover:bg-white/[0.06] transition-colors">
                         <td className="py-3 px-2">
-                          <span className="text-white font-medium text-xs">{inv.invoiceNumber}</span>
-                          <p className="text-[10px] text-gray-500 truncate max-w-[200px]">{inv.description}</p>
+                          <span className="text-[#F0F7F3] font-medium text-xs">{inv.invoiceNumber}</span>
+                          <p className="text-[10px] text-[#9FB0A6] truncate max-w-[200px]">{inv.description}</p>
                         </td>
-                        <td className="py-3 px-2 text-gray-400 text-xs">
+                        <td className="py-3 px-2 text-[#9FB0A6] text-xs">
                           {new Date(inv.issueDate).toLocaleDateString("en-IN")}
                         </td>
-                        <td className="py-3 px-2 text-right text-gray-300 text-xs">
+                        <td className="py-3 px-2 text-right text-[#9FB0A6] text-xs">
                           ₹{fm(inv.amount || 0)}
                         </td>
                         <td className="py-3 px-2 text-right text-amber-400 text-xs">
@@ -642,7 +642,7 @@ export default function BillingPage() {
                         </td>
                         <td className={cn(
                           "py-3 px-2 text-right font-medium text-xs",
-                          isCredit ? "text-red-400" : "text-white"
+                          isCredit ? "text-red-400" : "text-[#F0F7F3]"
                         )}>
                           {isCredit ? "-" : ""}₹{fm(Math.abs(totalWithGst))}
                         </td>
@@ -653,7 +653,7 @@ export default function BillingPage() {
                             inv.status === "SENT" ? "bg-blue-500/10 text-blue-400" :
                             inv.status === "OVERDUE" ? "bg-red-500/10 text-red-400" :
                             inv.status === "REFUNDED" ? "bg-purple-500/10 text-purple-400" :
-                            "bg-gray-500/10 text-gray-400"
+                            "bg-gray-500/10 text-[#9FB0A6]"
                           )}>
                             {inv.status}
                           </span>
@@ -661,7 +661,7 @@ export default function BillingPage() {
                         <td className="py-3 px-2 text-right">
                           {inv.invoicePdfUrl ? (
                             <a href={inv.invoicePdfUrl} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-leadflow-500/10 text-leadflow-accent text-[10px] font-medium hover:bg-leadflow-500/20 transition-all"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#34D399]/15 text-[#2D6A4F] text-[10px] font-medium hover:bg-[#34D399]/25 transition-all"
                             >
                               <Download className="w-3 h-3" /> PDF
                             </a>
@@ -678,36 +678,36 @@ export default function BillingPage() {
           ) : (
             <div className="text-center py-8">
               <FileText className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">No invoices yet. They'll appear here after your first payment.</p>
+              <p className="text-sm text-[#9FB0A6]">No invoices yet. They'll appear here after your first payment.</p>
             </div>
           )}
 
           {/* GST Summary */}
           {invoices.filter((i) => i.status === "PAID").length > 0 && (
-            <div className="mt-4 p-4 rounded-lg bg-white/5">
-              <h3 className="text-sm font-medium text-white mb-3">GST Summary</h3>
+            <div className="mt-4 p-4 rounded-lg bg-[#101713]">
+              <h3 className="text-sm font-medium text-[#F0F7F3] mb-3">GST Summary</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <p className="text-[10px] text-gray-500">Total Paid (excl. GST)</p>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-[10px] text-[#9FB0A6]">Total Paid (excl. GST)</p>
+                  <p className="text-sm font-semibold text-[#F0F7F3]">
                     ₹{fm(invoices.filter(i => i.status === "PAID").reduce((s, i) => s + (i.amount || 0), 0))}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-500">Total GST Paid</p>
+                  <p className="text-[10px] text-[#9FB0A6]">Total GST Paid</p>
                   <p className="text-sm font-semibold text-amber-400">
                     ₹{fm(invoices.filter(i => i.status === "PAID").reduce((s, i) => s + (i.gstAmount || 0), 0))}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-500">Total Incl. GST</p>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-[10px] text-[#9FB0A6]">Total Incl. GST</p>
+                  <p className="text-sm font-semibold text-[#F0F7F3]">
                     ₹{fm(invoices.filter(i => i.status === "PAID").reduce((s, i) => s + (i.totalAmount || i.amount || 0), 0))}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-gray-500">GST Rate</p>
-                  <p className="text-sm font-semibold text-gray-300">18% (CGST 9% + SGST 9%)</p>
+                  <p className="text-[10px] text-[#9FB0A6]">GST Rate</p>
+                  <p className="text-sm font-semibold text-[#9FB0A6]">18% (CGST 9% + SGST 9%)</p>
                 </div>
               </div>
             </div>
@@ -719,14 +719,14 @@ export default function BillingPage() {
       {activeTab === "usage" && (
         <div className="space-y-4">
           {/* Call Usage */}
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-            <h2 className="text-lg font-semibold text-white mb-4">Call Usage</h2>
+          <div className="p-6 rounded-xl app-card">
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-4">Call Usage</h2>
             {loading ? (
-              <div className="h-24 bg-white/5 animate-pulse rounded-lg" />
+              <div className="h-24 bg-[#101713] animate-pulse rounded-lg" />
             ) : billing ? (
               <>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-[#9FB0A6]">
                     {billing.usage.callsThisMonth} of {billing.usage.totalAvailable} calls used
                   </span>
                   <span className={cn(
@@ -737,28 +737,28 @@ export default function BillingPage() {
                     {billing.usage.usagePercent}%
                   </span>
                 </div>
-                <div className="h-3 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-3 rounded-full bg-white/[0.06] overflow-hidden">
                   <div
                     className={cn(
                       "h-full rounded-full transition-all duration-700",
                       billing.usage.usagePercent >= 90 ? "bg-red-500" :
                       billing.usage.usagePercent >= 75 ? "bg-amber-500" :
-                      "bg-gradient-to-r from-leadflow-500 to-leadflow-accent"
+                      "bg-gradient-to-r from-[#1B4332] to-[#2D6A4F]"
                     )}
                     style={{ width: `${Math.min(100, billing.usage.usagePercent)}%` }}
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-4 mt-4">
-                  <div className="p-3 rounded-lg bg-white/5">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Monthly Limit</p>
-                    <p className="text-lg font-bold text-white">{billing.usage.callsLimit}</p>
+                  <div className="p-3 rounded-lg bg-[#101713]">
+                    <p className="text-[10px] text-[#9FB0A6] uppercase tracking-wider">Monthly Limit</p>
+                    <p className="text-lg font-bold text-[#F0F7F3]">{billing.usage.callsLimit}</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-white/5">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Rollover</p>
-                    <p className="text-lg font-bold text-leadflow-accent">{billing.usage.rolloverCalls}</p>
+                  <div className="p-3 rounded-lg bg-[#101713]">
+                    <p className="text-[10px] text-[#9FB0A6] uppercase tracking-wider">Rollover</p>
+                    <p className="text-lg font-bold text-[#2D6A4F]">{billing.usage.rolloverCalls}</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-white/5">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Remaining</p>
+                  <div className="p-3 rounded-lg bg-[#101713]">
+                    <p className="text-[10px] text-[#9FB0A6] uppercase tracking-wider">Remaining</p>
                     <p className="text-lg font-bold text-green-400">{billing.usage.totalRemaining}</p>
                   </div>
                 </div>
@@ -767,8 +767,8 @@ export default function BillingPage() {
           </div>
 
           {/* Subscription Status */}
-          <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-            <h2 className="text-lg font-semibold text-white mb-4">Subscription Timeline</h2>
+          <div className="p-6 rounded-xl app-card">
+            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-4">Subscription Timeline</h2>
             <div className="space-y-3">
               {billing?.trialStartedAt && (
                 <div className="flex items-start gap-3">
@@ -776,8 +776,8 @@ export default function BillingPage() {
                     <Calendar className="w-3 h-3 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-white">Trial Started</p>
-                    <p className="text-xs text-gray-500">{new Date(billing.trialStartedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+                    <p className="text-sm text-[#F0F7F3]">Trial Started</p>
+                    <p className="text-xs text-[#9FB0A6]">{new Date(billing.trialStartedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
                   </div>
                 </div>
               )}
@@ -787,8 +787,8 @@ export default function BillingPage() {
                     <TrendingUp className="w-3 h-3 text-green-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-white">Trial → Paid Conversion</p>
-                    <p className="text-xs text-gray-500">{new Date(billing.convertedFromTrialAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+                    <p className="text-sm text-[#F0F7F3]">Trial → Paid Conversion</p>
+                    <p className="text-xs text-[#9FB0A6]">{new Date(billing.convertedFromTrialAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
                   </div>
                 </div>
               )}
@@ -798,8 +798,8 @@ export default function BillingPage() {
                     <Bell className="w-3 h-3 text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-white">Last Usage Alert</p>
-                    <p className="text-xs text-gray-500">{new Date(billing.usageAlerts.lastAlertSentAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                    <p className="text-sm text-[#F0F7F3]">Last Usage Alert</p>
+                    <p className="text-xs text-[#9FB0A6]">{new Date(billing.usageAlerts.lastAlertSentAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                       {billing.usageAlerts.currentLevel > 0 && ` at ${billing.usageAlerts.currentLevel}% usage`}</p>
                   </div>
                 </div>
@@ -811,17 +811,17 @@ export default function BillingPage() {
                   </div>
                   <div>
                     <p className="text-sm text-red-300">Dunning Started</p>
-                    <p className="text-xs text-gray-500">{new Date(billing.dunning.startedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })} — {DUNNING_CONFIG[billing.dunning.step]?.description}</p>
+                    <p className="text-xs text-[#9FB0A6]">{new Date(billing.dunning.startedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })} — {DUNNING_CONFIG[billing.dunning.step]?.description}</p>
                   </div>
                 </div>
               )}
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-gray-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Clock className="w-3 h-3 text-gray-400" />
+                  <Clock className="w-3 h-3 text-[#9FB0A6]" />
                 </div>
                 <div>
-                  <p className="text-sm text-white">Current Status</p>
-                  <p className="text-xs text-gray-500 capitalize">{billing?.planStatus?.toLowerCase() || "Unknown"} • {billing?.plan?.toLowerCase() || "No plan"} plan</p>
+                  <p className="text-sm text-[#F0F7F3]">Current Status</p>
+                  <p className="text-xs text-[#9FB0A6] capitalize">{billing?.planStatus?.toLowerCase() || "Unknown"} • {billing?.plan?.toLowerCase() || "No plan"} plan</p>
                 </div>
               </div>
             </div>

@@ -107,7 +107,7 @@ export default function ImageUploader({
     <div className="space-y-3">
       {/* Label */}
       <div className="flex items-center justify-between">
-        <label className="text-xs text-gray-500 flex items-center gap-1.5">
+        <label className="text-xs text-[#7C8781] flex items-center gap-1.5">
           <ImageIcon className="w-3 h-3" />
           Property Images ({images.length}/{maxImages})
         </label>
@@ -131,22 +131,22 @@ export default function ImageUploader({
           className={cn(
             "relative flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer",
             isDragging
-              ? "border-leadflow-500 bg-leadflow-500/10 scale-[1.02]"
-              : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/5",
+              ? "border-leadflow-500 bg-[#1B4332]/10 scale-[1.02]"
+              : "border-[#E4E7DF] bg-[#F7F8F4] hover:border-[#D8DDD3] hover:bg-[#F1F3EE]",
             uploading && "pointer-events-none opacity-60"
           )}
         >
           {uploading ? (
             <>
-              <Loader2 className="w-8 h-8 text-leadflow-accent animate-spin" />
+              <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
               <div className="text-center">
-                <p className="text-sm text-gray-400">Uploading...</p>
+                <p className="text-sm text-[#7C8781]">Uploading...</p>
                 <p className="text-xs text-gray-600 mt-0.5">{uploadProgress}</p>
               </div>
               {/* Progress bar */}
-              <div className="w-full max-w-[200px] h-1 rounded-full bg-white/10 overflow-hidden">
+              <div className="w-full max-w-[200px] h-1 rounded-full bg-[#F1F3EE] overflow-hidden">
                 <motion.div
-                  className="h-full bg-leadflow-accent rounded-full"
+                  className="h-full bg-[#2D6A4F] rounded-full"
                   initial={{ width: "0%" }}
                   animate={{ width: "100%" }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -155,11 +155,11 @@ export default function ImageUploader({
             </>
           ) : (
             <>
-              <div className="w-12 h-12 rounded-full bg-leadflow-500/10 flex items-center justify-center">
-                <Upload className="w-5 h-5 text-leadflow-accent" />
+              <div className="w-12 h-12 rounded-full bg-[#1B4332]/10 flex items-center justify-center">
+                <Upload className="w-5 h-5 text-[#2D6A4F]" />
               </div>
               <div className="text-center">
-                <p className="text-sm text-gray-300 font-medium">
+                <p className="text-sm text-[#5C6B62] font-medium">
                   Drop images here or click to browse
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
@@ -192,7 +192,7 @@ export default function ImageUploader({
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="group relative aspect-square rounded-lg overflow-hidden border border-white/10 bg-white/5"
+                className="group relative aspect-square rounded-lg overflow-hidden border border-[#E4E7DF] bg-white"
               >
                 {/* Image */}
                 <img
@@ -225,7 +225,7 @@ export default function ImageUploader({
                 </div>
 
                 {/* Index badge */}
-                <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-[10px] text-white font-medium">
+                <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-black/60 text-[10px] text-ink font-medium">
                   {index + 1}
                 </div>
 

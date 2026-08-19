@@ -53,7 +53,7 @@ export default function LeadDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 text-[#3B82F6] animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#6FE3B0] animate-spin" />
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function LeadDetailPage() {
     { label: "Location", value: lead.location || "—", icon: <MapPin className="w-4 h-4" /> },
     { label: "Timeline", value: lead.timeline || "—", icon: <Clock className="w-4 h-4" /> },
     { label: "Property", value: lead.propertyType ? `${lead.bedrooms || ""} ${lead.propertyType}`.trim() : "—", icon: <Activity className="w-4 h-4" /> },
-    { label: "Sentiment", value: lead.sentiment || "—", icon: lead.sentiment === "positive" ? <ThumbsUp className="w-4 h-4 text-[#10B981]" /> : lead.sentiment === "negative" ? <ThumbsDown className="w-4 h-4 text-[#F43F5E]" /> : <Meh className="w-4 h-4 text-[#F59E0B]" /> },
+    { label: "Sentiment", value: lead.sentiment || "—", icon: lead.sentiment === "positive" ? <ThumbsUp className="w-4 h-4 text-[#34D399]" /> : lead.sentiment === "negative" ? <ThumbsDown className="w-4 h-4 text-[#FB7185]" /> : <Meh className="w-4 h-4 text-[#E8C468]" /> },
     { label: "Language", value: lead.callLanguage || "—", icon: <MessageSquare className="w-4 h-4" /> },
   ];
 
@@ -84,24 +84,24 @@ export default function LeadDetailPage() {
     { event: "Lead received", date: lead.receivedAt, icon: <Activity className="w-3.5 h-3.5" /> },
     ...(lead.firstCalledAt ? [{ event: "First call attempted", date: lead.firstCalledAt, icon: <Phone className="w-3.5 h-3.5" /> }] : []),
     ...(lead.bookedAt ? [{ event: "Visit booked", date: lead.bookedAt, icon: <Calendar className="w-3.5 h-3.5" /> }] : []),
-    ...(lead.visitedAt ? [{ event: "Customer visited", date: lead.visitedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> }] : []),
-    ...(lead.convertedAt ? [{ event: "Deal closed", date: lead.convertedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" /> }] : []),
-    ...(lead.coldAt ? [{ event: "Lead marked cold", date: lead.coldAt, icon: <XCircle className="w-3.5 h-3.5 text-[#F43F5E]" /> }] : []),
+    ...(lead.visitedAt ? [{ event: "Customer visited", date: lead.visitedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" /> }] : []),
+    ...(lead.convertedAt ? [{ event: "Deal closed", date: lead.convertedAt, icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" /> }] : []),
+    ...(lead.coldAt ? [{ event: "Lead marked cold", date: lead.coldAt, icon: <XCircle className="w-3.5 h-3.5 text-[#FB7185]" /> }] : []),
   ];
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-[#1B1E26] text-[#8B93A3]">
+        <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white">{lead.name}</h1>
+            <h1 className="text-2xl font-bold text-[#F0F7F3]">{lead.name}</h1>
             <LeadStatusBadge status={lead.status} pulse={lead.status === "CALLING"} />
           </div>
-          <p className="text-sm text-[#8B93A3] font-mono mt-1">{lead.phone} · {lead.source} · {lead.email || "No email"}</p>
+          <p className="text-sm text-[#9FB0A6] font-mono mt-1">{lead.phone} · {lead.source} · {lead.email || "No email"}</p>
         </div>
       </div>
 
@@ -111,12 +111,12 @@ export default function LeadDetailPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-[#272B34] gap-0">
+      <div className="flex border-b border-white/10 gap-0">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={cn(
               "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
-              activeTab === tab.id ? "border-[#3B82F6] text-[#3B82F6]" : "border-transparent text-[#8B93A3] hover:text-white"
+              activeTab === tab.id ? "border-[#34D399]/50 text-[#6FE3B0]" : "border-transparent text-[#9FB0A6] hover:text-[#F0F7F3]"
             )}
           >
             {tab.icon} {tab.label}
@@ -129,18 +129,18 @@ export default function LeadDetailPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {qualFields.map((field) => (
-              <div key={field.label} className="flex items-start gap-3 p-4 rounded-xl bg-[#14161C] border border-[#272B34]">
-                <div className="mt-0.5 text-[#8B93A3]">{field.icon}</div>
+              <div key={field.label} className="flex items-start gap-3 p-4 rounded-xl app-card">
+                <div className="mt-0.5 text-[#9FB0A6]">{field.icon}</div>
                 <div>
-                  <p className="text-xs text-[#8B93A3]">{field.label}</p>
-                  <p className="text-sm font-medium text-white">{field.value}</p>
+                  <p className="text-xs text-[#9FB0A6]">{field.label}</p>
+                  <p className="text-sm font-medium text-[#F0F7F3]">{field.value}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="p-5 rounded-xl bg-[#14161C] border-l-4 border-[#3B82F6]">
-            <p className="text-sm italic text-[#8B93A3]">
+          <div className="p-5 rounded-xl bg-[#101713] border-l-4 border-[#34D399]/50">
+            <p className="text-sm italic text-[#9FB0A6]">
               {lead.score >= 70 ? "High-intent buyer — ready to close. Recommended: priority call and site visit scheduling." :
                lead.score >= 40 ? "Moderate interest — needs follow-up. Budget and timeline confirmed, proceed with visit booking." :
                "Low engagement — requires re-engagement sequence. Consider sending WhatsApp follow-up."}
@@ -148,16 +148,16 @@ export default function LeadDetailPage() {
           </div>
 
           <div className="space-y-0">
-            <h3 className="text-sm font-medium text-white mb-4">Timeline</h3>
+            <h3 className="text-sm font-medium text-[#F0F7F3] mb-4">Timeline</h3>
             {timeline.map((item, i) => (
               <div key={i} className="flex items-start gap-3 pb-4 relative">
                 {i < timeline.length - 1 && (
-                  <div className="absolute left-[11px] top-5 bottom-0 w-px bg-[#272B34]" />
+                  <div className="absolute left-[11px] top-5 bottom-0 w-px bg-white/10" />
                 )}
-                <div className="mt-0.5 text-[#8B93A3] bg-[#1B1E26] rounded-full p-1">{item.icon}</div>
+                <div className="mt-0.5 text-[#9FB0A6] bg-white/[0.06] rounded-full p-1">{item.icon}</div>
                 <div>
-                  <p className="text-sm text-white">{item.event}</p>
-                  <p className="text-xs text-[#8B93A3]">{fmt(item.date)}</p>
+                  <p className="text-sm text-[#F0F7F3]">{item.event}</p>
+                  <p className="text-xs text-[#9FB0A6]">{fmt(item.date)}</p>
                 </div>
               </div>
             ))}
@@ -170,33 +170,33 @@ export default function LeadDetailPage() {
       {activeTab === "calls" && (
         <div className="space-y-3">
           {(lead.calls || []).length === 0 ? (
-            <div className="text-center py-12 text-[#8B93A3]">
+            <div className="text-center py-12 text-[#9FB0A6]">
               <Phone className="w-10 h-10 mx-auto mb-3 opacity-50" />
               <p className="text-sm">No calls yet</p>
             </div>
           ) : (
             (lead.calls || []).map((call: any) => (
-              <div key={call.id} className="p-5 rounded-xl bg-[#14161C] border border-[#272B34]">
+              <div key={call.id} className="p-5 rounded-xl app-card">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-[#8B93A3] font-medium">{call.type}</span>
+                  <span className="text-xs text-[#9FB0A6] font-medium">{call.type}</span>
                   <span className={cn("text-xs font-medium px-2 py-0.5 rounded",
-                    call.status === "COMPLETED" ? "bg-[#10B981]/10 text-[#10B981]" :
-                    call.status === "NO_ANSWER" || call.status === "FAILED" ? "bg-[#F43F5E]/10 text-[#F43F5E]" :
-                    "bg-[#3B82F6]/10 text-[#3B82F6]"
+                    call.status === "COMPLETED" ? "bg-[#34D399]/15 text-[#34D399]" :
+                    call.status === "NO_ANSWER" || call.status === "FAILED" ? "bg-[#FB7185]/15 text-[#FB7185]" :
+                    "bg-[#34D399]/15 text-[#6FE3B0]"
                   )}>{call.status}</span>
                 </div>
-                <p className="text-xs text-[#8B93A3]">{fmt(call.createdAt)}</p>
-                {call.duration && <p className="text-xs text-[#8B93A3] mt-1">{call.duration}s duration</p>}
+                <p className="text-xs text-[#9FB0A6]">{fmt(call.createdAt)}</p>
+                {call.duration && <p className="text-xs text-[#9FB0A6] mt-1">{call.duration}s duration</p>}
                 {call.summary && (
                   <details className="mt-2">
-                    <summary className="text-xs font-medium text-[#3B82F6] cursor-pointer">View summary</summary>
-                    <p className="text-sm text-[#8B93A3] mt-2 whitespace-pre-wrap">{call.summary}</p>
+                    <summary className="text-xs font-medium text-[#6FE3B0] cursor-pointer">View summary</summary>
+                    <p className="text-sm text-[#9FB0A6] mt-2 whitespace-pre-wrap">{call.summary}</p>
                   </details>
                 )}
                 {call.transcript && (
                   <details className="mt-2">
-                    <summary className="text-xs font-medium text-[#3B82F6] cursor-pointer">Full transcript</summary>
-                    <p className="text-xs text-[#8B93A3] mt-2 whitespace-pre-wrap font-mono">{call.transcript}</p>
+                    <summary className="text-xs font-medium text-[#6FE3B0] cursor-pointer">Full transcript</summary>
+                    <p className="text-xs text-[#9FB0A6] mt-2 whitespace-pre-wrap font-mono">{call.transcript}</p>
                   </details>
                 )}
                 {call.recordingUrl && (
@@ -215,35 +215,35 @@ export default function LeadDetailPage() {
       {activeTab === "booking" && (
         <div>
           {!lead.booking ? (
-            <div className="text-center py-12 text-[#8B93A3]">
+            <div className="text-center py-12 text-[#9FB0A6]">
               <Calendar className="w-10 h-10 mx-auto mb-3 opacity-50" />
               <p className="text-sm">No visit booked yet</p>
             </div>
           ) : (
-            <div className="p-6 rounded-xl bg-[#10B981]/10 border border-[#10B981]/30">
+            <div className="p-6 rounded-xl bg-[#34D399]/15 border border-[#34D399]/40">
               <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-5 h-5 text-[#10B981]" />
-                <h3 className="text-lg font-semibold text-white">Visit Scheduled</h3>
+                <Calendar className="w-5 h-5 text-[#34D399]" />
+                <h3 className="text-lg font-semibold text-[#F0F7F3]">Visit Scheduled</h3>
               </div>
               <div className="space-y-3">
                 <div>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-2xl font-bold text-[#F0F7F3]">
                     {lead.booking.visitDate ? new Date(lead.booking.visitDate).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }) : "—"}
                   </p>
-                  <p className="text-base text-[#10B981] font-medium">{lead.booking.visitTime}</p>
+                  <p className="text-base text-[#34D399] font-medium">{lead.booking.visitTime}</p>
                 </div>
                 {lead.booking.propertyAddress && (
                   <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-[#8B93A3] mt-0.5" />
-                    <p className="text-sm text-[#8B93A3]">{lead.booking.propertyAddress}</p>
+                    <MapPin className="w-4 h-4 text-[#9FB0A6] mt-0.5" />
+                    <p className="text-sm text-[#9FB0A6]">{lead.booking.propertyAddress}</p>
                   </div>
                 )}
                 <div className="flex items-center gap-3 pt-4">
                   <span className={cn("px-3 py-1 rounded-full text-xs font-medium",
-                    lead.booking.status === "CONFIRMED" ? "bg-[#10B981]/10 text-[#10B981]" :
-                    lead.booking.status === "VISITED" ? "bg-[#10B981] text-black" :
-                    lead.booking.status === "NO_SHOW" ? "bg-[#F43F5E]/10 text-[#F43F5E]" :
-                    "bg-[#8B93A3]/10 text-[#8B93A3]"
+                    lead.booking.status === "CONFIRMED" ? "bg-[#34D399]/15 text-[#34D399]" :
+                    lead.booking.status === "VISITED" ? "bg-[#34D399] text-black" :
+                    lead.booking.status === "NO_SHOW" ? "bg-[#FB7185]/15 text-[#FB7185]" :
+                    "bg-[#5C6B62]/10 text-[#9FB0A6]"
                   )}>
                     {lead.booking.status.replace(/_/g, " ")}
                   </span>
@@ -257,7 +257,7 @@ export default function LeadDetailPage() {
       {activeTab === "messages" && (
         <div className="space-y-3">
           {(lead.customerNotifications || []).length === 0 && (lead.ownerNotifications || []).length === 0 ? (
-            <div className="text-center py-12 text-[#8B93A3]">
+            <div className="text-center py-12 text-[#9FB0A6]">
               <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-50" />
               <p className="text-sm">No messages sent yet</p>
             </div>
@@ -265,15 +265,15 @@ export default function LeadDetailPage() {
             [...(lead.customerNotifications || []), ...(lead.ownerNotifications || [])].sort((a: any, b: any) =>
               new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
             ).map((n: any) => (
-              <div key={n.id} className="p-4 rounded-xl bg-[#14161C] border border-[#272B34]">
+              <div key={n.id} className="p-4 rounded-xl app-card">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-[#8B93A3]">{n.type} · {n.channel || "whatsapp"}</span>
+                  <span className="text-xs font-medium text-[#9FB0A6]">{n.type} · {n.channel || "whatsapp"}</span>
                   <span className={cn("text-xs px-1.5 py-0.5 rounded",
-                    n.status === "sent" || n.status === "delivered" ? "bg-[#10B981]/10 text-[#10B981]" : "bg-[#F43F5E]/10 text-[#F43F5E]"
+                    n.status === "sent" || n.status === "delivered" ? "bg-[#34D399]/15 text-[#34D399]" : "bg-[#FB7185]/15 text-[#FB7185]"
                   )}>{n.status}</span>
                 </div>
-                <p className="text-sm text-white line-clamp-2">{n.message}</p>
-                <p className="text-xs text-[#8B93A3] mt-1">{fmt(n.sentAt)}</p>
+                <p className="text-sm text-[#F0F7F3] line-clamp-2">{n.message}</p>
+                <p className="text-xs text-[#9FB0A6] mt-1">{fmt(n.sentAt)}</p>
               </div>
             ))
           )}
@@ -320,13 +320,13 @@ function ScoreEditor({ leadId, initialScore, onScoreUpdated }: { leadId: string;
   }
 
   return (
-    <div className="p-4 rounded-xl bg-[#14161C] border border-[#272B34]">
+    <div className="p-4 rounded-xl app-card">
       <div className="flex items-center gap-3">
-        <span className="text-sm text-[#8B93A3]">Conversion Score</span>
-        <div className="flex-1 h-2 rounded-full bg-[#1B1E26] overflow-hidden">
+        <span className="text-sm text-[#9FB0A6]">Conversion Score</span>
+        <div className="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden">
           <div className={cn(
             "h-full rounded-full transition-all duration-500",
-            score >= 70 ? "bg-[#10B981]" : score >= 40 ? "bg-[#F59E0B]" : "bg-[#8B93A3]"
+            score >= 70 ? "bg-[#34D399]" : score >= 40 ? "bg-[#B45309]" : "bg-[#5C6B62]"
           )} style={{ width: `${score}%` }} />
         </div>
         {editing ? (
@@ -335,29 +335,29 @@ function ScoreEditor({ leadId, initialScore, onScoreUpdated }: { leadId: string;
               onChange={(e) => setTempScore(parseInt(e.target.value))}
               className="w-24 h-1.5"
             />
-            <span className="text-sm font-mono text-white w-8 text-right">{tempScore}</span>
+            <span className="text-sm font-mono text-[#F0F7F3] w-8 text-right">{tempScore}</span>
             <button onClick={handleSave} disabled={saving}
-              className="px-2 py-1 rounded text-xs bg-[#3B82F6] text-white font-medium hover:brightness-110"
+              className="px-2 py-1 rounded text-xs bg-[#1B4332] text-white font-medium hover:brightness-110"
             >
               {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
             </button>
             <button onClick={() => { setEditing(false); setTempScore(score); }}
-              className="px-2 py-1 rounded text-xs text-[#8B93A3] hover:text-white"
+              className="px-2 py-1 rounded text-xs text-[#9FB0A6] hover:text-[#F0F7F3]"
             >
               Cancel
             </button>
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold font-mono text-white">{score}</span>
+            <span className="text-lg font-bold font-mono text-[#F0F7F3]">{score}</span>
             <button onClick={() => { setEditing(true); loadHistory(); }}
-              className="p-1.5 rounded-lg hover:bg-[#1B1E26] text-[#8B93A3]"
+              className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
               title="Edit score"
             >
               <Edit3 className="w-3.5 h-3.5" />
             </button>
             <button onClick={() => { setShowHistory(!showHistory); if (!showHistory) loadHistory(); }}
-              className="p-1.5 rounded-lg hover:bg-[#1B1E26] text-[#8B93A3]"
+              className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
               title="Score history"
             >
               <BarChart3 className="w-3.5 h-3.5" />
@@ -368,26 +368,26 @@ function ScoreEditor({ leadId, initialScore, onScoreUpdated }: { leadId: string;
 
       {/* Score history */}
       {showHistory && history.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-[#272B34] space-y-1.5">
-          <p className="text-[11px] text-[#8B93A3] font-medium">Score History</p>
+        <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+          <p className="text-[11px] text-[#9FB0A6] font-medium">Score History</p>
           {history.map((h: any, i: number) => (
             <div key={h.id || i} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <span className={cn(
                   "w-2 h-2 rounded-full",
-                  h.score >= 70 ? "bg-[#10B981]" : h.score >= 40 ? "bg-[#F59E0B]" : "bg-[#8B93A3]"
+                  h.score >= 70 ? "bg-[#34D399]" : h.score >= 40 ? "bg-[#B45309]" : "bg-[#5C6B62]"
                 )} />
-                <span className="text-white font-mono">{h.score}</span>
-                <span className="text-[#8B93A3]">{h.source === "manual" ? "✏️ Manual" : "🤖 Auto"}</span>
-                {h.reason && <span className="text-[#8B93A3] truncate max-w-[100px]">— {h.reason}</span>}
+                <span className="text-[#F0F7F3] font-mono">{h.score}</span>
+                <span className="text-[#9FB0A6]">{h.source === "manual" ? "✏️ Manual" : "🤖 Auto"}</span>
+                {h.reason && <span className="text-[#9FB0A6] truncate max-w-[100px]">— {h.reason}</span>}
               </div>
-              <span className="text-[#8B93A3]">{h.createdAt ? new Date(h.createdAt).toLocaleDateString() : ""}</span>
+              <span className="text-[#9FB0A6]">{h.createdAt ? new Date(h.createdAt).toLocaleDateString() : ""}</span>
             </div>
           ))}
         </div>
       )}
       {showHistory && history.length === 0 && (
-        <div className="mt-3 pt-3 border-t border-[#272B34] text-xs text-[#8B93A3] text-center">
+        <div className="mt-3 pt-3 border-t border-white/10 text-xs text-[#9FB0A6] text-center">
           No score history yet
         </div>
       )}
@@ -437,24 +437,24 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-5 h-5 text-[#3B82F6] animate-spin" />
+        <Loader2 className="w-5 h-5 text-[#6FE3B0] animate-spin" />
       </div>
     );
   }
 
   if (!breakdown) {
-    return <div className="text-center py-12 text-[#8B93A3]">Could not load score breakdown</div>;
+    return <div className="text-center py-12 text-[#9FB0A6]">Could not load score breakdown</div>;
   }
 
   const factorColors: Record<string, string> = {
-    source: "#10B981",
-    latency: "#3B82F6",
-    timeline: "#F59E0B",
+    source: "#047857",
+    latency: "#1B4332",
+    timeline: "#B45309",
     budget: "#8B5CF6",
     propertyType: "#EC4899",
     callHour: "#06B6D4",
     territory: "#F97316",
-    sentiment: "#EF4444",
+    sentiment: "#DC2626",
   };
 
   const factorIcons: Record<string, React.ReactNode> = {
@@ -476,30 +476,30 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
   return (
     <div className="space-y-5">
       {/* Score Gauge */}
-      <div className="flex items-center gap-6 p-5 rounded-xl bg-[#14161C] border border-[#272B34]">
+      <div className="flex items-center gap-6 p-5 rounded-xl app-card">
         <div className="relative w-20 h-20 shrink-0">
           <svg className="w-20 h-20 -rotate-90" viewBox="0 0 72 72">
-            <circle cx="36" cy="36" r="30" fill="none" stroke="#1B1E26" strokeWidth="6" />
+            <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
             <circle cx="36" cy="36" r="30" fill="none"
-              stroke={breakdown.score >= 70 ? "#10B981" : breakdown.score >= 40 ? "#F59E0B" : "#8B93A3"}
+              stroke={breakdown.score >= 70 ? "#047857" : breakdown.score >= 40 ? "#B45309" : "#5C6B62"}
               strokeWidth="6" strokeDasharray={`${(breakdown.score / 100) * 188.5} 188.5`}
               strokeLinecap="round" className="transition-all duration-1000"
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xl font-bold font-mono text-white">{breakdown.score}</span>
+            <span className="text-xl font-bold font-mono text-[#F0F7F3]">{breakdown.score}</span>
           </div>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <BrainCircuit className="w-4 h-4 text-[#3B82F6]" />
-            <h3 className="text-sm font-semibold text-white">AI Score Analysis</h3>
+            <BrainCircuit className="w-4 h-4 text-[#6FE3B0]" />
+            <h3 className="text-sm font-semibold text-[#F0F7F3]">AI Score Analysis</h3>
           </div>
-          <p className="text-[13px] text-[#8B93A3] leading-relaxed">
+          <p className="text-[13px] text-[#9FB0A6] leading-relaxed">
             {breakdown.explanation}
           </p>
           <button onClick={handleRescore} disabled={rescoreLoading}
-            className="mt-2 flex items-center gap-1.5 text-[12px] text-[#3B82F6] hover:text-[#3B82F6]/80 font-medium transition-colors"
+            className="mt-2 flex items-center gap-1.5 text-[12px] text-[#6FE3B0] hover:text-[#6FE3B0]/80 font-medium transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${rescoreLoading ? "animate-spin" : ""}`} />
             {rescoreLoading ? "Recalculating..." : "Re-score this lead"}
@@ -508,16 +508,16 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
       </div>
 
       {/* Factor Breakdown */}
-      <div className="p-5 rounded-xl bg-[#14161C] border border-[#272B34]">
-        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-          <Target className="w-4 h-4 text-[#3B82F6]" />
+      <div className="p-5 rounded-xl app-card">
+        <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4 flex items-center gap-2">
+          <Target className="w-4 h-4 text-[#6FE3B0]" />
           Factor Breakdown
-          <span className="text-[11px] text-[#8B93A3] font-normal ml-1">— weighted contribution to score</span>
+          <span className="text-[11px] text-[#9FB0A6] font-normal ml-1">— weighted contribution to score</span>
         </h3>
         <div className="space-y-3">
           {sortedFactors.map(([key, value]) => {
             const label = breakdown.factorLabels[key];
-            const color = factorColors[key] || "#8B93A3";
+            const color = factorColors[key] || "#5C6B62";
             const isPositive = value >= 0;
             const absValue = Math.abs(value);
             const maxPossible = key === "sentiment" ? 25 : 20;
@@ -525,25 +525,25 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
 
             return (
               <div key={key} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#1B1E26] flex items-center justify-center shrink-0" style={{ color }}>
+                <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0" style={{ color }}>
                   {factorIcons[key] || <Info className="w-4 h-4" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[13px] font-medium text-[#F2F4F8]">{label?.label || key}</span>
+                    <span className="text-[13px] font-medium text-[#F0F7F3]">{label?.label || key}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[12px] text-[#8B93A3]">{label?.weight || ""}</span>
+                      <span className="text-[12px] text-[#9FB0A6]">{label?.weight || ""}</span>
                       <span className={cn(
                         "text-[13px] font-mono font-semibold",
-                        isPositive ? "text-[#10B981]" : "text-[#F43F5E]"
+                        isPositive ? "text-[#34D399]" : "text-[#FB7185]"
                       )}>
                         {isPositive ? "+" : ""}{absValue.toFixed(1)}
                       </span>
                     </div>
                   </div>
-                  <div className="h-1.5 rounded-full bg-[#1B1E26] overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-700"
-                      style={{ width: `${barPercent}%`, backgroundColor: isPositive ? color : "#F43F5E" }}
+                      style={{ width: `${barPercent}%`, backgroundColor: isPositive ? color : "#E11D48" }}
                     />
                   </div>
                 </div>
@@ -555,9 +555,9 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
 
       {/* Score History Trend */}
       {breakdown.history?.length > 1 && (
-        <div className="p-5 rounded-xl bg-[#14161C] border border-[#272B34]">
-          <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#10B981]" />
+        <div className="p-5 rounded-xl app-card">
+          <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-[#34D399]" />
             Score Trend
           </h3>
           <div className="flex items-end gap-2 h-24">
@@ -569,15 +569,15 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
                   <div className="w-full rounded-t-md transition-all duration-500 relative group"
                     style={{
                       height: `${heightPct}%`,
-                      backgroundColor: h.score >= 70 ? "#10B981" : h.score >= 40 ? "#F59E0B" : "#8B93A3",
+                      backgroundColor: h.score >= 70 ? "#047857" : h.score >= 40 ? "#B45309" : "#5C6B62",
                       opacity: isLatest ? 1 : 0.6,
                     }}
                   >
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1B1E26] text-[11px] text-white px-1.5 py-0.5 rounded whitespace-nowrap">
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/[0.06] text-[11px] text-[#F0F7F3] px-1.5 py-0.5 rounded whitespace-nowrap">
                       {h.score} — {h.source === "manual" ? "Manual" : "Auto"}
                     </div>
                   </div>
-                  <span className="text-[9px] text-[#8B93A3]">
+                  <span className="text-[9px] text-[#9FB0A6]">
                     {new Date(h.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit" })}
                   </span>
                 </div>
@@ -589,8 +589,8 @@ function ScoreBreakdown({ leadId, initialScore, onScoreUpdated }: { leadId: stri
 
       {/* When no history yet */}
       {(!breakdown.history || breakdown.history.length <= 1) && (
-        <div className="p-5 rounded-xl bg-[#14161C] border border-[#272B34]">
-          <div className="flex items-center gap-2 text-[#8B93A3]">
+        <div className="p-5 rounded-xl app-card">
+          <div className="flex items-center gap-2 text-[#9FB0A6]">
             <Info className="w-4 h-4" />
             <p className="text-[13px]">Score history will appear here after scoring events occur.</p>
           </div>
@@ -618,15 +618,15 @@ function PropertySuggestions({ leadId }: { leadId: string }) {
   }, [leadId]);
 
   if (loading) {
-    return <div className="py-12 text-center"><Loader2 className="w-5 h-5 animate-spin text-[#3B82F6] mx-auto" /></div>;
+    return <div className="py-12 text-center"><Loader2 className="w-5 h-5 animate-spin text-[#6FE3B0] mx-auto" /></div>;
   }
 
   if (suggestions.length === 0) {
     return (
       <div className="text-center py-12">
-        <Home className="w-10 h-10 text-[#363B45] mx-auto mb-3" />
-        <p className="text-sm text-[#8B93A3]">No matching properties found</p>
-        <p className="text-xs text-[#363B45] mt-1">Add more properties or wait for lead qualification data</p>
+        <Home className="w-10 h-10 text-[#6B7C73] mx-auto mb-3" />
+        <p className="text-sm text-[#9FB0A6]">No matching properties found</p>
+        <p className="text-xs text-[#6B7C73] mt-1">Add more properties or wait for lead qualification data</p>
       </div>
     );
   }
@@ -634,39 +634,39 @@ function PropertySuggestions({ leadId }: { leadId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#8B93A3]">{suggestions.length} matching properties</p>
-        <span className="text-[11px] text-[#3B82F6]">Match Score →</span>
+        <p className="text-xs text-[#9FB0A6]">{suggestions.length} matching properties</p>
+        <span className="text-[11px] text-[#6FE3B0]">Match Score →</span>
       </div>
       {suggestions.map((prop: any) => (
         <div key={prop.propertyId}
-          className="p-4 rounded-xl bg-[#14161C] border border-[#272B34] border-l-4"
+          className="p-4 rounded-xl app-card border-l-4"
           style={{
-            borderLeftColor: prop.score >= 70 ? "#10B981" : prop.score >= 40 ? "#F59E0B" : "#8B93A3",
+            borderLeftColor: prop.score >= 70 ? "#047857" : prop.score >= 40 ? "#B45309" : "#5C6B62",
           }}
         >
           <div className="flex items-start justify-between mb-2">
             <div>
-              <h4 className="text-sm font-semibold text-white">{prop.propertyName}</h4>
-              <p className="text-xs text-[#8B93A3]">{prop.propertyLocation || "—"}</p>
+              <h4 className="text-sm font-semibold text-[#F0F7F3]">{prop.propertyName}</h4>
+              <p className="text-xs text-[#9FB0A6]">{prop.propertyLocation || "—"}</p>
             </div>
             <div className={cn(
               "px-2.5 py-1 rounded-lg text-xs font-bold font-mono",
-              prop.score >= 70 ? "bg-[#10B981]/20 text-[#10B981]" :
-              prop.score >= 40 ? "bg-[#F59E0B]/20 text-[#F59E0B]" :
-              "bg-[#8B93A3]/20 text-[#8B93A3]"
+              prop.score >= 70 ? "bg-[#34D399]/25 text-[#34D399]" :
+              prop.score >= 40 ? "bg-[#B45309]/20 text-[#E8C468]" :
+              "bg-[#5C6B62]/20 text-[#9FB0A6]"
             )}>
               {prop.score}%
             </div>
           </div>
           {prop.propertyPrice && (
-            <p className="text-sm text-[#F2F4F8] font-mono mb-2">
+            <p className="text-sm text-[#F0F7F3] font-mono mb-2">
               ₹{(prop.propertyPrice / 100000).toFixed(1)}L
             </p>
           )}
           {prop.matchReasons.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {prop.matchReasons.slice(0, 3).map((reason: string, i: number) => (
-                <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[#1B1E26] text-[#8B93A3] border border-[#272B34]">
+                <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-[#9FB0A6] border border-white/10">
                   {reason}
                 </span>
               ))}
@@ -701,10 +701,10 @@ function NotesTab({ leadId }: { leadId: string }) {
       <textarea value={note} onChange={(e) => setNote(e.target.value)}
         placeholder="Add a note about this lead..."
         rows={6}
-        className="w-full px-4 py-3 rounded-xl bg-[#14161C] border border-[#272B34] text-sm text-white placeholder-[#363B45] focus:outline-none focus:border-[#3B82F6] resize-none"
+        className="w-full px-4 py-3 rounded-xl app-card text-sm text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50 resize-none"
       />
       <button onClick={handleSave} disabled={!note.trim() || saving}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]/80 text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-all"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#1B4332] to-[#1B4332]/80 text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-all"
       >
         {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : "Save Note"}
       </button>

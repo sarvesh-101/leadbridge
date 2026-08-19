@@ -103,9 +103,9 @@ export function BulkActionBar({ selectedIds, onClear, onComplete }: BulkActionBa
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1B4332]/10 border border-[#1B4332]/20"
       >
-        <span className="text-sm font-medium text-[#3B82F6] mr-2">
+        <span className="text-sm font-medium text-[#1B4332] mr-2">
           {selectedIds.length} selected
         </span>
 
@@ -131,12 +131,12 @@ export function BulkActionBar({ selectedIds, onClear, onComplete }: BulkActionBa
                     {action.label}
                   </button>
                   {showStatusMenu && (
-                    <div className="absolute top-full mt-1 left-0 z-50 w-40 rounded-lg bg-[#1B1E26] border border-[#272B34] shadow-xl overflow-hidden">
+                    <div className="absolute top-full mt-1 left-0 z-50 w-40 rounded-lg bg-[#F1F3EE] border border-[#E4E7DF] shadow-xl overflow-hidden">
                       {BULK_STATUSES.map((s) => (
                         <button
                           key={s.value}
                           onClick={() => handleAction(s.value)}
-                          className="w-full px-3 py-2 text-xs text-left text-gray-300 hover:bg-white/5 transition-colors"
+                          className="w-full px-3 py-2 text-xs text-left text-[#5C6B62] hover:bg-[#F1F3EE] transition-colors"
                         >
                           {s.label}
                         </button>
@@ -169,7 +169,7 @@ export function BulkActionBar({ selectedIds, onClear, onComplete }: BulkActionBa
 
         <button
           onClick={onClear}
-          className="ml-auto p-1.5 rounded-lg hover:bg-white/5 text-gray-500 hover:text-gray-300 transition-colors"
+          className="ml-auto p-1.5 rounded-lg hover:bg-[#F1F3EE] text-[#7C8781] hover:text-[#5C6B62] transition-colors"
           title="Clear selection"
         >
           <X className="w-4 h-4" />

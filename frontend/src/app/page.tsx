@@ -41,13 +41,13 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
+    <div className="min-h-screen bg-[#0A0F0C] text-[#F0F7F3] relative overflow-x-clip">
       {/* Navigation */}
       <nav
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           scrolled
-            ? "bg-[#0B0D12]/80 backdrop-blur-xl border-b border-[#272B34]"
+            ? "bg-[#0A0F0C]/75 backdrop-blur-xl border-b border-white/[0.08]"
             : "bg-transparent"
         )}
       >
@@ -55,13 +55,13 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center">
-                <Zap className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.35)]">
+                <Zap className="w-4 h-4 text-[#0A0F0C]" />
               </div>
-              <span className="text-[18px] font-display font-bold text-[#F2F4F8] tracking-[-0.02em]">
+              <span className="text-[18px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">
                 LeadBridge
               </span>
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#34D399] animate-pulse shadow-[0_0_8px_#34D399]" />
             </Link>
 
             {/* Desktop Nav */}
@@ -70,7 +70,7 @@ export default function LandingPage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-[13px] text-[#8B93A3] hover:text-[#F2F4F8] transition-colors font-medium tracking-[0.02em]"
+                  className="text-[13px] text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors font-medium tracking-[0.02em]"
                 >
                   {link.label}
                 </Link>
@@ -80,13 +80,13 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-4">
               <Link
                 href="/auth/login"
-                className="text-[13px] text-[#8B93A3] hover:text-[#F2F4F8] transition-colors font-medium"
+                className="text-[13px] text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors font-medium"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/register"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold transition-all duration-150 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[13px] font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-[0_0_32px_rgba(52,211,153,0.5)] active:scale-[0.98]"
               >
                 Request Your City
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -95,7 +95,7 @@ export default function LandingPage() {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden text-[#F2F4F8]"
+              className="md:hidden text-[#F0F7F3]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -110,14 +110,14 @@ export default function LandingPage() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-[#0B0D12]/95 backdrop-blur-xl border-b border-[#272B34]"
+              className="md:hidden bg-[#0A0F0C]/95 backdrop-blur-xl border-b border-white/[0.08]"
             >
               <div className="px-4 py-4 space-y-3">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="block text-[13px] text-[#8B93A3] hover:text-[#F2F4F8] py-2"
+                    className="block text-[13px] text-[#9FB0A6] hover:text-[#F0F7F3] py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.label}
@@ -126,13 +126,13 @@ export default function LandingPage() {
                 <div className="pt-3 space-y-3">
                   <Link
                     href="/auth/login"
-                    className="block text-center text-[13px] text-[#8B93A3] hover:text-[#F2F4F8] py-2"
+                    className="block text-center text-[13px] text-[#9FB0A6] hover:text-[#F0F7F3] py-2"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="block text-center px-5 py-3 rounded-lg bg-[#3B82F6] text-white text-[13px] font-semibold"
+                    className="block text-center px-5 py-3 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[13px] font-bold"
                   >
                     Request Your City
                   </Link>
@@ -196,19 +196,19 @@ export default function LandingPage() {
       <CTASection />
 
       {/* Footer */}
-      <footer className="py-12 border-t border-[#272B34] bg-[#0B0D12]">
+      <footer className="relative z-10 py-12 border-t border-white/[0.08] bg-[#080C0A]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-[#3B82F6] flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-[#0A0F0C]" />
                 </div>
-                <span className="text-[18px] font-display font-bold text-[#F2F4F8]">
+                <span className="text-[18px] font-display font-bold text-[#F0F7F3]">
                   LeadBridge
                 </span>
               </div>
-              <p className="text-[13px] text-[#8B93A3]">
+              <p className="text-[13px] text-[#9FB0A6]">
                 One broker per city. AI calls every lead in 60 seconds.
               </p>
             </div>
@@ -216,7 +216,7 @@ export default function LandingPage() {
               {
                 title: "Product",
                 links: [
-                  { label: "How It Works", href: "#how-it-works" },
+                  { label: "Features", href: "#features" },
                   { label: "Pricing", href: "#pricing" },
                   { label: "Territories", href: "#territories" },
                   { label: "How It Works", href: "#how-it-works" },
@@ -245,7 +245,7 @@ export default function LandingPage() {
                     <li key={link.label}>
                       <Link
                         href={link.href}
-                        className="text-[13px] text-[#8B93A3] hover:text-[#F2F4F8] transition-colors"
+                        className="text-[13px] text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -255,7 +255,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="pt-8 border-t border-[#272B34] text-center text-[13px] text-[#8B93A3]">
+          <div className="pt-8 border-t border-white/[0.08] text-center text-[13px] text-[#6B7C73]">
             © {new Date().getFullYear()} LeadBridge. All rights reserved.
           </div>
         </div>

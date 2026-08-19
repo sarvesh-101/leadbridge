@@ -111,7 +111,7 @@ export default function ProblemSection() {
           { opacity: 1, scale: 1, duration: 0.4 }
         )
         .to(".lead-dot", {
-          fill: "#363B45",
+          fill: "#3D4A44",
           duration: 0.3,
         });
 
@@ -129,17 +129,19 @@ export default function ProblemSection() {
   }, [inView]);
 
   return (
-    <section className="relative py-20 lg:py-32 bg-[#0B0D12]" ref={ref}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" ref={ref}>
+      {/* soft red/amber tension glow */}
+      <div className="absolute top-1/4 left-[-100px] w-[420px] h-[420px] rounded-full bg-[#E11D48] opacity-[0.06] blur-[110px] pointer-events-none" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column */}
           <div>
             <h2 className="h1-text mb-8">
-              Right now, your leads are going cold.
+              Right now, your leads are going <span className="text-[#FB7185]">cold.</span>
             </h2>
 
             <div className="mb-10">
-              <div className="text-[72px] font-display font-bold text-[#F2F4F8] leading-none mb-2">
+              <div className="text-[72px] font-display font-bold text-[#F0F7F3] leading-none mb-2">
                 {count}%
               </div>
               <p className="body-text">
@@ -164,17 +166,17 @@ export default function ProblemSection() {
                   >
                     <path
                       d="M10 18a8 8 0 100-16 8 8 0 000 16z"
-                      stroke="#F43F5E"
+                      stroke="#FB7185"
                       strokeWidth="1.5"
                     />
                     <path
                       d="M12.5 7.5l-5 5m0-5l5 5"
-                      stroke="#F43F5E"
+                      stroke="#FB7185"
                       strokeWidth="1.5"
                       strokeLinecap="round"
                     />
                   </svg>
-                  <p className="text-[15px] text-[#F2F4F8]">{point}</p>
+                  <p className="text-[15px] text-[#D5E0D9]">{point}</p>
                 </div>
               ))}
             </div>
@@ -194,22 +196,22 @@ export default function ProblemSection() {
                 cx="140"
                 cy="30"
                 r="16"
-                fill="#3B82F6"
+                fill="#34D399"
               />
               <text
                 x="140"
                 y="35"
                 textAnchor="middle"
-                fill="#F2F4F8"
+                fill="#0A0F0C"
                 fontSize="11"
-                fontWeight="500"
+                fontWeight="700"
               >
                 LEAD
               </text>
               <path
                 className="line-down-1"
                 d="M140 46 L140 90 L100 90 L100 130"
-                stroke="#272B34"
+                stroke="#2A3B33"
                 strokeWidth="1.5"
                 strokeDasharray="4 4"
                 fill="none"
@@ -219,8 +221,8 @@ export default function ProblemSection() {
                 cx="100"
                 cy="160"
                 r="24"
-                fill="#14161C"
-                stroke="#272B34"
+                fill="#141C18"
+                stroke="#2A3B33"
                 strokeWidth="1.5"
               />
               <rect
@@ -229,22 +231,22 @@ export default function ProblemSection() {
                 width="20"
                 height="30"
                 rx="3"
-                stroke="#8B93A3"
+                stroke="#9FB0A6"
                 strokeWidth="1.5"
                 fill="none"
               />
-              <circle cx="100" cy="169" r="2" fill="#8B93A3" />
+              <circle cx="100" cy="169" r="2" fill="#9FB0A6" />
               <path
                 className="missed-x"
                 d="M112 148 L120 156 M120 148 L112 156"
-                stroke="#F43F5E"
+                stroke="#FB7185"
                 strokeWidth="2"
                 strokeLinecap="round"
               />
               <path
                 className="line-down-2"
                 d="M100 184 L100 220 L140 220 L140 260"
-                stroke="#272B34"
+                stroke="#2A3B33"
                 strokeWidth="1.5"
                 strokeDasharray="4 4"
                 fill="none"
@@ -254,18 +256,18 @@ export default function ProblemSection() {
                 cx="140"
                 cy="290"
                 r="24"
-                fill="#14161C"
-                stroke="#272B34"
+                fill="#141C18"
+                stroke="#2A3B33"
                 strokeWidth="1.5"
               />
-              <circle cx="140" cy="290" r="18" stroke="#8B93A3" strokeWidth="1.5" fill="none" />
+              <circle cx="140" cy="290" r="18" stroke="#9FB0A6" strokeWidth="1.5" fill="none" />
               <line
                 className="clock-hand-minute"
                 x1="140"
                 y1="290"
                 x2="140"
                 y2="276"
-                stroke="#8B93A3"
+                stroke="#9FB0A6"
                 strokeWidth="2"
                 strokeLinecap="round"
                 style={{ transformOrigin: "140px 290px" }}
@@ -276,7 +278,7 @@ export default function ProblemSection() {
                 y1="290"
                 x2="148"
                 y2="290"
-                stroke="#8B93A3"
+                stroke="#9FB0A6"
                 strokeWidth="2"
                 strokeLinecap="round"
                 style={{ transformOrigin: "140px 290px" }}
@@ -284,7 +286,7 @@ export default function ProblemSection() {
               <path
                 className="line-down-3"
                 d="M140 314 L140 350 L140 390"
-                stroke="#272B34"
+                stroke="#2A3B33"
                 strokeWidth="1.5"
                 strokeDasharray="4 4"
                 fill="none"
@@ -296,9 +298,9 @@ export default function ProblemSection() {
                 width="60"
                 height="30"
                 rx="4"
-                fill="#F43F5E"
+                fill="#E11D48"
                 fillOpacity="0.15"
-                stroke="#F43F5E"
+                stroke="#E11D48"
                 strokeWidth="1"
               />
               <text
@@ -306,7 +308,7 @@ export default function ProblemSection() {
                 x="140"
                 y="430"
                 textAnchor="middle"
-                fill="#F43F5E"
+                fill="#E11D48"
                 fontSize="14"
                 fontWeight="700"
                 letterSpacing="2"

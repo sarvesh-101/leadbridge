@@ -51,7 +51,7 @@ const STATUS_BG: Record<BookingStatus, string> = {
   VISITED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   NO_SHOW: "bg-red-500/10 text-red-400 border-red-500/20",
   RESCHEDULED: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  CANCELLED: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+  CANCELLED: "bg-gray-500/10 text-[#7C8781] border-gray-500/20",
 };
 
 const DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -129,23 +129,23 @@ export default function BookingCalendar({
           <div className="flex items-center gap-2">
             <button
               onClick={prevMonth}
-              className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-lg hover:bg-[#E9ECE5] text-[#7C8781] hover:text-ink transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h2 className="text-lg font-semibold text-white min-w-[180px] text-center">
+            <h2 className="text-lg font-semibold text-ink min-w-[180px] text-center">
               {format(currentMonth, "MMMM yyyy")}
             </h2>
             <button
               onClick={nextMonth}
-              className="p-2 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-lg hover:bg-[#E9ECE5] text-[#7C8781] hover:text-ink transition-colors"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
           <button
             onClick={goToday}
-            className="px-3 py-1.5 text-xs font-medium text-gray-300 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-[#5C6B62] rounded-lg border border-[#E4E7DF] hover:bg-[#E9ECE5] transition-colors"
           >
             Today
           </button>
@@ -156,7 +156,7 @@ export default function BookingCalendar({
           {DAY_HEADERS.map((d) => (
             <div
               key={d}
-              className="text-center text-xs font-medium text-gray-500 py-2"
+              className="text-center text-xs font-medium text-[#7C8781] py-2"
             >
               {d}
             </div>
@@ -169,7 +169,7 @@ export default function BookingCalendar({
             {Array.from({ length: 35 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-square rounded-xl bg-white/5 animate-pulse"
+                className="aspect-square rounded-xl bg-white animate-pulse"
               />
             ))}
           </div>
@@ -190,9 +190,9 @@ export default function BookingCalendar({
                   className={cn(
                     "relative flex flex-col items-center justify-start pt-1.5 pb-1 rounded-xl transition-all duration-150 min-h-[80px] sm:min-h-[90px] group",
                     isCurrentMonth
-                      ? "hover:bg-white/10 cursor-pointer"
+                      ? "hover:bg-[#E9ECE5] cursor-pointer"
                       : "opacity-30 cursor-default",
-                    isSelected && "ring-2 ring-leadflow-500/50 bg-white/10",
+                    isSelected && "ring-2 ring-leadflow-500/50 bg-[#F1F3EE]",
                     today && !isSelected && "ring-1 ring-leadflow-accent/30"
                   )}
                 >
@@ -200,9 +200,9 @@ export default function BookingCalendar({
                     className={cn(
                       "text-xs font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full",
                       today
-                        ? "bg-leadflow-accent text-white"
+                        ? "bg-[#2D6A4F] text-white"
                         : isCurrentMonth
-                        ? "text-gray-300"
+                        ? "text-[#5C6B62]"
                         : "text-gray-600"
                     )}
                   >
@@ -223,7 +223,7 @@ export default function BookingCalendar({
                         />
                       ))}
                       {dayBookings.length > 4 && (
-                        <span className="text-[9px] text-gray-500 font-medium">
+                        <span className="text-[9px] text-[#7C8781] font-medium">
                           +{dayBookings.length - 4}
                         </span>
                       )}
@@ -237,7 +237,7 @@ export default function BookingCalendar({
                         e.stopPropagation();
                         handleQuickAdd(day);
                       }}
-                      className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-leadflow-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-[#1B4332]/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -249,11 +249,11 @@ export default function BookingCalendar({
         )}
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-white/5">
+        <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-[#EDF0EA]">
           {Object.entries(STATUS_COLORS).map(([status, color]) => (
             <div key={status} className="flex items-center gap-1.5">
               <span className={cn("w-2 h-2 rounded-full", color)} />
-              <span className="text-[11px] text-gray-500 capitalize">
+              <span className="text-[11px] text-[#7C8781] capitalize">
                 {status.replace(/_/g, " ")}
               </span>
             </div>
@@ -274,15 +274,15 @@ export default function BookingCalendar({
             exit={{ opacity: 0, x: 20 }}
             className="w-full lg:w-80 shrink-0"
           >
-            <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+            <div className="rounded-xl bg-white border border-[#E4E7DF] overflow-hidden">
               {/* Panel header */}
-              <div className="p-4 border-b border-white/10 bg-white/[0.02]">
+              <div className="p-4 border-b border-[#E4E7DF] bg-[#F7F8F4]">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-semibold text-white">
+                    <h3 className="text-sm font-semibold text-ink">
                       {format(selectedDate, "EEEE, MMMM d")}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-[#7C8781] mt-0.5">
                       {selectedBookings.length} booking
                       {selectedBookings.length !== 1 ? "s" : ""}
                     </p>
@@ -290,14 +290,14 @@ export default function BookingCalendar({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleQuickAdd(selectedDate)}
-                      className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-leadflow-accent transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-[#E9ECE5] text-[#7C8781] hover:text-[#2D6A4F] transition-colors"
                       title="Add booking"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setSelectedDate(null)}
-                      className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-[#E9ECE5] text-[#7C8781] hover:text-ink transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -310,10 +310,10 @@ export default function BookingCalendar({
                 {selectedBookings.length === 0 ? (
                   <div className="text-center py-8">
                     <CalendarIcon className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">No bookings on this day</p>
+                    <p className="text-sm text-[#7C8781]">No bookings on this day</p>
                     <button
                       onClick={() => handleQuickAdd(selectedDate)}
-                      className="mt-3 text-xs text-leadflow-accent hover:underline"
+                      className="mt-3 text-xs text-[#2D6A4F] hover:underline"
                     >
                       Add a booking
                     </button>
@@ -325,15 +325,15 @@ export default function BookingCalendar({
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.04 }}
-                      className="p-3 rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-colors cursor-pointer group"
+                      className="p-3 rounded-lg bg-[#F7F8F4] border border-[#EDF0EA] hover:bg-[#F7F8F4] transition-colors cursor-pointer group"
                     >
                       {/* Lead name + status */}
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-leadflow-500/20 to-leadflow-accent/20 flex items-center justify-center shrink-0">
-                            <User className="w-3.5 h-3.5 text-leadflow-accent" />
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
+                            <User className="w-3.5 h-3.5 text-[#2D6A4F]" />
                           </div>
-                          <span className="text-sm font-medium text-white truncate">
+                          <span className="text-sm font-medium text-ink truncate">
                             {b.lead?.name || "Unknown"}
                           </span>
                         </div>
@@ -348,7 +348,7 @@ export default function BookingCalendar({
                       </div>
 
                       {/* Details */}
-                      <div className="space-y-1 text-xs text-gray-500 ml-9">
+                      <div className="space-y-1 text-xs text-[#7C8781] ml-9">
                         <div className="flex items-center gap-1.5">
                           <Clock className="w-3 h-3" />
                           {b.visitTime}
@@ -381,9 +381,9 @@ export default function BookingCalendar({
             exit={{ opacity: 0, x: 20 }}
             className="w-full lg:w-80 shrink-0"
           >
-            <div className="rounded-xl bg-white/5 border border-white/10 p-8 text-center">
+            <div className="rounded-xl bg-white border border-[#E4E7DF] p-8 text-center">
               <CalendarIcon className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[#7C8781]">
                 Click a date to see booking details
               </p>
               <p className="text-xs text-gray-600 mt-1">
@@ -472,20 +472,20 @@ function QuickAddModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", duration: 0.4, bounce: 0.3 }}
-        className="w-full max-w-md rounded-2xl bg-surface border border-white/10 overflow-hidden shadow-2xl"
+        className="w-full max-w-md rounded-2xl bg-surface border border-[#E4E7DF] overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
+        <div className="flex items-center justify-between p-5 border-b border-[#E4E7DF]">
           <div>
-            <h3 className="text-base font-semibold text-white">New Booking</h3>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h3 className="text-base font-semibold text-ink">New Booking</h3>
+            <p className="text-xs text-[#7C8781] mt-0.5">
               {format(date, "EEEE, MMMM d, yyyy")}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg hover:bg-[#E9ECE5] text-[#7C8781] hover:text-ink transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -495,47 +495,47 @@ function QuickAddModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+              <label className="block text-xs font-medium text-[#7C8781] mb-1.5">
                 Lead Name *
               </label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Rahul Sharma"
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-[#E4E7DF] text-ink text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors"
                 autoFocus
               />
             </div>
             <div className="col-span-2 sm:col-span-1">
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+              <label className="block text-xs font-medium text-[#7C8781] mb-1.5">
                 Phone *
               </label>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-[#E4E7DF] text-ink text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+              <label className="block text-xs font-medium text-[#7C8781] mb-1.5">
                 Time
               </label>
               <input
                 type="time"
                 value={visitTime}
                 onChange={(e) => setVisitTime(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-leadflow-500/50 transition-colors [color-scheme:dark]"
+                className="w-full px-3 py-2 rounded-lg bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-leadflow-500/50 transition-colors [color-scheme:dark]"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+              <label className="block text-xs font-medium text-[#7C8781] mb-1.5">
                 Status
               </label>
-              <div className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-sm flex items-center gap-2">
+              <div className="w-full px-3 py-2 rounded-lg bg-white border border-[#E4E7DF] text-[#7C8781] text-sm flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-blue-500" />
                 CONFIRMED
               </div>
@@ -543,19 +543,19 @@ function QuickAddModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5">
+            <label className="block text-xs font-medium text-[#7C8781] mb-1.5">
               Property Address
             </label>
             <input
               value={propertyAddress}
               onChange={(e) => setPropertyAddress(e.target.value)}
               placeholder="7th floor, Sunrise Tower, Andheri West"
-              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-white border border-[#E4E7DF] text-ink text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1.5">
+            <label className="block text-xs font-medium text-[#7C8781] mb-1.5">
               Notes
             </label>
             <textarea
@@ -563,7 +563,7 @@ function QuickAddModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional info..."
               rows={2}
-              className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors resize-none"
+              className="w-full px-3 py-2 rounded-lg bg-white border border-[#E4E7DF] text-ink text-sm placeholder-gray-600 focus:outline-none focus:border-leadflow-500/50 transition-colors resize-none"
             />
           </div>
 
@@ -572,14 +572,14 @@ function QuickAddModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-gray-300 text-sm font-medium hover:bg-white/10 transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-lg border border-[#E4E7DF] text-[#5C6B62] text-sm font-medium hover:bg-[#E9ECE5] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim() || !phone.trim()}
-              className="flex-1 px-4 py-2.5 rounded-lg bg-leadflow-500 text-white text-sm font-medium hover:bg-leadflow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2.5 rounded-lg bg-[#1B4332] text-white text-sm font-medium hover:bg-leadflow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>

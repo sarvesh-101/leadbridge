@@ -72,8 +72,8 @@ function LeadsPageContent() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Leads</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-[#F0F7F3]">Leads</h1>
+          <p className="text-sm text-[#9FB0A6] dark:text-[#9FB0A6]">
             {total} total leads
           </p>
         </div>
@@ -84,12 +84,12 @@ function LeadsPageContent() {
               toast.success(`${leads.length} leads exported`);
             }}
             disabled={leads.length === 0}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-600 text-gray-300 text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-600 text-[#9FB0A6] text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Export CSV</span>
           </button>
-          <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-all">
+          <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs sm:text-sm font-medium hover:opacity-90 transition-all">
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Add Lead</span>
           </button>
@@ -139,7 +139,7 @@ function LeadsPageContent() {
 
 export default function LeadsPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-[#6FE3B0] animate-spin" /></div>}>
       <LeadsPageContent />
     </Suspense>
   );

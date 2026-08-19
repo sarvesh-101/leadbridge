@@ -126,11 +126,11 @@ export default function AdminWhatsAppPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">WhatsApp Configuration</h1>
-          <p className="text-gray-400 mt-1">Set up WhatsApp Cloud API for lead notifications and follow-ups</p>
+          <h1 className="text-2xl font-bold text-[#F0F7F3]">WhatsApp Configuration</h1>
+          <p className="text-[#9FB0A6] mt-1">Set up WhatsApp Cloud API for lead notifications and follow-ups</p>
         </div>
         <button onClick={loadConfig} disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400 hover:bg-white/10 hover:text-white disabled:opacity-50 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl app-card app-card-hover text-sm text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3] disabled:opacity-50 transition-all"
         >
           <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
           Refresh
@@ -140,7 +140,7 @@ export default function AdminWhatsAppPage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-32 rounded-xl app-card animate-pulse" />
           ))}
         </div>
       ) : config ? (
@@ -164,22 +164,22 @@ export default function AdminWhatsAppPage() {
               <WifiOff className="w-6 h-6 text-red-400 shrink-0 mt-0.5" />
             )}
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-[#F0F7F3]">
                 {config.configured
                   ? "✅ WhatsApp Cloud API is configured"
                   : config.demoMode
                   ? "⚠️ Demo Mode — WhatsApp is simulated"
                   : "❌ WhatsApp not configured"}
               </h3>
-              <p className="text-xs text-gray-400 mt-1">{config.message}</p>
+              <p className="text-xs text-[#9FB0A6] mt-1">{config.message}</p>
               {config.phoneInfo && (
-                <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+                <div className="flex items-center gap-4 mt-3 text-xs text-[#9FB0A6]">
                   <span className="flex items-center gap-1">
                     <Smartphone className="w-3.5 h-3.5 text-green-400" />
                     {config.phoneInfo.phoneNumber}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Shield className="w-3.5 h-3.5 text-[#3B82F6]" />
+                    <Shield className="w-3.5 h-3.5 text-[#6FE3B0]" />
                     {config.phoneInfo.name}
                   </span>
                   <span className={cn(
@@ -194,8 +194,8 @@ export default function AdminWhatsAppPage() {
               )}
             </div>
             <div className="text-right shrink-0">
-              <div className="text-2xl font-bold text-white">{configuredCount}/{totalCount}</div>
-              <div className="text-xs text-gray-500">Env vars set</div>
+              <div className="text-2xl font-bold text-[#F0F7F3]">{configuredCount}/{totalCount}</div>
+              <div className="text-xs text-[#9FB0A6]">Env vars set</div>
             </div>
           </motion.div>
 
@@ -203,19 +203,19 @@ export default function AdminWhatsAppPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {/* Test Send */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-xl bg-white/5 border border-white/10"
+              className="p-5 rounded-xl app-card"
             >
-              <Send className="w-5 h-5 text-[#3B82F6] mb-3" />
-              <h3 className="text-sm font-semibold text-white mb-3">Send Test Message</h3>
+              <Send className="w-5 h-5 text-[#6FE3B0] mb-3" />
+              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">Send Test Message</h3>
               <div className="space-y-2">
                 <input
                   value={testPhone}
                   onChange={(e) => setTestPhone(e.target.value)}
                   placeholder="+91 9876543210"
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-[#4A4A62] focus:outline-none focus:border-[#3B82F6]/50"
+                  className="w-full px-3 py-2 rounded-lg app-card text-sm text-[#F0F7F3] placeholder:text-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
                 />
                 <button onClick={handleTestSend} disabled={testSending || !testPhone.trim() || !config.configured}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#3B82F6] text-white text-xs font-medium disabled:opacity-50 hover:opacity-90 transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#1B4332] text-white text-xs font-medium disabled:opacity-50 hover:opacity-90 transition-all"
                 >
                   {testSending ? (
                     <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Sending...</>
@@ -233,31 +233,31 @@ export default function AdminWhatsAppPage() {
 
             {/* Webhook URL */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-              className="p-5 rounded-xl bg-white/5 border border-white/10"
+              className="p-5 rounded-xl app-card"
             >
-              <Globe className="w-5 h-5 text-[#10B981] mb-3" />
-              <h3 className="text-sm font-semibold text-white mb-3">Webhook URL</h3>
-              <div className="flex items-center gap-1.5 p-2 rounded-lg bg-white/5 border border-white/10">
-                <code className="flex-1 text-[11px] text-gray-300 truncate font-mono">
+              <Globe className="w-5 h-5 text-[#34D399] mb-3" />
+              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">Webhook URL</h3>
+              <div className="flex items-center gap-1.5 p-2 rounded-lg app-card">
+                <code className="flex-1 text-[11px] text-[#9FB0A6] truncate font-mono">
                   {config.webhookUrl}
                 </code>
                 <button onClick={handleCopyUrl}
-                  className="p-1.5 rounded-md hover:bg-white/10 text-gray-400 hover:text-white transition-all shrink-0"
+                  className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#9FB0A6] hover:text-[#F0F7F3] transition-all shrink-0"
                 >
                   {copied ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-[10px] text-gray-500 mt-2">
+              <p className="text-[10px] text-[#9FB0A6] mt-2">
                 Add this URL in Meta WhatsApp Manager → Webhook configuration
               </p>
             </motion.div>
 
             {/* Webhook Test */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="p-5 rounded-xl bg-white/5 border border-white/10"
+              className="p-5 rounded-xl app-card"
             >
-              <Shield className="w-5 h-5 text-[#F59E0B] mb-3" />
-              <h3 className="text-sm font-semibold text-white mb-3">Verify Token Test</h3>
+              <Shield className="w-5 h-5 text-[#E8C468] mb-3" />
+              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">Verify Token Test</h3>
               <button onClick={handleWebhookTest} disabled={webhookTesting}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium hover:bg-amber-500/20 disabled:opacity-50 transition-all"
               >
@@ -277,13 +277,13 @@ export default function AdminWhatsAppPage() {
 
           {/* Environment Variables Status */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="p-5 rounded-xl bg-white/5 border border-white/10"
+            className="p-5 rounded-xl app-card"
           >
-            <h3 className="text-sm font-semibold text-white mb-4">Environment Variables</h3>
+            <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">Environment Variables</h3>
             <div className="space-y-2">
               {Object.entries(config.envVars).map(([key, env]) => (
                 <div key={key}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5"
+                  className="flex items-center justify-between p-3 rounded-lg app-card"
                 >
                   <div className="flex items-center gap-3">
                     {env.set ? (
@@ -292,8 +292,8 @@ export default function AdminWhatsAppPage() {
                       <XCircle className="w-4 h-4 text-red-400" />
                     )}
                     <div>
-                      <code className="text-sm text-white font-mono">{key}</code>
-                      <p className="text-[10px] text-gray-500 mt-0.5">
+                      <code className="text-sm text-[#F0F7F3] font-mono">{key}</code>
+                      <p className="text-[10px] text-[#9FB0A6] mt-0.5">
                         {env.value || "Not set"}
                       </p>
                     </div>
@@ -311,18 +311,18 @@ export default function AdminWhatsAppPage() {
 
           {/* Setup Guide */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="p-5 rounded-xl bg-white/5 border border-white/10"
+            className="p-5 rounded-xl app-card"
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">Step-by-Step Setup Guide</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Follow these steps to configure WhatsApp Cloud API</p>
+                <h3 className="text-sm font-semibold text-[#F0F7F3]">Step-by-Step Setup Guide</h3>
+                <p className="text-xs text-[#9FB0A6] mt-0.5">Follow these steps to configure WhatsApp Cloud API</p>
               </div>
               <a
                 href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-[#3B82F6] hover:underline"
+                className="flex items-center gap-1 text-xs text-[#6FE3B0] hover:underline"
               >
                 Meta Docs <ExternalLink className="w-3 h-3" />
               </a>
@@ -336,23 +336,23 @@ export default function AdminWhatsAppPage() {
                     className={cn(
                       "rounded-xl border transition-all cursor-pointer",
                       isOpen
-                        ? "bg-[#3B82F6]/5 border-[#3B82F6]/20"
-                        : "bg-white/5 border-white/10 hover:bg-white/10"
+                        ? "bg-[#34D399]/10 border-[#34D399]/30"
+                        : "bg-[#101713] border-white/10 hover:bg-white/[0.06]"
                     )}
                     onClick={() => setActiveStep(isOpen ? null : step.step)}
                   >
                     <div className="flex items-start gap-3 p-4">
                       <div className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0",
-                        isOpen ? "bg-[#3B82F6] text-white" : "bg-white/10 text-gray-400"
+                        isOpen ? "bg-[#1B4332] text-white" : "bg-white/[0.06] text-[#9FB0A6]"
                       )}>
                         {step.step}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <h4 className="text-sm font-medium text-white">{step.title}</h4>
+                          <h4 className="text-sm font-medium text-[#F0F7F3]">{step.title}</h4>
                           <ArrowRight className={cn(
-                            "w-4 h-4 text-gray-500 transition-transform shrink-0",
+                            "w-4 h-4 text-[#9FB0A6] transition-transform shrink-0",
                             isOpen && "rotate-90"
                           )} />
                         </div>
@@ -364,12 +364,12 @@ export default function AdminWhatsAppPage() {
                               exit={{ opacity: 0, height: 0 }}
                               className="mt-3 space-y-3"
                             >
-                              <p className="text-xs text-gray-400 leading-relaxed">
+                              <p className="text-xs text-[#9FB0A6] leading-relaxed">
                                 {step.description}
                               </p>
                               {step.code && (
-                                <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/5">
-                                  <code className="flex-1 text-[11px] text-[#10B981] font-mono break-all">
+                                <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
+                                  <code className="flex-1 text-[11px] text-[#34D399] font-mono break-all">
                                     {step.code}
                                   </code>
                                   <button onClick={(e) => {
@@ -377,14 +377,14 @@ export default function AdminWhatsAppPage() {
                                     navigator.clipboard.writeText(step.code!);
                                     toast.success("Copied!");
                                   }}
-                                    className="p-1.5 rounded-md hover:bg-white/10 text-gray-400 hover:text-white"
+                                    className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#9FB0A6] hover:text-[#F0F7F3]"
                                   >
                                     <Copy className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               )}
                               {step.description2 && (
-                                <p className="text-xs text-gray-400">{step.description2}</p>
+                                <p className="text-xs text-[#9FB0A6]">{step.description2}</p>
                               )}
                               {step.note && (
                                 <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10">
@@ -394,7 +394,7 @@ export default function AdminWhatsAppPage() {
                               )}
                               {step.link && (
                                 <a href={step.link} target="_blank" rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 text-xs text-[#3B82F6] hover:underline"
+                                  className="inline-flex items-center gap-1.5 text-xs text-[#6FE3B0] hover:underline"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {step.linkLabel || "Open"} <ExternalLink className="w-3 h-3" />
@@ -413,10 +413,10 @@ export default function AdminWhatsAppPage() {
 
           {/* Message Branding Preview */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-            className="p-5 rounded-xl bg-white/5 border border-white/10"
+            className="p-5 rounded-xl app-card"
           >
-            <h3 className="text-sm font-semibold text-white mb-3">Message Preview (How Leads See It)</h3>
-            <p className="text-xs text-gray-500 mb-4">
+            <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">Message Preview (How Leads See It)</h3>
+            <p className="text-xs text-[#9FB0A6] mb-4">
               All messages come from LeadBridge's WhatsApp number but include the broker's business name prominently.
             </p>
             <div className="space-y-3">
@@ -466,17 +466,17 @@ Suresh Properties aapka intezaar kar rahe hain.
                   highlight: "Suresh Properties",
                 },
               ].map((msg, i) => (
-                <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
+                <div key={i} className="p-4 rounded-xl app-card">
                   <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4 text-[#10B981]" />
-                    <span className="text-xs font-medium text-gray-300">{msg.label}</span>
+                    <MessageSquare className="w-4 h-4 text-[#34D399]" />
+                    <span className="text-xs font-medium text-[#9FB0A6]">{msg.label}</span>
                   </div>
-                  <pre className="text-xs text-gray-400 font-sans whitespace-pre-wrap leading-relaxed">
+                  <pre className="text-xs text-[#9FB0A6] font-sans whitespace-pre-wrap leading-relaxed">
                     {msg.preview}
                   </pre>
-                  <div className="mt-2 flex items-center gap-2 text-[10px] text-gray-500">
+                  <div className="mt-2 flex items-center gap-2 text-[10px] text-[#9FB0A6]">
                     <CheckCircle2 className="w-3 h-3 text-green-400" />
-                    Broker brand highlighted: <strong className="text-white">"{msg.highlight}"</strong> appears in message
+                    Broker brand highlighted: <strong className="text-[#F0F7F3]">"{msg.highlight}"</strong> appears in message
                   </div>
                 </div>
               ))}
@@ -484,10 +484,10 @@ Suresh Properties aapka intezaar kar rahe hain.
           </motion.div>
         </>
       ) : (
-        <div className="p-8 rounded-xl bg-white/5 border border-white/10 text-center">
+        <div className="p-8 rounded-xl app-card text-center">
           <MessageSquare className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Failed to load WhatsApp configuration.</p>
-          <button onClick={loadConfig} className="mt-3 text-xs text-[#3B82F6] hover:underline">
+          <p className="text-sm text-[#9FB0A6]">Failed to load WhatsApp configuration.</p>
+          <button onClick={loadConfig} className="mt-3 text-xs text-[#6FE3B0] hover:underline">
             Try Again
           </button>
         </div>

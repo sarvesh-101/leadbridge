@@ -36,9 +36,9 @@ export function RecordingPlayer({ url }: RecordingPlayerProps) {
       try {
         ws = WaveSurfer.create({
           container: containerRef.current!,
-          waveColor: "#272B34",
-          progressColor: "#3B82F6",
-          cursorColor: "#3B82F6",
+          waveColor: "#E4E7DF",
+          progressColor: "#1B4332",
+          cursorColor: "#1B4332",
           cursorWidth: 1,
           barWidth: 3,
           barGap: 2,
@@ -116,7 +116,7 @@ export function RecordingPlayer({ url }: RecordingPlayerProps) {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="rounded-lg bg-[#14161C] border border-[#272B34] p-4">
+    <div className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-4">
       {/* WaveSurfer waveform container */}
       <div
         ref={containerRef}
@@ -126,7 +126,7 @@ export function RecordingPlayer({ url }: RecordingPlayerProps) {
 
       {/* Error state */}
       {error && !isLoaded && (
-        <p className="text-[11px] text-[#F43F5E] text-center mb-2">{error}</p>
+        <p className="text-[11px] text-[#E11D48] text-center mb-2">{error}</p>
       )}
 
       {/* Controls */}
@@ -138,27 +138,27 @@ export function RecordingPlayer({ url }: RecordingPlayerProps) {
           className={cn(
             "w-9 h-9 rounded-full flex items-center justify-center transition-colors shrink-0",
             url && isLoaded
-              ? "bg-[#3B82F6] hover:brightness-110 text-white"
-              : "bg-[#1B1E26] text-[#8B93A3] cursor-not-allowed"
+              ? "bg-[#1B4332] hover:brightness-110 text-white"
+              : "bg-[#F1F3EE] text-[#5C6B62] cursor-not-allowed"
           )}
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
         </button>
 
         {/* Time */}
-        <div className="flex items-center gap-2 text-[12px] font-mono text-[#8B93A3] shrink-0">
+        <div className="flex items-center gap-2 text-[12px] font-mono text-[#5C6B62] shrink-0">
           <span>{formatTime(currentTime)}</span>
-          <span className="text-[#363B45]">/</span>
+          <span className="text-[#8A948C]">/</span>
           <span>{formatTime(duration)}</span>
         </div>
 
         {/* Progress bar */}
         <div
-          className="flex-1 h-1 rounded-full bg-[#272B34] cursor-pointer relative overflow-hidden"
+          className="flex-1 h-1 rounded-full bg-[#E4E7DF] cursor-pointer relative overflow-hidden"
           onClick={handleSeek}
         >
           <div
-            className="absolute left-0 top-0 bottom-0 bg-[#3B82F6] rounded-full transition-all duration-100"
+            className="absolute left-0 top-0 bottom-0 bg-[#1B4332] rounded-full transition-all duration-100"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -167,21 +167,21 @@ export function RecordingPlayer({ url }: RecordingPlayerProps) {
         <div className="relative shrink-0">
           <button
             onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-            className="px-2 py-1 rounded text-[11px] font-mono bg-[#1B1E26] text-[#8B93A3] hover:text-[#F2F4F8] border border-[#272B34] transition-colors"
+            className="px-2 py-1 rounded text-[11px] font-mono bg-[#F1F3EE] text-[#5C6B62] hover:text-[#1E2B24] border border-[#E4E7DF] transition-colors"
           >
             {speed}x
           </button>
           {showSpeedMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowSpeedMenu(false)} />
-              <div className="absolute bottom-full mb-1 right-0 bg-[#14161C] border border-[#272B34] rounded-lg overflow-hidden z-20">
+              <div className="absolute bottom-full mb-1 right-0 bg-[#FFFFFF] border border-[#E4E7DF] rounded-lg overflow-hidden z-20">
                 {[0.5, 1, 1.5, 2].map((s) => (
                   <button
                     key={s}
                     onClick={() => handleSpeedChange(s)}
                     className={cn(
-                      "block w-full px-4 py-1.5 text-[12px] font-mono text-left hover:bg-[#1B1E26] transition-colors",
-                      speed === s ? "text-[#3B82F6]" : "text-[#8B93A3]"
+                      "block w-full px-4 py-1.5 text-[12px] font-mono text-left hover:bg-[#F1F3EE] transition-colors",
+                      speed === s ? "text-[#1B4332]" : "text-[#5C6B62]"
                     )}
                   >
                     {s}x
@@ -193,11 +193,11 @@ export function RecordingPlayer({ url }: RecordingPlayerProps) {
         </div>
 
         {/* Volume icon */}
-        <Volume2 className="w-4 h-4 text-[#8B93A3] shrink-0" />
+        <Volume2 className="w-4 h-4 text-[#5C6B62] shrink-0" />
       </div>
 
       {!url && (
-        <p className="text-[11px] text-[#8B93A3] text-center mt-2">
+        <p className="text-[11px] text-[#5C6B62] text-center mt-2">
           No recording available
         </p>
       )}

@@ -111,16 +111,16 @@ export default function CustomerDocumentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0D12]">
+    <div className="min-h-screen bg-[#0A0F0C] aurora-backdrop">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0B0D12]/80 backdrop-blur-lg border-b border-white/5">
+      <header className="sticky top-0 z-10 bg-[#0A0F0C]/80 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400">
+          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-sm font-semibold text-white">Upload Documents</h1>
-            <p className="text-[10px] text-gray-500">Share KYC documents with your broker</p>
+            <h1 className="text-sm font-semibold text-[#F0F7F3]">Upload Documents</h1>
+            <p className="text-[10px] text-[#9FB0A6]">Share KYC documents with your broker</p>
           </div>
         </div>
       </header>
@@ -128,15 +128,15 @@ export default function CustomerDocumentsPage() {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-5">
         {/* Upload Form */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-white/5 border border-white/10"
+          className="p-5 rounded-2xl app-card"
         >
-          <h2 className="text-sm font-semibold text-white mb-4">Upload a Document</h2>
+          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Upload a Document</h2>
 
           {/* Doc Type */}
           <div className="mb-4">
-            <label className="text-xs text-gray-500 mb-1.5 block">Document Type</label>
+            <label className="text-xs text-[#9FB0A6] mb-1.5 block">Document Type</label>
             <select value={docType} onChange={(e) => setDocType(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-[#3B82F6]/50"
+              className="w-full px-3 py-2.5 rounded-xl app-card text-[#F0F7F3] text-xs focus:outline-none focus:border-[#34D399]/50/50"
             >
               {DOC_TYPES.map((dt) => (
                 <option key={dt.value} value={dt.value}>{dt.label}</option>
@@ -147,7 +147,7 @@ export default function CustomerDocumentsPage() {
           {/* File Picker */}
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="relative p-6 rounded-xl border-2 border-dashed border-white/10 text-center cursor-pointer hover:border-[#3B82F6]/30 hover:bg-white/5 transition-all mb-4"
+            className="relative p-6 rounded-xl border-2 border-dashed border-white/10 text-center cursor-pointer hover:border-[#34D399]/40 hover:bg-white/[0.06] transition-all mb-4"
           >
             <input
               ref={fileInputRef}
@@ -158,28 +158,28 @@ export default function CustomerDocumentsPage() {
             />
             {file ? (
               <div className="flex items-center gap-3 justify-center">
-                <FileText className="w-6 h-6 text-[#3B82F6]" />
+                <FileText className="w-6 h-6 text-[#6FE3B0]" />
                 <div className="text-left">
-                  <p className="text-sm text-white">{file.name}</p>
-                  <p className="text-[11px] text-gray-500">{formatSize(file.size)}</p>
+                  <p className="text-sm text-[#F0F7F3]">{file.name}</p>
+                  <p className="text-[11px] text-[#9FB0A6]">{formatSize(file.size)}</p>
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                  className="p-1 rounded hover:bg-white/5"
+                  className="p-1 rounded hover:bg-white/[0.06]"
                 >
-                  <XCircle className="w-4 h-4 text-gray-500" />
+                  <XCircle className="w-4 h-4 text-[#9FB0A6]" />
                 </button>
               </div>
             ) : (
               <>
                 <Upload className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-400">Tap to select a file</p>
+                <p className="text-sm text-[#9FB0A6]">Tap to select a file</p>
                 <p className="text-[11px] text-gray-600 mt-1">PDF, JPG, PNG up to 10MB</p>
               </>
             )}
           </div>
 
           <button onClick={handleUpload} disabled={!file || uploading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#6B8AFF] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-40"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs font-medium hover:opacity-90 transition-all disabled:opacity-40"
           >
             {uploading ? (
               <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading...</>
@@ -191,14 +191,14 @@ export default function CustomerDocumentsPage() {
 
         {/* Uploaded Documents */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="p-5 rounded-2xl bg-white/5 border border-white/10"
+          className="p-5 rounded-2xl app-card"
         >
-          <h2 className="text-sm font-semibold text-white mb-4">Uploaded Documents</h2>
+          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Uploaded Documents</h2>
 
           {documents.length > 0 ? (
             <div className="space-y-2">
               {documents.map((doc) => (
-                <div key={doc.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                <div key={doc.id} className="flex items-center gap-3 p-3 rounded-xl app-card">
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center",
                     doc.status === "VERIFIED" ? "bg-green-500/10" : "bg-amber-500/10"
@@ -210,8 +210,8 @@ export default function CustomerDocumentsPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white truncate">{doc.fileName}</p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-sm text-[#F0F7F3] truncate">{doc.fileName}</p>
+                    <p className="text-[11px] text-[#9FB0A6]">
                       {DOC_TYPES.find(dt => dt.value === doc.type)?.label || doc.type}
                       {" · "}{formatSize(doc.fileSize)}
                     </p>
@@ -228,16 +228,16 @@ export default function CustomerDocumentsPage() {
           ) : (
             <div className="text-center py-8">
               <FileText className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">No documents uploaded yet</p>
+              <p className="text-sm text-[#9FB0A6]">No documents uploaded yet</p>
               <p className="text-[11px] text-gray-600 mt-1">Upload documents above for your broker to review</p>
             </div>
           )}
         </motion.div>
 
         {/* Info */}
-        <div className="p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/10">
-          <p className="text-xs text-gray-400">
-            <strong className="text-gray-300">Note:</strong> Your documents are securely stored and only
+        <div className="p-4 rounded-xl bg-[#34D399]/10 border border-[#34D399]/50/10">
+          <p className="text-xs text-[#9FB0A6]">
+            <strong className="text-[#9FB0A6]">Note:</strong> Your documents are securely stored and only
             visible to you and your broker. Uploaded documents help speed up the booking process.
           </p>
         </div>
