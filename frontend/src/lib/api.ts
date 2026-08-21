@@ -16,7 +16,7 @@ async function refreshAccessToken(): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
 
@@ -53,10 +53,6 @@ export async function apiFetch<T = any>(
   const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
-    // ngrok free tier shows an HTML browser-warning page for requests that
-    // don't carry this header — without it every API call from the browser
-    // silently returns HTML instead of JSON.
-    "ngrok-skip-browser-warning": "true",
     ...(options.headers as Record<string, string>),
   };
 
