@@ -14,7 +14,7 @@ const envSchema = z.object({
   WEBHOOK_URL: z.string().optional(),
 
   // Demo Mode — run without external APIs for investor demos
-  DEMO_MODE: z.coerce.boolean().default(false),
+  DEMO_MODE: z.string().transform((v) => v === "true").default("false"),
 
   // JWT
   JWT_SECRET: z.string().min(32),
