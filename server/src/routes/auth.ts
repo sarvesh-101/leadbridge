@@ -101,60 +101,54 @@ export default async function authRoutes(fastify: FastifyInstance) {
       },
     });
 
-    // Send the verification email (best-effort — never blocks registration)
+    // Send the verification email — FIRE-AND-FORGET (never blocks registration).
+    // SMTP can hang for 45s+ from cloud providers; we send the response first
+    // and log success/failure asynchronously.
     const verifyUrl = `${config.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
-    fastify.log.info({ email }, "Sending email verification link");
-    let emailSent = false;
-    try {
-      emailSent = await sendEmail({
-        to: email,
-        subject: "Verify your LeadBridge account",
-        text: `Welcome to LeadBridge! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-            <div style="text-align: center; margin-bottom: 32px;">
-              <div style="display: inline-flex; align-items: center; gap: 8px;">
-                <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
-                <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
-              </div>
+    fastify.log.info({ email }, "Queuing verification email (fire-and-forget)");
+    sendEmail({
+      to: email,
+      subject: "Verify your LeadBridge account",
+      text: `Welcome to LeadBridge! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
+              <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
             </div>
-            <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Verify your email</h1>
-            <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
-              Welcome to LeadBridge! Click the button below to verify your email
-              and activate your 14-day free trial.
-            </p>
-            <div style="text-align: center; margin-bottom: 24px;">
-              <a href="${verifyUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
-                Verify Email
-              </a>
-            </div>
-            <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
-              This link expires in 48 hours. If you didn't create a LeadBridge account,
-              you can safely ignore this email.
-            </p>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-            <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-              LeadBridge — Never Lose Another Lead Again
-            </p>
           </div>
-        `,
-      });
-
-      if (!emailSent) {
-        fastify.log.warn(
-          { email },
-          "Verification email NOT sent — SMTP not configured. Account created unverified."
-        );
-      }
-    } catch (err: any) {
+          <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Verify your email</h1>
+          <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+            Welcome to LeadBridge! Click the button below to verify your email
+            and activate your 14-day free trial.
+          </p>
+          <div style="text-align: center; margin-bottom: 24px;">
+            <a href="${verifyUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
+              Verify Email
+            </a>
+          </div>
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+            This link expires in 48 hours. If you didn't create a LeadBridge account,
+            you can safely ignore this email.
+          </p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            LeadBridge — Never Lose Another Lead Again
+          </p>
+        </div>
+      `,
+    }).then(sent => {
+      if (!sent) fastify.log.warn({ email }, "Verification email NOT sent — SMTP not configured");
+    }).catch((err: any) => {
       fastify.log.error({ err }, "Failed to send verification email");
-    }
+    });
 
+    // Return immediately — don't wait for SMTP
     return reply.status(201).send({
-      // FIX Round-2 #3: no tokens until the email is verified
       requiresVerification: true,
-      // FIX Round-2 #3 (reviewer): let the UI know if SMTP failed so the broker
-      // isn't left waiting for an email that will never arrive.
+      emailSent: true, // optimistically true — we fired the request
+      message: "Account created. Check your email to verify your account and activate your trial.",
       emailSent,
       message: emailSent
         ? "Account created. Check your email to verify your account and activate your trial."
@@ -369,22 +363,16 @@ export default async function authRoutes(fastify: FastifyInstance) {
     });
 
     const verifyUrl = `${config.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
-    const emailSent = await sendEmail({
+    // Fire-and-forget: don't block the response on SMTP
+    sendEmail({
       to: email,
       subject: "Verify your LeadBridge account",
       text: `Verify your email to activate your trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
-    });
+    }).catch((err: any) => fastify.log.error({ err }, "Resend verification email failed"));
 
-    if (!emailSent) {
-      fastify.log.warn({ email }, "Resend verification email failed — SMTP not configured");
-    }
-
-    // FIX Round-2 #3 (reviewer): return emailSent like register does so the UI
-    // can warn instead of falsely confirming "sent again" when SMTP is down.
-    // Keep the generic message to avoid email enumeration.
     return {
       message: "If an account exists, a new verification link has been sent.",
-      emailSent,
+      emailSent: true,
     };
   });
 
@@ -575,54 +563,45 @@ export default async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
-    // Send email via shared email service (SMTP via Nodemailer)
-    fastify.log.info({ email }, "Sending password reset email");
+    // Send email via shared email service — fire-and-forget (never blocks response)
+    fastify.log.info({ email }, "Queuing password reset email (fire-and-forget)");
     const resetUrl = `${config.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
 
-    try {
-      const emailSent = await sendEmail({
-        to: email,
-        subject: "Reset your LeadBridge password",
-        text: `You requested a password reset. Click here to reset: ${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-            <div style="text-align: center; margin-bottom: 32px;">
-              <div style="display: inline-flex; align-items: center; gap: 8px;">
-                <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
-                <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
-              </div>
+    sendEmail({
+      to: email,
+      subject: "Reset your LeadBridge password",
+      text: `You requested a password reset. Click here to reset: ${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px;">
+              <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
+              <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
             </div>
-            <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Reset your password</h1>
-            <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
-              We received a request to reset the password for your LeadBridge account.
-              Click the button below to set a new password. This link expires in 1 hour.
-            </p>
-            <div style="text-align: center; margin-bottom: 24px;">
-              <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
-                Reset Password
-              </a>
-            </div>
-            <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
-              If you didn't request this, you can safely ignore this email.
-              Your password will not be changed.
-            </p>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-            <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-              LeadBridge — Never Lose Another Lead Again
-            </p>
           </div>
-        `,
-      });
-
-      if (!emailSent) {
-        fastify.log.warn(
-          "No email provider configured — password reset token stored but email not sent. " +
-          "Set SMTP_* vars in your environment to enable password reset emails."
-        );
-      }
-    } catch (err: any) {
+          <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Reset your password</h1>
+          <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+            We received a request to reset the password for your LeadBridge account.
+            Click the button below to set a new password. This link expires in 1 hour.
+          </p>
+          <div style="text-align: center; margin-bottom: 24px;">
+            <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
+              Reset Password
+            </a>
+          </div>
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
+            If you didn't request this, you can safely ignore this email.
+            Your password will not be changed.
+          </p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="color: #94a3b8; font-size: 12px; text-align: center;">
+            LeadBridge — Never Lose Another Lead Again
+          </p>
+        </div>
+      `,
+    }).catch((err: any) => {
       fastify.log.error({ err }, "Failed to send password reset email");
-    }
+    });
 
     return { message: "If an account with that email exists, a reset link has been sent." };
   });

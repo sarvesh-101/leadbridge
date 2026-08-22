@@ -9,7 +9,7 @@ import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+import { customerApi } from "@/lib/customer-api";
 
 interface ChatMessage {
   id: string;
@@ -54,22 +54,10 @@ export default function CustomerChatPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/customer/chat-history`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          sessionStorage.clear();
-          router.push("/customer/login");
-          return;
-        }
-        throw new Error("Failed to load chat");
-      }
-
-      const data = await res.json();
+      const data = await customerApi.get("/customer/chat-history");
       setMessages(data.messages || []);
     } catch (err: any) {
+      if (err.message === "Session expired") return; // handled by customerApi
       toast.error(err.message || "Failed to load chat history");
     } finally {
       setLoading(false);

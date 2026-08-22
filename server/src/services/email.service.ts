@@ -46,6 +46,9 @@ function getSmtpTransporter(): nodemailer.Transporter | null {
         user: config.SMTP_USER,
         pass: config.SMTP_PASS,
       },
+      connectionTimeout: 10_000, // 10s — don't hang forever
+      greetingTimeout: 5_000,
+      socketTimeout: 10_000,
     });
     return smtpTransporter;
   } catch (error: any) {

@@ -53,11 +53,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Show loading spinner briefly while checking profile on dashboard routes
+  // Show sidebar with subtle loading state while checking profile
   if (!setupCheckDone && isAuthenticated && !pathname.startsWith("/setup") && !pathname.startsWith("/auth")) {
     return (
-      <div className="h-screen bg-[#0A0F0C] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-[#6FE3B0] animate-spin" />
+      <div className="flex h-screen bg-[#0A0F0C] aurora-backdrop">
+        <div className="hidden md:block">
+          <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+        </div>
+        <div className="flex-1 flex flex-col min-w-0">
+          <TopBar onMenuToggle={() => setMobileMenuOpen(true)} />
+          <main className="flex-1 flex items-center justify-center p-6">
+            <div className="flex items-center gap-3 text-[#9FB0A6]">
+              <Loader2 className="w-5 h-5 text-[#6FE3B0] animate-spin" />
+              <span className="text-sm">Loading your workspace…</span>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Lock, ArrowRight, ArrowLeft, Loader2, CheckCircle2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+import { customerApi } from "@/lib/customer-api";
 
 export default function CustomerLoginPage() {
   const router = useRouter();
@@ -40,16 +40,7 @@ export default function CustomerLoginPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/customer/auth/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: cleanPhone }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to send OTP");
-      }
+      await customerApi.post("/customer/auth/send-otp", { phone: cleanPhone });
 
       setStep("otp");
       setCountdown(30);
@@ -69,21 +60,10 @@ export default function CustomerLoginPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/customer/auth/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await customerApi.post("/customer/auth/verify-otp", {
           phone: phone.replace(/\D/g, ""),
           otp: otpString,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Invalid OTP");
-      }
-
-      const data = await res.json();
+        });
 
       // Store token + customer data in session storage (not persisted auth store)
       sessionStorage.setItem("customer_token", data.accessToken);

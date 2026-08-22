@@ -7,7 +7,7 @@ import { Upload, FileText, CheckCircle2, XCircle, ArrowLeft, Loader2, AlertCircl
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+import { customerApi } from "@/lib/customer-api";
 
 const DOC_TYPES = [
   { value: "aadhar", label: "Aadhaar Card" },
@@ -56,15 +56,8 @@ export default function CustomerDocumentsPage() {
   async function loadDocuments(t: string) {
     setLoading(true);
     try {
-      // Fetch documents via lead ID
-      const leadRes = await fetch(`${API_BASE}/customer/profile`, {
-        headers: { Authorization: `Bearer ${t}` },
-      });
-      if (leadRes.ok) {
-        const data = await leadRes.json();
-        // Documents are managed locally from uploads
-        setDocuments([]);
-      }
+      const data = await customerApi.get("/customer/profile");
+      setDocuments(data.documents || []);
     } catch {} finally {
       setLoading(false);
     }
@@ -73,7 +66,6 @@ export default function CustomerDocumentsPage() {
   async function handleUpload() {
     if (!file || !token) return toast.error("Select a file first");
     if (file.size > 10 * 1024 * 1024) return toast.error("File too large. Maximum 10MB.");
-    if (file.size > 10 * 1024 * 1024) return toast.error("File too large. Maximum 10MB.");
 
     setUploading(true);
     try {
@@ -81,18 +73,7 @@ export default function CustomerDocumentsPage() {
       formData.append("file", file);
       formData.append("type", docType);
 
-      const res = await fetch(`${API_BASE}/customer/documents/upload`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Upload failed" }));
-        throw new Error(err.error || "Upload failed");
-      }
-
-      const data = await res.json();
+      const data = await customerApi.post("/customer/documents/upload", formData);
       setDocuments((prev) => [data.document, ...prev]);
       toast.success("Document uploaded successfully!");
       setFile(null);

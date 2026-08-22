@@ -11,7 +11,7 @@ import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+import { customerApi } from "@/lib/customer-api";
 
 interface PropertyMini {
   name: string;
@@ -69,22 +69,10 @@ export default function CustomerBookingsPage() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/customer/bookings`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          sessionStorage.clear();
-          router.push("/customer/login");
-          return;
-        }
-        throw new Error("Failed to load bookings");
-      }
-
-      const data = await res.json();
+      const data = await customerApi.get("/customer/bookings");
       setBookings(data.bookings || []);
     } catch (err: any) {
+      if (err.message === "Session expired") return;
       toast.error(err.message || "Failed to load bookings");
     } finally {
       setLoading(false);
@@ -94,17 +82,7 @@ export default function CustomerBookingsPage() {
   async function handleConfirm(bookingId: string) {
     setConfirmingId(bookingId);
     try {
-      const token = sessionStorage.getItem("customer_token");
-      const res = await fetch(`${API_BASE}/customer/bookings/${bookingId}/confirm`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to confirm");
-      }
-
+      await customerApi.patch(`/customer/bookings/${bookingId}/confirm`);
       toast.success("Visit confirmed! We look forward to seeing you.");
       await loadBookings();
     } catch (err: any) {

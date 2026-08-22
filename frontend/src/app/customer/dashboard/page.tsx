@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+import { customerApi, customerFetch } from "@/lib/customer-api";
 
 interface PropertyInfo {
   name: string;
@@ -119,20 +119,7 @@ export default function CustomerDashboardPage() {
     if (!token) return;
 
     try {
-      const res = await fetch(`${API_BASE}/customer/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          sessionStorage.clear();
-          router.push("/customer/login");
-          return;
-        }
-        throw new Error("Failed to load profile");
-      }
-
-      const data = await res.json();
+      const data = await customerApi.get("/customer/profile");
       setCustomer(data.customer);
       setBooking(data.booking);
 
@@ -141,13 +128,10 @@ export default function CustomerDashboardPage() {
         sessionStorage.setItem("customer_booking", JSON.stringify(data.booking));
       }
 
-      const propRes = await fetch(`${API_BASE}/customer/properties`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (propRes.ok) {
-        const propData = await propRes.json();
+      try {
+        const propData = await customerApi.get("/customer/properties");
         setProperties(propData.properties || []);
-      }
+      } catch { /* non-critical */ }
     } catch (err: any) {
       toast.error(err.message || "Failed to load");
     } finally {
@@ -159,13 +143,7 @@ export default function CustomerDashboardPage() {
     if (!newDate || !newTime) return toast.error("Select a new date and time");
     setActionLoading(true);
     try {
-      const token = sessionStorage.getItem("customer_token");
-      const res = await fetch(`${API_BASE}/customer/bookings/${booking!.id}/reschedule`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ visitDate: newDate, visitTime: newTime }),
-      });
-      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed to reschedule"); }
+      await customerApi.patch(`/customer/bookings/${booking!.id}/reschedule`, { visitDate: newDate, visitTime: newTime });
       toast.success("Visit rescheduled successfully!");
       setShowReschedule(false);
       await loadProfile();
@@ -178,12 +156,7 @@ export default function CustomerDashboardPage() {
     if (!booking) return;
     setConfirmLoading(true);
     try {
-      const token = sessionStorage.getItem("customer_token");
-      const res = await fetch(`${API_BASE}/customer/bookings/${booking.id}/confirm`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed to confirm"); }
+      await customerApi.patch(`/customer/bookings/${booking.id}/confirm`);
       toast.success("Visit confirmed! We look forward to seeing you.");
       await loadProfile();
     } catch (err: any) {
@@ -194,13 +167,7 @@ export default function CustomerDashboardPage() {
   async function handleCancel() {
     setActionLoading(true);
     try {
-      const token = sessionStorage.getItem("customer_token");
-      const res = await fetch(`${API_BASE}/customer/bookings/${booking!.id}/cancel`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ reason: cancelReason || undefined }),
-      });
-      if (!res.ok) { const err = await res.json(); throw new Error(err.error || "Failed to cancel"); }
+      await customerApi.patch(`/customer/bookings/${booking!.id}/cancel`, { reason: cancelReason || undefined });
       toast.success("Visit cancelled");
       setShowCancel(false);
       await loadProfile();
