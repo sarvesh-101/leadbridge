@@ -24,6 +24,8 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         value: https://leadbridge-seven.vercel.app
+      - key: WEBHOOK_URL
+        value: https://leadbridge-zy4o.onrender.com
       - key: PHONE_PROVIDER
         value: omnidimension
       - key: VOICE_AI_PROVIDER
