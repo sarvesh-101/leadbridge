@@ -17,12 +17,6 @@ const prismaPlugin = fp(async (fastify: FastifyInstance) => {
     log: fastify.log.level === "info"
       ? ["error", "warn"]
       : ["error", "warn", "info"],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL_PRISMA || process.env.DATABASE_URL,
-        connectionLimit: poolLimit,
-      },
-    },
   });
 
   await prisma.$connect();

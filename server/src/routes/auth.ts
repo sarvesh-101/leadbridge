@@ -144,15 +144,11 @@ export default async function authRoutes(fastify: FastifyInstance) {
       fastify.log.error({ err }, "Failed to send verification email");
     });
 
-    // Return immediately — don't wait for SMTP
+    // Return immediately — don't wait for SMTP (fire-and-forget)
     return reply.status(201).send({
       requiresVerification: true,
       emailSent: true, // optimistically true — we fired the request
       message: "Account created. Check your email to verify your account and activate your trial.",
-      emailSent,
-      message: emailSent
-        ? "Account created. Check your email to verify your account and activate your trial."
-        : "Account created, but the verification email could not be sent right now. Use the resend button below to try again.",
       user: {
         id: client.id,
         businessName: client.businessName,
