@@ -89,7 +89,7 @@ export async function reportError(error: Error | unknown, context: ReportContext
       method: "POST",
       headers: {
         "Content-Type": "application/x-sentry-envelope",
-        "X-Sentry-Auth": `Sentry sentry_version=7, sentry_client=leadbridge/1.0.0, sentry_key=${cfg.publicKey}`,
+        "X-Sentry-Auth": `Sentry sentry_version=7, sentry_client=converza/1.0.0, sentry_key=${cfg.publicKey}`,
       },
       body: envelope,
     });

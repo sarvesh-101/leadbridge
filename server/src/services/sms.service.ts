@@ -14,7 +14,7 @@
  * Environment:
  *   MESSAGEBIRD_API_KEY  (required for SMS fallback to work) — new-format
  *                        `bk_<region>_...` access keys supported.
- *   SMS_SENDER_ID        (optional, default "LeadBrg") — legacy field; the new
+ *   SMS_SENDER_ID        (optional, default "CONVERZ") — legacy field; the new
  *                        platform API handles the sender on its side.
  *
  * NOTE (2026-08-12): the `messagebird` npm SDK targets the OLD API

@@ -56,8 +56,8 @@ const openrouterClient = axios.create({
   headers: {
     Authorization: `Bearer ${USE_OPENROUTER ? config.OPENROUTER_API_KEY : config.DEEPSEEK_API_KEY}`,
     "Content-Type": "application/json",
-    "HTTP-Referer": "https://leadbridge.com",
-    "X-Title": "LeadBridge",
+    "HTTP-Referer": "https://converza.tech",
+    "X-Title": "Converza",
   },
   timeout: 30000, // 30s default — overridden per-call in consumers
 });

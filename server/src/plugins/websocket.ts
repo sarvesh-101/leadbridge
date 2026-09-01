@@ -8,7 +8,7 @@ import { logger } from "../utils/logger";
 /**
  * WebSocket Plugin — Real-time lead event streaming using @fastify/websocket.
  *
- * Clients connect via: wss://api.leadbridge.com/ws?token=<jwt>
+ * Clients connect via: wss://api.converza.tech/ws?token=<jwt>
  * Server validates JWT on connection, subscribes client to their clientId channel.
  * Events are published to Redis "lead:events" channel and forwarded to connected clients.
  */

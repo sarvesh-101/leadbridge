@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
-# LeadBridge — Secure Setup Script
+# Converza — Secure Setup Script
 # Run this from the project root to configure environment:
 #   bash scripts/setup.sh
 # ─────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ NC='\033[0m'
 
 echo -e "${CYAN}"
 echo "╔══════════════════════════════════════════════════╗"
-echo "║         LeadBridge — Setup Wizard               ║"
+echo "║         Converza — Setup Wizard                 ║"
 echo "╚══════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
@@ -82,8 +82,8 @@ read -rp "  SMTP_PORT (Enter for default 587): " SMTP_PORT
 SMTP_PORT="${SMTP_PORT:-587}"
 read -rp "  SMTP_USER: " SMTP_USER
 read -rp "  SMTP_PASS: " SMTP_PASS
-read -rp "  FROM_EMAIL (Enter for default noreply@leadbridge.com): " FROM_EMAIL
-FROM_EMAIL="${FROM_EMAIL:-noreply@leadbridge.com}"
+read -rp "  FROM_EMAIL (Enter for default noreply@converza.tech): " FROM_EMAIL
+FROM_EMAIL="${FROM_EMAIL:-noreply@converza.tech}"
 echo ""
 
 # Optional: Razorpay
@@ -153,7 +153,7 @@ SMTP_PORT=${SMTP_PORT}
 SMTP_USER=${SMTP_USER}
 SMTP_PASS=${SMTP_PASS}
 FROM_EMAIL=${FROM_EMAIL}
-FROM_NAME=LeadBridge
+FROM_NAME=Converza
 
 # ─── Razorpay ─────────────────────────────────────────────
 RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}

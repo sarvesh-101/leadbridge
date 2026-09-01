@@ -294,13 +294,13 @@ export default function LeadForwardingPage() {
               <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 flex items-center justify-center mb-2">
                 <span className="text-sm font-bold text-[#34D399]">2</span>
               </div>
-              <p className="text-xs text-[#9FB0A6]">Forward that SMS/email to the LeadBridge number/email above — don't change anything</p>
+              <p className="text-xs text-[#9FB0A6]">Forward that SMS/email to the Converza number/email above — don't change anything</p>
             </div>
             <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
               <div className="w-8 h-8 rounded-lg bg-[#E8C468]/15 flex items-center justify-center mb-2">
                 <span className="text-sm font-bold text-[#E8C468]">3</span>
               </div>
-              <p className="text-xs text-[#9FB0A6]">LeadBridge auto-extracts the lead, creates it, and starts the AI calling pipeline immediately</p>
+              <p className="text-xs text-[#9FB0A6]">Converza auto-extracts the lead, creates it, and starts the AI calling pipeline immediately</p>
             </div>
           </div>
         </motion.div>
@@ -453,7 +453,7 @@ export default function LeadForwardingPage() {
                       </li>
                       <li className="flex gap-2">
                         <span className="text-[#34D399] shrink-0">4.</span>
-                        Send — LeadBridge extracts the lead and starts the AI calling process
+                        Send — Converza extracts the lead and starts the AI calling process
                       </li>
                     </ol>
                   </div>
@@ -685,8 +685,7 @@ export default function LeadForwardingPage() {
                   <ul className="space-y-1.5 text-xs text-[#9FB0A6] ml-2">
                     <li className="flex gap-2">
                       <span className="text-green-400 shrink-0">→</span>
-                      <strong className="text-[#F0F7F3]">HTTPS required:</strong> Twilio won't send to non-HTTPS URLs. Use ngrok for local testing:
-                      <code className="ml-1 text-[#6FE3B0] font-mono">ngrok http 3000</code>
+                      <strong className="text-[#F0F7F3]">HTTPS required:</strong> Twilio won't send to non-HTTPS URLs. Your production URL is already HTTPS.
                     </li>
                     <li className="flex gap-2">
                       <span className="text-green-400 shrink-0">→</span>

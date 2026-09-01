@@ -119,7 +119,7 @@ export default function ImportLeadsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "leadbridge-sample-import.csv";
+      a.download = "converza-sample-import.csv";
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Sample CSV downloaded");

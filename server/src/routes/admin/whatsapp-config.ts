@@ -17,7 +17,7 @@ export default async function adminWhatsAppRoutes(fastify: FastifyInstance) {
   // ─── GET /admin/whatsapp/config — Full WhatsApp configuration status ──
   fastify.get("/admin/whatsapp/config", async (_request: FastifyRequest, reply: FastifyReply) => {
     // Use WEBHOOK_URL (backend) when available; fall back to FRONTEND_URL for local dev
-    const backendBase = (config.WEBHOOK_URL || config.FRONTEND_URL || "https://leadbridge.com").replace(/\/+$/, "");
+    const backendBase = (config.WEBHOOK_URL || config.FRONTEND_URL || "https://converza.tech").replace(/\/+$/, "");
     const webhookUrl = `${backendBase}/api/v1/webhooks/whatsapp`;
 
     const envVars = {
@@ -110,7 +110,7 @@ export default async function adminWhatsAppRoutes(fastify: FastifyInstance) {
           {
             step: 6,
             title: "Set Verify Token",
-            description: "Create a random string (e.g., 'leadbridge-verify-2024') and add it as WHATSAPP_VERIFY_TOKEN in your .env file. You'll enter the same string in Meta's webhook configuration.",
+            description: "Create a random string (e.g., 'converza-verify-2024') and add it as WHATSAPP_VERIFY_TOKEN in your .env file. You'll enter the same string in Meta's webhook configuration.",
           },
           {
             step: 7,
@@ -163,7 +163,7 @@ export default async function adminWhatsAppRoutes(fastify: FastifyInstance) {
     try {
       const result = await sendTextMessage({
         to,
-        text: `🔔 This is a test message from LeadBridge!\n\nYour WhatsApp Cloud API is configured correctly.\n\nTimestamp: ${new Date().toISOString()}\n\n— LeadBridge`,
+        text: `🔔 This is a test message from Converza!\n\nYour WhatsApp Cloud API is configured correctly.\n\nTimestamp: ${new Date().toISOString()}\n\n— Converza`,
         recipientType: "customer",
       });
 

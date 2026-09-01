@@ -1,12 +1,12 @@
 #!/bin/bash
-# Start all services for LeadBridge platform (development mode)
+# Start all services for Converza platform (development mode)
 # For production, use: docker compose -f docker/docker-compose.yml up -d
 
 PROJECT_ROOT="$(dirname "$0")/.."
 LOG_DIR="$PROJECT_ROOT/logs"
 mkdir -p "$LOG_DIR"
 
-echo "Starting LeadBridge development services..."
+echo "Starting Converza development services..."
 
 # Start infrastructure (PostgreSQL + Redis) via Docker Compose
 echo "Starting PostgreSQL and Redis..."

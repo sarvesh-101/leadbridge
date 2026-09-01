@@ -75,7 +75,7 @@ services:
       - key: FROM_EMAIL
         sync: false
       - key: FROM_NAME
-        value: LeadBridge
+        value: Converza
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
@@ -83,7 +83,7 @@ services:
       - key: MESSAGEBIRD_API_KEY
         sync: false
       - key: SMS_SENDER_ID
-        value: LeadBrg
+        value: CONVERZ
       - key: ENCRYPTION_KEY
         generateValue: true
       - key: CRON_SECRET

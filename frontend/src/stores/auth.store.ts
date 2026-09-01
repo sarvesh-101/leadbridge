@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
         set({ accessToken: token }),
     }),
     {
-      name: "leadbridge-auth",
+      name: "converza-auth",
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,

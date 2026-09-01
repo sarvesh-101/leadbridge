@@ -191,7 +191,7 @@ export async function buildServer() {
 
     return {
       status: overallStatus,
-      app: "LeadBridge",
+      app: "Converza",
       version: "1.0.0",
       timestamp: new Date().toISOString(),
       checks,
@@ -485,7 +485,7 @@ async function ensureAdmin() {
 
   const adminCount = await prisma.admin.count();
   if (adminCount === 0) {
-    const email = "admin@leadbridge.com";
+    const email = "admin@converza.tech";
     const tempPassword = crypto.randomUUID().split("-").pop() + "A1!";
     const passwordHash = await bcrypt.hash(tempPassword, 12);
 
@@ -617,7 +617,7 @@ async function start() {
     logger.info("✅ BullMQ workers started: call, notification, extraction, followup, reminder, webhook-retry");
 
     await server.listen({ port: config.PORT, host: "0.0.0.0" });
-    logger.info(`LeadBridge server running on port ${config.PORT}`);
+    logger.info(`Converza server running on port ${config.PORT}`);
     logger.info(`Health check: http://localhost:${config.PORT}/health`);
     logger.info(`API: http://localhost:${config.PORT}/api/v1`);
   } catch (err) {

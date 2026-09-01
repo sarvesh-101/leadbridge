@@ -1,5 +1,5 @@
 /**
- * LeadBridge — Database Seed Script
+ * Converza — Database Seed Script
  *
  * Usage:
  *   npx prisma db seed
@@ -23,7 +23,7 @@ async function main() {
   console.log("🌱 Seeding database...\n");
 
   // ─── 1. Admin ─────────────────────────────────────────────
-  const adminEmail = "admin@leadbridge.com";
+  const adminEmail = "admin@converza.tech";
   const adminPassword = await bcrypt.hash("admin123!A", 12);
 
   const admin = await prisma.admin.upsert({

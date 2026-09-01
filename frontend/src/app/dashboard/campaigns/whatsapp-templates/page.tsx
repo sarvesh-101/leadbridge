@@ -199,7 +199,7 @@ export default function WhatsAppTemplatesPage() {
   function openPreview(template: typeof TEMPLATES[0]) {
     const data: Record<string, string> = {};
     template.variables.forEach(v => {
-      data[v] = v === "businessName" || v === "brokerName" ? "LeadBridge" :
+      data[v] = v === "businessName" || v === "brokerName" ? "Converza" :
                 v === "customerName" || v === "leadName" ? "Rajesh Sharma" :
                 v === "visitDate" ? "15 July 2026" :
                 v === "visitTime" ? "11:00 AM" :
@@ -213,7 +213,7 @@ export default function WhatsAppTemplatesPage() {
                 v === "propertyType" ? "Apartment" :
                 v === "location" ? "Andheri West" :
                 v === "timeline" ? "Within 1 month" :
-                v === "dashboardLink" ? "https://leadbridge.com/dashboard" :
+                v === "dashboardLink" ? "https://converza.tech/dashboard" :
                 v === "dealAmount" ? "₹75,00,000" :
                 v === "day" ? "1" :
                 v === "result" ? "Call answered — no response to booking offer" :
@@ -324,8 +324,7 @@ export default function WhatsAppTemplatesPage() {
                           <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", template.bg)}>
                             <Icon className={cn("w-4 h-4", template.color)} />
                           </div>
-                          <div>
-                            <p className="text-xs font-medium text-[#F0F7F3]">LeadBridge</p>
+                          <div>                             <p className="text-xs font-medium text-[#F0F7F3]">Converza</p>
                             <p className="text-[10px] text-[#9FB0A6]">WhatsApp</p>
                           </div>
                         </div>

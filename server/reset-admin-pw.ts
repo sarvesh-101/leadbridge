@@ -5,7 +5,7 @@ async function main() {
   const prisma = new PrismaClient();
   const hash = await bcrypt.hash('admin123', 12);
   await prisma.admin.update({ 
-    where: { email: 'admin@leadbridge.com' }, 
+    where: { email: 'admin@converza.tech' }, 
     data: { passwordHash: hash } 
   });
   console.log('✅ Password reset to: admin123');

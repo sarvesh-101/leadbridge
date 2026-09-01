@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════
-# LeadBridge — Production Database Migration Script
+# Converza — Production Database Migration Script
 # ═══════════════════════════════════════════════════════════════
 # Usage:
 #   ./scripts/prisma-migrate.sh           # Dry-run (preview changes)
@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 SERVER_DIR="$PROJECT_DIR/server"
 
-echo "🔷 LeadBridge — Database Migration"
+echo "🔷 Converza — Database Migration"
 echo ""
 
 # Check for .env

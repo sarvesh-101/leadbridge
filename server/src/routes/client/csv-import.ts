@@ -301,7 +301,7 @@ Vikram Verma,9876543214,vikram@example.com,Facebook,6000000,Gurgaon,Immediate,Vi
 `;
 
     reply.header("Content-Type", "text/csv");
-    reply.header("Content-Disposition", "attachment; filename=leadbridge-sample-import.csv");
+    reply.header("Content-Disposition", "attachment; filename=converza-sample-import.csv");
     return reply.send(sampleCsv);
   });
 }
