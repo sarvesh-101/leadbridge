@@ -121,30 +121,32 @@ export default async function razorpayWebhookRoutes(fastify: FastifyInstance) {
               amountInr,
               paymentId,
               paymentMethod,
-            });          // FIX Round-2 #5: Razorpay renews every 30 days from signup, but the
-          // calendar cron resets on the 1st. Each subscription.charged IS a new
-          // billing cycle — reset the broker's call allowance here so usage
-          // aligns with billing.
-          //
-          // Idempotency: resetBrokerCycle itself guards via lastCycleResetAt
-          // (skips if already reset < 20 days ago), so a redelivered webhook or
-          // the calendar cron can never double-reset/double-roll.
-          //
-          // First charge (trial→paid conversion): the client just entered a paid
-          // cycle with a fresh allowance and their trial usage is tiny — skip the
-          // reset so we don't roll unused trial allowance into rollover (avoids
-          // the reviewer-flagged double-allowance).
-          const firstChargeIds = new Set(newPayers.map((p) => p.id));
-          if (!firstChargeIds.has(c.id)) {
-            try {
-              const { resetBrokerCycle } = await import("../../services/credit-manager.service");
-              await resetBrokerCycle(fastify.prisma, c.id);
-              fastify.log.info({ clientId: c.id, razorpaySubId }, "Broker call cycle reset on subscription.charged");
-            } catch (err: any) {
-              fastify.log.warn({ clientId: c.id, err: err.message }, "Cycle reset failed on subscription.charged");
+            });
+
+            // FIX Round-2 #5: Razorpay renews every 30 days from signup, but the
+            // calendar cron resets on the 1st. Each subscription.charged IS a new
+            // billing cycle — reset the broker's call allowance here so usage
+            // aligns with billing.
+            //
+            // Idempotency: resetBrokerCycle itself guards via lastCycleResetAt
+            // (skips if already reset < 20 days ago), so a redelivered webhook or
+            // the calendar cron can never double-reset/double-roll.
+            //
+            // First charge (trial→paid conversion): the client just entered a paid
+            // cycle with a fresh allowance and their trial usage is tiny — skip the
+            // reset so we don't roll unused trial allowance into rollover (avoids
+            // the reviewer-flagged double-allowance).
+            const firstChargeIds = new Set(newPayers.map((p) => p.id));
+            if (!firstChargeIds.has(c.id)) {
+              try {
+                const { resetBrokerCycle } = await import("../../services/credit-manager.service");
+                await resetBrokerCycle(fastify.prisma, c.id);
+                fastify.log.info({ clientId: c.id, razorpaySubId }, "Broker call cycle reset on subscription.charged");
+              } catch (err: any) {
+                fastify.log.warn({ clientId: c.id, err: err.message }, "Cycle reset failed on subscription.charged");
+              }
             }
-          }
-          }
+          } // end for (const c of clients)
 
           fastify.log.info({ razorpaySubId }, "Subscription charged — client activated");
         }

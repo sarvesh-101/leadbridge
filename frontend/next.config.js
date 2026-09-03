@@ -4,8 +4,8 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'leadbridge.com' },
-      { protocol: 'https', hostname: 'api.leadbridge.com' },
+      { protocol: 'https', hostname: 'converza.tech' },
+      { protocol: 'https', hostname: 'api.converza.tech' },
       { protocol: 'http', hostname: 'localhost' },
     ],
     formats: ['image/avif', 'image/webp'],

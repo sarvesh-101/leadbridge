@@ -15,8 +15,10 @@ const MAX_RECONNECT_ATTEMPTS = 10;
 /**
  * Polling fallback interval (used when WebSocket is unavailable).
  * Polls the leads endpoint every 15 seconds for real-time updates.
+ * Backs off exponentially when the server is unreachable to avoid spam.
  */
-const POLLING_INTERVAL_MS = 15000;
+const POLLING_BASE_MS = 15000;
+const POLLING_MAX_MS = 120000; // Max 2 minutes between polls when server is down
 
 class WebSocketClient {
   private ws: WebSocket | null = null;
@@ -119,12 +121,16 @@ class WebSocketClient {
    * Start polling as fallback when WebSocket is unavailable.
    * Uses a lightweight endpoint to check for recent lead changes.
    */
+  private pollConsecutiveFailures = 0;
+
   startPolling() {
     if (this.isPolling) return;
     this.isPolling = true;
+    this.pollConsecutiveFailures = 0;
     console.log("[WS] WebSocket unavailable — starting polling fallback");
 
-    this.pollingTimer = setInterval(async () => {
+    const poll = async () => {
+      if (!this.isPolling) return;
       try {
         const { accessToken, isAuthenticated } = useAuthStore.getState();
         if (!isAuthenticated || !accessToken) {
@@ -139,16 +145,14 @@ class WebSocketClient {
         });
 
         const response = await fetch(`${apiBase}/leads?${params}`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
 
         if (response.ok) {
           const data = await response.json();
           this.lastPollTimestamp = new Date().toISOString();
+          this.pollConsecutiveFailures = 0; // Reset backoff on success
 
-          // Emit events for any new/changed leads
           if (data.leads?.length) {
             data.leads.forEach((lead: any) => {
               this.notifyHandlers("lead.status_changed", {
@@ -160,9 +164,20 @@ class WebSocketClient {
           }
         }
       } catch {
-        // Silently retry on next interval
+        this.pollConsecutiveFailures++;
       }
-    }, POLLING_INTERVAL_MS);
+
+      // Schedule next poll with exponential backoff on failures
+      if (this.isPolling) {
+        const delay = Math.min(
+          POLLING_BASE_MS * Math.pow(1.5, this.pollConsecutiveFailures),
+          POLLING_MAX_MS
+        );
+        this.pollingTimer = setTimeout(poll, delay) as unknown as ReturnType<typeof setInterval>;
+      }
+    };
+
+    this.pollingTimer = setTimeout(poll, POLLING_BASE_MS) as unknown as ReturnType<typeof setInterval>;
   }
 
   /**
@@ -170,10 +185,11 @@ class WebSocketClient {
    */
   stopPolling() {
     if (this.pollingTimer) {
-      clearInterval(this.pollingTimer);
+      clearTimeout(this.pollingTimer as unknown as ReturnType<typeof setTimeout>);
       this.pollingTimer = null;
     }
     this.isPolling = false;
+    this.pollConsecutiveFailures = 0;
   }
 
   private notifyHandlers(event: string, data: WebSocketEvent) {

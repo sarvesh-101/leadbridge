@@ -50,9 +50,14 @@ export async function runDunning(): Promise<{
   for (const client of pastDueClients) {
     try {
       // Determine when dunning started — use stored value or initialize to now
-      // FIX: Use client.dunningStartedAt which is set once on first dunning run,
-      // falling back to updatedAt only for the very first evaluation
+      // On first run, persist dunningStartedAt so subsequent runs use the same baseline
       const dunningStart = client.dunningStartedAt || new Date();
+      if (!client.dunningStartedAt) {
+        await prisma.client.update({
+          where: { id: client.id },
+          data: { dunningStartedAt: dunningStart },
+        });
+      }
       const daysSinceDue = Math.floor((Date.now() - dunningStart.getTime()) / (1000 * 60 * 60 * 24));
 
       // Which step should we be at?
@@ -129,11 +134,11 @@ export async function runDunning(): Promise<{
 async function sendDunningEmail(client: any, step: number): Promise<void> {
   const subject = step === 1
     ? "Payment Failed — Update Your Billing Info"
-    : "Urgent: Your LeadBridge Account Will Be Suspended";
+    : "Urgent: Your Converza Account Will Be Suspended";
 
   const text = step === 1
-    ? `Hi ${client.ownerName},\n\nYour recent subscription payment failed. To continue using LeadBridge without interruption, please update your billing information.\n\n${config.FRONTEND_URL}/dashboard/billing\n\n— LeadBridge`
-    : `Hi ${client.ownerName},\n\nWe haven't received payment for your subscription. Your account will be suspended in ${step === 2 ? "5" : "1"} day(s) if payment is not made.\n\n${config.FRONTEND_URL}/dashboard/billing\n\n— LeadBridge`;
+    ? `Hi ${client.ownerName},\n\nYour recent subscription payment failed. To continue using Converza without interruption, please update your billing information.\n\n${config.FRONTEND_URL}/dashboard/billing\n\n— Converza`
+    : `Hi ${client.ownerName},\n\nWe haven't received payment for your subscription. Your account will be suspended in ${step === 2 ? "5" : "1"} day(s) if payment is not made.\n\n${config.FRONTEND_URL}/dashboard/billing\n\n— Converza`;
 
   try {
     await sendEmail({ to: client.email, subject, text });
@@ -145,7 +150,7 @@ async function sendDunningEmail(client: any, step: number): Promise<void> {
 async function sendDunningWhatsApp(client: any, step: number): Promise<void> {
   const message = step === 2
     ? `Namaste ${client.ownerName} ji!\n\nAapke subscription payment mein issue hai. Kripya apni billing information update karein.\n\nYahan jaayein: ${config.FRONTEND_URL}/dashboard/billing\n\nAgar koi problem hai toh humein WhatsApp karein.`
-    : `Namaste ${client.ownerName} ji!\n\nAapka account kal suspend kar diya jaayega kyunki payment nahi aa paaya hai. Naye calls block ho jayenge.\n\nPayment karein: ${config.FRONTEND_URL}/dashboard/billing\n\n— LeadBridge`;  try {
+    : `Namaste ${client.ownerName} ji!\n\nAapka account kal suspend kar diya jaayega kyunki payment nahi aa paaya hai. Naye calls block ho jayenge.\n\nPayment karein: ${config.FRONTEND_URL}/dashboard/billing\n\n— Converza`;  try {
       await sendTextMessage({
       to: client.ownerWhatsapp,
       text: message,

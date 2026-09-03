@@ -1,5 +1,5 @@
 /**
- * LeadBridge Service Worker
+ * Converza Service Worker
  *
  * Handles:
  * - Push notifications for new leads, bookings, and status changes
@@ -7,7 +7,7 @@
  * - Cache-first strategy for static assets
  */
 
-const CACHE_NAME = "leadbridge-v1";
+const CACHE_NAME = "converza-v1";
 const STATIC_ASSETS = [
   "/",
   "/dashboard",
@@ -85,7 +85,7 @@ self.addEventListener("push", (event) => {
   try {
     const data = event.data.json();
 
-    const title = data.title || "LeadBridge";
+    const title = data.title || "Converza";
     const options = {
       body: data.body || "",
       icon: "/favicon.svg",
@@ -101,7 +101,7 @@ self.addEventListener("push", (event) => {
       actions: [
         {
           action: "open",
-          title: "Open LeadBridge",
+          title: "Open Converza",
         },
         {
           action: "dismiss",

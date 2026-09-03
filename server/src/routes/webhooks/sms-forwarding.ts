@@ -4,7 +4,7 @@
  * POST /api/v1/webhooks/sms/incoming
  *
  * How it works:
- *   1. Broker forwards a portal SMS (99acres, MagicBricks, etc.) to LeadBridge's Twilio number
+ *   1. Broker forwards a portal SMS (99acres, MagicBricks, etc.) to Converza's Twilio number
  *   2. Twilio POSTs the message to this endpoint with `From` (broker's number) and `Body` (SMS text)
  *   3. We look up the broker by their phone/ownerWhatsapp number
  *   4. We parse the SMS body to extract lead info (name, phone, budget, etc.)
@@ -73,6 +73,12 @@ export default async function smsForwardingRoutes(fastify: FastifyInstance) {
         logger.warn({ requestId: (request as any).requestId }, "[SMS] Invalid Twilio signature — rejecting");
         return reply.status(403).send({ error: "Invalid signature" });
       }
+    } else {
+      // SECURITY: No Twilio auth token configured — reject all SMS webhooks
+      // to prevent anyone from POSTing fake leads. Set TWILIO_AUTH_TOKEN in
+      // your environment to enable SMS forwarding.
+      logger.warn({ requestId: (request as any).requestId }, "[SMS] TWILIO_AUTH_TOKEN not configured — rejecting webhook (unauthenticated)");
+      return reply.status(403).send({ error: "SMS webhook not configured" });
     }
     const requestId = (request as unknown as Record<string, unknown>).requestId || "sms-no-id";
 
@@ -146,13 +152,42 @@ export default async function smsForwardingRoutes(fastify: FastifyInstance) {
     }
 
     // ─── Parse the SMS body ────────────────────────────────────
-    const parsed = parseSmsLead(Body);
+    let parsed = parseSmsLead(Body);
+    let confidence = 0.5;
+
+    // LLM fallback: when regex can't extract phone (uncommon portal formats)
     if (!parsed || !parsed.phone) {
-      logger.warn({ clientId: client.id, body: Body.substring(0, 150), requestId }, "[SMS] Could not parse lead from SMS");
+      logger.info({ clientId: client.id, body: Body.substring(0, 100), requestId }, "[SMS] Regex parse failed — trying LLM fallback");
+      try {
+        const { extractLeadFromForwardedText } = await import("../../services/deepseek.service");
+        const llmResult = await extractLeadFromForwardedText(Body, "sms");
+        if (llmResult) {
+          parsed = {
+            name: llmResult.name || "Unknown",
+            phone: llmResult.phone,
+            email: llmResult.email,
+            source: "sms_forward",
+            budget: llmResult.budget,
+            location: llmResult.location,
+            propertyType: llmResult.propertyType,
+            bedrooms: llmResult.bedrooms,
+          };
+          confidence = 0.7; // LLM extraction confidence
+        }
+      } catch (err: any) {
+        logger.warn({ clientId: client.id, err: err.message, requestId }, "[SMS] LLM fallback extraction failed");
+      }
+    }
+
+    if (!parsed || !parsed.phone) {
+      logger.warn({ clientId: client.id, body: Body.substring(0, 150), requestId }, "[SMS] Could not parse lead from SMS (regex + LLM both failed)");
       return reply.status(200).type("text/xml").send("<Response></Response>");
     }
 
-    const { confidence } = parseSmsLeadWithConfidence(Body);
+    if (confidence === 0.5) {
+      const confResult = parseSmsLeadWithConfidence(Body);
+      confidence = confResult.confidence;
+    }
 
     // FIX Round-2 #6: monthly leads cap (plan.leads) — return empty TwiML so
     // Twilio doesn't retry, but log it so the platform can see over-cap traffic.

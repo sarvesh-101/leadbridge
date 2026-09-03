@@ -138,7 +138,7 @@ const campaignWorker = new Worker<CampaignEmailJob>(
               sendEmail({
                 to: client.email,
                 subject: `✅ Campaign "${campaignRecord.name}" sent successfully`,
-                text: `Hi ${client.ownerName},\n\nYour email campaign "${campaignRecord.name}" has finished sending.\n\n📊 Summary:\n• Recipients: ${campaignRecord.totalRecipients}\n• Delivered: ${campaignRecord.deliveredCount}\n• Failed: ${campaignRecord.failedCount}\n\nView results: ${config.FRONTEND_URL}/dashboard/campaigns/email\n\n— LeadBridge`,
+                text: `Hi ${client.ownerName},\n\nYour email campaign "${campaignRecord.name}" has finished sending.\n\n📊 Summary:\n• Recipients: ${campaignRecord.totalRecipients}\n• Delivered: ${campaignRecord.deliveredCount}\n• Failed: ${campaignRecord.failedCount}\n\nView results: ${config.FRONTEND_URL}/dashboard/campaigns/email\n\n— Converza`,
               }).catch((err: any) => {
                 logger.error({ err: err.message, campaignId }, "Failed to send campaign completion email");
               });
@@ -185,17 +185,9 @@ campaignWorker.on("failed", (job, error) => {
   logger.error({ jobId: job?.id, err: error.message }, "Campaign worker job failed");
 });
 
-// Graceful shutdown
-async function shutdown() {
-  await campaignWorker.close();
-  await winnerCheckWorker.close();
-  await closeAllQueues();
-  // Prisma disconnects globally in index.ts via prisma-shared
-  process.exit(0);
-}
-
-process.on("SIGTERM", shutdown);
-process.on("SIGINT", shutdown);
+// NOTE: Standalone shutdown handlers removed — when imported from index.ts,
+// the main process's gracefulShutdown() closes campaignWorker + all queues.
+// When running as a standalone process (Docker), add signal handlers back.
 
 export { campaignWorker, winnerCheckWorker };
 export default campaignWorker;

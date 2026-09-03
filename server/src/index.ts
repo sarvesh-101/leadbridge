@@ -82,14 +82,15 @@ import { isRedisAvailable } from "./workers/queues";
 
 // ─── BullMQ Workers ────────────────────────────────────────────
 // Import workers so they start processing their queues immediately.
-// Named imports are used so gracefulShutdown can close() them directly.
-// DO NOT import the campaign worker here — it runs as a separate Docker container.
+// Named imports are used so gracefulShutdown can close() them directly.    // Campaign worker: runs in-process on single-process deployments (Render free tier).
+    // On multi-container setups (Docker Compose), disable this import to avoid duplicate processing.
 import callWorker from "./workers/call.worker";
 import notificationWorker from "./workers/notification.worker";
 import extractionWorker from "./workers/extraction.worker";
 import followupWorker from "./workers/followup.worker";
 import reminderWorker from "./workers/reminder.worker";
 import webhookRetryWorker from "./workers/webhook-retry.worker";
+import campaignWorker from "./workers/campaign.worker";
 
 import { getCircuitState } from "./utils/circuit-breaker";
 import { disconnectPrisma } from "./utils/prisma-shared";
@@ -655,6 +656,7 @@ async function gracefulShutdown(signal: string) {
       followupWorker.close(),
       reminderWorker.close(),
       webhookRetryWorker.close(),
+      campaignWorker.close(),
     ]);
     logger.info("All BullMQ workers closed");
   } catch (err: any) {

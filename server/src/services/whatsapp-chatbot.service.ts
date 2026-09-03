@@ -1,7 +1,7 @@
 /**
  * WhatsApp AI Chatbot — handles incoming WhatsApp messages from leads.
  *
- * When a customer replies to a LeadBridge message (e.g., "Yes I'm coming" or "Reschedule"),
+ * When a customer replies to a Converza message (e.g., "Yes I'm coming" or "Reschedule"),
  * this service uses DeepSeek to understand the intent and take appropriate action.
  *
  * Supported intents:
@@ -161,8 +161,22 @@ Respond with JSON:
     await handleIntent(lead, client, booking, parsed);
 
   } catch (error: any) {
-    logger.error({ err: error.message, fromNumber }, "Chatbot processing failed");
-    // Fallback reply in the client's configured language
+    logger.error({ err: error.message, fromNumber }, "Chatbot processing failed — attempt 1, retrying in 3s");
+    // Retry once after 3 seconds (handles transient OpenRouter/DeepSeek failures)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const retryResult = await chatCompletion(
+        contextMessages,
+        { temperature: 0.7, max_tokens: 512, timeout: 20000 }
+      );
+      const retryParsed: ChatbotResponse = JSON.parse(retryResult.content.replace(/```json/g, "").replace(/```/g, "").trim());
+      await sendTextMessage({ to: lead.phone, text: retryParsed.reply, recipientType: "customer" });
+      logger.info({ fromNumber }, "Chatbot retry succeeded");
+      return;
+    } catch (retryErr: any) {
+      logger.error({ err: retryErr.message, fromNumber }, "Chatbot retry also failed — sending fallback");
+    }
+    // Final fallback reply in the client's configured language
     const fallbackText = getChatbotFallbackMessage(lead.name, client.language || "hinglish", client.ownerWhatsapp);
     await sendTextMessage({
       to: lead.phone,

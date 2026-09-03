@@ -17,6 +17,7 @@ import { prisma } from "../utils/prisma-shared";
 import { logger } from "../utils/logger";
 
 const REFERRAL_REWARD_CALLS = 10;
+const REFERRAL_MONTHLY_CAP = 50; // Max bonus calls from referrals per month (prevents abuse)
 
 export interface ReferralStats {
   totalReferrals: number;
@@ -130,6 +131,22 @@ export async function rewardReferralConversion(
       },
     });
     if (existingReward) {
+      return { rewarded: false, rewardCalls: 0, totalRollover: 0 };
+    }
+
+    // Check monthly referral reward cap to prevent abuse
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthlyRewardCount = await prisma.creditTransaction.count({
+      where: {
+        clientId,
+        type: "REFERRAL_REWARD",
+        createdAt: { gte: monthStart },
+      },
+    });
+    if (monthlyRewardCount * REFERRAL_REWARD_CALLS >= REFERRAL_MONTHLY_CAP) {
+      logger.warn({ clientId, monthlyRewardCount }, "Referral reward cap reached this month — skipping");
       return { rewarded: false, rewardCalls: 0, totalRollover: 0 };
     }
 

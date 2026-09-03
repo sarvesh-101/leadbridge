@@ -76,10 +76,10 @@ export async function generateInvoicePdf(invoice: InvoiceData): Promise<string> 
       .text("INVOICE", 50, 50);
 
     doc.fontSize(10).font("Helvetica").fillColor(GRAY)
-      .text(config.FROM_NAME || "LeadBridge", 50, 85)
-      .text(`GSTIN: 29ABCDE1234F1Z5`, 50, 100) // Placeholder GST
+      .text(config.FROM_NAME || "Converza", 50, 85)
+      .text(`GST: Not applicable (below ₹20L threshold)`, 50, 100)
       .text("Bengaluru, Karnataka", 50, 115)
-      .text(`www.leadbridge.com`, 50, 130);
+      .text(`www.converza.tech`, 50, 130);
 
     // Invoice number & date — right aligned
     const rightX = 400;
@@ -303,7 +303,7 @@ export async function generateAndSendGstInvoice(params: {
         `  Total Amount: ₹${invoice.totalAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
         `  Due Date: ${invoice.dueDate.toLocaleDateString("en-IN")}`,
         ``,
-        `You can also download this invoice from your LeadBridge dashboard.`,
+        `You can also download this invoice from your Converza dashboard.`,
         ``,
         `— ${config.FROM_NAME}`,
       ].join("\n"),

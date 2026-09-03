@@ -40,11 +40,9 @@ export async function generateMonthlyReports(): Promise<{ reportsGenerated: numb
       }),
     ]);
 
-    // Reset monthly call counter
-    await prisma.client.update({
-      where: { id: client.id },
-      data: { callsThisMonth: 0 },
-    });
+    // NOTE: callsThisMonth is reset by subscription.charged webhook (resetBrokerCycle)
+    // and by the monthly-reset cron. Do NOT reset it here — it would double-reset
+    // when both crons run on the 1st of the month.
 
     const month = `${lastMonthStart.getMonth() + 1}/${lastMonthStart.getFullYear()}`;
     const conversionRate = totalLeads > 0 ? Math.round((conversions / totalLeads) * 100) : 0;
@@ -53,7 +51,7 @@ export async function generateMonthlyReports(): Promise<{ reportsGenerated: numb
     const reportText = [
       `Hi ${client.ownerName},`,
       ``,
-      `Here's your LeadBridge performance report for ${month}:`,
+      `Here's your Converza performance report for ${month}:`,
       ``,
       `📊 Monthly Summary`,
       `━━━━━━━━━━━━━━━━`,
@@ -76,14 +74,14 @@ export async function generateMonthlyReports(): Promise<{ reportsGenerated: numb
       ``,
       `View full analytics: ${config.FRONTEND_URL}/dashboard/analytics`,
       ``,
-      `— The LeadBridge Team`,
+      `— The Converza Team`,
     ].join("\n");
 
     // Send email via shared email service (SMTP via Nodemailer)
     try {
       const emailSent = await sendEmail({
         to: client.email,
-        subject: `📊 LeadBridge Monthly Report — ${month}`,
+        subject: `📊 Converza Monthly Report — ${month}`,
         text: reportText,
       });
 

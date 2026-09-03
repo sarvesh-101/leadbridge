@@ -14,11 +14,24 @@ export async function detectNoShows(): Promise<{ processed: number }> {
   let processed = 0;
 
   for (const booking of candidateBookings) {
-    const [time, modifier] = booking.visitTime.split(" ");
-    // eslint-disable-next-line prefer-const
-    let [hours, minutes] = time.split(":").map(Number);
-    if (modifier?.toLowerCase() === "pm" && hours !== 12) hours += 12;
-    if (modifier?.toLowerCase() === "am" && hours === 12) hours = 0;
+    // Parse visit time — supports both 12h ("10:00 AM") and 24h ("14:00") formats
+    let hours: number;
+    let minutes: number;
+    const timeParts = booking.visitTime.trim();
+    const amPmMatch = timeParts.match(/(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?/i);
+    if (amPmMatch) {
+      hours = parseInt(amPmMatch[1], 10);
+      minutes = parseInt(amPmMatch[2], 10);
+      const modifier = amPmMatch[3];
+      if (modifier?.toUpperCase() === "PM" && hours !== 12) hours += 12;
+      if (modifier?.toUpperCase() === "AM" && hours === 12) hours = 0;
+      // If no AM/PM modifier and hours <= 12, assume 24h format (already correct)
+    } else {
+      // Fallback: try raw split
+      const [h, m] = timeParts.split(":").map(Number);
+      hours = h || 10;
+      minutes = m || 0;
+    }
 
     const visitDateTime = new Date(booking.visitDate);
     visitDateTime.setHours(hours, minutes, 0, 0);
