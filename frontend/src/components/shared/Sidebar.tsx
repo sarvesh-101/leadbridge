@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuthStore } from "../../stores/auth.store";
+import { serverLogout } from "../../lib/api";
 import { Lock } from "lucide-react";
 import { canAccessFeature } from "./FeatureGate";
 
@@ -71,7 +72,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const isAdmin = user?.role === "admin";
 
   const items = isAdmin ? ADMIN_NAV_ITEMS : NAV_ITEMS;
@@ -96,7 +97,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_16px_rgba(52,211,153,0.35)]">
                 <Zap className="w-4 h-4 text-[#0A0F0C]" />
               </div>
-              <span className="text-[16px] font-display font-bold text-[#F0F7F3]">LeadBridge</span>
+              <span className="text-[16px] font-display font-bold text-[#F0F7F3]">Converza</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
             </motion.div>
           )}
@@ -199,7 +200,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               </div>
             </div>
             <button
-              onClick={logout}
+              onClick={serverLogout}
               className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-[#9FB0A6] hover:text-[#FB7185] hover:bg-white/[0.06] transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -208,7 +209,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </div>
         ) : (
           <button
-            onClick={logout}
+            onClick={serverLogout}
             className="flex items-center justify-center w-full p-2 rounded-lg text-[#9FB0A6] hover:text-[#FB7185] hover:bg-white/[0.06] transition-colors"
           >
             <LogOut className="w-4 h-4" />

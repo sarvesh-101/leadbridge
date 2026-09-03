@@ -27,9 +27,9 @@ import type {
 // ─── Fake data pools for realistic transcripts ───────────────────
 
 const HINGLISH_GREETINGS = [
-  "Namaste! Main LeadBridge AI assistant bol raha hoon. Aapne abhi property enquiry ki thi, sahi hai?",
-  "Namaste ji! LeadBridge se baat kar rahe hain. Aapne online property dekhi thi na?",
-  "Hello! Main LeadBridge ki taraf se call kar raha hoon. Aapki enquiry ke baare mein baat karni thi.",
+  "Namaste! Main Converza AI assistant bol raha hoon. Aapne abhi property enquiry ki thi, sahi hai?",
+  "Namaste ji! Converza se baat kar rahe hain. Aapne online property dekhi thi na?",
+  "Hello! Main Converza ki taraf se call kar raha hoon. Aapki enquiry ke baare mein baat karni thi.",
 ];
 
 const HINGLISH_RESPONSES: Record<string, string[]> = {
@@ -55,10 +55,10 @@ const HINGLISH_RESPONSES: Record<string, string[]> = {
 const FARE_WELL = "Dhanyavaad! Aapko visit ki details WhatsApp par bhej dete hain. Koi aur sawaal ho toh poochh sakte hain.";
 
 const AGENT_NAMES = [
-  "Priya - LeadBridge AI",
-  "Rahul - LeadBridge AI",
-  "Neha - LeadBridge AI",
-  "Vikram - LeadBridge AI",
+  "Priya - Converza AI",
+  "Rahul - Converza AI",
+  "Neha - Converza AI",
+  "Vikram - Converza AI",
 ];
 
 let agentCounter = 100000;

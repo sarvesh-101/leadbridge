@@ -230,7 +230,7 @@ export default function CustomerDashboardPage() {
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-sm font-semibold text-[#F0F7F3]">LeadBridge</span>
+            <span className="text-sm font-semibold text-[#F0F7F3]">Converza</span>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={loadProfile} className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]" title="Refresh">

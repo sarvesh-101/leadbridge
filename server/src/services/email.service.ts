@@ -138,7 +138,7 @@ export async function sendBookingConfirmationEmail(params: {
     ``,
     `Please be on time. Contact the broker if you need to reschedule.`,
     ``,
-    `— The LeadBridge Team`,
+    `— The Converza Team`,
   ].join("\n");
 
   const ownerText = [
@@ -151,7 +151,7 @@ export async function sendBookingConfirmationEmail(params: {
     `Time: ${params.visitTime}`,
     `Location: ${params.location}`,
     ``,
-    `— LeadBridge`,
+    `— Converza`,
   ].join("\n");
 
   const [customerSent, ownerSent] = await Promise.all([

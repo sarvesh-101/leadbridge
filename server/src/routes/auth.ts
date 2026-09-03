@@ -12,6 +12,33 @@ if (config.GOOGLE_CLIENT_ID) {
   googleClient = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 }
 
+// ─── Refresh-token revocation (Redis denylist keyed by token jti) ───
+// Refresh JWTs are stateless, so "logout" and single-use rotation need an
+// explicit denylist. TTL covers the max refresh lifetime (30 days).
+const REFRESH_DENY_PREFIX = "refresh_deny:";
+const REFRESH_DENY_TTL_SECONDS = 31 * 24 * 60 * 60;
+
+async function revokeRefreshJti(fastify: FastifyInstance, jti: string): Promise<void> {
+  const redis = fastify.redis;
+  if (!redis) return;
+  try {
+    await redis.set(`${REFRESH_DENY_PREFIX}${jti}`, "1", "EX", REFRESH_DENY_TTL_SECONDS);
+  } catch (err: any) {
+    fastify.log.warn({ err: err.message }, "Failed to revoke refresh token (Redis unavailable)");
+  }
+}
+
+async function isRefreshJtiRevoked(fastify: FastifyInstance, jti: string): Promise<boolean> {
+  const redis = fastify.redis;
+  if (!redis) return false;
+  try {
+    return (await redis.exists(`${REFRESH_DENY_PREFIX}${jti}`)) === 1;
+  } catch (err: any) {
+    fastify.log.warn({ err: err.message }, "Refresh token revocation check skipped (Redis unavailable)");
+    return false;
+  }
+}
+
 export default async function authRoutes(fastify: FastifyInstance) {
   // ─── Register (create client) ─────────────────────────────────
   fastify.post("/auth/register", {
@@ -108,19 +135,19 @@ export default async function authRoutes(fastify: FastifyInstance) {
     fastify.log.info({ email }, "Queuing verification email (fire-and-forget)");
     sendEmail({
       to: email,
-      subject: "Verify your LeadBridge account",
-      text: `Welcome to LeadBridge! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
+      subject: "Verify your Converza account",
+      text: `Welcome to Converza! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
           <div style="text-align: center; margin-bottom: 32px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
               <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
-              <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
+              <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">Converza</span>
             </div>
           </div>
           <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Verify your email</h1>
           <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
-            Welcome to LeadBridge! Click the button below to verify your email
+            Welcome to Converza! Click the button below to verify your email
             and activate your 14-day free trial.
           </p>
           <div style="text-align: center; margin-bottom: 24px;">
@@ -129,12 +156,12 @@ export default async function authRoutes(fastify: FastifyInstance) {
             </a>
           </div>
           <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
-            This link expires in 48 hours. If you didn't create a LeadBridge account,
+            This link expires in 48 hours. If you didn't create a Converza account,
             you can safely ignore this email.
           </p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
           <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-            LeadBridge — Never Lose Another Lead Again
+            Converza — Never Lose Another Lead Again
           </p>
         </div>
       `,
@@ -307,7 +334,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const refreshToken = generateRefreshToken({ sub: client.id, role: "client" });
 
     return {
-      message: "Email verified successfully. Welcome to LeadBridge!",
+      message: "Email verified successfully. Welcome to Converza!",
       accessToken,
       refreshToken,
       user: {
@@ -362,7 +389,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     // Fire-and-forget: don't block the response on SMTP
     sendEmail({
       to: email,
-      subject: "Verify your LeadBridge account",
+      subject: "Verify your Converza account",
       text: `Verify your email to activate your trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
     }).catch((err: any) => fastify.log.error({ err }, "Resend verification email failed"));
 
@@ -372,7 +399,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     };
   });
 
-  // ─── Refresh Token ────────────────────────────────────────────
+  // ─── Refresh Token (single-use rotation + revocation check) ──
   fastify.post("/auth/refresh", {
     schema: {
       body: {
@@ -383,12 +410,25 @@ export default async function authRoutes(fastify: FastifyInstance) {
         },
       },
     },
+    config: { rateLimit: { max: 20, timeWindow: "1 minute" } },
   }, async (request: FastifyRequest<{ Body: { refreshToken: string } }>, reply: FastifyReply) => {
     const { refreshToken } = request.body;
     const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded) {
       return reply.status(401).send({ error: "Invalid or expired refresh token" });
+    }
+
+    // Reject tokens that were explicitly revoked (logout) or already used
+    // (single-use rotation — a stolen token can't be replayed after the real
+    // client refreshes first, and vice-versa).
+    if (decoded.jti && (await isRefreshJtiRevoked(fastify, decoded.jti))) {
+      return reply.status(401).send({ error: "Invalid or expired refresh token" });
+    }
+
+    // Rotate: burn the presented token before issuing a fresh pair.
+    if (decoded.jti) {
+      await revokeRefreshJti(fastify, decoded.jti);
     }
 
     const accessToken = generateAccessToken({
@@ -404,11 +444,18 @@ export default async function authRoutes(fastify: FastifyInstance) {
     return { accessToken, refreshToken: newRefreshToken };
   });
 
-  // ─── Logout ───────────────────────────────────────────────────
+  // ─── Logout (revokes the presented refresh token) ─────────────
   fastify.post("/auth/logout", {
     preHandler: [fastify.authenticate],
-  }, async (_request: FastifyRequest, _reply: FastifyReply) => {
-    // In a production system, invalidate the refresh token here
+  }, async (request: FastifyRequest, _reply: FastifyReply) => {
+    const body = (request.body || {}) as { refreshToken?: string };
+    const { refreshToken } = body;
+    if (refreshToken) {
+      const decoded = verifyRefreshToken(refreshToken);
+      if (decoded?.jti) {
+        await revokeRefreshJti(fastify, decoded.jti);
+      }
+    }
     return { message: "Logged out successfully" };
   });
 
@@ -565,19 +612,19 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
     sendEmail({
       to: email,
-      subject: "Reset your LeadBridge password",
+      subject: "Reset your Converza password",
       text: `You requested a password reset. Click here to reset: ${resetUrl}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
           <div style="text-align: center; margin-bottom: 32px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
               <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">⚡</div>
-              <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">LeadBridge</span>
+              <span style="font-size: 20px; font-weight: 700; color: #1a1a2e;">Converza</span>
             </div>
           </div>
           <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Reset your password</h1>
           <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
-            We received a request to reset the password for your LeadBridge account.
+            We received a request to reset the password for your Converza account.
             Click the button below to set a new password. This link expires in 1 hour.
           </p>
           <div style="text-align: center; margin-bottom: 24px;">
@@ -591,7 +638,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
           </p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
           <p style="color: #94a3b8; font-size: 12px; text-align: center;">
-            LeadBridge — Never Lose Another Lead Again
+            Converza — Never Lose Another Lead Again
           </p>
         </div>
       `,

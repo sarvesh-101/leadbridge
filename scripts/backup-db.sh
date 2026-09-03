@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# LeadBridge — PostgreSQL Backup Script (Phase 0.6)
+# Converza — PostgreSQL Backup Script (Phase 0.6)
 #
 # Dumps the production database (Railway Postgres, or any DATABASE_URL) to a
 # timestamped file, keeps N recent backups, and optionally uploads to S3/Supabase
@@ -20,7 +20,7 @@ DATABASE_URL="${DATABASE_URL:?DATABASE_URL is required (Railway auto-injects it)
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 BACKUP_KEEP="${BACKUP_KEEP:-10}"          # how many backups to retain locally
 STAMP="$(date +%Y%m%d_%H%M%S)"
-FILENAME="leadbridge_${STAMP}.sql.gz"
+FILENAME="converza_${STAMP}.sql.gz"
 OUTFILE="${BACKUP_DIR}/${FILENAME}"
 
 mkdir -p "${BACKUP_DIR}"
@@ -42,7 +42,7 @@ fi
 echo "✓ Backup complete: ${FILENAME} (${SIZE} bytes)"
 
 # ─── Retention: keep the newest $BACKUP_KEEP, delete the rest ───────────────
-ls -1t "${BACKUP_DIR}"/leadbridge_*.sql.gz 2>/dev/null | tail -n +$((BACKUP_KEEP + 1)) | while read -r old; do
+ls -1t "${BACKUP_DIR}"/converza_*.sql.gz 2>/dev/null | tail -n +$((BACKUP_KEEP + 1)) | while read -r old; do
   echo "→ Pruning old backup: $(basename "${old}")"
   rm -f "${old}"
 done

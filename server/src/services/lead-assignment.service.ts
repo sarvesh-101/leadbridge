@@ -12,6 +12,7 @@
  */
 
 import { prisma } from "../utils/prisma-shared";
+import { logger } from "../utils/logger";
 
 interface AssignmentResult {
   assignedTo: string | null;
@@ -121,8 +122,9 @@ async function logAssignment(
       },
     });
   } catch (error: any) {
-    // Non-critical — don't throw
-    console.warn("Failed to log lead assignment:", error.message);
+    // Non-critical — don't throw, but log through the structured logger
+    // (was a bare console.warn — invisible in prod log aggregation)
+    logger.warn({ leadId, memberId, err: error.message }, "Failed to log lead assignment");
   }
 }
 

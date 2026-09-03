@@ -168,7 +168,7 @@ function PrivacyTab() {
         {privacy?.erasureProcessedAt ? (
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
             <p className="text-sm text-emerald-400">
-              ✓ Your account and data have been erased. Thank you for using LeadBridge.
+              ✓ Your account and data have been erased. Thank you for using Converza.
             </p>
           </div>
         ) : privacy?.erasureRequested ? (

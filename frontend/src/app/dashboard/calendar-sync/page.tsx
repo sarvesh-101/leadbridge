@@ -163,7 +163,7 @@ export default function CalendarSyncPage() {
         <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">How Calendar Sync Works</h3>
         <div className="space-y-4">
           {[
-            { step: "1", title: "Connect", desc: "Authorize LeadBridge to access your Google Calendar. We only read/write calendar events." },
+            { step: "1", title: "Connect", desc: "Authorize Converza to access your Google Calendar. We only read/write calendar events." },
             { step: "2", title: "Auto-Sync", desc: "When a lead books a visit, it's automatically added to your Google Calendar as an event." },
             { step: "3", title: "Updates", desc: "Rescheduled or cancelled bookings are updated in real-time. Reminders are synced too." },
           ].map((item) => (

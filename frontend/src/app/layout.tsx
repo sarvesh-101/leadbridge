@@ -5,11 +5,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "LeadBridge — AI Calling Agent for Real Estate Brokers",
-    template: "%s | LeadBridge",
+    default: "Converza — AI Calling Agent for Real Estate Brokers",
+    template: "%s | Converza",
   },
   description:
-    "LeadBridge puts an AI agent on every inbound lead within 60 seconds — qualifying, booking, following up — while you focus on closing. One broker per city.",
+    "Converza puts an AI agent on every inbound lead within 60 seconds — qualifying, booking, following up — while you focus on closing. One broker per city.",
   keywords: [
     "real estate CRM",
     "AI calling agent",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    title: "LeadBridge",
+    title: "Converza",
     statusBarStyle: "black-translucent",
   },
   other: {
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "LeadBridge",
-    title: "LeadBridge — Your leads call themselves back.",
+    siteName: "Converza",
+    title: "Converza — Your leads call themselves back.",
     description:
       "AI calling agent for Indian real estate brokers. One broker per city. AI calls every lead within 60 seconds.",
   },

@@ -697,7 +697,7 @@ export default function LeadForwardingPage() {
                     </li>
                     <li className="flex gap-2">
                       <span className="text-green-400 shrink-0">→</span>
-                      Only <strong className="text-[#F0F7F3]">FORWARDING_SMS_NUMBER</strong> is required for the frontend. TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN are needed for signature validation
+                      Only <strong className="text-[#F0F7F3]">FORWARDING_SMS_NUMBER</strong> is required for the frontend. TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN are needed for signature validation. MessageBird (<code className="text-[#6FE3B0]">MESSAGEBIRD_API_KEY</code>) is also supported — point the inbound callback to <code className="text-[#6FE3B0]">/api/v1/webhooks/sms/incoming-messagebird</code>
                     </li>
                   </ul>
                 </div>

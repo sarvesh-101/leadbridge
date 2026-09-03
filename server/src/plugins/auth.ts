@@ -1,6 +1,7 @@
 import fp from "fastify-plugin";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import jwt, { SignOptions } from "jsonwebtoken";
+import crypto from "node:crypto";
 import { config } from "../config";
 
 declare module "fastify" {
@@ -73,17 +74,26 @@ export function generateRefreshToken(payload: {
   role: "admin" | "client";
 }): string {
   return jwt.sign(
-    { ...payload, type: "refresh", iat: Math.floor(Date.now() / 1000) },
+    // jti = unique token id — lets us revoke individual refresh tokens
+    // (logout, rotation on use) via a Redis denylist.
+    { ...payload, type: "refresh", jti: crypto.randomUUID(), iat: Math.floor(Date.now() / 1000) },
     config.JWT_REFRESH_SECRET,
     { expiresIn: config.JWT_REFRESH_EXPIRY as SignOptions["expiresIn"] }
   );
 }
 
-export function verifyRefreshToken(token: string): { sub: string; role: string } | null {
+export function verifyRefreshToken(
+  token: string
+): { sub: string; role: string; jti?: string } | null {
   try {
-    const payload = jwt.verify(token, config.JWT_REFRESH_SECRET) as { type: string; sub: string; role: string };
+    const payload = jwt.verify(token, config.JWT_REFRESH_SECRET) as {
+      type: string;
+      sub: string;
+      role: string;
+      jti?: string;
+    };
     if (payload.type !== "refresh") return null;
-    return { sub: payload.sub, role: payload.role };
+    return { sub: payload.sub, role: payload.role, jti: payload.jti };
   } catch {
     return null;
   }

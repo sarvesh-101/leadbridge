@@ -2,6 +2,16 @@ import { Plan } from "@prisma/client";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { cancelSubscription as cancelRazorpaySub, refundPayment } from "../../services/razorpay.service";
 import { PLAN_DEFINITIONS, createSubscriptionCheckout, getRazorpayPlanIdForTier } from "../../services/subscription.service";
+import { signAssetUrl } from "../../utils/signed-asset-url";
+
+// Invoice PDFs are protected on the server; expose a short-lived signed URL
+// alongside the stored path so the dashboard can open them in a new tab.
+function withSignedPdf<T extends { invoicePdfUrl?: string | null }>(invoice: T): T & { signedInvoicePdfUrl: string | null } {
+  return {
+    ...invoice,
+    signedInvoicePdfUrl: invoice.invoicePdfUrl ? signAssetUrl(invoice.invoicePdfUrl) : null,
+  };
+}
 
 export default async function clientBillingRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
@@ -59,7 +69,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         features: subscription.features,
         limits: subscription.limits,
       },
-      invoices: subscription.invoices,
+      invoices: (subscription.invoices || []).map(withSignedPdf),
     };
   });
 
@@ -321,7 +331,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       orderBy: { issueDate: "desc" },
     });
 
-    return { invoices };
+    return { invoices: invoices.map(withSignedPdf) };
   });
 
   // ─── Get Invoice ───────────────────────────────────────────────
@@ -337,7 +347,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       return reply.status(404).send({ error: "Invoice not found" });
     }
 
-    return { invoice };
+    return { invoice: withSignedPdf(invoice) };
   });
 
   // ─── Get Billing Info ─────────────────────────────────────────

@@ -28,7 +28,7 @@ get_env() {
 }
 
 echo "═══════════════════════════════════════════════"
-echo "🚂 Railway Deploy for LeadBridge"
+echo "🚂 Railway Deploy for Converza"
 echo "═══════════════════════════════════════════════"
 
 # Step 1: Link to Postgres and Redis

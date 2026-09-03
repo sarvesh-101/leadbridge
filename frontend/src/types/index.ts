@@ -1,4 +1,4 @@
-// LeadBridge — Shared TypeScript Types
+// Converza — Shared TypeScript Types
 
 export type LeadStatus =
   | "PENDING" | "CALLING" | "CALL_FAILED" | "NO_ANSWER" | "FAQ_ONLY"

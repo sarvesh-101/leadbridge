@@ -42,10 +42,10 @@ export async function checkTrialExpiry(): Promise<{ paused: number; emailsSent: 
     try {
       const emailSent = await sendEmail({
         to: client.email,
-        subject: "Your LeadBridge trial has expired — upgrade to continue",
+        subject: "Your Converza trial has expired — upgrade to continue",
         text: `Hi ${client.ownerName},
 
-Your LeadBridge trial period has ended.
+Your Converza trial period has ended.
 
 To continue receiving and managing AI-called leads, please upgrade to a paid plan.
 
@@ -59,7 +59,7 @@ Upgrade here: ${config.FRONTEND_URL}/dashboard/billing
 
 Questions? Reply to this email.
 
-— The LeadBridge Team`,
+— The Converza Team`,
       });
 
       if (emailSent) {

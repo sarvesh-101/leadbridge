@@ -91,6 +91,25 @@ export default async function customerRoutes(fastify: FastifyInstance) {
       return { message: "If a booking exists with this number, an OTP has been sent." };
     }
 
+    // SECURITY: per-phone send cap (3/min) — the route-level limit is per IP,
+    // so a distributed attacker could otherwise SMS/WhatsApp-bomb a victim's
+    // number at paid-per-message cost. Unknown numbers are filtered out above,
+    // so this counter only increments when a message would actually be sent.
+    const redis = fastify.redis;
+    if (redis) {
+      try {
+        const rateKey = `otp_send:${phone.replace(/\D/g, "").slice(-10)}`;
+        const count = await redis.incr(rateKey);
+        if (count === 1) await redis.expire(rateKey, 60);
+        if (count > 3) {
+          logger.warn({ requestId, phone: phone.slice(-4), action: "otp.send.rate_limited" }, "OTP send rate-limited for phone");
+          return { message: "If a booking exists with this number, an OTP has been sent." };
+        }
+      } catch (err: any) {
+        logger.warn({ err: err.message }, "OTP rate limit check skipped — Redis unavailable");
+      }
+    }
+
     // Generate 6-digit OTP
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
@@ -104,13 +123,13 @@ export default async function customerRoutes(fastify: FastifyInstance) {
     // Send OTP via WhatsApp (primary)
     const waSent = await sendTextMessage({
       to: lead.phone,
-      text: `🔐 Your LeadBridge OTP is: ${otp}\n\nThis code expires in 10 minutes.\n\n— ${lead.client?.businessName || "LeadBridge"}`,
+      text: `🔐 Your Converza OTP is: ${otp}\n\nThis code expires in 10 minutes.\n\n— ${lead.client?.businessName || "Converza"}`,
       recipientType: "customer",
     }).catch(() => false);
 
     // Fallback to SMS if WhatsApp fails
     if (!waSent) {
-      await sendSms(lead.phone, `Your LeadBridge OTP: ${otp}. Valid for 10 minutes.`);
+      await sendSms(lead.phone, `Your Converza OTP: ${otp}. Valid for 10 minutes.`);
     }
 
     // Log the notification

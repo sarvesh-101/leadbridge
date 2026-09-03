@@ -3,7 +3,12 @@
  *
  * Provides full-text search across call transcripts using PostgreSQL tsvector.
  * Searches across transcript text, summaries, and extracted data for keywords.
+ *
+ * SECURITY: All user input is passed as bound parameters via Prisma.sql —
+ * never string-interpolated — so search terms, dates and offsets cannot be
+ * used for SQL injection or to escape the client scope.
  */
+import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma-shared";
 
 interface SearchResult {
@@ -21,6 +26,28 @@ interface SearchResult {
 }
 
 /**
+ * Escape LIKE wildcards so a user's search term is treated literally.
+ * (Default Postgres LIKE escape char is backslash.)
+ */
+function likePattern(value: string): string {
+  return `%${value.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
+}
+
+/** Validate & clamp pagination to sane bounds. */
+function clampPagination(limit: number | undefined, offset: number | undefined) {
+  const safeLimit = Math.min(Math.max(Number.isFinite(limit) ? Math.trunc(limit as number) : 20, 1), 100);
+  const safeOffset = Math.max(Number.isFinite(offset) ? Math.trunc(offset as number) : 0, 0);
+  return { safeLimit, safeOffset };
+}
+
+/** Parse an ISO date param — invalid dates are ignored rather than erroring. */
+function parseDateParam(value: string | undefined): Date | undefined {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+/**
  * Search call transcripts for a keyword or phrase.
  * Uses PostgreSQL full-text search with tsvector for performance.
  */
@@ -35,30 +62,28 @@ export async function searchTranscripts(
     minDuration?: number;
   }
 ): Promise<{ results: SearchResult[]; total: number }> {
-  const limit = options?.limit || 20;
-  const offset = options?.offset || 0;
+  const { safeLimit, safeOffset } = clampPagination(options?.limit, options?.offset);
 
-  // Build search conditions
-  const conditions: string[] = [
-    `c."clientId" = '${clientId}'`,
-    `(c.transcript ILIKE '%${escapeSql(query)}%' OR c.summary ILIKE '%${escapeSql(query)}%')`,
+  const dateFrom = parseDateParam(options?.dateFrom);
+  const dateTo = parseDateParam(options?.dateTo);
+  const minDuration =
+    typeof options?.minDuration === "number" && Number.isFinite(options.minDuration)
+      ? options.minDuration
+      : undefined;
+
+  // All values below are bound parameters — never interpolated into SQL.
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`c."clientId" = ${clientId}`,
+    Prisma.sql`(c.transcript ILIKE ${likePattern(query)} OR c.summary ILIKE ${likePattern(query)})`,
   ];
+  if (dateFrom) conditions.push(Prisma.sql`c."createdAt" >= ${dateFrom}`);
+  if (dateTo) conditions.push(Prisma.sql`c."createdAt" <= ${dateTo}`);
+  if (minDuration !== undefined) conditions.push(Prisma.sql`c.duration >= ${minDuration}`);
 
-  if (options?.dateFrom) {
-    conditions.push(`c."createdAt" >= '${options.dateFrom}'`);
-  }
-  if (options?.dateTo) {
-    conditions.push(`c."createdAt" <= '${options.dateTo}'`);
-  }
-  if (options?.minDuration) {
-    conditions.push(`c.duration >= ${options.minDuration}`);
-  }
+  const whereClause = Prisma.join(conditions, " AND ");
 
-  const whereClause = conditions.join(" AND ");
-
-  // Use raw query for full-text search with relevance ranking
-  const countResult = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
-    `SELECT COUNT(*) as count FROM "Call" c WHERE ${whereClause}`
+  const countResult = await prisma.$queryRaw<Array<{ count: bigint }>>(
+    Prisma.sql`SELECT COUNT(*) as count FROM "Call" c WHERE ${whereClause}`
   );
   const total = Number(countResult[0]?.count || 0);
 
@@ -66,7 +91,7 @@ export async function searchTranscripts(
     return { results: [], total: 0 };
   }
 
-  const results = await prisma.$queryRawUnsafe<Array<{
+  const results = await prisma.$queryRaw<Array<{
     id: string;
     leadId: string;
     leadName: string;
@@ -77,7 +102,7 @@ export async function searchTranscripts(
     duration: number | null;
     createdAt: Date;
   }>>(
-    `SELECT
+    Prisma.sql`SELECT
       c.id,
       c."leadId",
       l.name as "leadName",
@@ -91,7 +116,7 @@ export async function searchTranscripts(
     JOIN "Lead" l ON l.id = c."leadId"
     WHERE ${whereClause}
     ORDER BY c."createdAt" DESC
-    LIMIT ${limit} OFFSET ${offset}`
+    LIMIT ${safeLimit} OFFSET ${safeOffset}`
   );
 
   // Build search results with highlighted snippets
@@ -115,21 +140,19 @@ export async function searchAllTranscripts(
     clientId?: string;
   }
 ): Promise<{ results: SearchResult[]; total: number }> {
-  const limit = options?.limit || 20;
-  const offset = options?.offset || 0;
+  const { safeLimit, safeOffset } = clampPagination(options?.limit, options?.offset);
 
-  const conditions: string[] = [
-    `(c.transcript ILIKE '%${escapeSql(query)}%' OR c.summary ILIKE '%${escapeSql(query)}%')`,
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`(c.transcript ILIKE ${likePattern(query)} OR c.summary ILIKE ${likePattern(query)})`,
   ];
-
   if (options?.clientId) {
-    conditions.push(`c."clientId" = '${options.clientId}'`);
+    conditions.push(Prisma.sql`c."clientId" = ${options.clientId}`);
   }
 
-  const whereClause = conditions.join(" AND ");
+  const whereClause = Prisma.join(conditions, " AND ");
 
-  const countResult = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
-    `SELECT COUNT(*) as count FROM "Call" c WHERE ${whereClause}`
+  const countResult = await prisma.$queryRaw<Array<{ count: bigint }>>(
+    Prisma.sql`SELECT COUNT(*) as count FROM "Call" c WHERE ${whereClause}`
   );
   const total = Number(countResult[0]?.count || 0);
 
@@ -137,7 +160,7 @@ export async function searchAllTranscripts(
     return { results: [], total: 0 };
   }
 
-  const results = await prisma.$queryRawUnsafe<Array<{
+  const results = await prisma.$queryRaw<Array<{
     id: string;
     leadId: string;
     leadName: string;
@@ -148,7 +171,7 @@ export async function searchAllTranscripts(
     duration: number | null;
     createdAt: Date;
   }>>(
-    `SELECT
+    Prisma.sql`SELECT
       c.id,
       c."leadId",
       l.name as "leadName",
@@ -162,7 +185,7 @@ export async function searchAllTranscripts(
     JOIN "Lead" l ON l.id = c."leadId"
     WHERE ${whereClause}
     ORDER BY c."createdAt" DESC
-    LIMIT ${limit} OFFSET ${offset}`
+    LIMIT ${safeLimit} OFFSET ${safeOffset}`
   );
 
   const searchResults: SearchResult[] = results.map((row) => ({
@@ -221,13 +244,6 @@ function calculateRelevance(transcript: string, summary: string | null, query: s
 }
 
 /**
- * Escape single quotes for safe SQL string interpolation.
- */
-function escapeSql(value: string): string {
-  return value.replace(/'/g, "''").replace(/\\/g, "\\\\");
-}
-
-/**
  * Get search stats for a client.
  */
 export async function getTranscriptSearchStats(
@@ -238,17 +254,17 @@ export async function getTranscriptSearchStats(
   averageTranscriptLength: number;
   topKeywords: string[];
 }> {
-  const stats = await prisma.$queryRawUnsafe<Array<{
+  const stats = await prisma.$queryRaw<Array<{
     total: bigint;
     withContent: bigint;
     avgLength: number;
   }>>(
-    `SELECT
+    Prisma.sql`SELECT
       COUNT(*) as total,
       COUNT(*) FILTER (WHERE transcript IS NOT NULL AND transcript != '') as "withContent",
       COALESCE(AVG(LENGTH(transcript)), 0) as "avgLength"
     FROM "Call" c
-    WHERE c."clientId" = '${escapeSql(clientId)}'`
+    WHERE c."clientId" = ${clientId}`
   );
 
   const row = stats[0];

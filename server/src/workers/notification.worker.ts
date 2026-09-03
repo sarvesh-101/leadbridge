@@ -258,7 +258,7 @@ const notificationWorker = new Worker<NotificationJob>(
 
       const emailSent = await sendEmail({
         to: client.email,
-        subject: `[LeadBridge] ${type.replace(/_/g, " ")}`,
+        subject: `[Converza] ${type.replace(/_/g, " ")}`,
         text: messageText,
       });
       if (emailSent) {

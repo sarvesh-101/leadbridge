@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# LeadBridge — Uptime Monitor (Phase 0.6)
+# Converza — Uptime Monitor (Phase 0.6)
 #
 # Checks the production health endpoint every run and alerts when the API is
 # down, degraded, or slow. The /health endpoint already verifies database,
@@ -25,7 +25,7 @@ ALERT_WEBHOOK_URL="${ALERT_WEBHOOK_URL:-}"   # optional — silent if unset
 TIMEOUT="${TIMEOUT:-10}"
 
 STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-STATE_FILE="${STATE_FILE:-/tmp/leadbridge-uptime.state}"
+STATE_FILE="${STATE_FILE:-/tmp/converza-uptime.state}"
 
 # curl with timeout + follow redirects; capture HTTP code and body
 RESPONSE="$(curl -sS -m "${TIMEOUT}" -w $'\n%{http_code}' "${HEALTH_URL}" 2>/dev/null || true)"
@@ -53,7 +53,7 @@ fi
 touch "${STATE_FILE}"
 
 if [ -n "${ALERT_WEBHOOK_URL}" ]; then
-  PAYLOAD="{\"text\":\"🚨 *LeadBridge DOWN* — HTTP ${CODE}, status=${STATUS:-unknown}\\n${HEALTH_URL}\\nTime: ${STAMP}\"}"
+  PAYLOAD="{\"text\":\"🚨 *Converza DOWN* — HTTP ${CODE}, status=${STATUS:-unknown}\\n${HEALTH_URL}\\nTime: ${STAMP}\"}"
   curl -sS -m 10 -X POST -H 'Content-Type: application/json' -d "${PAYLOAD}" "${ALERT_WEBHOOK_URL}" >/dev/null 2>&1 \
     && echo "    ✅ Alert sent." || echo "    ❌ Alert webhook failed."
 else

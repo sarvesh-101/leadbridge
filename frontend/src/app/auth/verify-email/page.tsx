@@ -63,7 +63,7 @@ function VerifyEmailContent() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
               <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
-            <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">LeadBridge</span>
+            <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">Converza</span>
           </Link>
         </div>
 

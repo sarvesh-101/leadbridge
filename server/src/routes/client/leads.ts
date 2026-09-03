@@ -170,11 +170,15 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
 
     // Auto-assign lead to team member (round-robin/workload-based)
     const { assignLead } = await import("../../services/lead-assignment.service");
-    assignLead(clientId, lead.id).catch(() => {});
+    assignLead(clientId, lead.id).catch((err: Error) => {
+      fastify.log.warn({ leadId: lead.id, err: err.message }, "Lead assignment failed");
+    });
 
     // Auto-match lead to properties for suggestions + notification
     const { matchLeadToProperties } = await import("../../services/property-matching.service");
-    matchLeadToProperties(lead.id, clientId).catch(() => {});
+    matchLeadToProperties(lead.id, clientId).catch((err: Error) => {
+      fastify.log.warn({ leadId: lead.id, err: err.message }, "Property matching failed");
+    });
 
     return reply.status(201).send({ lead });
   });
@@ -224,13 +228,17 @@ export default async function clientLeadRoutes(fastify: FastifyInstance) {
     // Record scoring outcome for feedback training loop
     if (["CONVERTED", "COLD", "VISITED"].includes(newStatus)) {
       const { recordScoringOutcome } = await import("../../services/scoring.service");
-      (recordScoringOutcome as (leadId: string, outcome: string) => Promise<void>)(lead.id, newStatus.toLowerCase()).catch(() => {});
+      (recordScoringOutcome as (leadId: string, outcome: string) => Promise<void>)(lead.id, newStatus.toLowerCase()).catch((err: Error) => {
+        fastify.log.warn({ leadId: lead.id, err: err.message }, "Scoring outcome recording failed");
+      });
     }
 
     // Reward referral conversion — when a referred lead converts, give broker bonus calls
     if (["VISITED", "CONVERTED"].includes(newStatus)) {
       const { rewardReferralConversion } = await import("../../services/referral.service");
-      rewardReferralConversion(clientId, lead.id).catch(() => {});
+      rewardReferralConversion(clientId, lead.id).catch((err: Error) => {
+        fastify.log.warn({ clientId, leadId: lead.id, err: err.message }, "Referral reward processing failed");
+      });
     }
 
     // Create audit log entry for team member tracking

@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
               <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
-            <span className="text-xl font-bold text-[#F0F7F3]">LeadBridge</span>
+            <span className="text-xl font-bold text-[#F0F7F3]">Converza</span>
           </Link>
           <h1 className="text-2xl font-bold text-[#F0F7F3]">Reset your password</h1>
           <p className="text-[#9FB0A6] mt-2">

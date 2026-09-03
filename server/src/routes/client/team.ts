@@ -106,15 +106,15 @@ export default async function teamRoutes(fastify: FastifyInstance) {
     try {
       emailSent = await sendEmail({
         to: email,
-        subject: `${name} — you've been invited to join LeadBridge`,
-        text: `You've been invited to join LeadBridge as a ${role}.\n\nAccept here: ${inviteUrl}\n\nThis invitation expires in 7 days.`,
+        subject: `${name} — you've been invited to join Converza`,
+        text: `You've been invited to join Converza as a ${role}.\n\nAccept here: ${inviteUrl}\n\nThis invitation expires in 7 days.`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
             <div style="text-align: center; margin-bottom: 32px;">
               <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; margin: 0 auto 16px;">👥</div>
               <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 8px;">You're Invited!</h1>
               <p style="color: #64748b; line-height: 1.6;">
-                You've been invited to join <strong>LeadBridge</strong> as a <strong>${role}</strong>.
+                You've been invited to join <strong>Converza</strong> as a <strong>${role}</strong>.
               </p>
             </div>
             <div style="text-align: center; margin-bottom: 24px;">

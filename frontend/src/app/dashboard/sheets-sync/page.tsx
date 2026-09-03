@@ -49,7 +49,7 @@ export default function SheetsSyncPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-[#F0F7F3]">Google Sheets Sync</h1>
-        <p className="text-[#9FB0A6] mt-1">Bidirectional sync between LeadBridge and Google Sheets</p>
+        <p className="text-[#9FB0A6] mt-1">Bidirectional sync between Converza and Google Sheets</p>
       </div>
 
       {/* Instructions */}
@@ -61,7 +61,7 @@ export default function SheetsSyncPage() {
           <div>
             <h3 className="text-sm font-semibold text-[#F0F7F3]">Sync your lead data with Google Sheets</h3>
             <p className="text-xs text-[#9FB0A6] mt-1">
-              Keep your Google Sheets up to date with your lead data from LeadBridge.
+              Keep your Google Sheets up to date with your lead data from Converza.
               New leads will be added to your sheet, and updates (like booking status) will be synced back.
             </p>
           </div>
@@ -69,9 +69,9 @@ export default function SheetsSyncPage() {
 
         <div className="space-y-2">
           {[
-            "Leads are synced from LeadBridge to your Google Sheet",
-            "Status updates are pushed back to LeadBridge from the sheet",
-            "Works best with the LeadBridge Google Sheets template",
+            "Leads are synced from Converza to your Google Sheet",
+            "Status updates are pushed back to Converza from the sheet",
+            "Works best with the Converza Google Sheets template",
           ].map((tip, i) => (
             <div key={i} className="flex items-start gap-2 text-xs text-[#9FB0A6]">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399] mt-0.5 shrink-0" />
@@ -149,7 +149,7 @@ export default function SheetsSyncPage() {
         <ol className="space-y-2 text-xs text-[#9FB0A6] list-decimal list-inside">
           <li>Go to the <a href="/dashboard/integrations" className="text-[#6FE3B0] hover:underline">Integrations</a> page and configure Google Sheets</li>
           <li>Copy your Integration ID from the integrations list</li>
-          <li>Create or open a Google Sheet (use the LeadBridge template for best results)</li>
+          <li>Create or open a Google Sheet (use the Converza template for best results)</li>
           <li>Share the sheet with the service account email from integrations</li>
           <li>Paste the sheet URL and Integration ID above</li>
           <li>Click &ldquo;Start Sync&rdquo; to sync your data</li>

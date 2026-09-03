@@ -67,7 +67,7 @@ export default function ComparisonSection() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
           <span className="caption text-gradient-gold mb-4 block">HEAD-TO-HEAD</span>
-          <h2 className="h1-text mb-4">LeadBridge vs. Traditional Telecaller</h2>
+          <h2 className="h1-text mb-4">Converza vs. Traditional Telecaller</h2>
           <p className="text-[16px] text-[#9FB0A6] max-w-[520px] mx-auto">
             A capability comparison — what each approach offers. Results vary by broker and market.
           </p>
@@ -80,7 +80,7 @@ export default function ComparisonSection() {
               <span className="text-[11px] font-semibold text-[#9FB0A6] uppercase tracking-[0.08em]">Metric</span>
             </div>
             <div className="px-6 py-4 bg-[#34D399]/[0.07] border-x border-white/10">
-              <span className="text-[11px] font-semibold text-[#6FE3B0] uppercase tracking-[0.08em]">LeadBridge</span>
+              <span className="text-[11px] font-semibold text-[#6FE3B0] uppercase tracking-[0.08em]">Converza</span>
             </div>
             <div className="px-6 py-4">
               <span className="text-[11px] font-semibold text-[#FB7185] uppercase tracking-[0.08em]">Telecaller</span>
@@ -119,7 +119,7 @@ export default function ComparisonSection() {
         {/* Savings Callout */}
         <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-[#34D399]/10 to-[#1B4332]/20 border border-[#34D399]/20 text-center">
           <p className="text-[15px] text-[#D5E0D9] font-medium">
-            💰 Example: 2 telecallers (₹50K/mo) vs LeadBridge Growth (₹35K/mo) — <span className="text-[#6FE3B0]">about ₹15K/mo less</span> in this scenario
+            💰 Example: 2 telecallers (₹50K/mo) vs Converza Growth (₹35K/mo) — <span className="text-[#6FE3B0]">about ₹15K/mo less</span> in this scenario
           </p>
         </div>
       </div>

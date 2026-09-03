@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Menu, Search, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { useAuthStore } from "../../stores/auth.store";
+import { serverLogout } from "../../lib/api";
 import { RealtimeStatusDot } from "./RealtimeStatusDot";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { useRouter } from "next/navigation";
@@ -13,7 +14,7 @@ interface TopBarProps {
 }
 
 export function TopBar({ onSearch, onMenuToggle }: TopBarProps) {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -90,7 +91,7 @@ export function TopBar({ onSearch, onMenuToggle }: TopBarProps) {
                 </button>
                 <hr className="my-1 border-white/10" />
                 <button
-                  onClick={logout}
+                  onClick={serverLogout}
                   className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-[#FB7185] hover:bg-white/[0.06] transition-colors"
                 >
                   <LogOut className="w-4 h-4" />

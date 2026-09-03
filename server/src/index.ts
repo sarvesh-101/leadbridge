@@ -5,8 +5,10 @@ import websocket from "@fastify/websocket";
 import multipart from "@fastify/multipart";
 import formbodyPlugin from "@fastify/formbody";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { config } from "./config";
 import { logger } from "./utils/logger";
+import { verifySignedAssetUrl } from "./utils/signed-asset-url";
 
 // ─── Request ID generation ────────────────────────────────────
 function generateRequestId(): string {
@@ -60,8 +62,12 @@ import customerActivityRoutes from "./routes/client/customer-activity";
 import territoryComparisonRoutes from "./routes/admin/territory-comparison";
 import ingestWebhookRoutes from "./routes/webhooks/ingest";
 import smsForwardingRoutes from "./routes/webhooks/sms-forwarding";
+import messageBirdSmsRoutes from "./routes/webhooks/messagebird-sms";
 import emailForwardingRoutes from "./routes/webhooks/email-forwarding";
 import forwardingTestRoutes from "./routes/webhooks/forwarding-test";
+import indiaMartWebhookRoutes from "./routes/webhooks/indiamart";
+import facebookWebhookRoutes from "./routes/webhooks/facebook";
+import facebookIntegrationRoutes from "./routes/client/facebook-integration";
 
 import omnidimensionWebhookRoutes from "./routes/webhooks/omnidimension";
 import razorpayWebhookRoutes from "./routes/webhooks/razorpay";
@@ -421,16 +427,45 @@ export async function buildServer() {
   await server.register(razorpayWebhookRoutes, { prefix: apiPrefix });
   await server.register(whatsappWebhookRoutes, { prefix: apiPrefix });
   await server.register(smsForwardingRoutes, { prefix: apiPrefix });
+  await server.register(messageBirdSmsRoutes, { prefix: apiPrefix });
   await server.register(emailForwardingRoutes, { prefix: apiPrefix });
   await server.register(forwardingTestRoutes, { prefix: apiPrefix });
+  await server.register(indiaMartWebhookRoutes, { prefix: apiPrefix });
+  await server.register(facebookWebhookRoutes, { prefix: apiPrefix });
+  await server.register(facebookIntegrationRoutes, { prefix: apiPrefix });
 
   // ─── Invoice PDF Serving ─────────────────────────────────────
-  // FIX #2: Serve generated GST invoice PDFs
+  // FIX #2: Serve generated GST invoice PDFs.
+  // SECURITY: PDFs contain broker PII (name, phone, address, GSTIN) and the
+  // filenames are guessable, so access requires EITHER a valid signed URL
+  // (short-lived HMAC, how the dashboard links to them in a new tab) OR a
+  // valid Bearer access token (API clients).
   server.get("/invoices/:filename", async (request, reply) => {
     const { filename } = request.params as { filename: string };
     // Basic security: only allow PDF files and prevent path traversal
     if (!filename.endsWith(".pdf") || filename.includes("..") || filename.includes("/")) {
       return reply.status(400).send({ error: "Invalid filename" });
+    }
+
+    const pathname = `/invoices/${filename}`;
+    const query = request.query as Record<string, string>;
+
+    // 1) Signed URL (query param signature)
+    const signedOk = verifySignedAssetUrl(pathname, query);
+    // 2) Bearer access token fallback
+    let bearerOk = false;
+    const authHeader = request.headers.authorization;
+    if (!signedOk && authHeader?.startsWith("Bearer ")) {
+      try {
+        jwt.verify(authHeader.slice(7), config.JWT_SECRET);
+        bearerOk = true;
+      } catch {
+        bearerOk = false;
+      }
+    }
+
+    if (!signedOk && !bearerOk) {
+      return reply.status(401).send({ error: "Unauthorized — link expired or missing signature" });
     }
 
     const path = await import("path");
@@ -444,6 +479,7 @@ export async function buildServer() {
     const stream = fs.createReadStream(filePath);
     reply.header("Content-Type", "application/pdf");
     reply.header("Content-Disposition", `inline; filename="${filename}"`);
+    reply.header("Cache-Control", "private, no-store");
     return reply.send(stream);
   });
 
@@ -514,6 +550,11 @@ async function validateEnvironment(): Promise<void> {
     { key: "JWT_SECRET", value: config.JWT_SECRET, hint: "Generate with: openssl rand -hex 32" },
     { key: "JWT_REFRESH_SECRET", value: config.JWT_REFRESH_SECRET, hint: "Generate with: openssl rand -hex 32" },
     ...(config.DEMO_MODE ? [] : [{ key: "OMNIDIM_API_KEY", value: config.OMNIDIM_API_KEY, hint: "Get from Omnidimension dashboard. Set DEMO_MODE=true to skip." }]),
+    // Credential encryption must NOT silently fall back to JWT_SECRET in
+    // production (rotating JWT_SECRET would make stored creds undecryptable).
+    ...(config.NODE_ENV === "production"
+      ? [{ key: "ENCRYPTION_KEY", value: config.ENCRYPTION_KEY, hint: "Set a stable random string (openssl rand -hex 32). Use the SAME value in every environment sharing the database." }]
+      : []),
   ];
 
   for (const { key, value, hint } of required) {

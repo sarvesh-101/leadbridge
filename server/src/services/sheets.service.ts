@@ -4,7 +4,7 @@
  * Brokers connect their Google Sheets and leads flow automatically:
  * - NEW LEADS → Appended to sheet in real-time
  * - STATUS UPDATES → Updated in sheet rows
- * - MANUAL ENTRIES → From sheet back into LeadBridge
+ * - MANUAL ENTRIES → From sheet back into Converza
  *
  * Uses the Google Sheets API v4 with service account authentication.
  */

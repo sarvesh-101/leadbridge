@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * CallingPulse — the signature LeadBridge visual element.
+ * CallingPulse — the signature Converza visual element.
  * Two sonar rings expand outward from the center dot when an AI call is live.
  */
 export function CallingPulse({ size = "md" }: { size?: "sm" | "md" | "lg" }) {

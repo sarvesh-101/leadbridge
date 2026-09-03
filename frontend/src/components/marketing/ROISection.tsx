@@ -14,7 +14,7 @@ const scenarios = [
     color: "#E11D48",
   },
   {
-    label: "With LeadBridge",
+    label: "With Converza",
     telecallers: 0,
     costPerTelecaller: 0,
     leadsPerMonth: 400,
@@ -178,7 +178,7 @@ export default function ROISection() {
               <TrendingUp className="w-8 h-8 text-[#34D399]" />
             </div>
 
-            {/* LeadBridge */}
+            {/* Converza */}
             <div className="flex flex-col items-center gap-3">
               <span className="text-[28px] font-display font-bold text-[#34D399]">₹{bridgeCost.toLocaleString()}</span>
               <div className="relative w-16" style={{ height: "160px" }}>

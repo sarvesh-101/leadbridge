@@ -125,6 +125,7 @@ interface InvoiceEntry {
   dueDate: string;
   paidAt: string | null;
   invoicePdfUrl: string | null;
+  signedInvoicePdfUrl?: string | null;
   payments: Array<{ id: string; status: string; amount: number }>;
 }
 
@@ -215,7 +216,7 @@ export default function BillingPage() {
         await loadBilling();
         setManualPaymentNotice(
           res.message ||
-          `Your ${plan} subscription was created, but online payment isn't configured yet. Contact the LeadBridge team to complete payment.`
+          `Your ${plan} subscription was created, but online payment isn't configured yet. Contact the Converza team to complete payment.`
         );
         toast.warning("Subscription created — payment required manually");
       } else {
@@ -660,7 +661,7 @@ export default function BillingPage() {
                         </td>
                         <td className="py-3 px-2 text-right">
                           {inv.invoicePdfUrl ? (
-                            <a href={inv.invoicePdfUrl} target="_blank" rel="noopener noreferrer"
+                            <a href={inv.signedInvoicePdfUrl || inv.invoicePdfUrl} target="_blank" rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[#34D399]/15 text-[#2D6A4F] text-[10px] font-medium hover:bg-[#34D399]/25 transition-all"
                             >
                               <Download className="w-3 h-3" /> PDF

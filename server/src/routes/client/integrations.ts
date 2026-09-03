@@ -1,81 +1,95 @@
 /**
- * Integration Routes — ported from FastAPI Python backend.
+ * Integration Routes — manages third-party lead source connections.
  *
- * Manages third-party provider connections (IndiaMart, JustDial, 99Acres, etc.),
- * outgoing webhooks, and API tokens for programmatic access.
+ * Two REAL kinds of lead sources are supported:
+ *
+ *   1. kind: "api"  — IndiaMART. Official Leads API (Push webhook + Pull
+ *      API poller). The broker saves their CRM key + registered mobile; leads
+ *      are ingested in real-time and the AI calling pipeline starts.
+ *
+ *   2. kind: "forwarding" — JustDial, 99acres, MagicBricks, Housing.com.
+ *      These portals have no public lead API; leads arrive as SMS/email
+ *      notifications that the broker forwards to their Converza inbox
+ *      (see /dashboard/forwarding). The "connection" is the forwarding setup,
+ *      not an API credential.
+ *
+ * Providers that previously showed a fake "Connect" button with no ingestion
+ * (Facebook, Google, Zoho, Zapier) have been removed from the catalog.
  */
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import crypto from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { encrypt, decrypt } from "../../utils/encryption";
+import { config } from "../../config";
+
+type ProviderKind = "api" | "forwarding";
 
 // Static catalog of available integration providers
 const AVAILABLE_PROVIDERS: Record<string, {
-  name: string; description: string; docsUrl: string; type: string; setupSteps: string[];
+  name: string; description: string; docsUrl: string; type: string; kind: ProviderKind; setupSteps: string[];
 }> = {
   indiamart: {
-    name: "IndiaMart", description: "Import leads from IndiaMart CRM",
-    docsUrl: "https://seller.indiamart.com/", type: "lead_source",
-    setupSteps: ["Log in to your IndiaMart seller account", "Go to Settings → API Integration", "Generate an API key", "Enter the API key and your IndiaMart credentials below"],
+    name: "IndiaMART", description: "Real-time lead import via the official IndiaMART Leads API",
+    docsUrl: "https://help.indiamart.com/knowledge-base/im-lms-leads-api/", type: "lead_source", kind: "api",
+    setupSteps: [
+      "Log in to seller.indiamart.com with your IndiaMART account",
+      "Go to Lead Manager → (⋮ menu) → CRM Integration → Generate Key (direct link: seller.indiamart.com/leadmanager/crmapi)",
+      "The CRM key is sent to your registered email — paste it below with your registered mobile number",
+      "Note: the IndiaMART Leads API is a paid add-on — contact your IndiaMART account manager to enable it if the key page doesn't work",
+    ],
   },
   justdial: {
-    name: "JustDial", description: "Sync leads from JustDial Business",
-    docsUrl: "https://business.justdial.com/", type: "lead_source",
-    setupSteps: ["Log in to your JustDial Business account", "Navigate to Integrations section", "Enable API access and copy your token", "Paste the token below"],
+    name: "JustDial", description: "Forward JustDial enquiry SMS/emails — they become AI-called leads",
+    docsUrl: "https://www.justdial.com/", type: "lead_source", kind: "forwarding",
+    setupSteps: [
+      "Open the JustDial enquiry SMS/email when it arrives",
+      "Forward it to your Converza forwarding number/email (see Lead Forwarding)",
+      "The AI call starts automatically — no API needed",
+    ],
   },
   magicbricks: {
-    name: "MagicBricks", description: "Auto-import leads from MagicBricks",
-    docsUrl: "https://www.magicbricks.com/", type: "lead_source",
-    setupSteps: ["Log in to your MagicBricks agent dashboard", "Go to Lead Settings → API Integration", "Generate an API key", "Enter the API key below"],
+    name: "MagicBricks", description: "Forward MagicBricks lead alerts — they become AI-called leads",
+    docsUrl: "https://www.magicbricks.com/", type: "lead_source", kind: "forwarding",
+    setupSteps: [
+      "Open the MagicBricks lead alert SMS/email when it arrives",
+      "Forward it to your Converza forwarding number/email (see Lead Forwarding)",
+      "The AI call starts automatically — no API needed",
+    ],
   },
   housing: {
-    name: "Housing.com", description: "Import leads from Housing.com",
-    docsUrl: "https://housing.com/", type: "lead_source",
-    setupSteps: ["Log in to your Housing.com partner account", "Go to Settings → API", "Generate your API credentials", "Enter them below"],
+    name: "Housing.com", description: "Forward Housing.com enquiry notifications — they become AI-called leads",
+    docsUrl: "https://housing.com/", type: "lead_source", kind: "forwarding",
+    setupSteps: [
+      "Open the Housing.com enquiry SMS/email when it arrives",
+      "Forward it to your Converza forwarding number/email (see Lead Forwarding)",
+      "The AI call starts automatically — no API needed",
+    ],
   },
   "99acres": {
-    name: "99Acres", description: "Sync leads from 99Acres",
-    docsUrl: "https://www.99acres.com/", type: "lead_source",
-    setupSteps: ["Log in to your 99Acres builder account", "Go to My Account → API Settings", "Generate API key", "Enter the API key below"],
+    name: "99acres", description: "Forward 99acres enquiry SMS/emails — they become AI-called leads",
+    docsUrl: "https://www.99acres.com/", type: "lead_source", kind: "forwarding",
+    setupSteps: [
+      "Open the 99acres enquiry SMS/email when it arrives",
+      "Forward it to your Converza forwarding number/email (see Lead Forwarding)",
+      "The AI call starts automatically — no API needed",
+    ],
   },
   facebook: {
-    name: "Facebook Lead Ads", description: "Capture leads from Facebook Lead Ads automatically",
-    docsUrl: "https://developers.facebook.com/docs/marketing-api/leads/", type: "lead_source",
-    setupSteps: ["Create a Facebook app in Meta Developer Console", "Configure Lead Ads webhook", "Use the webhook URL below as your callback URL", "Verify the webhook with the verify token"],
+    name: "Facebook Lead Ads", description: "Real-time lead import from Facebook Lead Ads (official leadgen webhook)",
+    docsUrl: "https://developers.facebook.com/docs/graph-api/webhooks/getting-started/webhooks-for-leadgen/", type: "lead_source", kind: "api",
+    setupSteps: [
+      "Click Connect on the Facebook card",
+      "Authorize your Facebook Page (or paste a long-lived Page Access Token)",
+      "The page is subscribed to our leadgen webhook — every lead form submission is AI-called automatically",
+      "Note: needs a Meta app with lead access; for production volume, Meta app review may be required",
+    ],
   },
-  google: {
-    name: "Google Lead Forms", description: "Import leads from Google Ads Lead Form extensions",
-    docsUrl: "https://developers.google.com/google-ads/api/docs/lead-form-extensions", type: "lead_source",
-    setupSteps: ["Set up Google Ads lead form extensions", "Enable lead form submissions", "Configure the webhook URL below in Google Ads"],
-  },
-  zoho: {
-    name: "Zoho CRM", description: "Two-way sync with Zoho CRM",
-    docsUrl: "https://www.zoho.com/crm/developer/docs/", type: "crm",
-    setupSteps: ["Log in to Zoho CRM", "Go to Settings → Developer Space → API", "Generate Client ID and Client Secret", "Enter the OAuth credentials below", "Authorize LeadBridge to access your Zoho account"],
-  },
-  zapier: {
-    name: "Zapier", description: "Connect with 5000+ apps via Zapier webhooks",
-    docsUrl: "https://zapier.com/apps/webhook/integrations", type: "automation",
-    setupSteps: ["Create a Zapier account", "Choose 'Webhooks by Zapier' as your app", "Select 'Catch Hook' trigger", "Copy the webhook URL below and paste it in Zapier"],
-  },
-};
-
-const PROVIDER_ENDPOINTS: Record<string, string> = {
-  indiamart: "https://seller.indiamart.com/apiseller/checksession/",
-  justdial: "https://business.justdial.com/api/v1/health",
-  magicbricks: "https://www.magicbricks.com/api/agent/health",
-  housing: "https://housing.com/api/v1/health",
-  "99acres": "https://www.99acres.com/api/health",
-  facebook: "https://graph.facebook.com/v19.0/me",
-  google: "https://www.googleapis.com/oauth2/v1/tokeninfo",
-  zoho: "https://www.zohoapis.com/crm/v2/settings/modules",
 };
 
 export default async function clientIntegrationRoutes(fastify: FastifyInstance) {
   fastify.addHook("preHandler", fastify.authenticate);
 
   // ─── List Available Providers ──────────────────────────────────
-  // Ported from FastAPI: GET /integrations/providers
   fastify.get("/integrations/providers", async () => {
     const providers = Object.entries(AVAILABLE_PROVIDERS).map(([slug, info]) => ({
       slug,
@@ -85,7 +99,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── Get Provider Detail ──────────────────────────────────────
-  // Ported from FastAPI: GET /integrations/providers/{slug}
   fastify.get("/integrations/providers/:slug", async (
     request: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply
   ) => {
@@ -97,7 +110,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── List User Integrations ────────────────────────────────────
-  // Ported from FastAPI: GET /integrations/
   fastify.get("/integrations", async (request: FastifyRequest) => {
     const clientId = request.clientId!;
     const { status, provider } = request.query as Record<string, string>;
@@ -111,31 +123,45 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
       orderBy: { createdAt: "desc" },
     });
 
-    // Enrich with provider type info — never expose raw credentials in batch listing
-    const items = integrations.map((i) => ({
-      id: i.id,
-      provider: i.provider,
-      name: i.name,
-      description: i.description,
-      status: i.status,
-      type: AVAILABLE_PROVIDERS[i.provider]?.type || "custom",
-      syncFrequency: i.syncFrequency,
-      hasCredentials: !!(i.apiKey || i.apiSecret),
-      hasSettings: Object.keys(i.settings as Record<string, unknown>).length > 0,
-      lastSyncAt: i.lastSyncAt,
-      totalSynced: i.totalSynced,
-      totalErrors: i.totalErrors,
-      lastErrorMessage: i.lastErrorMessage,
-      lastErrorAt: i.lastErrorAt,
-      createdAt: i.createdAt,
-      updatedAt: i.updatedAt,
-    }));
+    // Public base URL for the IndiaMART Push API webhook (the URL the broker
+    // pastes into IndiaMART's Push API page).
+    const baseUrl = config.WEBHOOK_URL || `${request.protocol}://${request.hostname}`;
+
+    const items = integrations.map((i) => {
+      const providerInfo = AVAILABLE_PROVIDERS[i.provider];
+      return {
+        id: i.id,
+        provider: i.provider,
+        name: i.name,
+        description: i.description,
+        status: i.status,
+        type: providerInfo?.type || "custom",
+        kind: providerInfo?.kind || "forwarding",
+        syncFrequency: i.syncFrequency,
+        hasCredentials: !!(i.apiKey || i.apiSecret),
+        hasSettings: Object.keys(i.settings as Record<string, unknown>).length > 0,
+        lastSyncAt: i.lastSyncAt,
+        totalSynced: i.totalSynced,
+        totalErrors: i.totalErrors,
+        lastErrorMessage: i.lastErrorMessage,
+        lastErrorAt: i.lastErrorAt,
+        createdAt: i.createdAt,
+        updatedAt: i.updatedAt,
+        // Webhook URLs for API-kind providers.
+        // IndiaMART: per-client path (their URL formation guideline).
+        // Facebook: shared path — Meta delivers per subscribed page.
+        webhookUrl: i.provider === "indiamart"
+          ? `${baseUrl}/api/v1/webhooks/indiamart/${clientId}`
+          : i.provider === "facebook"
+          ? `${baseUrl}/api/v1/webhooks/facebook`
+          : null,
+      };
+    });
 
     return { items, total: items.length };
   });
 
   // ─── Create Integration ────────────────────────────────────────
-  // Ported from FastAPI: POST /integrations/
   fastify.post("/integrations", async (request: FastifyRequest<{
     Body: { provider: string; name?: string; description?: string; apiKey?: string; apiSecret?: string; settings?: Record<string, unknown> };
   }>, reply: FastifyReply) => {
@@ -146,8 +172,17 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
       return reply.status(400).send({ error: "Provider slug is required" });
     }
 
-    if (!AVAILABLE_PROVIDERS[provider]) {
+    const providerInfo = AVAILABLE_PROVIDERS[provider];
+    if (!providerInfo) {
       return reply.status(400).send({ error: `Unknown provider: ${provider}` });
+    }
+
+    // Only API-kind providers take credentials. Forwarding sources are set up
+    // via the Lead Forwarding page, not by saving API keys.
+    if (providerInfo.kind === "forwarding") {
+      return reply.status(400).send({
+        error: `${providerInfo.name} uses SMS/email forwarding, not an API key. Go to Lead Forwarding to set it up.`,
+      });
     }
 
     // Check if integration already exists for this provider
@@ -159,7 +194,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
       return reply.status(409).send({ error: `Integration for '${provider}' already exists` });
     }
 
-    const providerInfo = AVAILABLE_PROVIDERS[provider];
     const integration = await fastify.prisma.integration.create({
       data: {
         clientId,
@@ -186,7 +220,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── Get Integration ──────────────────────────────────────────
-  // Ported from FastAPI: GET /integrations/{id}
   fastify.get("/integrations/:id", async (
     request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply
   ) => {
@@ -209,7 +242,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── Update Integration ────────────────────────────────────────
-  // Ported from FastAPI: PUT /integrations/{id}
   fastify.patch("/integrations/:id", async (
     request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>, reply: FastifyReply
   ) => {
@@ -243,7 +275,8 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── Test Integration ─────────────────────────────────────────
-  // Ported from FastAPI: POST /integrations/{id}/test
+  // IndiaMART: real connectivity test against the Pull API.
+  // Forwarding sources: no API to test — point the broker at Lead Forwarding.
   fastify.post("/integrations/:id/test", async (
     request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply
   ) => {
@@ -255,41 +288,79 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
       return reply.status(404).send({ error: "Integration not found" });
     }
 
-    const endpoint = PROVIDER_ENDPOINTS[integration.provider];
+    const providerInfo = AVAILABLE_PROVIDERS[integration.provider];
 
-    try {
-      if (endpoint) {
-        const axios = (await import("axios")).default;
-        const headers: Record<string, string> = {};
-        if (integration.apiKey) {
-          headers["Authorization"] = `Bearer ${integration.apiKey}`;
-        }
-        await axios.get(endpoint, { headers, timeout: 10000 });
-      }
-
-      await fastify.prisma.integration.update({
-        where: { id: integration.id },
-        data: { status: "ACTIVE", lastSyncAt: new Date(), totalSynced: { increment: 1 }, lastErrorMessage: null },
+    if (providerInfo?.kind === "forwarding") {
+      return reply.status(400).send({
+        error: `${providerInfo.name} doesn't use an API connection — it works by forwarding enquiry SMS/emails to your Converza inbox. Open Lead Forwarding to set it up.`,
       });
+    }
 
-      return { status: "success", message: `Successfully connected to ${integration.provider}` };
-    } catch (error: any) {
+    // Facebook: verify the saved page token against the Graph API.
+    if (integration.provider === "facebook") {
+      if (!integration.apiKey) {
+        return reply.status(400).send({ error: "Connect your Facebook page first" });
+      }
+      const { getPageFromToken, subscribePageToLeadgen } = await import("../../services/facebook-leads.service");
+      try {
+        const page = await getPageFromToken(decrypt(integration.apiKey));
+        await subscribePageToLeadgen(page.id, decrypt(integration.apiKey));
+        await fastify.prisma.integration.update({
+          where: { id: integration.id },
+          data: { status: "ACTIVE", lastErrorMessage: null },
+        });
+        return { status: "success", message: `Connected to Facebook page "${page.name}" — webhook active` };
+      } catch (err: any) {
+        await fastify.prisma.integration.update({
+          where: { id: integration.id },
+          data: {
+            status: "ERROR",
+            totalErrors: { increment: 1 },
+            lastErrorMessage: (err.message || "Connection failed").slice(0, 300),
+            lastErrorAt: new Date(),
+          },
+        });
+        return reply.status(400).send({ error: `Facebook connection failed: ${err.message}` });
+      }
+    }
+
+    if (integration.provider !== "indiamart") {
+      return reply.status(400).send({ error: "This integration doesn't support connection testing" });
+    }
+
+    const settings = (integration.settings as Record<string, unknown>) || {};
+    const mobile = typeof settings.mobile === "string" ? settings.mobile : "";
+    if (!integration.apiKey || !mobile) {
+      return reply.status(400).send({ error: "Save your IndiaMART CRM key and registered mobile number first" });
+    }
+
+    const { testIndiaMartConnection } = await import("../../services/indiamart.service");
+    const result = await testIndiaMartConnection(decrypt(integration.apiKey), mobile);
+
+    if (!result.ok) {
       await fastify.prisma.integration.update({
         where: { id: integration.id },
         data: {
           status: "ERROR",
           totalErrors: { increment: 1 },
-          lastErrorMessage: `Connection failed: ${(error.message || "").slice(0, 200)}`,
+          lastErrorMessage: (result.error || "Connection failed").slice(0, 300),
           lastErrorAt: new Date(),
         },
       });
-
-      return reply.status(400).send({ error: `Connection failed: ${error.message}` });
+      return reply.status(400).send({ error: `IndiaMART connection failed: ${result.error}` });
     }
+
+    await fastify.prisma.integration.update({
+      where: { id: integration.id },
+      data: { status: "ACTIVE", lastErrorMessage: null },
+    });
+
+    return { status: "success", message: `Connected to IndiaMART — credentials verified`, leadsInWindow: result.leads };
   });
 
   // ─── Trigger Sync ─────────────────────────────────────────────
-  // Ported from FastAPI: POST /integrations/{id}/sync
+  // IndiaMART: pulls new leads from the Pull API right now.
+  // Forwarding sources: nothing to poll — leads arrive by forwarding.
   fastify.post("/integrations/:id/sync", async (
     request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply
   ) => {
@@ -301,16 +372,56 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
       return reply.status(404).send({ error: "Integration not found" });
     }
 
-    await fastify.prisma.integration.update({
-      where: { id: integration.id },
-      data: { lastSyncAt: new Date() },
-    });
+    const providerInfo = AVAILABLE_PROVIDERS[integration.provider];
 
-    return { message: `Sync triggered for '${integration.name}'`, syncedAt: new Date() };
+    if (providerInfo?.kind === "forwarding") {
+      return reply.status(400).send({
+        error: `${providerInfo.name} doesn't need syncing — leads arrive instantly when you forward an enquiry SMS/email. Open Lead Forwarding.`,
+      });
+    }
+
+    if (integration.provider === "facebook") {
+      // Facebook delivers in real-time via the leadgen webhook (Meta retries
+      // failed deliveries itself) — there is no pull API to poll.
+      return reply.status(200).send({
+        message: "Facebook delivers leads in real-time via the webhook — no manual sync needed. Use Test to verify the connection.",
+      });
+    }
+
+    if (integration.provider !== "indiamart") {
+      return reply.status(400).send({ error: "This integration doesn't support manual sync" });
+    }
+
+    const settings = (integration.settings as Record<string, unknown>) || {};
+    const mobile = typeof settings.mobile === "string" ? settings.mobile : "";
+    if (!integration.apiKey || !mobile) {
+      return reply.status(400).send({ error: "Save your IndiaMART CRM key and registered mobile number first" });
+    }
+
+    try {
+      const { syncIndiaMartClient } = await import("../../cron/indiamart-pull.cron");
+      const result = await syncIndiaMartClient(fastify.prisma, integration);
+      return {
+        message: `IndiaMART sync complete — ${result.created} new lead${result.created === 1 ? "" : "s"} imported, ${result.skipped} duplicate${result.skipped === 1 ? "" : "s"}`,
+        syncedAt: new Date(),
+        created: result.created,
+        skipped: result.skipped,
+      };
+    } catch (err: any) {
+      await fastify.prisma.integration.update({
+        where: { id: integration.id },
+        data: {
+          status: "ERROR",
+          totalErrors: { increment: 1 },
+          lastErrorMessage: (err.message || "Sync failed").slice(0, 300),
+          lastErrorAt: new Date(),
+        },
+      });
+      return reply.status(400).send({ error: `IndiaMART sync failed: ${err.message}` });
+    }
   });
 
   // ─── Delete Integration ───────────────────────────────────────
-  // Ported from FastAPI: DELETE /integrations/{id}
   fastify.delete("/integrations/:id", async (
     request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply
   ) => {
@@ -327,7 +438,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── Integration Health Summary ───────────────────────────────
-  // Ported from FastAPI: GET /integrations/health
   fastify.get("/integrations/health", async (request: FastifyRequest) => {
     const clientId = request.clientId!;
 
@@ -352,7 +462,6 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
   });
 
   // ─── Generate API Token ────────────────────────────────────────
-  // Ported from FastAPI: POST /integrations/api-tokens
   fastify.post("/integrations/api-tokens", async (request: FastifyRequest) => {
     const token = crypto.randomBytes(32).toString("hex");
 
@@ -362,4 +471,4 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
       note: "Save this token securely. It will not be shown again.",
     };
   });
-}
+}

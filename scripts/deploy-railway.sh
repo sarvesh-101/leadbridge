@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
-# LeadBridge — Railway Deployment Script
+# Converza — Railway Deployment Script
 # This script guides you through deploying to Railway.
 # Prerequisites:
 #   1. GitHub repo with your code pushed
@@ -21,7 +21,7 @@ NC='\033[0m'
 
 echo -e "${CYAN}"
 echo "╔══════════════════════════════════════════════════╗"
-echo "║    LeadBridge — Railway Deployment Guide        ║"
+echo "║    Converza — Railway Deployment Guide         ║"
 echo "╚══════════════════════════════════════════════════╝"
 echo -e "${NC}"
 

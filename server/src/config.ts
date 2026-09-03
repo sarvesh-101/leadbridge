@@ -84,19 +84,25 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_SECURE: z.coerce.boolean().default(false),
-  FROM_EMAIL: z.string().default("noreply@leadbridge.com"),
-  FROM_NAME: z.string().default("LeadBridge"),
+  FROM_EMAIL: z.string().default("noreply@converza.tech"),
+  FROM_NAME: z.string().default("Converza"),
 
   // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
+
+  // Facebook Lead Ads (Meta Graph API + leadgen webhook)
+  FACEBOOK_APP_ID: z.string().optional(),
+  FACEBOOK_APP_SECRET: z.string().optional(),
+  FACEBOOK_VERIFY_TOKEN: z.string().optional(),
+  FACEBOOK_GRAPH_VERSION: z.string().default("v19.0"),
 
   // Cron
   CRON_SECRET: z.string().default("change-me-cron-secret"),
 
   // MessageBird (SMS fallback for WhatsApp)
   MESSAGEBIRD_API_KEY: z.string().optional(),
-  SMS_SENDER_ID: z.string().default("LeadBrg"),
+  SMS_SENDER_ID: z.string().default("CONVERZ"),
 
   // Encryption (for credential storage at rest)
   // Optional in development; defaults to JWT_SECRET-based derivation if not set
@@ -133,6 +139,17 @@ const envSchema = z.object({
   FORWARDING_SMS_NUMBER: z.string().optional(),
   // The email address that brokers forward portal emails to
   FORWARDING_EMAIL: z.string().optional(),
+
+  // ─── IMAP email ingestion (alternative to an inbound-email webhook) ──
+  // Polls a mailbox (e.g. forward@converza.tech or any Gmail with an app
+  // password) and runs the same email-forwarding pipeline. Set all of these
+  // to enable; the cron is skipped when unset.
+  IMAP_HOST: z.string().optional(),
+  IMAP_PORT: z.coerce.number().default(993),
+  IMAP_USER: z.string().optional(),
+  IMAP_PASS: z.string().optional(),
+  IMAP_FOLDER: z.string().default("INBOX"),
+  IMAP_TLS: z.coerce.boolean().default(true),
 
 });
 

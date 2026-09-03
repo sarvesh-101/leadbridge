@@ -29,7 +29,7 @@ SUPABASE_REGION="aws-0-ap-south-1"  # Mumbai — closest to India
 DB_URL="postgresql://postgres.${PROJECT_REF}:${DB_PASSWORD}@${SUPABASE_REGION}.pooler.supabase.com:6543/postgres"
 
 echo "═══════════════════════════════════════════════"
-echo "🚀 Render.com Deploy for LeadBridge"
+echo "🚀 Render.com Deploy for Converza"
 echo "═══════════════════════════════════════════════"
 
 # Step 1: Test DB connection

@@ -139,7 +139,7 @@ export default function CustomerLoginPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-[#F0F7F3]">LeadBridge</span>
+            <span className="text-xl font-bold text-[#F0F7F3]">Converza</span>
           </div>
           <h1 className="text-2xl font-bold text-[#F0F7F3] mb-2">Track Your Visit</h1>
           <p className="text-sm text-[#9FB0A6]">Enter your phone number to view and manage your booking</p>

@@ -1,7 +1,7 @@
 /**
  * Bidirectional Google Sheets Sync Service.
  *
- * Two-way sync between LeadBridge leads and Google Sheets:
+ * Two-way sync between Converza leads and Google Sheets:
  * - PUSH: Export new/modified leads to Google Sheets
  * - PULL: Import new leads from Google Sheets
  * - Conflict resolution based on last-updated timestamps

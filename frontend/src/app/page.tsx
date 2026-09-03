@@ -59,7 +59,7 @@ export default function LandingPage() {
                 <Zap className="w-4 h-4 text-[#0A0F0C]" />
               </div>
               <span className="text-[18px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">
-                LeadBridge
+                Converza
               </span>
               <span className="w-2 h-2 rounded-full bg-[#34D399] animate-pulse shadow-[0_0_8px_#34D399]" />
             </Link>
@@ -205,7 +205,7 @@ export default function LandingPage() {
                   <Zap className="w-4 h-4 text-[#0A0F0C]" />
                 </div>
                 <span className="text-[18px] font-display font-bold text-[#F0F7F3]">
-                  LeadBridge
+                  Converza
                 </span>
               </div>
               <p className="text-[13px] text-[#9FB0A6]">
@@ -256,7 +256,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="pt-8 border-t border-white/[0.08] text-center text-[13px] text-[#6B7C73]">
-            © {new Date().getFullYear()} LeadBridge. All rights reserved.
+            © {new Date().getFullYear()} Converza. All rights reserved.
           </div>
         </div>
       </footer>

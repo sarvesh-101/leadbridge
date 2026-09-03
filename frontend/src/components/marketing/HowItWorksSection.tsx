@@ -20,7 +20,7 @@ const slides = [
     title: "Qualifies, answers, books",
     body: "Budget. Location. Timeline. Property type. All captured. Visit booked.",
     transcript: [
-      { speaker: "AI", text: "Namaste! Main LeadBridge se bol raha hoon." },
+      { speaker: "AI", text: "Namaste! Main Converza se bol raha hoon." },
       { speaker: "Lead", text: "Haan ji, maine online dekha tha." },
       { speaker: "AI", text: "Aap konse area mein dekh rahe hain?" },
       { speaker: "Lead", text: "Andheri West mein 2BHK chahiye." },

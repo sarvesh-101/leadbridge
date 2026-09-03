@@ -5,7 +5,7 @@
 
 import { config } from "../config";
 
-const PORTAL_URL = `${config.FRONTEND_URL || "https://leadbridge.com"}/customer/login`;
+const PORTAL_URL = `${config.FRONTEND_URL || "https://converza.tech"}/customer/login`;
 
 interface CustomerBookingConfirmationData {
   customerName: string;
@@ -121,7 +121,7 @@ export function bookingDayStatusOwner(data: BookingDayOwnerData): string {
     `Reminder: Sent at ${data.reminderSentAt}`,
     ``,
     `Keep your phone available.`,
-    `— LeadBridge`,
+    `— Converza`,
   ].join("\n");
 }
 

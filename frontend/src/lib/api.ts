@@ -9,6 +9,23 @@ interface FetchOptions extends RequestInit {
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
+/**
+ * User-initiated logout: best-effort revoke the refresh token server-side
+ * (single-use rotation + denylist), then clear local auth state immediately.
+ * Fire-and-forget — logout must never block on the network.
+ */
+export function serverLogout(): void {
+  const { refreshToken, logout } = useAuthStore.getState();
+  if (refreshToken) {
+    fetch(`${API_BASE}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    }).catch(() => {});
+  }
+  logout();
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const { refreshToken, login } = useAuthStore.getState();
   if (!refreshToken) return null;

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
-    q: "How does LeadBridge work?",
+    q: "How does Converza work?",
     a: "When a lead comes in from 99acres, MagicBricks, JustDial, or any connected source, our AI agent calls them within 60 seconds. It introduces itself, asks qualifying questions (budget, location, timeline, property type), answers their questions, and if interested — books a site visit. You get a WhatsApp summary instantly.",
   },
   {
@@ -27,7 +27,7 @@ const faqs = [
   },
   {
     q: "How is this different from a telecaller?",
-    a: "A telecaller costs ₹20,000-₹30,000/mo, handles ~40 calls/day, works limited hours, and takes breaks. LeadBridge costs less, works 24/7, never gets tired, and calls every lead within 60 seconds — including weekends and holidays.",
+    a: "A telecaller costs ₹20,000-₹30,000/mo, handles ~40 calls/day, works limited hours, and takes breaks. Converza costs less, works 24/7, never gets tired, and calls every lead within 60 seconds — including weekends and holidays.",
   },
   {
     q: "Can I customize the call script?",
@@ -43,7 +43,7 @@ const faqs = [
   },
   {
     q: "Is my city/territory exclusive?",
-    a: "Yes! Each city or zone is assigned to one broker only. Once you claim your territory, no other broker can use LeadBridge in that area. Check the Territory Map on this page to see which cities are available. First come, first locked.",
+    a: "Yes! Each city or zone is assigned to one broker only. Once you claim your territory, no other broker can use Converza in that area. Check the Territory Map on this page to see which cities are available. First come, first locked.",
   },
   {
     q: "How do I get started?",
@@ -51,7 +51,7 @@ const faqs = [
   },
   {
     q: "Do you offer a trial?",
-    a: "We offer a 7-day trial with 50 AI calls included — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If LeadBridge isn't right, just let us know.",
+    a: "We offer a 7-day trial with 50 AI calls included — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If Converza isn't right, just let us know.",
   },
 ];
 

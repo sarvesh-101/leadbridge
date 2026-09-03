@@ -159,7 +159,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center">
           <Link href="/" className="text-[#9FB0A6] hover:text-[#F0F7F3] text-sm">
-            &copy; {new Date().getFullYear()} LeadBridge. All rights reserved.
+            &copy; {new Date().getFullYear()} Converza. All rights reserved.
           </Link>
         </div>
       </div>

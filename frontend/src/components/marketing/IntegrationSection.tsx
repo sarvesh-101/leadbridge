@@ -58,7 +58,7 @@ const integrations = [
     name: "Email Import",
     type: "Inbound",
     icon: Mail,
-    description: "Forward enquiry emails to your LeadBridge inbox",
+    description: "Forward enquiry emails to your Converza inbox",
     status: "setup" as const,
   },
 ];
@@ -156,7 +156,7 @@ export default function IntegrationSection() {
               ))}
             </div>
             <span className="text-[13px] text-[#9FB0A6]">
-              Any source → LeadBridge AI → You get a WhatsApp notification
+              Any source → Converza AI → You get a WhatsApp notification
             </span>
           </div>
         </div>

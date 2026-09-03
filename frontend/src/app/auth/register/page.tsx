@@ -121,7 +121,7 @@ export default function RegisterPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
               <Zap className="w-5 h-5 text-[#0A0F0C]" />
             </div>
-            <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">LeadBridge</span>
+            <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">Converza</span>
           </Link>
           <h1 className="text-[24px] font-display font-bold text-[#F0F7F3]">Create your account</h1>
           <p className="text-[14px] text-[#9FB0A6] mt-2">Start your 14-day free trial</p>
@@ -279,7 +279,7 @@ export default function RegisterPage() {
                 <Link href="/legal/terms" className="text-[#6FE3B0] hover:underline">Terms of Service</Link>{" "}
                 and{" "}
                 <Link href="/legal/privacy" className="text-[#6FE3B0] hover:underline">Privacy Policy</Link>,
-                and I consent to LeadBridge processing my information as described in the Privacy
+                and I consent to Converza processing my information as described in the Privacy
                 Policy. I can withdraw consent anytime.
               </span>
             </label>

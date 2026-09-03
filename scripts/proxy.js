@@ -1,5 +1,5 @@
 /**
- * LeadBridge — Local Reverse Proxy
+ * Converza — Local Reverse Proxy
  * Serves frontend (port 3001) and backend API (port 3000)
  * on a single port (8080) for ngrok to tunnel.
  *
@@ -100,7 +100,7 @@ server.on("upgrade", (req, socket, head) => {
 server.listen(PROXY_PORT, "0.0.0.0", () => {
   console.log(`
 ╔══════════════════════════════════════════════════╗
-║         LeadBridge — Reverse Proxy Active        ║
+║         Converza — Reverse Proxy Active         ║
 ╠══════════════════════════════════════════════════╣
 ║  Local          → http://localhost:${PROXY_PORT}        ║
 ║  Frontend       → ${FRONTEND_TARGET.padEnd(36)} ║

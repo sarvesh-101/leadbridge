@@ -83,6 +83,77 @@ export async function extractFromTranscript(transcript: string): Promise<Extract
 }
 
 /**
+ * LLM fallback for forwarded SMS/email parsing.
+ * When regex-based parsing fails (uncommon portal formats, garbled text),
+ * this function asks the LLM to extract structured lead info.
+ */
+export interface ForwardingExtractedLead {
+  name: string;
+  phone: string;
+  email?: string;
+  budget?: string;
+  location?: string;
+  propertyType?: string;
+  bedrooms?: string;
+}
+
+export async function extractLeadFromForwardedText(
+  text: string,
+  context: "sms" | "email" = "sms"
+): Promise<ForwardingExtractedLead | null> {
+  const systemPrompt = `You are a real estate lead parser. Extract lead information from this forwarded ${context} message.
+Return ONLY valid JSON, no markdown. The JSON must match this schema exactly:
+{
+  "name": "customer full name",
+  "phone": "10-digit Indian mobile number without country code, or null if not found",
+  "email": "email address or null",
+  "budget": "budget string like '80L', '1.2Cr', '5000000' or null",
+  "location": "area/locality mentioned or null",
+  "propertyType": "Apartment|Villa|Plot|Commercial|House or null",
+  "bedrooms": "1|2|3|4 or null"
+}
+
+Rules:
+- Phone MUST be a valid 10-digit Indian mobile (starts with 6/7/8/9). If not found, set phone to null.
+- Name should be the customer's name, not the agent/broker name.
+- If you cannot find enough information to create a lead (no phone), return {"phone": null}.
+- Common portals: 99acres, MagicBricks, Housing.com, JustDial, Facebook, Google.`;
+
+  try {
+    const result = await chatCompletion(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: text.substring(0, 2000) }, // truncate very long emails
+      ],
+      { temperature: 0.1, max_tokens: 512 }
+    );
+
+    const parsed = JSON.parse(
+      result.content.replace(/```json/g, "").replace(/```/g, "").trim()
+    ) as ForwardingExtractedLead;
+
+    // Validate: phone is mandatory for a usable lead
+    if (!parsed.phone || !/^\d{10}$/.test(parsed.phone)) {
+      logger.warn({ model: result.model }, "LLM forwarding extraction: no valid phone found");
+      return null;
+    }
+
+    // Normalize phone to E.164
+    parsed.phone = `+91${parsed.phone}`;
+
+    logger.info(
+      { name: parsed.name, phone: parsed.phone, model: result.model },
+      "LLM forwarding extraction succeeded"
+    );
+
+    return parsed;
+  } catch (error: any) {
+    logger.warn({ err: error.message }, "LLM forwarding extraction failed");
+    return null;
+  }
+}
+
+/**
  * Generate an AI call script for a client based on their business info.
  */
 export async function generateCallScript(businessInfo: {

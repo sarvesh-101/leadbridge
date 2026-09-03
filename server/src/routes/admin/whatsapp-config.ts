@@ -14,6 +14,11 @@ import { logger } from "../../utils/logger";
 import { sendTextMessage } from "../../services/whatsapp.service";
 
 export default async function adminWhatsAppRoutes(fastify: FastifyInstance) {
+  // SECURITY: admin-only — this route exposes config state and can send paid
+  // test messages, so it MUST be behind authenticateAdmin like every other
+  // /admin route (was previously public).
+  fastify.addHook("preHandler", fastify.authenticateAdmin);
+
   // ─── GET /admin/whatsapp/config — Full WhatsApp configuration status ──
   fastify.get("/admin/whatsapp/config", async (_request: FastifyRequest, reply: FastifyReply) => {
     // Use WEBHOOK_URL (backend) when available; fall back to FRONTEND_URL for local dev

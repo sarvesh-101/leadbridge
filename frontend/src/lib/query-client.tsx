@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider as BaseQueryClientProvider, useQueryCl
 import { wsClient } from "./websocket";
 
 /**
- * QueryClient configured for the LeadBridge dashboard.
+ * QueryClient configured for the Converza dashboard.
  * - staleTime: 30s — don't refetch within 30 seconds of mount
  * - retry: 2 — retry failed queries twice
  * - refetchOnWindowFocus: true — refetch when user returns to tab

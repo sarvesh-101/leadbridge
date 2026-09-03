@@ -417,7 +417,7 @@ export default function AdminWhatsAppPage() {
           >
             <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">Message Preview (How Leads See It)</h3>
             <p className="text-xs text-[#9FB0A6] mb-4">
-              All messages come from LeadBridge's WhatsApp number but include the broker's business name prominently.
+              All messages come from Converza's WhatsApp number but include the broker's business name prominently.
             </p>
             <div className="space-y-3">
               {[

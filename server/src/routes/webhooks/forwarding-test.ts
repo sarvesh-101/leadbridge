@@ -69,8 +69,31 @@ export default async function forwardingTestRoutes(fastify: FastifyInstance) {
     // (with an owner notification), instead of rejecting the forwarded lead.
     const callAllowed = client.plan === "PRO" || client.callsThisMonth < client.callsLimit;
 
-    // Parse the test body
-    const parsed = parseSmsLead(body);
+    // Parse the test body — regex first, then LLM fallback
+    let parsed = parseSmsLead(body);
+
+    if (!parsed || !parsed.phone) {
+      logger.info({ clientId, requestId }, "[FORWARDING-TEST] Regex parse failed — trying LLM fallback");
+      try {
+        const { extractLeadFromForwardedText } = await import("../../services/deepseek.service");
+        const llmResult = await extractLeadFromForwardedText(body, "sms");
+        if (llmResult) {
+          parsed = {
+            name: llmResult.name || "Unknown",
+            phone: llmResult.phone,
+            email: llmResult.email,
+            source: "test_forward",
+            budget: llmResult.budget,
+            location: llmResult.location,
+            propertyType: llmResult.propertyType,
+            bedrooms: llmResult.bedrooms,
+          };
+        }
+      } catch (err: any) {
+        logger.warn({ clientId, err: err.message, requestId }, "[FORWARDING-TEST] LLM fallback extraction failed");
+      }
+    }
+
     if (!parsed || !parsed.phone) {
       return reply.status(400).send({
         error: "Could not extract lead info from the provided text",

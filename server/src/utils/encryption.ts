@@ -12,6 +12,7 @@
 
 import crypto from "node:crypto";
 import { config } from "../config";
+import { logger } from "./logger";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16; // 128-bit IV
@@ -19,11 +20,21 @@ const TAG_LENGTH = 16; // 128-bit auth tag
 
 /**
  * Derive a 32-byte key from the configured encryption secret using SHA-256.
- * This ensures we always have exactly 32 bytes regardless of the input length.
+ *
+ * SECURITY: in production the key MUST be the explicit ENCRYPTION_KEY env var.
+ * Falling back to JWT_SECRET here is what made rotating JWT_SECRET silently
+ * corrupt every stored credential. The dev/test fallback keeps local tooling
+ * working without extra setup; index.ts refuses to boot in production without
+ * ENCRYPTION_KEY.
  */
 function deriveKey(): Buffer {
-  const secret = config.ENCRYPTION_KEY || config.JWT_SECRET;
-  return crypto.createHash("sha256").update(secret).digest();
+  if (config.ENCRYPTION_KEY) {
+    return crypto.createHash("sha256").update(config.ENCRYPTION_KEY).digest();
+  }
+  if (config.NODE_ENV === "production") {
+    throw new Error("ENCRYPTION_KEY is required in production — refusing to derive the encryption key from JWT_SECRET");
+  }
+  return crypto.createHash("sha256").update(config.JWT_SECRET).digest();
 }
 
 /**
@@ -80,10 +91,17 @@ export function decrypt(encrypted: string): string {
     plain += decipher.final("utf8");
 
     return plain;
-  } catch {
-    // If decryption fails, return as-is for backward compatibility
-    // (might be unencrypted data from before encryption was introduced)
-    return encrypted;
+  } catch (error: any) {
+    // A blob this long is genuinely our AES-GCM format (not legacy plaintext),
+    // so a failure here means the key changed (rotation / env mismatch).
+    // Return "" instead of leaking raw ciphertext back to API callers, and log
+    // loudly so the ops team re-encrypts rather than wondering why credentials
+    // look garbled.
+    logger.error(
+      { err: error?.message || String(error) },
+      "Failed to decrypt stored credential — ENCRYPTION_KEY mismatch or rotation? Credential returned empty."
+    );
+    return "";
   }
 }
 

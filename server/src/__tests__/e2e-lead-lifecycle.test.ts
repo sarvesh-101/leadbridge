@@ -130,7 +130,7 @@ describeDb("E2E: Full Lead Lifecycle", () => {
         status: "COMPLETED",
         duration: 145,
         summary: "Lead interested in 2BHK in Andheri West, budget 1-2Cr, agreed to visit Sunday 11AM",
-        transcript: "AI: Namaste! Main LeadBridge AI assistant hoon... Customer: Haan, main 2BHK dhundh raha hoon...",
+        transcript: "AI: Namaste! Main Converza AI assistant hoon... Customer: Haan, main 2BHK dhundh raha hoon...",
       },
     });
 

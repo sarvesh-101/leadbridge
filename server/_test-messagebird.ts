@@ -37,7 +37,7 @@ import { sendSms } from "./src/services/sms.service";
   console.log("--- 2. Real SMS send ---");
   const ok = await sendSms(
     "+91 7045525531",
-    "🔔 LeadBridge SMS test — if you got this, MessageBird works! Timestamp: " + new Date().toISOString()
+    "🔔 Converza SMS test — if you got this, MessageBird works! Timestamp: " + new Date().toISOString()
   );
   if (ok) {
     console.log("✅ SMS ACCEPTED by MessageBird — check your phone!");

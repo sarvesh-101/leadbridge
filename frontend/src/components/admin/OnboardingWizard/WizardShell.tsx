@@ -48,7 +48,7 @@ export default function WizardShell() {
             <div className="w-7 h-7 rounded-lg bg-[#1B4332] flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-[15px] font-display font-bold text-[#1E2B24]">LeadBridge</span>
+            <span className="text-[15px] font-display font-bold text-[#1E2B24]">Converza</span>
             <span className="text-[12px] text-[#5C6B62]">· Admin</span>
           </Link>
 
@@ -190,7 +190,7 @@ function Step3() {
 }
 
 function Step4() {
-  const [script, setScript] = useState(`Namaste! Main LeadBridge AI assistant bol raha hoon.
+  const [script, setScript] = useState(`Namaste! Main Converza AI assistant bol raha hoon.
 Maine aapko online property enquiry ke baare mein call kiya hai.
 Kya aapko [Property Type] mein interested hain?
 Aapka budget kya hai?
@@ -205,7 +205,7 @@ Kya main aapki site visit book kar doon?`);
         businessName: "Your Business",
         language: "hinglish",
       });
-      const generatedScript = response.script || `Namaste! Main LeadBridge se bol raha hoon.
+      const generatedScript = response.script || `Namaste! Main Converza se bol raha hoon.
 Aapne abhi enquiry kiya tha.
 Kya main aapko property ke baare mein thodi jaankari de sakta hoon?
 Aap konse area mein dekh rahe hain?
@@ -214,7 +214,7 @@ Kya main aapki site visit book kar doon?`;
       setScript(generatedScript);
     } catch (err) {
       console.error("Failed to generate script:", err);
-      setScript(`Namaste! Main LeadBridge se bol raha hoon.
+      setScript(`Namaste! Main Converza se bol raha hoon.
 Aapne abhi enquiry kiya tha.
 Kya main aapko property ke baare mein thodi jaankari de sakta hoon?
 Aap konse area mein dekh rahe hain?
@@ -267,7 +267,7 @@ Kya main aapki site visit book kar doon?`);
                   <Zap className="w-4 h-4 text-[#047857]" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-medium text-[#1E2B24]">LeadBridge AI</p>
+                  <p className="text-[13px] font-medium text-[#1E2B24]">Converza AI</p>
                   <p className="text-[11px] text-[#047857]">Calling...</p>
                 </div>
               </div>

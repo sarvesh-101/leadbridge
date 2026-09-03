@@ -96,6 +96,18 @@ services:
         value: call-recordings
       - key: FORWARDING_EMAIL
         value: forward@converza.tech
+      - key: FORWARDING_SMS_NUMBER
+        sync: false
+      - key: IMAP_HOST
+        sync: false
+      - key: IMAP_PORT
+        value: "993"
+      - key: IMAP_USER
+        sync: false
+      - key: IMAP_PASS
+        sync: false
+      - key: IMAP_FOLDER
+        value: INBOX
       - key: OMNIDIM_COST_PER_MINUTE
         value: "4.6"
       - key: PHONE_NUMBER_MONTHLY_COST

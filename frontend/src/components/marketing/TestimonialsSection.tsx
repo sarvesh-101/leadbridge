@@ -88,7 +88,7 @@ export default function TestimonialsSection() {
                 LB
               </div>
               <div>
-                <p className="text-[15px] font-semibold text-[#F0F7F3]">The LeadBridge Team</p>
+                <p className="text-[15px] font-semibold text-[#F0F7F3]">The Converza Team</p>
                 <p className="text-[13px] text-[#9FB0A6]">Founding team — we answer every message ourselves</p>
               </div>
             </div>

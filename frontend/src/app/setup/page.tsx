@@ -29,8 +29,7 @@ const ALL_SOURCES = [
   { id: "magicbricks", label: "MagicBricks" },
   { id: "housing", label: "Housing.com" },
   { id: "justdial", label: "JustDial" },
-  { id: "facebook", label: "Facebook" },
-  { id: "google", label: "Google" },
+  { id: "indiamart", label: "IndiaMART" },
   { id: "whatsapp", label: "WhatsApp" },
   { id: "website", label: "Your Website" },
   { id: "referral", label: "Referrals" },
@@ -260,7 +259,7 @@ export default function SetupPage() {
               <Zap className="w-10 h-10 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-ink">Welcome to LeadBridge! 🎉</h2>
+              <h2 className="text-2xl font-bold text-ink">Welcome to Converza! 🎉</h2>
               <p className="text-[#5C6B62] mt-3 leading-relaxed">
                 This 7-step setup will get your AI calling system running in under 5 minutes.
               </p>
@@ -466,7 +465,7 @@ export default function SetupPage() {
               })}
             </div>
             <p className="text-xs text-[#5C6B62] text-center">
-              You can configure webhook integration for each source later in Settings.
+              Saved as your preference. You'll connect each source for real in Integrations — IndiaMART uses its official API, and JustDial/99acres/etc. use SMS/email forwarding.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setCurrentStep(6)}
@@ -599,7 +598,7 @@ export default function SetupPage() {
           <div className="w-8 h-8 rounded-lg bg-[#1B4332] flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="text-[16px] font-bold text-ink">LeadBridge Setup</span>
+          <span className="text-[16px] font-bold text-ink">Converza Setup</span>
         </div>
       </header>
 

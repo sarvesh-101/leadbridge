@@ -238,10 +238,14 @@ export default async function ingestWebhookRoutes(fastify: FastifyInstance) {
 
         // Auto-assign and match even in fallback path
         const { assignLead } = await import("../../services/lead-assignment.service");
-        assignLead(client.id, lead.id).catch(() => {});
+        assignLead(client.id, lead.id).catch((err: Error) => {
+          fastify.log.warn({ leadId: lead.id, err: err.message }, "Lead assignment failed (fallback path)");
+        });
 
         const { matchLeadToProperties } = await import("../../services/property-matching.service");
-        matchLeadToProperties(lead.id, client.id).catch(() => {});
+        matchLeadToProperties(lead.id, client.id).catch((err: Error) => {
+          fastify.log.warn({ leadId: lead.id, err: err.message }, "Property matching failed (fallback path)");
+        });
       }
     } finally {
       if (lockAcquired) {

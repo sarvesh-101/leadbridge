@@ -108,7 +108,7 @@ export default function HeroSection() {
               ref={subheadRef}
               className="text-[15px] sm:text-[18px] text-[#9FB0A6] max-w-[480px] leading-relaxed mb-10 opacity-0"
             >
-              LeadBridge puts an AI agent on every inbound lead
+              Converza puts an AI agent on every inbound lead
               within 60 seconds — qualifying, booking, following up —
               while you focus on closing.
             </p>

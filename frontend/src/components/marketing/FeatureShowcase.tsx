@@ -52,7 +52,7 @@ const features = [
   {
     icon: ShieldCheck,
     title: "Territory Exclusivity",
-    description: "One broker per city or zone. Your competitors can't use LeadBridge in your territory. First come, first locked.",
+    description: "One broker per city or zone. Your competitors can't use Converza in your territory. First come, first locked.",
   },
   {
     icon: Users,

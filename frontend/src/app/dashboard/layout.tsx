@@ -161,7 +161,7 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
                 <path d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-[16px] font-bold text-[#F0F7F3]">LeadBridge</span>
+            <span className="text-[16px] font-bold text-[#F0F7F3]">Converza</span>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
             <X className="w-4 h-4" />
