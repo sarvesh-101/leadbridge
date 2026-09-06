@@ -5,15 +5,15 @@
  * server/.env first (Settings → API Keys in the Razorpay dashboard).
  *
  * What it does (idempotent — safe to re-run):
- *   1. Creates the 3 monthly subscription plans via POST /v1/plans
- *      (Starter ₹18,000 · Growth ₹35,000 · Pro ₹60,000, period monthly, INR)
- *      — SKIPPED if RAZORPAY_PLAN_STARTER/GROWTH/PRO already set in .env.
+ *   1. Creates the 4 monthly subscription plans via POST /v1/plans
+ *      (Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 · Pro ₹60,000, period monthly, INR)
+ *      — SKIPPED if RAZORPAY_PLAN_LAUNCH/STARTER/GROWTH/PRO already set in .env.
  *   2. Generates RAZORPAY_WEBHOOK_SECRET and writes it to .env, then prints
  *      the EXACT dashboard steps to create the webhook.
  *      NOTE: Razorpay does NOT allow creating merchant webhooks via API —
  *      POST /v1/webhooks is a PARTNER-only endpoint. Merchant webhooks must
  *      be created in the dashboard (Settings → Webhooks → Add Webhook).
- *   3. Writes RAZORPAY_PLAN_STARTER/GROWTH/PRO + RAZORPAY_WEBHOOK_SECRET
+ *   3. Writes RAZORPAY_PLAN_LAUNCH/STARTER/GROWTH/PRO + RAZORPAY_WEBHOOK_SECRET
  *      back into server/.env.
  *
  * Usage:  node scripts/setup-razorpay.cjs
@@ -28,9 +28,10 @@ const SERVER_ENV = path.join(__dirname, "..", "server", ".env");
 
 // ─── Plans (match PLAN_DEFINITIONS in server/src/routes/client/billing.ts) ─
 const PLANS = [
-  { key: "RAZORPAY_PLAN_STARTER", name: "LeadBridge Starter (Monthly)", amountPaise: 18000 * 100 },
-  { key: "RAZORPAY_PLAN_GROWTH", name: "LeadBridge Growth (Monthly)", amountPaise: 35000 * 100 },
-  { key: "RAZORPAY_PLAN_PRO", name: "LeadBridge Pro (Monthly)", amountPaise: 60000 * 100 },
+  { key: "RAZORPAY_PLAN_LAUNCH", name: "Converza Launch (Monthly)", amountPaise: 7999 * 100 },
+  { key: "RAZORPAY_PLAN_STARTER", name: "Converza Starter (Monthly)", amountPaise: 18000 * 100 },
+  { key: "RAZORPAY_PLAN_GROWTH", name: "Converza Growth (Monthly)", amountPaise: 35000 * 100 },
+  { key: "RAZORPAY_PLAN_PRO", name: "Converza Pro (Monthly)", amountPaise: 60000 * 100 },
 ];
 
 const WEBHOOK_EVENTS = [

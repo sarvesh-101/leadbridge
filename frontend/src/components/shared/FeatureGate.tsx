@@ -25,18 +25,21 @@ interface FeatureGateProps {
 }
 
 const PLAN_ORDER: Record<string, number> = {
-  STARTER: 0,
-  GROWTH: 1,
-  PRO: 2,
+  LAUNCH: 0,
+  STARTER: 1,
+  GROWTH: 2,
+  PRO: 3,
 };
 
 const PLAN_NAMES: Record<string, string> = {
+  LAUNCH: "Launch",
   STARTER: "Starter",
   GROWTH: "Growth",
   PRO: "Pro",
 };
 
 const PLAN_PRICES: Record<string, string> = {
+  LAUNCH: "₹8K/mo",
   STARTER: "₹18K/mo",
   GROWTH: "₹35K/mo",
   PRO: "₹60K/mo",

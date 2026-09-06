@@ -58,6 +58,8 @@ services:
         sync: false
       - key: RAZORPAY_WEBHOOK_SECRET
         sync: false
+      - key: RAZORPAY_PLAN_LAUNCH
+        sync: false
       - key: RAZORPAY_PLAN_STARTER
         value: plan_TLa2O5pEwG46mP
       - key: RAZORPAY_PLAN_GROWTH

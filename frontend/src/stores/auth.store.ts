@@ -9,7 +9,7 @@ export interface UserProfile {
   businessName?: string;
   ownerName?: string;
   phone?: string;
-  plan?: "STARTER" | "GROWTH" | "PRO";
+  plan?: "LAUNCH" | "STARTER" | "GROWTH" | "PRO";
   planStatus?: "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELLED";
   city?: string;
   zone?: string;

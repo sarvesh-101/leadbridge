@@ -3,11 +3,28 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 
-// Source of truth: server/src/routes/client/billing.ts → PLAN_DEFINITIONS
-// STARTER users 5 / leads 500 / calls 100 · GROWTH 15 / 3000 / 500 ·
+// Source of truth: server/src/services/subscription.service.ts → PLAN_DEFINITIONS
+// LAUNCH 2 / 200 / 50 · STARTER users 5 / leads 500 / calls 100 · GROWTH 15 / 3000 / 500 ·
 // PRO 50 / 50000 / calls 2000 (PRO_MONTHLY_CALL_CAP — Phase 2.2 margin fix;
 // NOT unlimited: the platform pays per-minute while PRO is flat ₹60K)
 const plans = [
+  {
+    name: "Launch",
+    price: "₹7,999",
+    calls: "50 AI calls",
+    users: "2",
+    leads: "200",
+    dedicatedNumber: false,
+    followups: "3-day",
+    support: "WhatsApp",
+    features: [
+      "Full qualification + booking",
+      "WhatsApp notifications",
+      "3-day follow-up automation",
+      "Shared calling number",
+    ],
+    popular: false,
+  },
   {
     name: "Starter",
     price: "₹18,000",
@@ -91,10 +108,8 @@ export default function PricingSection() {
     const init = async () => {
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-
-      const cards = sectionRef.current?.querySelectorAll(".pricing-card");
-      if (!cards || cards.length < 3) return;
+      gsap.registerPlugin(ScrollTrigger);        const cards = sectionRef.current?.querySelectorAll(".pricing-card");
+      if (!cards || cards.length < 4) return;
 
       const st1 = ScrollTrigger.create({
         trigger: sectionRef.current,
@@ -102,8 +117,9 @@ export default function PricingSection() {
         toggleActions: "play none none none",
         onEnter: () => {
           gsap.fromTo(cards[0], { opacity: 0, x: -100 }, { opacity: 1, x: 0, duration: 0.6 });
-          gsap.fromTo(cards[2], { opacity: 0, x: 100 }, { opacity: 1, x: 0, duration: 0.6 });
+          gsap.fromTo(cards[3], { opacity: 0, x: 100 }, { opacity: 1, x: 0, duration: 0.6 });
           gsap.fromTo(cards[1], { opacity: 0, y: 100, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6 });
+          gsap.fromTo(cards[2], { opacity: 0, y: 100, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6 });
         },
       });
 
@@ -126,7 +142,7 @@ export default function PricingSection() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full bg-[#34D399] opacity-[0.05] blur-[150px] pointer-events-none" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <h2 className="h1-text text-center mb-16">Simple, transparent pricing</h2>
-        <div className="grid md:grid-cols-3 gap-6 items-center">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
           {plans.map((plan, i) => (
             <div
               key={plan.name}
@@ -198,13 +214,13 @@ export default function PricingSection() {
         <div className="mt-20">
           <h3 className="text-[20px] font-semibold text-[#F0F7F3] text-center mb-8">Compare every plan</h3>
           <div className="overflow-x-auto rounded-2xl glass-card">
-          <div className="min-w-[640px]">
+          <div className="min-w-[820px]">
             <div className="grid grid-cols-4 gap-0 border-b border-white/10">
               <div className="px-6 py-4">
                 <span className="text-[11px] font-semibold text-[#9FB0A6] uppercase tracking-[0.08em]">Feature</span>
               </div>
               {plans.map((p) => (
-                <div key={p.name} className={`px-6 py-4 ${p.popular ? "bg-[#34D399]/[0.07]" : ""} ${p.name !== "Starter" ? "border-l border-white/10" : ""}`}>
+                <div key={p.name} className={`px-6 py-4 ${p.popular ? "bg-[#34D399]/[0.07]" : ""} ${p.name !== "Launch" ? "border-l border-white/10" : ""}`}>
                   <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${p.popular ? "text-[#6FE3B0]" : "text-[#F0F7F3]"}`}>{p.name}</span>
                 </div>
               ))}
@@ -217,7 +233,7 @@ export default function PricingSection() {
                 {plans.map((p) => {
                   const val = row.get(p);
                   return (
-                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 ${p.popular ? "bg-[#34D399]/[0.07]" : ""} ${p.name !== "Starter" ? "border-l border-white/10" : ""}`}>
+                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 ${p.popular ? "bg-[#34D399]/[0.07]" : ""} ${p.name !== "Launch" ? "border-l border-white/10" : ""}`}>
                       {typeof val === "boolean" ? (
                         val ? (
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">

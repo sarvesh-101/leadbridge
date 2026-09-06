@@ -55,7 +55,7 @@ Hi [Name]! Sarvesh here from LeadBridge. Quick one — when you're out showing a
 
 LeadBridge ek AI agent platform hai jo aapke liye poora pipeline chalaata hai: har source se lead capture (portals, Meta, website, Sheets), AI scoring + property matching, aapke number pe 5 seconds me call uthata hai (Hinglish), site visit book + calendar sync, har call ka recording + AI summary, WhatsApp/SMS follow-ups automatic. Territory exclusive + flat pricing, no per-minute.
 
-Plans: ₹18K / ₹35K / ₹60K + free 30-day trial. Preview: https://leadbridge-seven.vercel.app/
+Plans: ₹8K / ₹18K / ₹35K / ₹60K + free 30-day trial. Preview: https://leadbridge-seven.vercel.app/
 
 Free 30-day trial — nothing to pay, no card. Want me to send a 60-second demo? 🙏
 
@@ -69,7 +69,7 @@ Hi! Loved your [Area] posts — great listings 🔥
 
 Quick question: how many enquiries slip through when your agents are out showing homes? Humne ek AI agent platform banaya hai jo har enquiry ko 5 seconds me answer karta hai — aapke hi number pe, 24×7, Hinglish. Har call ka AI transcript + summary, site visit booking, WhatsApp/SMS follow-ups automatic. Territory exclusive — aapka zone sirf aapka. Flat pricing, no per-minute.
 
-Plans: ₹18K / ₹35K / ₹60K + free 30-day trial. Preview: https://leadbridge-seven.vercel.app/
+Plans: ₹8K / ₹18K / ₹35K / ₹60K + free 30-day trial. Preview: https://leadbridge-seven.vercel.app/
 
 Free trial for a month. Worth a chat? 🙏
 

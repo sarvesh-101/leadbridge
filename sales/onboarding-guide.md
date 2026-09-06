@@ -103,7 +103,7 @@ Leads 4 raste se aate hain — jitne kholo, utna badhiya:
 
 ## Kuch Zaroori Baatein
 
-- **Aapka plan:** Starter ₹18K (100 calls/mo) · Growth ₹35K (500 calls/mo) · Pro ₹60K
+- **Aapka plan:** Launch ₹8K (50 calls/mo) · Starter ₹18K (100 calls/mo) · Growth ₹35K (500 calls/mo) · Pro ₹60K
   (2,000 calls/mo) — flat fee, koi per-minute charge nahi. Number, agent,
   WhatsApp+SMS, recordings, transcripts, analytics — sab included.
 - **Calls use hote hi count hota hai** — unused calls agle mahine roll over hote hain

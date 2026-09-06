@@ -243,7 +243,7 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const validPlans = ["STARTER", "GROWTH", "PRO"];
+    const validPlans = ["LAUNCH", "STARTER", "GROWTH", "PRO"];
     if (plan && validPlans.includes(plan)) {
       updateData.plan = plan;
     } else if (plan) {

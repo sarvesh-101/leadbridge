@@ -47,7 +47,7 @@ I'm writing about a problem every established [Area] agency faces: property enqu
 - **Your own number:** buyers call your line, never a generic call centre.
 - **One flat subscription, no per-minute charges** (per-minute services cost ₹12–65/min; flat pricing means every call gets cheaper as you scale).
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (most popular, 500 calls/mo) · Pro ₹60,000 per month. Every plan includes the dedicated number, AI agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (most popular, 500 calls/mo) · Pro ₹60,000 per month. Every plan includes the dedicated number, AI agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
 
 You can preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -102,7 +102,7 @@ Buyers there enquire at eight to ten agencies before choosing — and the winner
 
 **Why brokers choose us:** territory exclusivity (your zone, locked to you) · your own number · one flat fee, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -137,7 +137,7 @@ Bandra West is a premium market: buyers enquire with budgets of ₹3–8 crore a
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -172,7 +172,7 @@ South Mumbai enquiries are among the highest-value in the city — and they arri
 
 **Why brokers choose us:** territory exclusivity (your zone is locked to you) · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -207,7 +207,7 @@ Bandra West sees enquiries around the clock — from NRIs at odd hours to busy p
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -242,7 +242,7 @@ In this corridor, buyers enquire at several agencies in the same afternoon. Whoe
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription — it costs less than one junior salesman, with no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -277,7 +277,7 @@ Pali Hill buyers enquire with budgets of ₹10–50 crore, and they expect white
 
 **Why brokers choose us:** territory exclusivity (your zone is locked to you) · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -312,7 +312,7 @@ In this high-volume corridor, the difference between agencies comes down to resp
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription — it costs less than one junior telecaller, with no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -347,7 +347,7 @@ But even the best firms lose the first enquiry when nobody can answer at 9 pm or
 
 **Why brokers choose us:** territory exclusivity (your zone is locked to you) · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -382,7 +382,7 @@ The one thing trust can't fix is speed. When a buyer enquires at 7 am or 10 pm a
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -417,7 +417,7 @@ Lokhandwala generates one of the highest enquiry volumes in Andheri West — and
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -452,7 +452,7 @@ Santacruz sees steady enquiry volume from both renters and buyers — and a fair
 
 **Why brokers choose us:** territory exclusivity · your own number · one flat subscription, no per-minute charges.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes a free 30-day trial.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 

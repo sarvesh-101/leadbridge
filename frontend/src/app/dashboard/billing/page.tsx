@@ -15,6 +15,23 @@ import Link from "next/link";
 
 const PLANS = [
   {
+    id: "LAUNCH",
+    name: "Launch",
+    price: "₹7,999",
+    period: "/month",
+    description: "Entry tier — test AI calling on live leads",
+    features: [
+      "50 AI calls/month",
+      "Full qualification + booking",
+      "WhatsApp notifications",
+      "3-day follow-up automation",
+      "Shared calling number",
+      "WhatsApp support",
+    ],
+    highlighted: false,
+    color: "from-teal-500 to-teal-600",
+  },
+  {
     id: "STARTER",
     name: "Starter",
     price: "₹18,000",
@@ -509,7 +526,7 @@ export default function BillingPage() {
       {/* ─── PLANS TAB ──────────────────────────────────────── */}
       {activeTab === "plans" && (
         <div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {PLANS.map((plan, i) => {
               const isCurrent = currentPlan === plan.id;
               return (

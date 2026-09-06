@@ -298,8 +298,9 @@ function Step5() {
     <div className="space-y-4">
       <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Pricing Plan</h2>
       <p className="text-[14px] text-[#5C6B62]">Select the plan and set call limits.</p>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
+          { name: "Launch", price: "₹7,999", calls: "50" },
           { name: "Starter", price: "₹18,000", calls: "100" },
           { name: "Growth", price: "₹35,000", calls: "500", popular: true },
           { name: "Pro", price: "₹60,000", calls: "2,000" },

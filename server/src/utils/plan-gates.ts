@@ -46,6 +46,7 @@ export const FEATURE_PLANS: Record<string, Plan[]> = {
  * Human-readable plan display names.
  */
 export const PLAN_DISPLAY_NAMES: Record<string, string> = {
+  LAUNCH: "Launch (₹8K/mo)",
   STARTER: "Starter (₹18K/mo)",
   GROWTH: "Growth (₹35K/mo)",
   PRO: "Pro (₹60K/mo)",
@@ -55,9 +56,10 @@ export const PLAN_DISPLAY_NAMES: Record<string, string> = {
  * Plan tier ordering (higher index = higher tier).
  */
 const PLAN_ORDER: Record<string, number> = {
-  STARTER: 0,
-  GROWTH: 1,
-  PRO: 2,
+  LAUNCH: 0,
+  STARTER: 1,
+  GROWTH: 2,
+  PRO: 3,
 };
 
 /**

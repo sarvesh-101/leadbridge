@@ -10,6 +10,7 @@ import { tryAcquireLock, releaseLock } from "../../utils/distributed-lock";
  * These prevent a single misconfigured portal from flooding the system.
  */
 const DAILY_LEAD_LIMITS: Record<string, number> = {
+  LAUNCH: 25,     // entry tier: same conservative cap as TRIAL
   STARTER: 50,
   GROWTH: 200,
   PRO: Infinity,  // No daily cap for PRO

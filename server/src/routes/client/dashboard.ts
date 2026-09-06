@@ -39,7 +39,7 @@ export default async function clientDashboardRoutes(fastify: FastifyInstance) {
         where: { planStatus: { in: ["TRIAL", "ACTIVE"] } },
         select: { plan: true },
       });
-      const planPrices: Record<string, number> = { STARTER: 18000, GROWTH: 35000, PRO: 60000 };
+      const planPrices: Record<string, number> = { LAUNCH: 7999, STARTER: 18000, GROWTH: 35000, PRO: 60000 };
       const mrr = activePlans.reduce((sum, c) => sum + (planPrices[c.plan] || 0), 0);
 
       return {

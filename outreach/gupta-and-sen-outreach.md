@@ -39,7 +39,7 @@ Luxury buyers are the most demanding clients in the market. They expect an insta
 - **Your own number:** buyers call your line, never a generic call centre.
 - **One flat subscription, no per-minute charges** (per-minute services cost ₹12–65/min; flat pricing means every call gets cheaper as you scale).
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (most popular, 500 calls/mo) · Pro ₹60,000 per month. Every plan includes the dedicated number, AI agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (most popular, 500 calls/mo) · Pro ₹60,000 per month. Every plan includes the dedicated number, AI agent, WhatsApp + SMS, recordings, transcripts, analytics and a free 30-day trial.
 
 You can preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -77,7 +77,7 @@ Honest question: while you're out showing a home, how many buyer calls go unansw
 
 **Why agents pick us:** your own dedicated number · territory exclusivity (your zone, locked to you) · one flat fee with no per-minute charges · free 30-day trial.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts and analytics.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month — every plan includes the number, agent, WhatsApp + SMS, recordings, transcripts and analytics.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -115,7 +115,7 @@ You already win deals on speed: you call back faster than your competitors. But 
 
 **The edge that matters most:** **territory exclusivity** — your zone is locked to you, so no other broker competes for your leads. Plus your own dedicated number, flat pricing (no per-minute charges), and a free 30-day trial.
 
-**Plans:** Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month.
+**Plans:** Launch ₹7,999 · Starter ₹18,000 · Growth ₹35,000 (500 calls/mo) · Pro ₹60,000 per month.
 
 Preview the platform here: https://leadbridge-seven.vercel.app/
 
@@ -142,7 +142,7 @@ LeadBridge ek **AI agent platform** hai jo ye sab handle karta hai:
 - **Territory exclusive** — aapka zone sirf aapka
 - One flat price — no per-minute charges
 
-Plans: ₹18K / ₹35K / ₹60K per month + **free 30-day trial**.
+Plans: ₹8K / ₹18K / ₹35K / ₹60K per month + **free 30-day trial**.
 
 Preview: https://leadbridge-seven.vercel.app/
 
@@ -164,7 +164,7 @@ LeadBridge ek **AI agent platform** hai jo aapke liye poora pipeline chalaata ha
 - WhatsApp/SMS follow-ups automatic — koi lead thanda nahi hota
 - **Territory exclusive** + flat pricing, no per-minute
 
-Plans: ₹18K / ₹35K / ₹60K + **free 30-day trial**.
+Plans: ₹8K / ₹18K / ₹35K / ₹60K + **free 30-day trial**.
 
 Preview: https://leadbridge-seven.vercel.app/
 
@@ -186,7 +186,7 @@ LeadBridge ek **AI agent platform** hai jo wo gap band karta hai:
 - **Territory exclusivity** — aapka zone locked, koi doosra broker aapke leads ke liye compete nahi karta
 - Flat pricing, no per-minute charges
 
-Plans: ₹18K / ₹35K / ₹60K + **free 30-day trial**.
+Plans: ₹8K / ₹18K / ₹35K / ₹60K + **free 30-day trial**.
 
 Preview: https://leadbridge-seven.vercel.app/
 
@@ -202,7 +202,7 @@ Quick question: jab aapke agents property dikhane out hote hai, toh kitni enquir
 
 Humne ek **AI agent platform** banaya hai jo har enquiry ko 5 seconds me answer karta hai — aapke hi number pe, 24×7, Hinglish me. Har call ka AI transcript + summary, site visit booking, WhatsApp/SMS follow-ups automatic. **Territory exclusive** — aapka zone sirf aapka. Flat pricing, no per-minute.
 
-Plans: ₹18K / ₹35K / ₹60K per month + free 30-day trial.
+Plans: ₹8K / ₹18K / ₹35K / ₹60K per month + free 30-day trial.
 
 Preview: https://leadbridge-seven.vercel.app/
 

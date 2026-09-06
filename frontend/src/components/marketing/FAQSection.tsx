@@ -19,7 +19,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "Starter plan is ₹18,000/mo for 100 AI calls. Growth is ₹35,000/mo for 500 calls. Pro is ₹60,000/mo for 2,000 calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
+    a: "Launch plan is ₹7,999/mo for 50 AI calls. Starter is ₹18,000/mo for 100 calls. Growth is ₹35,000/mo for 500 calls. Pro is ₹60,000/mo for 2,000 calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
   },
   {
     q: "What languages does the AI speak?",

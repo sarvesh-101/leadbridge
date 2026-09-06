@@ -95,7 +95,7 @@ export interface Campaign {
   updatedAt: string;
 }
 
-export type Plan = "STARTER" | "GROWTH" | "PRO";
+export type Plan = "LAUNCH" | "STARTER" | "GROWTH" | "PRO";
 export type PlanStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "CANCELLED";
 export type CallType = "QUALIFICATION" | "BOOKING_REMINDER" | "FOLLOWUP_D1" | "FOLLOWUP_D3";
 export type CallStatus = "INITIATED" | "RINGING" | "ANSWERED" | "COMPLETED" | "NO_ANSWER" | "FAILED" | "BUSY";

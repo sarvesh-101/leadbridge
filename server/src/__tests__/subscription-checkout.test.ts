@@ -125,6 +125,19 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
     expect(mockCreateSubscription.mock.calls[0][0].trialDays).toBe(30);
   });
 
+  it("charges LAUNCH without a trial (checkout is the trial)", async () => {
+    // LAUNCH has no trial — but it still needs a Razorpay plan ID configured,
+    // otherwise checkout degrades gracefully (non-strict) and never calls Razorpay.
+    mockGetPlanIds.mockReturnValue({ launch: "pl", starter: "", growth: "", pro: "" });
+    await createSubscriptionCheckout(mockFastify, client, "LAUNCH");
+    expect(mockCreateSubscription.mock.calls[0][0].trialDays).toBe(0);
+  });
+
+  it("falls back gracefully when LAUNCH is not configured on Razorpay", async () => {
+    await createSubscriptionCheckout(mockFastify, client, "LAUNCH", { strict: false });
+    expect(mockCreateSubscription).not.toHaveBeenCalled();
+  });
+
   it("cancels prior DB subscriptions AND their live Razorpay subs (FIX #11)", async () => {
     mockPrisma.subscription.findMany.mockResolvedValue([
       { id: "old-db-1", providerSubscriptionId: "sub_old_1" },
@@ -202,17 +215,19 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
 describe("getRazorpayPlanIdForTier", () => {
   it("maps tiers to configured Razorpay plan ids", () => {
     mockGetPlanIds.mockReturnValue({
+      launch: "pl",
       starter: "ps",
       growth: "pg",
       pro: "pp",
     });
+    expect(getRazorpayPlanIdForTier("LAUNCH")).toBe("pl");
     expect(getRazorpayPlanIdForTier("STARTER")).toBe("ps");
     expect(getRazorpayPlanIdForTier("GROWTH")).toBe("pg");
     expect(getRazorpayPlanIdForTier("PRO")).toBe("pp");
   });
 
   it("returns empty string for unconfigured plans", () => {
-    mockGetPlanIds.mockReturnValue({ starter: "", growth: "pg", pro: "pp" });
+    mockGetPlanIds.mockReturnValue({ launch: "", starter: "", growth: "pg", pro: "pp" });
     expect(getRazorpayPlanIdForTier("STARTER")).toBe("");
   });
 });

@@ -35,6 +35,7 @@ export default async function adminDashboardRoutes(fastify: FastifyInstance) {
     });
 
     const planPrices: Record<string, number> = {
+      LAUNCH: 7999,
       STARTER: 18000,
       GROWTH: 35000,
       PRO: 60000,

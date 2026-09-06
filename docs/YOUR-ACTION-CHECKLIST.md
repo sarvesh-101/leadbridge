@@ -74,7 +74,7 @@ Upload these in the Razorpay KYC form:
 ### Step 2: Talk to a CA
 Call your Chartered Accountant and ask:
 
-> "I'm launching a SaaS product (SAC code 9983). Monthly pricing is ₹18K / ₹35K / ₹60K.
+> "I'm launching a SaaS product (SAC code 9983). Monthly pricing is ₹8K / ₹18K / ₹35K / ₹60K.
 > Should I register for GST now or stay under the ₹20L/yr threshold?
 > What entity type do you recommend — sole proprietor or private limited?"
 

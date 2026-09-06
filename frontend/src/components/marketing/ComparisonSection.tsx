@@ -14,7 +14,7 @@ const comparisons = [
   { metric: "WhatsApp notifications", bridge: "Instant after every call", traditional: "None" },
   { metric: "Call recordings & transcripts", bridge: "Every call recorded", traditional: "Rarely done" },
   { metric: "Analytics dashboard", bridge: "Real-time funnel & metrics", traditional: "Excel sheets" },
-  { metric: "Monthly cost", bridge: "₹18,000 - ₹60,000", traditional: "₹20,000 - ₹30,000/person" },
+  { metric: "Monthly cost", bridge: "₹7,999 - ₹60,000", traditional: "₹20,000 - ₹30,000/person" },
   // Phase 2.1: the two capability-number claims below carry a footnote so
   // prospects know they're platform capability, not a guaranteed outcome.
   { metric: "Leads handled", bridge: "500+ per month", traditional: "~200 per person", note: true },

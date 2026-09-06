@@ -28,7 +28,8 @@ describe("Monthly Leads Limit helper (FIX Round-2 #6)", () => {
 
   describe("getMonthlyLeadsLimit", () => {
     it("returns the plan's leads allowance from PLAN_DEFINITIONS", () => {
-      // STARTER leads: 500, PRO leads: 50000 (from subscription.service.ts)
+      // LAUNCH leads: 200, STARTER leads: 500, PRO leads: 50000 (subscription.service.ts)
+      expect(getMonthlyLeadsLimit("LAUNCH")).toBe(200);
       expect(getMonthlyLeadsLimit("STARTER")).toBe(500);
       expect(getMonthlyLeadsLimit("PRO")).toBe(50000);
     });

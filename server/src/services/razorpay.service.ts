@@ -17,6 +17,7 @@ const razorpayApi = axios.create({
 });
 
 export interface PlanDetails {
+  launch: string;
   starter: string;
   growth: string;
   pro: string;
@@ -24,6 +25,7 @@ export interface PlanDetails {
 
 export function getPlanIds(): PlanDetails {
   return {
+    launch: config.RAZORPAY_PLAN_LAUNCH || "",
     starter: config.RAZORPAY_PLAN_STARTER || "",
     growth: config.RAZORPAY_PLAN_GROWTH || "",
     pro: config.RAZORPAY_PLAN_PRO || "",

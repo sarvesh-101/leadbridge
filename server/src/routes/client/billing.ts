@@ -83,7 +83,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         type: "object",
         required: ["planTier"],
         properties: {
-          planTier: { type: "string", enum: ["STARTER", "GROWTH", "PRO"] },
+          planTier: { type: "string", enum: ["LAUNCH", "STARTER", "GROWTH", "PRO"] },
           billingCycle: { type: "string", enum: ["MONTHLY"] },
         },
       },
@@ -262,7 +262,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         type: "object",
         required: ["planTier"],
         properties: {
-          planTier: { type: "string", enum: ["STARTER", "GROWTH"] },
+          planTier: { type: "string", enum: ["LAUNCH", "STARTER", "GROWTH"] },
         },
       },
     },
@@ -280,7 +280,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
     }
 
     // Validate downgrade (not upgrade)
-    const TIER_ORDER: Record<string, number> = { STARTER: 0, GROWTH: 1, PRO: 2 };
+    const TIER_ORDER: Record<string, number> = { LAUNCH: 0, STARTER: 1, GROWTH: 2, PRO: 3 };
     const currentTier = TIER_ORDER[currentSub.planTier] ?? 99;
     const requestedTier = TIER_ORDER[planTier] ?? -1;
 
@@ -426,7 +426,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
   // active subscription found" → no cancel/refund possible) and left brokers
   // with an empty invoice list for the upgrade charge.
   fastify.post("/billing/upgrade", async (request: FastifyRequest<{
-    Body: { plan: "STARTER" | "GROWTH" | "PRO" };
+    Body: { plan: "LAUNCH" | "STARTER" | "GROWTH" | "PRO" };
   }>, reply: FastifyReply) => {
     const client = await fastify.prisma.client.findUnique({
       where: { id: request.clientId },

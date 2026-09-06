@@ -28,6 +28,10 @@ export interface PlanDefinition {
 }
 
 export const PLAN_DEFINITIONS: Record<string, PlanDefinition> = {
+  // LAUNCH = entry tier (2026-09-07). Closes the ₹18K → ₹0 cliff: at ₹160/call it is
+  // deliberately the WORST per-call rate in the ladder — designed as a stepping stone
+  // to GROWTH (₹70/call), never a destination. See docs/plan-margins.md § LAUNCH.
+  LAUNCH: { name: "Launch", monthly: 7999, yearly: 79990, users: 2, leads: 200, calls: 50 },
   STARTER: { name: "Starter", monthly: 18000, yearly: 180000, users: 5, leads: 500, calls: 100 },
   GROWTH: { name: "Growth", monthly: 35000, yearly: 350000, users: 15, leads: 3000, calls: 500 },
   PRO: { name: "Pro", monthly: 60000, yearly: 600000, users: 50, leads: 50000, calls: 999999 },
@@ -44,6 +48,7 @@ export const RAZORPAY_TOTAL_COUNT = 1200;
 export function getRazorpayPlanIdForTier(planTier: string): string {
   const planIds = getPlanIds();
   const planIdMap: Record<string, string> = {
+    LAUNCH: planIds.launch,
     STARTER: planIds.starter,
     GROWTH: planIds.growth,
     PRO: planIds.pro,

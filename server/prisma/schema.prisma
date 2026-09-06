@@ -19,6 +19,7 @@ enum PhoneSetupStatus {
 }
 
 enum Plan {
+  LAUNCH
   STARTER
   GROWTH
   PRO

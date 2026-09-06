@@ -50,6 +50,7 @@ export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
 
     // Calculate MRR from active client plans — uses groupBy for efficiency
     const planPrices: Record<string, number> = {
+      LAUNCH: 7999,
       STARTER: 18000,
       GROWTH: 35000,
       PRO: 60000,

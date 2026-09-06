@@ -71,7 +71,7 @@ export async function ingestExternalLead(
       const key = `daily_leads:${clientId}:${today}`;
       const count = await redis.incr(key);
       if (count === 1) await redis.expire(key, 48 * 60 * 60);
-      const DAILY_LIMITS: Record<string, number> = { STARTER: 50, GROWTH: 200, TRIAL: 25, PRO: Infinity };
+      const DAILY_LIMITS: Record<string, number> = { LAUNCH: 25, STARTER: 50, GROWTH: 200, TRIAL: 25, PRO: Infinity };
       const limit = DAILY_LIMITS[client.plan] ?? Infinity;
       if (limit !== Infinity && count > limit) {
         logger.warn({ clientId, count, limit }, `${logLabel}: daily lead limit reached`);

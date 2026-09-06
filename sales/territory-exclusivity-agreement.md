@@ -54,7 +54,7 @@ for spam or unlawful telemarketing.
 
 ## 5. Fees & Term
 
-5.1 **Plan:** [Starter ₹18,000 / Growth ₹35,000 / Pro ₹60,000] per month, billed
+5.1 **Plan:** [Launch ₹7,999 / Starter ₹18,000 / Growth ₹35,000 / Pro ₹60,000] per month, billed
 via Razorpay, GST applicable.
 
 5.2 **Initial term:** `[12]` months from subscription activation. Thereafter

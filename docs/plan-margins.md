@@ -27,8 +27,27 @@
 
 ## Per-plan margins (revenue vs. platform cost)
 
-Plans from `subscription.service.ts`: STARTER ₹18K/100 calls · GROWTH ₹35K/500 calls ·
-PRO ₹60K/up-to-5,000 calls (capped).
+### LAUNCH — ₹7,999/mo, 50 calls ✅ SAFE (entry tier, added 2026-09-07)
+
+Purpose: close the ₹0 → ₹18K cliff with a low-friction entry point. Deliberately the
+**worst per-call rate in the ladder (₹160/call)** so LAUNCH is a stepping stone to
+GROWTH (₹70/call), never a destination. No checkout trial (the signup trial already
+exists); shared calling number; 2 users; 200 leads/mo; 25 leads/day (same as TRIAL).
+
+| Avg call | Call cost | + phone ₹200 | Platform cost | Margin | % |
+|---|---|---|---|---|---|
+| 2 min | ₹460 | ₹660 | ₹660 | **₹7,339** | 92% |
+| 4 min | ₹920 | ₹1,120 | ₹1,120 | **₹6,879** | 86% |
+| 6 min | ₹1,380 | ₹1,580 | ₹1,580 | **₹6,419** | 80% |
+
+Overage → credits at BROKER_CALL_PRICE ₹70/call (62% margin standalone) or an upgrade.
+Psychological anchor: ₹7,999 reads as "₹8K" next to ₹18K/₹35K/₹60K; 50 calls ≈ 1.7/day.
+**Razorpay:** create plan `Converza Launch ₹7,999/mo`, set `RAZORPAY_PLAN_LAUNCH` in env
+(or run `scripts/setup-razorpay.cjs` extension). Checkout already handles an unconfigured
+LAUNCH plan gracefully (PENDING/TRIAL degrade, no crash).
+
+Plans from `subscription.service.ts`: LAUNCH ₹7,999/50 calls · STARTER ₹18K/100 calls ·
+GROWTH ₹35K/500 calls · PRO ₹60K/up-to-5,000 calls (capped).
 
 ### STARTER — ₹18,000/mo, 100 calls ✅ SAFE
 

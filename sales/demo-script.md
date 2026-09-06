@@ -33,7 +33,7 @@
 
 ### 1:15–1:30 — The close (15s)
 > "Aur sabse badi baat — **aapke area mein sirf aap**. Territory exclusive hai.
-> Flat fee: ₹18K / ₹35K / ₹60K. Koi per-minute charge nahi. 30 din ka free trial —
+> Flat fee: ₹8K / ₹18K / ₹35K / ₹60K. Koi per-minute charge nahi. 30 din ka free trial —
 > aap apne number par trial chala sakte hain, isi hafte?"
 
 ---
