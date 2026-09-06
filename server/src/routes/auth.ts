@@ -40,6 +40,28 @@ async function isRefreshJtiRevoked(fastify: FastifyInstance, jti: string): Promi
 }
 
 export default async function authRoutes(fastify: FastifyInstance) {
+  // Email sends stay fire-and-forget (never block the response on slow SMTP),
+  // but the route reports the ACTUAL result when it settles quickly: SMTP
+  // unconfigured → sendEmail() resolves false in <5ms, so the frontend can
+  // warn the user the verification email wasn't sent. If SMTP is slow, we
+  // report optimistically true after the window and let the send continue.
+  const EMAIL_REPORT_TIMEOUT_MS = 1500;
+  async function sendVerificationEmail(
+    to: string,
+    subject: string,
+    text: string,
+    html?: string
+  ): Promise<boolean> {
+    const sendPromise = sendEmail({ to, subject, text, ...(html ? { html } : {}) });
+    // Background logging — never an unhandled rejection.
+    sendPromise.catch((err: any) => fastify.log.error({ err }, "Verification email failed (background)"));
+    const outcome = await Promise.race([
+      sendPromise.then((sent) => sent).catch(() => false),
+      new Promise<"timeout">((resolve) => setTimeout(() => resolve("timeout"), EMAIL_REPORT_TIMEOUT_MS)),
+    ]);
+    return outcome === "timeout" ? true : outcome;
+  }
+
   // ─── Register (create client) ─────────────────────────────────
   fastify.post("/auth/register", {
     schema: {
@@ -128,16 +150,17 @@ export default async function authRoutes(fastify: FastifyInstance) {
       },
     });
 
-    // Send the verification email — FIRE-AND-FORGET (never blocks registration).
-    // SMTP can hang for 45s+ from cloud providers; we send the response first
-    // and log success/failure asynchronously.
+    // Send the verification email — fire-and-forget, but with a short report
+    // window so the response reflects the real outcome when it's known fast
+    // (SMTP unconfigured → instant false). Slow SMTP never blocks registration
+    // beyond EMAIL_REPORT_TIMEOUT_MS.
     const verifyUrl = `${config.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
     fastify.log.info({ email }, "Queuing verification email (fire-and-forget)");
-    sendEmail({
-      to: email,
-      subject: "Verify your Converza account",
-      text: `Welcome to Converza! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
-      html: `
+    const emailSent = await sendVerificationEmail(
+      email,
+      "Verify your Converza account",
+      `Welcome to Converza! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
+      `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
           <div style="text-align: center; margin-bottom: 32px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
@@ -164,18 +187,18 @@ export default async function authRoutes(fastify: FastifyInstance) {
             Converza — Never Lose Another Lead Again
           </p>
         </div>
-      `,
-    }).then(sent => {
-      if (!sent) fastify.log.warn({ email }, "Verification email NOT sent — SMTP not configured");
-    }).catch((err: any) => {
-      fastify.log.error({ err }, "Failed to send verification email");
-    });
+      `
+    );
+    if (!emailSent) {
+      fastify.log.warn({ email }, "Verification email NOT sent — SMTP not configured");
+    }
 
-    // Return immediately — don't wait for SMTP (fire-and-forget)
     return reply.status(201).send({
       requiresVerification: true,
-      emailSent: true, // optimistically true — we fired the request
-      message: "Account created. Check your email to verify your account and activate your trial.",
+      emailSent,
+      message: emailSent
+        ? "Account created. Check your email to verify your account and activate your trial."
+        : "Account created, but the verification email could not be sent. Please try resending the link or contact support.",
       user: {
         id: client.id,
         businessName: client.businessName,
@@ -386,16 +409,18 @@ export default async function authRoutes(fastify: FastifyInstance) {
     });
 
     const verifyUrl = `${config.FRONTEND_URL}/auth/verify-email?token=${verificationToken}`;
-    // Fire-and-forget: don't block the response on SMTP
-    sendEmail({
-      to: email,
-      subject: "Verify your Converza account",
-      text: `Verify your email to activate your trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
-    }).catch((err: any) => fastify.log.error({ err }, "Resend verification email failed"));
+    // Fire-and-forget, but report the real outcome when it's known fast.
+    const emailSent = await sendVerificationEmail(
+      email,
+      "Verify your Converza account",
+      `Verify your email to activate your trial: ${verifyUrl}\n\nThis link expires in 48 hours.`
+    );
 
     return {
-      message: "If an account exists, a new verification link has been sent.",
-      emailSent: true,
+      message: emailSent
+        ? "If an account exists, a new verification link has been sent."
+        : "If an account exists, a new verification link has been sent — but the email could not be delivered right now.",
+      emailSent,
     };
   });
 

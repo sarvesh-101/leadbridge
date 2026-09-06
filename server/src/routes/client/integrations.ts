@@ -1,7 +1,7 @@
 /**
  * Integration Routes — manages third-party lead source connections.
  *
- * Two REAL kinds of lead sources are supported:
+ * Three kinds of integrations are supported:
  *
  *   1. kind: "api"  — IndiaMART. Official Leads API (Push webhook + Pull
  *      API poller). The broker saves their CRM key + registered mobile; leads
@@ -13,8 +13,10 @@
  *      (see /dashboard/forwarding). The "connection" is the forwarding setup,
  *      not an API credential.
  *
- * Providers that previously showed a fake "Connect" button with no ingestion
- * (Facebook, Google, Zoho, Zapier) have been removed from the catalog.
+ *   3. kind: "sync" — Google Sheets (see /dashboard/sheets-sync). Saves the
+ *      broker's service-account clientEmail/privateKey into `credentials` so
+ *      the bidirectional sync service (sheets-sync-v2.service.ts) can read
+ *      them. No API key/secret involved.
  */
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import crypto from "node:crypto";
@@ -22,7 +24,7 @@ import { Prisma } from "@prisma/client";
 import { encrypt, decrypt } from "../../utils/encryption";
 import { config } from "../../config";
 
-type ProviderKind = "api" | "forwarding";
+type ProviderKind = "api" | "forwarding" | "sync";
 
 // Static catalog of available integration providers
 const AVAILABLE_PROVIDERS: Record<string, {
@@ -82,6 +84,16 @@ const AVAILABLE_PROVIDERS: Record<string, {
       "Authorize your Facebook Page (or paste a long-lived Page Access Token)",
       "The page is subscribed to our leadgen webhook — every lead form submission is AI-called automatically",
       "Note: needs a Meta app with lead access; for production volume, Meta app review may be required",
+    ],
+  },
+  google: {
+    name: "Google Sheets", description: "Bidirectional sync between Converza leads and a Google Sheet (service-account based)",
+    docsUrl: "https://developers.google.com/sheets/api/quickstart/nodejs", type: "sync", kind: "sync",
+    setupSteps: [
+      "Create a Google Cloud project → enable the Google Sheets API",
+      "Create a service account → download its JSON key file",
+      "Paste the service account email + private key on the Sheets Sync page",
+      "Share your Google Sheet with the service account email (Editor)",
     ],
   },
 };
@@ -265,6 +277,16 @@ export default async function clientIntegrationRoutes(fastify: FastifyInstance) 
     // Encrypt any credential fields in the update
     if (data.apiKey) data.apiKey = encrypt(data.apiKey as string);
     if (data.apiSecret) data.apiSecret = encrypt(data.apiSecret as string);
+
+    // Keep `credentials` in sync with `settings` (same contract as the create
+    // endpoint): the sync services (sheets-sync-v2, cron) read from
+    // `credentials`, so an update to settings must refresh it too.
+    if (data.settings) {
+      data.credentials = {
+        ...(data.settings as Record<string, unknown>),
+        encrypted: true,
+      };
+    }
 
     await fastify.prisma.integration.update({
       where: { id: integration.id },

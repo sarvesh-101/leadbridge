@@ -1,6 +1,6 @@
 /**
  * MessageBird live test:
- * 1. Validate key via GET /balance
+ * 1. Validate key against the new platform API (Bearer auth)
  * 2. Send a real SMS via the actual sendSms() code path to +91 7045525531
  */
 import { config } from "./src/config";
@@ -13,19 +13,28 @@ import { sendSms } from "./src/services/sms.service";
   console.log(`Sender: ${config.SMS_SENDER_ID}`);
   console.log("");
 
-  // 1. Validate the key — GET /balance (works for both live & test keys)
-  console.log("--- 1. Key validation (balance) ---");
+  // 1. Validate the key against the NEW platform API. The legacy
+  //    `rest.messagebird.com/balance` endpoint + `AccessKey` auth rejects new
+  //    `bk_...` keys, so probe the regional host with Bearer auth instead.
+  //    A 401/403 means the key is bad; anything else means it authenticated.
+  console.log("--- 1. Key validation ---");
   try {
-    const res = await fetch("https://rest.messagebird.com/balance", {
-      headers: { Authorization: `AccessKey ${key}` },
+    const host = key?.startsWith("bk_us1_")
+      ? "us1.platform.bird.com"
+      : key?.startsWith("bk_eu1_")
+        ? "eu1.platform.bird.com"
+        : "api.bird.com";
+    const res = await fetch(`https://${host}/v1/sms/messages`, {
+      headers: { Authorization: `Bearer ${key}` },
     });
-    const body = await res.json().catch(() => ({}));
     console.log(`HTTP ${res.status}`);
-    if (res.status === 200) {
-      console.log(`   ✅ Key VALID — balance: ${body.payment} ${body.currency} | type: ${body.type}`);
-    } else {
-      console.log(`   ❌ Key invalid: ${JSON.stringify(body).slice(0, 250)}`);
+    if (res.status === 401 || res.status === 403) {
+      console.log(`   ❌ Key invalid (unauthorized)`);
       process.exit(1);
+    }
+    console.log("   ✅ Key VALID — auth passed");
+    if (res.status >= 400) {
+      console.log(`      (endpoint returned ${res.status}: ${(await res.text()).slice(0, 250)})`);
     }
   } catch (err: any) {
     console.log(`   ❌ Request failed: ${err.message}`);
@@ -35,6 +44,7 @@ import { sendSms } from "./src/services/sms.service";
   // 2. Send a real SMS through the actual code path
   console.log("");
   console.log("--- 2. Real SMS send ---");
+  console.log(`   Using sender ID: ${config.SMS_SENDER_ID}`);
   const ok = await sendSms(
     "+91 7045525531",
     "🔔 Converza SMS test — if you got this, MessageBird works! Timestamp: " + new Date().toISOString()

@@ -653,10 +653,11 @@ async function start() {
     // Register cron jobs (non-blocking — runs alongside the server)
     registerCronJobs();
 
-    // BullMQ workers are already started via imports above.
-    // The campaign worker runs as a separate Docker container (see docker-compose.yml)
-    // DO NOT start it here — it would create duplicate processing.
-    logger.info("✅ BullMQ workers started: call, notification, extraction, followup, reminder, webhook-retry");
+    // BullMQ workers are already started via imports above (each worker begins
+    // processing its queue on construction). The campaign worker runs in-process
+    // too — on multi-container setups (Docker Compose), remove its import to
+    // avoid duplicate processing.
+    logger.info("✅ BullMQ workers started: call, notification, extraction, followup, reminder, webhook-retry, campaign");
 
     await server.listen({ port: config.PORT, host: "0.0.0.0" });
     logger.info(`Converza server running on port ${config.PORT}`);

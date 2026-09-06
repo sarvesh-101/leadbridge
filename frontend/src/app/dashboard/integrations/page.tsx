@@ -16,7 +16,7 @@ interface ProviderInfo {
   description: string;
   docsUrl: string;
   type: string;
-  kind: "api" | "forwarding";
+  kind: "api" | "forwarding" | "sync";
   setupSteps: string[];
 }
 

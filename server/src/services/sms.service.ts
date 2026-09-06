@@ -14,8 +14,11 @@
  * Environment:
  *   MESSAGEBIRD_API_KEY  (required for SMS fallback to work) — new-format
  *                        `bk_<region>_...` access keys supported.
- *   SMS_SENDER_ID        (optional, default "CONVERZ") — legacy field; the new
- *                        platform API handles the sender on its side.
+ *   SMS_SENDER_ID        (required on free-text sends — the `from`/originator the
+ *                        recipient sees; e.g. an alphanumeric sender ID like
+ *                        CONVERZ, which must be registered for the destination
+ *                        country (India DLT) in the Bird dashboard — see
+ *                        docs/GO-LIVE-RUNBOOK.md STEP 9). Defaults to "CONVERZ".
  *
  * NOTE (2026-08-12): the `messagebird` npm SDK targets the OLD API
  * (rest.messagebird.com, `AccessKey` auth) which rejects new `bk_` keys.
@@ -76,6 +79,10 @@ export async function sendSms(to: string, text: string): Promise<boolean> {
       body: JSON.stringify({
         to: e164To,
         text: text.substring(0, 765),
+        // `from` is REQUIRED on free-text sends — the sender the recipient sees.
+        // Alphanumeric sender IDs must be registered for the destination country
+        // (India DLT) in the Bird dashboard, otherwise Bird rejects with 422.
+        from: config.SMS_SENDER_ID,
         // Category drives DLT/template handling on Bird's side.
         category: "transactional",
       }),
