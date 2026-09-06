@@ -1,5 +1,9 @@
 # LeadBridge — Backups & Uptime Monitoring on Railway (Phase 0.6)
 
+> ⛔ **DEPRECATED (2026-09-07):** the Railway deploy path was abandoned — production runs on
+> Render. The backup/uptime scripts (`scripts/backup-db.sh`, `scripts/uptime-check.sh`) are
+> still valid but must be scheduled via a Render Cron Job or GitHub Actions instead.
+
 > **Why:** before the first paying broker, two things must exist: (1) recoverable
 > database backups, (2) an alert that pages you before a broker notices an outage.
 > This guide sets both up on Railway (the Phase 0.1 production path). The existing

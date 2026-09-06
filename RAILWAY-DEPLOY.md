@@ -1,5 +1,9 @@
 # 🚂 LeadBridge — Railway Deploy Guide (Phase 0.1)
 
+> ⛔ **DEPRECATED (2026-09-07):** production now runs on **Render** (`leadbridge-zy4o.onrender.com`,
+> see `render.yaml` + `docs/render-setup-guide.md`) — do NOT follow this guide.
+> Kept for history only.
+
 > **Goal:** get the backend off the laptop + ngrok onto Railway with production
 > Postgres + Redis. The site currently dies when the PC is off. This fixes that.
 >

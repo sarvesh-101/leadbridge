@@ -1,4 +1,4 @@
-# 🏗️ LeadBridge — AI-Powered Real Estate Lead Conversion Platform
+# 🏗️ Converza — AI-Powered Real Estate Lead Conversion Platform
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5%2B-blue)](https://typescriptlang.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org)
@@ -8,7 +8,7 @@
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D)](https://redis.io)
 
 > **One broker per city. AI calls every lead in 60 seconds.**
-> LeadBridge automates real estate lead qualification, calling, follow-ups, and conversion tracking — from inquiry to site visit.
+> Converza automates real estate lead qualification, calling, follow-ups, and conversion tracking — from inquiry to site visit.
 
 ---
 
@@ -28,7 +28,7 @@
 
 ## 🎯 Overview
 
-LeadBridge automates the entire real estate lead follow-up process:
+Converza automates the entire real estate lead follow-up process:
 
 1. **Lead Ingestion** — Captures leads from 99acres, MagicBricks, Housing.com, JustDial, Facebook, Google, WhatsApp, and manual entry via webhooks
 2. **Instant AI Call** — Within 60 seconds, an Omnidimension AI agent calls every new lead in Hinglish for qualification
@@ -40,7 +40,7 @@ LeadBridge automates the entire real estate lead follow-up process:
 
 ### Key Metrics (Industry Benchmarks)
 
-| Metric | Industry Avg | LeadBridge |
+| Metric | Industry Avg | Converza |
 |--------|:-----------:|:----------:|
 | Response Time | 24-48 hours | < 60 seconds |
 | Lead Response Rate | 10-15% | 60-80% |
@@ -218,7 +218,7 @@ Deploy:      Railway / Docker Compose (VPS)
 
 ```bash
 git clone <repository-url>
-cd leadbridge
+cd converza
 
 # Server dependencies
 cd server
@@ -256,7 +256,7 @@ npx prisma generate
 npx prisma db push     # Creates tables
 
 # First run auto-creates:
-#   Admin email: admin@leadbridge.com
+#   Admin email: admin@converza.tech
 #   Admin password: <random> — check server logs!
 ```
 
@@ -278,7 +278,7 @@ npm run dev
 
 ```bash
 curl http://localhost:3000/health
-# → {"status":"healthy","app":"LeadBridge","version":"1.0.0"}
+# → {"status":"healthy","app":"Converza","version":"1.0.0"}
 ```
 
 ### 7. Run Full Stack with Docker Compose
@@ -340,7 +340,7 @@ ENCRYPTION_KEY          — optional, defaults to JWT_SECRET derivation
 ### Step 1: Create Project
 1. Go to [railway.app/dashboard](https://railway.app/dashboard)
 2. Click **New Project** → **Deploy from GitHub repo**
-3. Select your `leadbridge` repo
+3. Select your `converza` repo
 4. Railway auto-detects Node.js → runs build automatically
 
 ### Step 2: Add Databases
@@ -399,7 +399,7 @@ curl https://your-server-domain.railway.app/health
 ## 📁 Project Structure
 
 ```
-leadbridge/
+converza/
 ├── server/                          # Fastify TypeScript Server
 │   ├── prisma/
 │   │   └── schema.prisma           # 18 models: Lead, Call, Booking, Client, etc.
@@ -517,7 +517,7 @@ Test breakdown:
 
 ## 📄 License
 
-Copyright © 2024-2026 LeadBridge. All rights reserved.
+Copyright © 2024-2026 Converza. All rights reserved.
 
 This project contains proprietary software. Unauthorized copying, distribution, or use is prohibited.
 
