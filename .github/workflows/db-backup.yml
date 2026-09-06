@@ -1,0 +1,69 @@
+# Converza — scheduled production DB backups (Option B in docs/DB-BACKUP-SETUP.md).
+# Runs scripts/backup-db.sh: pg_dump → gzip → off-site upload to the private
+# Supabase Storage bucket "db-backups" → keeps the dump as a 14-day artifact.
+#
+# One-time setup (repo Settings → Secrets and variables → Actions):
+#   PROD_DATABASE_URL          session-pooler Postgres URI (see setup doc)
+#   PROD_SUPABASE_URL          https://oavzflfdjluxvdlymbug.supabase.co
+#   PROD_SUPABASE_SERVICE_KEY  service key
+#   BACKUP_HEARTBEAT_URL       (optional) UptimeRobot heartbeat — paged when a run is missed
+#
+# ⚠️ GitHub disables scheduled workflows after 60 days without repo activity —
+#    you get an email; re-enable from the Actions tab.
+
+name: DB Backup
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Dump DB → Supabase Storage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure pg_dump is available (client 16)
+        run: |
+          if ! command -v pg_dump >/dev/null 2>&1; then
+            sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+            wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc >/dev/null
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client-16
+          fi
+          pg_dump --version
+
+      - name: Run backup script (dump + off-site upload)
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_KEY }}
+          SUPABASE_BACKUP_BUCKET: db-backups
+          BACKUP_KEEP: "3"
+          BACKUP_DIR: /tmp/converza-backups
+        run: bash scripts/backup-db.sh
+
+      - name: Keep dump as artifact (14 days)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: converza-db-dump
+          path: /tmp/converza-backups/*.sql.gz
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Ping uptime heartbeat (optional)
+        if: env.HEARTBEAT_URL != ''
+        env:
+          HEARTBEAT_URL: ${{ secrets.BACKUP_HEARTBEAT_URL }}
+        run: curl -fsS --max-time 10 "$HEARTBEAT_URL"

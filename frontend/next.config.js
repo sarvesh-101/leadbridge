@@ -36,7 +36,10 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
               "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com",
               "img-src 'self' data: blob: https: http:",
-              "connect-src 'self' https://*.railway.app https://*.vercel.app https://*.onrender.com https://api.deepseek.com https://accounts.google.com wss://*.onrender.com wss://*.railway.app wss://*.vercel.app" + (isProd ? "" : " http://localhost ws://localhost"),
+              // Pinned to the exact API origin (was: *.railway.app/*.vercel.app/*.onrender.com
+              // wildcards — over-broad). Update BOTH origins here when the API domain changes
+              // (https for fetch/XHR + wss for the WebSocket). See docs/REBRAND-URL-SWITCH.md.
+              "connect-src 'self' https://leadbridge-zy4o.onrender.com wss://leadbridge-zy4o.onrender.com https://api.deepseek.com https://accounts.google.com" + (isProd ? "" : " http://localhost ws://localhost"),
               "frame-src 'self' https://accounts.google.com",
               "object-src 'none'",
               "base-uri 'self'",

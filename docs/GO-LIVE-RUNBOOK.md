@@ -46,7 +46,7 @@
 
 - [ ] 1. Render → **leadbridge-api** service → **Settings** → rename service to **converza-api** (URL stays the same — safe)
 - [ ] 2. Vercel → project **leadbridge-seven** → **Settings** → rename to **converza** ⚠️ (URL CHANGES — write down the new one)
-- [ ] 3. Tell me the final two URLs (frontend + API) → I update `render.yaml` (`FRONTEND_URL`, `WEBHOOK_URL`), Razorpay plan display names, and any remaining old-domain references
+- [ ] 3. Hand the new frontend URL to Codebuff → the exact pre-staged edits (render.yaml `FRONTEND_URL`, `frontend/.env.local`, Razorpay plan display names, smoke tests) are ready in **`docs/REBRAND-URL-SWITCH.md`** — apply per that doc (the API URL does NOT change, only the frontend one)
 
 **✅ Done when:** you can tell me both live URLs, rebranded.
 
