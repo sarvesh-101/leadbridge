@@ -151,6 +151,13 @@ const envSchema = z.object({
   IMAP_FOLDER: z.string().default("INBOX"),
   IMAP_TLS: z.coerce.boolean().default(true),
 
+  // Free-trial length in days for new signups. One knob for BOTH trial sources:
+  // signup trial (auth.ts trialEndsAt) and the STARTER checkout trial
+  // (subscription.service.ts trialDays). Outreach promises 30 days — keep code
+  // in sync with marketing via this value. Cost exposure is capped regardless:
+  // call.worker.ts enforces TRIAL_MAX_CALLS = 50 (~₹460/platform at ₹9.2/call).
+  TRIAL_DAYS: z.coerce.number().default(30),
+
 });
 
 const parsed = envSchema.safeParse(process.env);

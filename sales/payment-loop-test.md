@@ -23,7 +23,7 @@
 
 1. Register a new broker on the live site (`/auth/register`).
 2. Verify email → login.
-3. Go to `/dashboard` → billing → **Start 14-day trial** (STARTER).
+3. Go to `/dashboard` → billing → **Start 30-day trial** (STARTER).
 4. **Assert:** plan card shows "Trial", calls = 100, no charge happened yet.
 5. Check DB (via admin panel): `Subscription.status = TRIAL`, `client.planStatus = TRIAL`, `trialStartedAt` set.
 

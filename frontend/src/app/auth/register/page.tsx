@@ -124,7 +124,7 @@ export default function RegisterPage() {
             <span className="text-[20px] font-display font-bold text-[#F0F7F3] tracking-[-0.02em]">Converza</span>
           </Link>
           <h1 className="text-[24px] font-display font-bold text-[#F0F7F3]">Create your account</h1>
-          <p className="text-[14px] text-[#9FB0A6] mt-2">Start your 14-day free trial</p>
+          <p className="text-[14px] text-[#9FB0A6] mt-2">Start your 30-day free trial</p>
         </div>
 
         <div className="p-6 rounded-lg glass-card">
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 <span className="text-[#F0F7F3] font-medium">{pendingEmail}</span>
               </p>
               <p className="text-[13px] text-[#9FB0A6] leading-relaxed mb-5">
-                Click the link to activate your 14-day free trial and log in.
+                Click the link to activate your 30-day free trial and log in.
               </p>
               {emailWarning && (
                 <p className="flex items-center gap-2 p-3 rounded-lg bg-[#E8C468]/10 border border-[#E8C468]/25 text-[#E8C468] text-[12px] text-left mb-4">

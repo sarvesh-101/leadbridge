@@ -386,7 +386,7 @@ Check these boxes:
 
 ### 7.2 Start Trial
 1. Go to **Dashboard** → **Billing**
-2. Click **Start 14-day Trial** (or "Activate Trial")
+2. Click **Start 30-day Trial** (or "Activate Trial")
 3. Confirm: plan shows "Trial", 100 calls included, no charge yet
 
 ### 7.3 Upgrade to Growth Plan

@@ -120,9 +120,9 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
     expect(result.paymentUrl).toBe("https://rzp.io/test");
   });
 
-  it("passes 14-day trial for STARTER", async () => {
+  it("passes TRIAL_DAYS (30) as the trial for STARTER checkout", async () => {
     await createSubscriptionCheckout(mockFastify, client, "STARTER");
-    expect(mockCreateSubscription.mock.calls[0][0].trialDays).toBe(14);
+    expect(mockCreateSubscription.mock.calls[0][0].trialDays).toBe(30);
   });
 
   it("cancels prior DB subscriptions AND their live Razorpay subs (FIX #11)", async () => {

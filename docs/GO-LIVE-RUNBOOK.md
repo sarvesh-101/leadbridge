@@ -170,7 +170,7 @@
 # STEP 10 — Prove it end-to-end 🟡 (~1 day, both of us) — AFTER KYC clears
 
 - [ ] 1. **Payment loop test** (full spec in `sales/payment-loop-test.md`):
-      register test broker → start 14-day trial → upgrade to GROWTH → pay with real UPI/card (refunded later) →
+      register test broker → start 30-day trial → upgrade to GROWTH → pay with real UPI/card (refunded later) →
       verify webhook fired (check server logs) → plan shows ACTIVE + invoice PAID →
       cancel subscription → verify CANCELLED → refund in Razorpay → delete test account (Settings → Privacy → Erasure)
 - [ ] 2. **Real AI call test:** dashboard → **Voice AI** → **Test Call** → AI calls your phone →

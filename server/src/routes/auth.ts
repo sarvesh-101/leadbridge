@@ -118,7 +118,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     // FIX Round-2 #3: email verification (trial-abuse protection) — every new
     // account starts unverified. Login is blocked (403 verificationRequired)
     // until the broker clicks the link in the verification email. This makes
-    // fake-email signups useless: they can never activate the 14-day trial
+    // fake-email signups useless: they can never activate the free trial
     // (which costs the platform ~₹460/user in real AI calls).
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const verificationTokenExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48h
@@ -136,7 +136,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         passwordHash,
         plan: "GROWTH",
         planStatus: "TRIAL",
-        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14-day trial
+        trialEndsAt: new Date(Date.now() + config.TRIAL_DAYS * 24 * 60 * 60 * 1000), // free trial = TRIAL_DAYS days (default 30, matches outreach promise)
         callsLimit: 500, // matches Growth plan definition (PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
         leadSources: ["manual"],
         adminId: null,
@@ -159,7 +159,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const emailSent = await sendVerificationEmail(
       email,
       "Verify your Converza account",
-      `Welcome to Converza! Verify your email to activate your 14-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
+      `Welcome to Converza! Verify your email to activate your 30-day free trial: ${verifyUrl}\n\nThis link expires in 48 hours.`,
       `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
           <div style="text-align: center; margin-bottom: 32px;">
@@ -171,7 +171,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
           <h1 style="font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px;">Verify your email</h1>
           <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
             Welcome to Converza! Click the button below to verify your email
-            and activate your 14-day free trial.
+            and activate your 30-day free trial.
           </p>
           <div style="text-align: center; margin-bottom: 24px;">
             <a href="${verifyUrl}" style="display: inline-block; padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #4F6EF7, #8B5CF6); color: white; font-size: 15px; font-weight: 600; text-decoration: none;">
@@ -544,7 +544,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
             passwordHash,
             plan: "GROWTH",
             planStatus: "TRIAL",
-            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+            trialEndsAt: new Date(Date.now() + config.TRIAL_DAYS * 24 * 60 * 60 * 1000),
             callsLimit: 500, // matches Growth plan definition (PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
             leadSources: ["manual"],
             adminId: null,

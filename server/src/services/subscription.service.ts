@@ -1,5 +1,6 @@
 import { BillingCycle, Plan, PlanStatus, Subscription } from "@prisma/client";
 import { FastifyInstance } from "fastify";
+import { config } from "../config";
 import {
   createSubscription,
   getPlanIds,
@@ -111,7 +112,7 @@ export async function createSubscriptionCheckout(
         customerPhone: client.phone,
         customerName: client.ownerName,
         totalCount: RAZORPAY_TOTAL_COUNT,
-        trialDays: planTier === "STARTER" ? 14 : 0,
+        trialDays: planTier === "STARTER" ? config.TRIAL_DAYS : 0,
       });
     } catch (err: any) {
       fastify.log.warn({ err: err.message, planTier }, "Razorpay subscription creation failed");

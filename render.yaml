@@ -120,3 +120,5 @@ services:
         value: "20"
       - key: PRO_MONTHLY_CALL_CAP
         value: "2000"
+      - key: TRIAL_DAYS
+        value: "30"

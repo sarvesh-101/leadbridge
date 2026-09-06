@@ -223,7 +223,7 @@ After verification:
 
 ### Test Steps (Follow the spec)
 1. **Register** a test broker account on the live site
-2. **Start trial** (14-day, STARTER plan, no charge)
+2. **Start trial** (30-day, STARTER plan, no charge)
 3. **Upgrade to GROWTH** → Razorpay checkout opens
 4. **Pay with real UPI/card** (₹35,000 — gets refunded later)
 5. **Verify webhook fired** → check server logs for "webhook received"
