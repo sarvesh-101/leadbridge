@@ -1,6 +1,11 @@
 # 🚀 Converza — Step-by-Step Operational Guide
 
 > **Follow this guide in order.** Each step has exact URLs, exact buttons to click, and exact things to type. Don't skip steps.
+>
+> ⚡ **STATUS UPDATE 2026-09-13 — don't redo finished steps.** Source of truth: **`docs/GO-LIVE-RUNBOOK.md`**.
+> ✅ Done: **Step 1 (KYC)** · **Step 4 (MessageBird sender ID `CONVERZ`)** · **Step 5 (UptimeRobot)** + all secret rotations.
+> 🔲 Open: **Step 2 (GST/CA call)** · **Step 3 (WhatsApp verification — submit early, 2–5 day wait)** ·
+> **Step 6 (Razorpay webhook — 10 min, unblocks money — do first)** · **Step 7 (payment loop test)** · **Step 8 (demo call)**.
 
 ---
 

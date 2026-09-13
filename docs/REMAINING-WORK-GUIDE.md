@@ -8,6 +8,15 @@
 > **Last verified:** current code state — see Phase 0. Local HEAD is AHEAD of the GitHub remote;
 > ~20 new files (IndiaMART, Facebook, MessageBird, IMAP, lead-ingestion) are **untracked**.
 > Nothing ships until Phase 0 is done.
+>
+> ⚡ **STATUS UPDATE 2026-09-13 — this guide is largely superseded by `docs/GO-LIVE-RUNBOOK.md`.**
+> Quick status: **Phase 0 ✅** (everything committed; repo clean) · **Phase 1 ✅** (deploy live; ⚠️ verify Render
+> is on latest `main`) · **Phase 2 ✅** (all secrets rotated 2026-09-10) · **Phase 5a ✅** (KYC Verified) ·
+> **Phase 8 ✅** (ALL code gaps fixed: WhatsApp retry, campaign worker in-process, Sheets UI fields, test DB
+> rename + auth tests green).
+> Still open: **Phase 3** (Render/Vercel renames) · **Phase 4** (lead channels: MessageBird number, IMAP,
+> Facebook, IndiaMART) · **Phase 5b** (Razorpay webhook — do first, unblocks money) · **Phase 6** (WhatsApp
+> verification) · **Phase 7** (payment loop + demo call).
 
 ---
 

@@ -3,6 +3,17 @@
 > **Created:** 2026-08-29 · **Owner:** Sarvesh
 > **Code is ready.** This doc covers every action YOU need to take to make Converza customer-usable.
 > Complete items in order — each section has clear steps with exact URLs and buttons to click.
+>
+> ⚡ **STATUS UPDATE 2026-09-13 — read before working through this list.**
+> Source of truth for what's left: **`docs/GO-LIVE-RUNBOOK.md`**. Already done — don't redo:
+> - ✅ **Priority 1 (Razorpay KYC)** — Verified, payouts enabled (2026-09-10)
+> - ✅ **Priority 4 (MessageBird sender ID)** — `CONVERZ` approved; key + `SMS_SENDER_ID` configured (2026-08-29)
+> - ✅ **Priority 5 (UptimeRobot)** — running, keep-alive on `/health`
+> - ✅ Secret rotations (DB password, JWT, `ENCRYPTION_KEY`) — done 2026-09-10
+> - ✅ All Phase 8 code gaps (WhatsApp retry, campaign worker, Sheets UI, tests) — fixed
+>
+> Still open: **Priority 2 (GST/CA call)** · **Priority 3 (WhatsApp business verification)** ·
+> **Priority 6 (payment loop test)** — blocked first on registering the Razorpay webhook · **Priority 7 (demo call)**.
 
 ---
 
