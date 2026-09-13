@@ -31,20 +31,19 @@
   - `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` set in `server/.env`.
   - Bucket `call-recordings` created + made **public** (upload → public URL → read 200 verified).
   - Fixed `storage.service.ts` delete to the current Supabase bulk API (`DELETE /object/{bucket}` + `prefixes`) — old endpoint 400s on new projects.
-- [x] **0.6 DB backups + uptime monitoring** ✅ DONE 2026-08-29 — scripts updated, Render setup guide written (`docs/render-setup-guide.md`), UptimeRobot recommended for free monitoring
+- [x] **0.2b Secret rotation** ✅ DONE 2026-09-10 — Supabase DB password reset + Render `ENCRYPTION_KEY` synced to local (leaked values from commit `c94c8d0` now dead). JWT secrets rotated earlier.
+- [x] **0.6 DB backups + uptime monitoring** ✅ scripts + UptimeRobot done 2026-08-29 — ⏳ remaining: create `db-backups` bucket + add backup secrets/cron (per `docs/DB-BACKUP-SETUP.md`)
   - ✅ `scripts/backup-db.sh` (pg_dump → gzip, retention, optional S3) + `scripts/uptime-check.sh` (state-transition alerting on `/health`) + `infrastructure/monitoring/railway-monitoring.md` guide (2026-08-10).
-  - Remaining: Railway Postgres built-in backups ON + a Cron Job service running both scripts. Blocked until 0.1 deploy.
 
 ---
 
 ## 🟨 PHASE 1 — Compliance & paperwork (parallel with Phase 0)
 
-- [ ] **1.1 Decide GST path** ⏳ NEEDS ACTION — ask CA: SaaS 18% (SAC 9983), register now or stay under ₹20L/yr
+- [ ] **1.1 Decide GST path** ⏳ NEEDS ACTION — ask CA: SaaS 18% (SAC 9983), register now or stay under ₹20L/yr *(CA call not yet done as of 2026-09-10)*
   - SaaS = 18% (SAC 9983). Registration mandatory only above ₹20L/yr turnover.
   - Either register now (charge 18% — pricing page already says "18% GST applies") or stay under threshold and remove that line. Ask a CA.
-- [ ] **1.2 Confirm Razorpay KYC matches legal entity** ⏳ NEEDS ACTION — submit PAN + Aadhaar + bank proof to Razorpay dashboard
-  - Individual: PAN + Aadhaar/address + bank proof. Company: CoI, MoA/AoA, board resolution, director/UBO proofs.
-  - Mismatch → payout holds. Live keys already set: `RAZORPAY_KEY_ID/SECRET/WEBHOOK_SECRET/PLAN_*`.
+- [x] **1.2 Confirm Razorpay KYC matches legal entity** ✅ DONE 2026-09-10 — KYC **Verified**, payouts enabled
+  - Remaining sub-task: register the webhook (`…/api/v1/webhooks/razorpay`, events `subscription.charged`/`cancelled`, `payment.failed`, `invoice.paid`) + `RAZORPAY_WEBHOOK_SECRET` in Render if not done yet.
 - [x] **1.3 DPDP Act compliance** ✅ CODE DONE 2026-08-10 (legal review still advised)
   - No size exemption. We collect phone numbers → Data Fiduciary.
   - ✅ Consent checkbox (required) on registration + stored (`consentGivenAt`/`consentVersion` v1.0).

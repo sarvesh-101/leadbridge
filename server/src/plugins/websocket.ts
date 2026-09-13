@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import Redis from "ioredis";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { getSharedRedisOptions, noteRedisError, sharedRetryStrategy } from "../utils/redis-health";
 
 /**
  * WebSocket Plugin — Real-time lead event streaming using @fastify/websocket.
@@ -33,16 +34,10 @@ const websocketPlugin = fp(async (fastify: FastifyInstance) => {
   async function connectRedisPubSub(): Promise<Redis | null> {
     try {
       const client = new Redis(config.REDIS_URL, {
-        maxRetriesPerRequest: null,
+        ...getSharedRedisOptions(),
         enableReadyCheck: true,
         lazyConnect: true,
-        retryStrategy: (times: number) => {
-          if (times > 5) {
-            logger.error("WS: Redis connection failed after 5 retries — giving up");
-            return null; // Stop retrying
-          }
-          return Math.min(times * 200, 2000); // Exponential backoff: 200ms, 400ms, 800ms...
-        },
+        retryStrategy: (times: number) => sharedRetryStrategy(times),
       });
 
       client.on("connect", () => {
@@ -52,6 +47,7 @@ const websocketPlugin = fp(async (fastify: FastifyInstance) => {
 
       client.on("error", (err: Error) => {
         redisHealthy = false;
+        noteRedisError(err);
         logger.warn({ err: err.message }, "WS: Redis connection error");
       });
 
@@ -96,6 +92,8 @@ const websocketPlugin = fp(async (fastify: FastifyInstance) => {
       });
 
       // Start periodic health check
+      // Every 5 minutes — a PING per connection-hour is plenty for liveness;
+      // 30s pings burned ~4.3K commands/connection/day for zero value.
       redisHealthCheckInterval = setInterval(async () => {
         try {
           await client.ping();
@@ -103,11 +101,12 @@ const websocketPlugin = fp(async (fastify: FastifyInstance) => {
             redisHealthy = true;
             logger.info("WS: Redis health recovered");
           }
-        } catch {
+        } catch (err: any) {
           redisHealthy = false;
+          noteRedisError(err);
           logger.warn("WS: Redis health check failed");
         }
-      }, 30000); // Every 30 seconds
+      }, 5 * 60 * 1000); // Every 5 minutes
 
       return client;
     } catch (err) {

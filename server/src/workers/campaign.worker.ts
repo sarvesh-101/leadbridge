@@ -13,6 +13,7 @@
 import { Worker } from "bullmq";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { sendEmail } from "../services/email.service";
 import { checkABTestWinner } from "../services/email-campaign.service";
 import { CampaignEmailJob, CampaignWinnerCheckJob, closeAllQueues } from "./queues";
@@ -67,7 +68,8 @@ const winnerCheckWorker = new Worker<CampaignWinnerCheckJob>(
     }
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 2,
     lockDuration: 30000,
   }
@@ -175,7 +177,8 @@ const campaignWorker = new Worker<CampaignEmailJob>(
     }
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 10,
     lockDuration: 30000,
   }

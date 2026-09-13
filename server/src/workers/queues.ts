@@ -1,10 +1,11 @@
-import { Queue, Worker, ConnectionOptions } from "bullmq";
+import { Queue, ConnectionOptions } from "bullmq";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { getSharedRedisOptions, noteRedisError } from "../utils/redis-health";
 
 const connection: ConnectionOptions = {
   url: config.REDIS_URL,
-  maxRetriesPerRequest: null,
+  ...getSharedRedisOptions(),
   enableReadyCheck: false,
 };
 
@@ -45,11 +46,15 @@ function createQueue(name: string, attempts: number, delay: number): Queue | nul
       defaultJobOptions: getDefaultJobOptions(attempts, delay),
     });
     q.on("error", (err: Error) => {
+      noteRedisError(err);
+      // Quota/auth failures (e.g. Upstash max requests limit) are persistent —
+      // stop using queues and fall back to the DB pending-jobs table.
       logger.warn({ err: err.message, queue: name }, "Queue error — disabling Redis queues");
       redisAvailable = false;
     });
     return q;
   } catch (err: any) {
+    noteRedisError(err);
     logger.warn({ err: err.message, queue: name }, "Failed to create queue — disabling Redis");
     redisAvailable = false;
     return null;
@@ -161,6 +166,44 @@ export function isRedisAvailable(): boolean {
   return redisAvailable !== false;
 }
 
+/**
+ * Re-enable Redis queues after an outage (called by the redis-health probe
+ * once a PING succeeds again). Queue objects are re-created lazily on next
+ * use; BullMQ Workers re-attach to the same connection automatically.
+ */
+export function reenableQueues(): void {
+  if (redisAvailable === true) return;
+  redisAvailable = true;
+  _callQueue = undefined;
+  _notificationQueue = undefined;
+  _followupQueue = undefined;
+  _reminderQueue = undefined;
+  _extractionQueue = undefined;
+  _webhookRetryQueue = undefined;
+  _emailCampaignQueue = undefined;
+  logger.info("Redis queues re-enabled after recovery");
+}
+
+/**
+ * Add a job to a queue, treating enqueue-time failures (quota exhausted,
+ * connection down) as "not queued" so the caller stores the job in the DB
+ * pending-jobs table instead of losing it.
+ */
+async function safeAdd(q: Queue | null, jobId: string, data: unknown, delayMs: number): Promise<boolean> {
+  if (!q) return false;
+  try {
+    await q.add(jobId, data as any, { delay: delayMs });
+    return true;
+  } catch (err: any) {
+    noteRedisError(err);
+    logger.error(
+      { err: err.message, jobId },
+      "Queue add failed — job will be stored in DB for replay when Redis recovers"
+    );
+    return false;
+  }
+}
+
 export function getRedisAvailable(): boolean | null {
   return redisAvailable;
 }
@@ -169,42 +212,36 @@ export async function enqueueCall(job: CallJob, delayMs?: number): Promise<boole
   const q = getCallQueue();
   const jobId = `call:${job.leadId}:${job.callType}:${job.attempt}`;
 
-  if (!q) {
+  const ok = await safeAdd(q, jobId, job, delayMs ?? 0);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — storing call job in DB for replay when Redis recovers.");
     await storePendingJob("call", job, jobId, delayMs ?? 0);
-    return false;
   }
-
-  await q.add(jobId, job, { delay: delayMs ?? 0 });
-  return true;
+  return ok;
 }
 
 export async function enqueueNotification(job: NotificationJob, delayMs?: number): Promise<boolean> {
   const q = getNotificationQueue();
   const jobId = `notify:${job.type}:${job.leadId}`;
 
-  if (!q) {
+  const ok = await safeAdd(q, jobId, job, delayMs ?? 0);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — storing notification in DB for later replay.");
     await storePendingJob("notification", job, jobId, delayMs ?? 0);
-    return false;
   }
-
-  await q.add(jobId, job, { delay: delayMs ?? 0 });
-  return true;
+  return ok;
 }
 
 export async function enqueueFollowup(job: FollowupJob, delayMs?: number): Promise<boolean> {
   const q = getFollowupQueue();
   const jobId = `followup:D${job.day}:${job.leadId}`;
 
-  if (!q) {
+  const ok = await safeAdd(q, jobId, job, delayMs ?? 0);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — storing followup in DB for later replay.");
     await storePendingJob("followup", job, jobId, delayMs ?? 0);
-    return false;
   }
-
-  await q.add(jobId, job, { delay: delayMs ?? 0 });
-  return true;
+  return ok;
 }
 
 /**
@@ -232,13 +269,12 @@ export async function enqueueReminder(job: ReminderJob, delayMs?: number): Promi
   const q = getReminderQueue();
   const reminderJobId = `reminder:${job.bookingId}`;
 
-  if (!q) {
+  const ok = await safeAdd(q, reminderJobId, job, delayMs ?? 0);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — reminder NOT queued! Storing in DB for later replay.");
     await storePendingJob("reminder", job, reminderJobId, delayMs ?? 0);
     return false;
   }
-
-  await q.add(reminderJobId, job, { delay: delayMs ?? 0 });
 
   // Store the job ID on the booking so we can remove it on cancellation
   try {
@@ -301,14 +337,12 @@ export async function enqueueExtraction(job: ExtractionJob, delayMs?: number): P
   const q = getExtractionQueue();
   const jobId = `extract:${job.callId}`;
 
-  if (!q) {
+  const ok = await safeAdd(q, jobId, job, delayMs ?? 0);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — storing extraction in DB for later replay.");
     await storePendingJob("extraction", job, jobId, delayMs ?? 0);
-    return false;
   }
-
-  await q.add(jobId, job, { delay: delayMs ?? 0 });
-  return true;
+  return ok;
 }
 
 export interface WebhookRetryJob {
@@ -318,40 +352,28 @@ export interface WebhookRetryJob {
 
 export async function enqueueWebhookRetry(payload: Record<string, unknown>, delayMs: number = 2000) {
   const q = getWebhookRetryQueue();
-  if (!q) { logger.warn({}, "Redis unavailable — webhook retry not queued"); return; }
-  return q.add(
-    `webhook-retry:${payload.call_sid || payload.call_id || Date.now()}`,
-    { payload, retryCount: 0 } as WebhookRetryJob,
-    { delay: delayMs }
-  );
+  const jobId = `webhook-retry:${payload.call_sid || payload.call_id || Date.now()}`;
+  const ok = await safeAdd(q, jobId, { payload, retryCount: 0 } as WebhookRetryJob, delayMs);
+  if (!ok) logger.warn({}, "Redis unavailable — webhook retry not queued");
+  return ok;
 }
 
 export async function enqueueCampaignEmail(job: CampaignEmailJob, delayMs?: number): Promise<boolean> {
   const q = getEmailCampaignQueue();
-  if (!q) {
+  const ok = await safeAdd(q, `campaign:${job.campaignId}:${job.leadId}`, job, delayMs ?? 0);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — campaign email NOT queued!");
-    return false;
   }
-  await q.add(
-    `campaign:${job.campaignId}:${job.leadId}`,
-    job,
-    { delay: delayMs ?? 0 }
-  );
-  return true;
+  return ok;
 }
 
 export async function enqueueCampaignWinnerCheck(job: CampaignWinnerCheckJob, delayMs: number): Promise<boolean> {
   const q = getEmailCampaignQueue();
-  if (!q) {
+  const ok = await safeAdd(q, `campaign-winner:${job.campaignId}`, job, delayMs);
+  if (!ok) {
     logger.error({ job }, "Redis unavailable — campaign winner check NOT queued!");
-    return false;
   }
-  await q.add(
-    `campaign-winner:${job.campaignId}`,
-    job,
-    { delay: delayMs }
-  );
-  return true;
+  return ok;
 }
 
 export async function closeAllQueues() {

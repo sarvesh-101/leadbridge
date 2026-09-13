@@ -2,6 +2,7 @@ import { Worker } from "bullmq";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { NotificationJob } from "./queues";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { sendTextMessage } from "../services/whatsapp.service";
 import { sendSms } from "../services/sms.service";
 import { sendEmail } from "../services/email.service";
@@ -311,7 +312,8 @@ const notificationWorker = new Worker<NotificationJob>(
     return { waMessageId, type: notificationType, recipient };
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 5,
     lockDuration: 30000,
   }

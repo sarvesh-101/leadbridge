@@ -17,6 +17,7 @@
 import Redis from "ioredis";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { getSharedRedisOptions, noteRedisError } from "../utils/redis-health";
 
 let pubClient: Redis | null = null;
 
@@ -26,13 +27,17 @@ function getPubClient(): Redis | null {
 
   try {
     const client = new Redis(config.REDIS_URL, {
-      maxRetriesPerRequest: null,
+      ...getSharedRedisOptions(),
       enableReadyCheck: false,
       lazyConnect: true,
+    });
+    client.on("error", (err) => {
+      noteRedisError(err);
     });
     client.connect()
       .then(() => { pubClient = client; })
       .catch((err) => {
+        noteRedisError(err);
         logger.warn({ err }, "WS Service: Redis unavailable — events will not be published");
         pubClient = null;
       });

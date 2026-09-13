@@ -96,8 +96,11 @@ export function registerCronJobs() {
     });
   });
 
-  // ─── Redis Pending Job Recovery — Every 30 seconds ─────────
-  cron.schedule("*/30 * * * * *", async () => {
+  // ─── Redis Pending Job Recovery — Every 5 minutes ───────────
+  // Was every 30s — with the cron-lock + recovery queries this burned the
+  // entire Upstash free-tier command quota (500K/month) in ~2 weeks.
+  // Jobs are replayed from the DB, so 5 minutes is still prompt enough.
+  cron.schedule("*/5 * * * *", async () => {
     await runWithCronLock("redis-recovery", 25, async () => {
       try {
         const result = await recoverPendingJobs();
@@ -169,10 +172,11 @@ export function registerCronJobs() {
     });
   });
 
-  // ─── IMAP Email Ingestion — Every 2 minutes ──────────────
+  // ─── IMAP Email Ingestion — Every 5 minutes ──────────────
   // Polls the configured mailbox for forwarded portal emails (runs the same
   // pipeline as the inbound-email webhook). Skipped when IMAP_* isn't set.
-  cron.schedule("*/2 * * * *", async () => {
+  // Was every 2 minutes — quiet hours had ~0 leads, pure quota burn.
+  cron.schedule("*/5 * * * *", async () => {
     await runWithCronLock("imap-email-pull", 100, async () => {
       try {
         await runImapEmailPull();

@@ -3,6 +3,7 @@ import { LeadStatus } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { FollowupJob, enqueueCall, enqueueNotification, enqueueFollowup } from "./queues";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { isInFollowup } from "../utils/lifecycle";
 import { emitStatusChange } from "../services/websocket.service";
 import { getOptimalFollowupTiming } from "../services/smart-scheduler.service";
@@ -105,7 +106,8 @@ const followupWorker = new Worker<FollowupJob>(
     }
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 5,
     lockDuration: 30000,
   }

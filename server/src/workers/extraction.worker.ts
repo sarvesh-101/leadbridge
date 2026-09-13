@@ -4,6 +4,7 @@ import { config } from "../config";
 import { logger } from "../utils/logger";
 import { prisma } from "../utils/prisma-shared";
 import { ExtractionJob, enqueueNotification, enqueueReminder, enqueueFollowup } from "./queues";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { extractFromTranscript } from "../services/deepseek.service";
 import { emitStatusChange, emitBookingCreated } from "../services/websocket.service";
 import { scoreLead } from "../services/scoring.service";
@@ -242,7 +243,8 @@ const extractionWorker = new Worker<ExtractionJob>(
     return { newStatus, bookingId, score, qualified: extractedData.qualified, sentiment: extractedData.sentiment };
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 5,
     lockDuration: 30000,
   }

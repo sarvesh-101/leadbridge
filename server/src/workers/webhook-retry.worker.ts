@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { config } from "../config";
 import { WebhookRetryJob, enqueueCall, enqueueExtraction, enqueueNotification } from "./queues";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { logger } from "../utils/logger";
 import { prisma } from "../utils/prisma-shared";
 
@@ -126,7 +127,8 @@ const webhookRetryWorker = new Worker<WebhookRetryJob>(
     return { processed: true, callId: call.id, onRetry: true, retryCount };
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 10,
     lockDuration: 15000,
     // The queue itself has `attempts: 5`, so retry 5x with increasing backoff

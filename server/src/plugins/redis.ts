@@ -3,6 +3,7 @@ import fp from "fastify-plugin";
 import { FastifyInstance } from "fastify";
 import { config } from "../config";
 import { logger } from "../utils/logger";
+import { getSharedRedisOptions, noteRedisError } from "../utils/redis-health";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -17,16 +18,9 @@ declare module "fastify" {
  */
 const redisPlugin = fp(async (fastify: FastifyInstance) => {
   const redis = new Redis(config.REDIS_URL, {
-    maxRetriesPerRequest: null,
+    ...getSharedRedisOptions(),
     enableReadyCheck: false,
     lazyConnect: true,
-    retryStrategy: (times) => {
-      if (times > 3) {
-        fastify.log.error("Redis max retries reached — disabling Redis");
-        return null; // Stop retrying
-      }
-      return Math.min(times * 100, 3000);
-    },
   });
 
   try {
@@ -34,6 +28,7 @@ const redisPlugin = fp(async (fastify: FastifyInstance) => {
     fastify.log.info("Redis connected");
 
     redis.on("error", (err) => {
+      noteRedisError(err);
       fastify.log.error({ err }, "Redis connection error");
     });
 

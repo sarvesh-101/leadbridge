@@ -4,6 +4,7 @@ import { config } from "../config";
 import { logger } from "../utils/logger";
 import { prisma } from "../utils/prisma-shared";
 import { CallJob, enqueueCall, enqueueNotification } from "./queues";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { getVoiceAIProvider } from "../services/voice";
 import { emitCallStarted, emitCallEnded, emitStatusChange } from "../services/websocket.service";
 import { canDispatchCall, canBrokerDispatchCall, incrementBrokerCallCount } from "../services/credit-manager.service";
@@ -218,9 +219,10 @@ const callWorker = new Worker<CallJob>(
     }
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
     concurrency: 5,
     lockDuration: 60000,
+    stalledInterval: 2 * 60 * 1000,
   }
 );
 

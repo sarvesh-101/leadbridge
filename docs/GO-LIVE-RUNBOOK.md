@@ -4,11 +4,17 @@
 > Tick the checkboxes as you go. Come back to me after each step — I'll verify and/or do my part.
 >
 > **Already done ✅:** Phase 0 (code committed + pushed), Phase 1 (deploy live, `/health` green),
-> JWT secrets rotated, UptimeRobot keep-alive running.
+> JWT secrets rotated, UptimeRobot keep-alive running,
+> **Supabase DB password + Render ENCRYPTION_KEY rotated (2026-09-10)**,
+> **Razorpay KYC VERIFIED + payouts enabled (2026-09-10)**, MessageBird sender ID `CONVERZ` (2026-08-29).
 
 ---
 
-# STEP 1 — Rotate the leaked Supabase password 🔴 (~15 min, you)
+# STEP 1 — Rotate the leaked Supabase password ✅ DONE 2026-09-10
+
+> ✅ **DONE 2026-09-10** — password reset in Supabase, `DATABASE_URL` / `DATABASE_URL_PRISMA` updated
+> in `server/.env` (via `scripts/update-secrets.ps1`) and mirrored in Render; `/health` green.
+> The leaked password from commit `c94c8d0` is now dead. Steps below kept for reference only.
 
 **Why:** the old password `Sarvesh_198012` is in git history (commit `c94c8d0`) AND still live in your `.env`. Anyone with repo access can log into your database.
 
@@ -29,7 +35,10 @@
 
 ---
 
-# STEP 2 — Make Render's ENCRYPTION_KEY match local 🔴 (~5 min, you)
+# STEP 2 — Make Render's ENCRYPTION_KEY match local ✅ DONE 2026-09-10
+
+> ✅ **DONE 2026-09-10** — Render's `ENCRYPTION_KEY` now matches local `server/.env`.
+> Credentials stored under the old auto-generated key must be re-entered once in the dashboard.
 
 **Why:** Render auto-generated its own key — different from your local one. Encrypted broker credentials (WhatsApp tokens, integration keys) would be garbled.
 
@@ -113,18 +122,11 @@
 
 ---
 
-# STEP 7 — Razorpay: KYC + webhook 🔴 (~1 hr + 3-7 days waiting) — START TODAY, longest wait
+# STEP 7 — Razorpay: webhook + GST 🟠 — KYC ✅ DONE 2026-09-10, webhook still pending
 
-### 7a. KYC (blocks receiving money)
-- [ ] 1. **https://dashboard.razorpay.com** → log in
-- [ ] 2. Left sidebar → **Settings** → **KYC**
-- [ ] 3. Pick entity type — **Sole proprietor** is simplest:
-      - PAN card (personal)
-      - Aadhaar card (front + back)
-      - Bank account proof (cancel cheque or statement — must match PAN holder)
-      - Address proof (Aadhaar works)
-- [ ] 4. Submit → Razorpay sends ₹1 to your bank (micro-deposit) → enter the exact amount in the dashboard (1-2 days)
-- [ ] 5. Wait 3-7 business days → check **Settings → KYC** for status
+### 7a. KYC ✅ DONE 2026-09-10
+> KYC status = **Verified**, payouts enabled. The entity name used here is the anchor for
+> WhatsApp business verification (Step 8) and the GST decision (7c) — keep it identical everywhere.
 
 ### 7b. Webhook (so payments activate subscriptions)
 - [ ] 1. Razorpay Dashboard → **Settings** → **Webhooks** → **Add Webhook**
@@ -136,7 +138,7 @@
 - [ ] 1. Call your CA and ask: *"SaaS product, SAC 9983, pricing ₹18K/₹35K/₹60K monthly. Register for GST now or stay under the ₹20L/yr threshold? Sole proprietor or private limited?"*
 - [ ] 2. Tell me the answer → I update the pricing page + invoice GSTIN line
 
-**✅ Done when:** KYC = "Verified", payouts enabled, webhook registered.
+**✅ Done when:** webhook registered with all 4 events + `RAZORPAY_WEBHOOK_SECRET` set in Render (KYC already ✅).
 
 ---
 
@@ -194,11 +196,14 @@
 ## 📅 Suggested rhythm
 
 ```
-TODAY:      Step 1 (DB password) → Step 7a (submit KYC — longest wait!) → Step 2 (ENCRYPTION_KEY)
-THIS WEEK:  Step 3 (rebrand) → Step 4 (MessageBird number) → Step 5 (IMAP) →
-            Step 8 (WhatsApp verification) → Step 9 (sender ID)
-            while I do Step 11 in parallel
-WEEK 2:     KYC + WhatsApp approved → Step 10 (payment loop + demo call)
+DONE 2026-09-10:  Step 1 (DB password) ✅ · Step 2 (ENCRYPTION_KEY) ✅ · Step 7a (KYC) ✅ · Step 11 (code gaps) ✅
+NOW:        Step 7b (register Razorpay webhook — 10 min, unblocks money) →
+            deploy latest commit on Render (manual deploy → 595baa3) →
+            Step 8 (submit WhatsApp verification — 2-5 day wait, submit early) →
+            Step 7c (CA call: GST + entity)
+THIS WEEK:  Step 3 (rebrand renames → hand new Vercel URL to Codebuff) →
+            Step 4 (MessageBird number) → Step 5 (IMAP) → Step 9 (sender ID if not live)
+WEEK 2:     WhatsApp approved → Step 10 (payment loop + demo call)
             → first real broker (IndiaMART key in `docs/portal-ingestion-setup.md` Part 1)
 ```
 

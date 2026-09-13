@@ -2,8 +2,8 @@
  * Redis Recovery Cron — replays pending jobs stored in the database.
  *
  * When Redis is unavailable, the enqueue functions in queues.ts store
- * jobs in the PendingJob table instead. This cron runs every 30 seconds
- * and replays those jobs once Redis is back.
+ * jobs in the PendingJob table instead. This cron (every 5 minutes since the
+ * Upstash quota fix) replays those jobs once Redis is back.
  *
  * Process:
  *   1. Check if Redis is available (BullMQ queues are working)
@@ -16,8 +16,10 @@
 
 import { prisma } from "../utils/prisma-shared";
 import { logger } from "../utils/logger";
+import { isRedisBackedOff, onRedisRecovered } from "../utils/redis-health";
 import {
   isRedisAvailable,
+  reenableQueues,
   enqueueCall,
   enqueueNotification,
   enqueueFollowup,
@@ -27,13 +29,18 @@ import {
 
 const BATCH_SIZE = 50;
 
+// After a Redis outage, the health probe fires recovery callbacks once a
+// PING succeeds — re-enable queues so jobs flow back into Redis instead of
+// piling up in the DB.
+onRedisRecovered(() => reenableQueues());
+
 /**
  * Recover pending jobs from the database and re-enqueue them to Redis.
  * Runs every 30 seconds when Redis is available.
  */
 export async function recoverPendingJobs(): Promise<{ recovered: number; failed: number }> {
-  // Only run if Redis is available
-  if (!isRedisAvailable()) {
+  // Only run if Redis is available (and not in a quota/auth backoff window)
+  if (isRedisBackedOff() || !isRedisAvailable()) {
     logger.debug("Redis not available — skipping pending job recovery");
     return { recovered: 0, failed: 0 };
   }

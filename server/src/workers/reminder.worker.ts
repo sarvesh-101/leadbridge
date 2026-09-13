@@ -3,6 +3,7 @@ import { LeadStatus } from "@prisma/client";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { ReminderJob, enqueueCall, enqueueNotification } from "./queues";
+import { getSharedRedisOptions } from "../utils/redis-health";
 import { prisma } from "../utils/prisma-shared";
 
 /**
@@ -81,7 +82,8 @@ const reminderWorker = new Worker<ReminderJob>(
     };
   },
   {
-    connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+    connection: { url: config.REDIS_URL, ...getSharedRedisOptions() },
+    stalledInterval: 2 * 60 * 1000,
     concurrency: 5,
     lockDuration: 30000,
   }

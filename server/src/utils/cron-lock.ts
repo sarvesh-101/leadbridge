@@ -13,19 +13,30 @@
 import Redis from "ioredis";
 import { config } from "../config";
 import { logger } from "./logger";
+import {
+  getSharedRedisOptions,
+  isRedisBackedOff,
+  noteRedisError,
+  onRedisRecovered,
+} from "./redis-health";
 
 let sharedClient: Redis | null | undefined;
 
 async function getClient(): Promise<Redis | null> {
   if (sharedClient !== undefined) return sharedClient;
 
+  // While a quota/auth backoff is active, skip creating the client entirely —
+  // every AUTH attempt against an exhausted Upstash instance just spams errors.
+  if (isRedisBackedOff()) return null;
+
   try {
     const client = new Redis(config.REDIS_URL, {
-      maxRetriesPerRequest: null,
+      ...getSharedRedisOptions(),
       lazyConnect: true,
     });
-    client.on("error", () => {
-      /* connection errors are handled by the caller below */
+    client.on("error", (err) => {
+      noteRedisError(err);
+      /* other connection errors are handled by the caller below */
     });
     await client.connect();
     sharedClient = client;
@@ -45,6 +56,12 @@ export async function runWithCronLock<T>(
   ttlSeconds: number,
   fn: () => Promise<T>
 ): Promise<T | null> {
+  // Quota/auth backoff active → skip the lock (fail-open, job still runs).
+  if (isRedisBackedOff()) {
+    logger.warn({ job: name }, "Cron lock skipped — Redis backoff active");
+    return fn();
+  }
+
   const client = await getClient();
 
   if (client) {
