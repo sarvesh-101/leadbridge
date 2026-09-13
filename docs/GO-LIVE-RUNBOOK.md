@@ -198,7 +198,7 @@
 ```
 DONE 2026-09-10:  Step 1 (DB password) ✅ · Step 2 (ENCRYPTION_KEY) ✅ · Step 7a (KYC) ✅ · Step 11 (code gaps) ✅
 NOW:        Step 7b (register Razorpay webhook — 10 min, unblocks money) →
-            deploy latest commit on Render (manual deploy → 595baa3) →
+            deploy latest commit on Render (manual deploy → hash must match GitHub main) →
             Step 8 (submit WhatsApp verification — 2-5 day wait, submit early) →
             Step 7c (CA call: GST + entity)
 THIS WEEK:  Step 3 (rebrand renames → hand new Vercel URL to Codebuff) →
