@@ -15,8 +15,10 @@
 > **Phase 8 ✅** (ALL code gaps fixed: WhatsApp retry, campaign worker in-process, Sheets UI fields, test DB
 > rename + auth tests green).
 > Still open: **Phase 3** (Render/Vercel renames) · **Phase 4** (lead channels: MessageBird number, IMAP,
-> Facebook, IndiaMART) · **Phase 5b** (Razorpay webhook — do first, unblocks money) · **Phase 6** (WhatsApp
-> verification) · **Phase 7** (payment loop + demo call).
+> Facebook, IndiaMART) · **Phase 5b** (Razorpay webhook — do first, unblocks money) · **Phase 7** (payment
+> loop + demo call).
+> ✅ **Phase 6 done** (Meta business verification — entity **GS TECHNO**, verified 2026-08-03; confirmed
+> 2026-09-13). Leftovers: WABA display name + daily limits check; website footer; SIM-side WhatsApp registration.
 
 ---
 

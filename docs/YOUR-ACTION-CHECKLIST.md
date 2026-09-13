@@ -12,7 +12,11 @@
 > - ✅ Secret rotations (DB password, JWT, `ENCRYPTION_KEY`) — done 2026-09-10
 > - ✅ All Phase 8 code gaps (WhatsApp retry, campaign worker, Sheets UI, tests) — fixed
 >
-> Still open: **Priority 2 (GST/CA call)** · **Priority 3 (WhatsApp business verification)** ·
+> ✅ **Priority 3 (WhatsApp business verification)** — Meta business verified: **GS TECHNO**, verified 2026-08-03
+> (confirmed 2026-09-13). Leftovers: check display name + daily limits in WhatsApp Manager; add GS TECHNO +
+> registered address to the website footer.
+>
+> Still open: **Priority 2 (GST/CA call — anchor entity name is GS TECHNO)** ·
 > **Priority 6 (payment loop test)** — blocked first on registering the Razorpay webhook · **Priority 7 (demo call)**.
 
 ---

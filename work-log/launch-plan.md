@@ -50,10 +50,10 @@
   - ✅ Settings → Privacy & Data tab: consent status + one-click "Request data erasure" (atomic, notifies admin, 30-day SLA).
   - ✅ Admin: `?erasureRequested=true` filter + `dataErasureProcessedAt` to close the loop.
   - ✅ Privacy Policy updated (Aug 10, 2026) with DPDP erasure path. `ENCRYPTION_KEY` already set.
-- [ ] **1.4 WhatsApp business verification** ⏳ NEEDS ACTION — submit legal entity docs to Meta per `sales/whatsapp-business-verification.md` `sales/whatsapp-business-verification.md` (2026-08-15)
-  - Full step-by-step: decide legal entity (blocked on 1.1) → Meta BM setup → submit verification → post-check → rejection fixes.
-  - Rule: one name everywhere (Meta = GST/CoI/MSME = website = bank account).
-  - Submission itself is a Sarvesh action (needs the real entity name + docs).
+- [x] **1.4 WhatsApp business verification** ✅ VERIFIED — **entity: GS TECHNO, verified 2026-08-03** (confirmed in Meta Security Center 2026-09-13)
+  - Legal entity name anchor = **GS TECHNO** — must be used identically on the website footer, GST, bank account.
+  - Remaining sub-items: confirm WABA display name (was PENDING_REVIEW) + daily limits in WhatsApp Manager; add GS TECHNO + registered address to the website footer; SIM-side WhatsApp registration for +91 72088 55916 (was in cooldown, per 0.3).
+  - Reference: `sales/whatsapp-business-verification.md`.
 - [x] **1.5 Fix legal contact emails** ✅ DONE 2026-08-10 — real mailbox `support@converza.tech` purchased + wired
   - Footer Contact, FAQ, ToS, and Privacy Policy pages now `mailto:support@converza.tech` (was dead `@leadbridge.com`).
   - Outbound `FROM_EMAIL` stays the real Gmail SMTP user (verified in .env) — sends from a live inbox.

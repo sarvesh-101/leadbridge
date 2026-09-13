@@ -6,7 +6,8 @@
 > **Already done ✅:** Phase 0 (code committed + pushed), Phase 1 (deploy live, `/health` green),
 > JWT secrets rotated, UptimeRobot keep-alive running,
 > **Supabase DB password + Render ENCRYPTION_KEY rotated (2026-09-10)**,
-> **Razorpay KYC VERIFIED + payouts enabled (2026-09-10)**, MessageBird sender ID `CONVERZ` (2026-08-29).
+> **Razorpay KYC VERIFIED + payouts enabled (2026-09-10)**, MessageBird sender ID `CONVERZ` (2026-08-29),
+> **Meta business verification — entity GS TECHNO (verified 2026-08-03, confirmed 2026-09-13)**.
 
 ---
 
@@ -142,19 +143,25 @@
 
 ---
 
-# STEP 8 — WhatsApp business verification 🟡 (~30 min + 2-5 days waiting)
+# STEP 8 — WhatsApp business verification ✅ DONE (verified 2026-08-03, confirmed 2026-09-13)
 
-- [ ] 1. **https://business.facebook.com** → Settings → **Business Info**:
-      - Legal Business Name = the SAME name you used for Razorpay KYC
-      - Address = registered address (matches GST/CoI)
-      - Phone + Website = your Converza domain
-- [ ] 2. Add the WhatsApp Business Account (+91 72088 55916) to this Business Manager
-- [ ] 3. **Security Center** → **Start Verification** → upload business document (GST cert / CoI / MSME)
-- [ ] 4. Complete the verification code step (Meta calls or mails the registered contact)
-- [ ] 5. Tell me your **legal entity name + registered address** → I add it to the website footer (Meta requires the real business name on the site)
-- [ ] 6. Wait 2-5 business days → check **WhatsApp Manager** → display name should change from PENDING_REVIEW → approved, limits raised
+> ✅ **Security Center shows: "Verification for GS TECHNO — Originally verified on Aug 03, 2026 — Verified."**
+> The legal entity name is **GS TECHNO** — this is now the anchor everywhere (footer, GST, bank).
+>
+> Remaining sub-items:
+> - [ ] Confirm WhatsApp display name status in WhatsApp Manager (was PENDING_REVIEW → should be approved now)
+> - [ ] Check daily messaging limits raised
+> - [ ] Sarvesh: send the registered address → Codebuff adds **GS TECHNO** + address to the website footer
+> - [ ] From launch-plan 0.3: register +91 72088 55916 on the WhatsApp app itself (SIM-side; was in cooldown)
 
-**✅ Done when:** WhatsApp display name approved + daily limits adequate.
+Original steps kept for reference:
+
+- [x] 1. **https://business.facebook.com** → Settings → **Business Info** (legal name = GS TECHNO + registered address)
+- [x] 2. WhatsApp Business Account (+91 72088 55916) in this Business Manager
+- [x] 3. **Security Center** → verification submitted + approved
+- [ ] 4. Post-verification checks (display name, daily limits) — see sub-items above
+
+**✅ Done when:** WhatsApp display name approved + daily limits adequate. (Business verification itself: ✅.)
 
 ---
 
@@ -197,13 +204,14 @@
 
 ```
 DONE 2026-09-10:  Step 1 (DB password) ✅ · Step 2 (ENCRYPTION_KEY) ✅ · Step 7a (KYC) ✅ · Step 11 (code gaps) ✅
+DONE 2026-09-13:  Step 8 (Meta business verification) ✅ — entity GS TECHNO, verified 2026-08-03
 NOW:        Step 7b (register Razorpay webhook — 10 min, unblocks money) →
             deploy latest commit on Render (manual deploy → hash must match GitHub main) →
-            Step 8 (submit WhatsApp verification — 2-5 day wait, submit early) →
-            Step 7c (CA call: GST + entity)
+            Step 7c (CA call: GST + entity — anchor name is now GS TECHNO)
 THIS WEEK:  Step 3 (rebrand renames → hand new Vercel URL to Codebuff) →
-            Step 4 (MessageBird number) → Step 5 (IMAP) → Step 9 (sender ID if not live)
-WEEK 2:     WhatsApp approved → Step 10 (payment loop + demo call)
+            Step 4 (MessageBird number) → Step 5 (IMAP) → Step 9 (sender ID if not live) →
+            Step 8 leftovers (display name + limits check, footer, SIM-side WhatsApp registration)
+WEEK 2:     Step 10 (payment loop + demo call)
             → first real broker (IndiaMART key in `docs/portal-ingestion-setup.md` Part 1)
 ```
 
