@@ -123,21 +123,26 @@
 
 ---
 
-# STEP 7 — Razorpay: webhook + GST 🟠 — KYC ✅ DONE 2026-09-10, webhook still pending
+# STEP 7 — Razorpay: webhook + GST ✅ DONE (7b + 7c decided 2026-09-22; KYC done 2026-09-10)
 
 ### 7a. KYC ✅ DONE 2026-09-10
-> KYC status = **Verified**, payouts enabled. The entity name used here is the anchor for
-> WhatsApp business verification (Step 8) and the GST decision (7c) — keep it identical everywhere.
+> KYC status = **Verified**, payouts enabled.
 
-### 7b. Webhook (so payments activate subscriptions)
-- [ ] 1. Razorpay Dashboard → **Settings** → **Webhooks** → **Add Webhook**
-- [ ] 2. URL: `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`
-- [ ] 3. Events: `subscription.charged`, `subscription.cancelled`, `payment.failed`, `invoice.paid`
-- [ ] 4. Save → copy the **webhook secret** → Render → add `RAZORPAY_WEBHOOK_SECRET` → Save
+### 7b. Webhook (so payments activate subscriptions) ✅ DONE 2026-09-22
+- [x] Webhook registered at `…/api/v1/webhooks/razorpay` + `RAZORPAY_WEBHOOK_SECRET` set.
 
-### 7c. GST decision
-- [ ] 1. Call your CA and ask: *"SaaS product, SAC 9983, pricing ₹18K/₹35K/₹60K monthly. Register for GST now or stay under the ₹20L/yr threshold? Sole proprietor or private limited?"*
-- [ ] 2. Tell me the answer → I update the pricing page + invoice GSTIN line
+### 7c. GST decision ✅ DECIDED 2026-09-22 — CA confirmed: **register + charge 18% GST**
+- [x] CA call done. Decision: GST registration **in progress**; pricing keeps "18% GST applies".
+- [x] ✅ **GSTIN SUPPLIED + WIRED 2026-09-25: `27AEGPH7840P1ZX`** (Maharashtra, proprietorship —
+      same proprietor as GS TECHNO, so one GSTIN legally covers SaaS/SAC 9983 billing too).
+      Checksum-verified; set as `SELLER_GSTIN` + `SELLER_ADDRESS` in `server/.env` and mirrored on
+      Render → Environment (2026-09-25). Format validation added in `config.ts` (fail-fast).
+      Invoice PDFs pick it up automatically (`invoice.service.ts` reads `SELLER_GSTIN` /
+      `SELLER_LEGAL_NAME` / `SELLER_ADDRESS`).
+      ⚠️ Optional follow-up with CA: GST-portal "nature of business" amendment to add IT services —
+      NOT a blocker for invoicing.
+      ⚠️ Compliance note: do not issue the FIRST real invoice before the GSTIN is live on it
+      (i.e. after the Render deploy below).
 
 **✅ Done when:** webhook registered with all 4 events + `RAZORPAY_WEBHOOK_SECRET` set in Render (KYC already ✅).
 
@@ -151,7 +156,8 @@
 > Remaining sub-items:
 > - [ ] Confirm WhatsApp display name status in WhatsApp Manager (was PENDING_REVIEW → should be approved now)
 > - [ ] Check daily messaging limits raised
-> - [ ] Sarvesh: send the registered address → Codebuff adds **GS TECHNO** + address to the website footer
+> - [x] Sarvesh: send the registered address → ✅ DONE 2026-09-25 — **GS TECHNO** + address +
+>       GSTIN now on the website footer (landing page)
 > - [ ] From launch-plan 0.3: register +91 72088 55916 on the WhatsApp app itself (SIM-side; was in cooldown)
 
 Original steps kept for reference:
@@ -205,9 +211,12 @@ Original steps kept for reference:
 ```
 DONE 2026-09-10:  Step 1 (DB password) ✅ · Step 2 (ENCRYPTION_KEY) ✅ · Step 7a (KYC) ✅ · Step 11 (code gaps) ✅
 DONE 2026-09-13:  Step 8 (Meta business verification) ✅ — entity GS TECHNO, verified 2026-08-03
-NOW:        Step 7b (register Razorpay webhook — 10 min, unblocks money) →
-            deploy latest commit on Render (manual deploy → hash must match GitHub main) →
-            Step 7c (CA call: GST + entity — anchor name is now GS TECHNO)
+DONE 2026-09-22:  Step 7b (Razorpay webhook) ✅ · Step 7c decision ✅
+DONE 2026-09-25:  Step 7c GSTIN ✅ — `27AEGPH7840P1ZX` set in `server/.env` (+ validation in `config.ts`)
+DONE 2026-09-25:  Render env mirrored ✅ — `SELLER_GSTIN` + `SELLER_ADDRESS` added by Sarvesh
+NOW:        commit + push the local code (footer entity block, invoice PDF layout fix, config
+            validation) → Render deploy → Step 10 (payment loop test — confirm the GSTIN +
+            address print on the invoice PDF)
 THIS WEEK:  Step 3 (rebrand renames → hand new Vercel URL to Codebuff) →
             Step 4 (MessageBird number) → Step 5 (IMAP) → Step 9 (sender ID if not live) →
             Step 8 leftovers (display name + limits check, footer, SIM-side WhatsApp registration)

@@ -75,6 +75,10 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       name: string;
       welcomeMessage?: string;
       language?: string;
+      /** Omnidim display names — full multilingual list (see /voice/languages) */
+      languages?: string[];
+      /** E.164 — enables live call transfer to the broker/human when the prospect asks */
+      transferToNumber?: string;
       voiceProvider?: string;
       voiceId?: string;
       modelName?: string;
@@ -88,6 +92,21 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       return reply.status(403).send(featureGateError("AI voice agent creation", plan, requiredPlan));
     }
 
+    // ── Multilingual + transfer resolution ─────────────────────────
+    const { toOmnidimLanguageNames, DEFAULT_AGENT_LANGUAGES } = await import("../../services/voice/supported-languages");
+
+    const transferToNumber = request.body.transferToNumber?.trim() || undefined;
+    if (transferToNumber && !/^\+[1-9]\d{7,14}$/.test(transferToNumber)) {
+      return reply.status(400).send({
+        error: "Invalid transferToNumber — must be E.164 format (e.g. +919876543210)",
+      });
+    }
+
+    const languages =
+      request.body.languages?.length
+        ? toOmnidimLanguageNames(request.body.languages)
+        : toOmnidimLanguageNames([request.body.language]) || DEFAULT_AGENT_LANGUAGES;
+
     const voiceAI = getVoiceAIProvider();
     let agent;
     let isLocal = false;
@@ -97,6 +116,8 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         name: request.body.name,
         welcomeMessage: request.body.welcomeMessage,
         language: request.body.language || "hi-IN",
+        languages,
+        transferToNumber,
         voiceProvider: request.body.voiceProvider || "eleven_labs",
         voiceId: request.body.voiceId,
         modelName: request.body.modelName || "gpt-4o-mini",
@@ -129,10 +150,18 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       data: {
         omniAgentId: String(agent.id),
         omnidimensionAgentId: Number(agent.id),
+        ...(transferToNumber ? { transferToNumber } : {}),
+        ...(languages.length ? { languages: { set: languages } } : {}),
       },
     });
 
     return reply.status(201).send({ agent, isAssigned: true, isLocal });
+  });
+
+  /** Languages the AI agents can speak (Omnidim: 100+ Indian + international) */
+  fastify.get("/voice/languages", async () => {
+    const { AGENT_LANGUAGE_OPTIONS } = await import("../../services/voice/supported-languages");
+    return { languages: AGENT_LANGUAGE_OPTIONS };
   });
 
   /** List all agents */

@@ -32,6 +32,10 @@ export interface CreateAgentParams {
   name: string;
   welcomeMessage?: string;
   language?: string;
+  /** Full agent language list (Omnidim dashboard display names). Overrides `language` when set. */
+  languages?: string[];
+  /** E.164 number — live call transfer when the prospect asks for a human (Omnidim `transfer` config). */
+  transferToNumber?: string;
   voiceProvider?: string;
   voiceId?: string;
   modelProvider?: string;
@@ -71,7 +75,32 @@ export async function createAgent(params: CreateAgentParams): Promise<OmnidimAge
   };
 
   if (params.welcomeMessage) body.welcome_message = params.welcomeMessage;
-  if (params.language) body.languages = [params.language, "English"];
+  // Omnidim `languages`: display-name strings exactly as in their dashboard picker;
+  // unrecognized names are silently skipped by their API.
+  if (params.languages?.length) {
+    body.languages = params.languages;
+  } else if (params.language) {
+    body.languages = [params.language, "English"];
+  }
+
+  // Conditional live call transfer — fires when transfer_condition matches.
+  // Omnidim transfer schema: { enabled, transfer_options: [{ number (E.164, required),
+  // type: "static"|"dynamic", backup_numbers?, transfer_condition (required), transfer_message (required) }] }
+  if (params.transferToNumber) {
+    body.transfer = {
+      enabled: true,
+      transfer_options: [
+        {
+          number: params.transferToNumber,
+          type: "static",
+          transfer_condition:
+            "Transfer whenever the caller explicitly asks to speak with a human agent, the broker, or the owner, or says they do not want to talk to an AI. Also transfer when the caller is a highly interested hot lead who qualifies (clear budget, timeline, and property requirement) and asks for immediate human assistance.",
+          transfer_message:
+            "Sure, I am connecting you to our team member right away. Please stay on the line while I transfer this call.",
+        },
+      ],
+    };
+  }
 
   // Voice configuration — default to Rachel (ElevenLabs) if no voiceId provided
   body.voice = {

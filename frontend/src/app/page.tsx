@@ -211,6 +211,20 @@ export default function LandingPage() {
               <p className="text-[13px] text-[#9FB0A6]">
                 One broker per city. AI calls every lead in 60 seconds.
               </p>
+              {/* Legal entity block — name must match GST / Meta / Razorpay KYC (anchor: GS TECHNO). */}
+              <div className="mt-4 text-[12px] text-[#6B7C73] leading-relaxed">
+                <p className="text-[#9FB0A6]">Operated by GS TECHNO</p>
+                <p>
+                  1, Hanuman Nagar, Behind BMC Chawl 22, Bhatwadi Hill, Ghatkopar,
+                  Mumbai Suburban, Maharashtra 400084
+                </p>
+                <p>GSTIN: 27AEGPH7840P1ZX</p>
+                {/* TRAI TCCCPR: AI calls disclose as automated; 9–9 IST promotional window enforced in-product */}
+                <p className="mt-2">
+                  AI calls are placed as an automated service with mandatory AI disclosure,
+                  within TRAI TCCCPR guidelines. Promotional calls: 9 AM–9 PM IST only.
+                </p>
+              </div>
             </div>
             {[
               {
@@ -220,6 +234,12 @@ export default function LandingPage() {
                   { label: "Pricing", href: "#pricing" },
                   { label: "Territories", href: "#territories" },
                   { label: "How It Works", href: "#how-it-works" },
+                ],
+              },
+              {
+                title: "Compare",
+                links: [
+                  { label: "Converza vs Vyora AI", href: "/compare/vyora" },
                 ],
               },
               {
@@ -256,7 +276,7 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="pt-8 border-t border-white/[0.08] text-center text-[13px] text-[#6B7C73]">
-            © {new Date().getFullYear()} Converza. All rights reserved.
+            © {new Date().getFullYear()} Converza · Operated by GS TECHNO. All rights reserved.
           </div>
         </div>
       </footer>

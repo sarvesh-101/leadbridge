@@ -39,9 +39,12 @@
 
 ## 🟨 PHASE 1 — Compliance & paperwork (parallel with Phase 0)
 
-- [ ] **1.1 Decide GST path** ⏳ NEEDS ACTION — ask CA: SaaS 18% (SAC 9983), register now or stay under ₹20L/yr *(CA call not yet done as of 2026-09-10)*
-  - SaaS = 18% (SAC 9983). Registration mandatory only above ₹20L/yr turnover.
-  - Either register now (charge 18% — pricing page already says "18% GST applies") or stay under threshold and remove that line. Ask a CA.
+- [x] **1.1 Decide GST path** ✅ DONE — CA: register + charge 18% (2026-09-22); **GSTIN supplied 2026-09-25: `27AEGPH7840P1ZX`**
+  - SaaS = 18% (SAC 9983). GSTIN is a Maharashtra proprietorship registration (state code 27) —
+    one GSTIN per state covers all business lines of the same proprietor, incl. SaaS billing.
+  - Wired: `SELLER_GSTIN` + `SELLER_ADDRESS` set in `server/.env` AND mirrored on Render
+    (2026-09-25); format validation added in `config.ts`; invoice PDFs read them automatically.
+  - Optional (CA): GST-portal "nature of business" amendment to add IT services — not a blocker.
 - [x] **1.2 Confirm Razorpay KYC matches legal entity** ✅ DONE 2026-09-10 — KYC **Verified**, payouts enabled
   - Remaining sub-task: register the webhook (`…/api/v1/webhooks/razorpay`, events `subscription.charged`/`cancelled`, `payment.failed`, `invoice.paid`) + `RAZORPAY_WEBHOOK_SECRET` in Render if not done yet.
 - [x] **1.3 DPDP Act compliance** ✅ CODE DONE 2026-08-10 (legal review still advised)
@@ -52,7 +55,7 @@
   - ✅ Privacy Policy updated (Aug 10, 2026) with DPDP erasure path. `ENCRYPTION_KEY` already set.
 - [x] **1.4 WhatsApp business verification** ✅ VERIFIED — **entity: GS TECHNO, verified 2026-08-03** (confirmed in Meta Security Center 2026-09-13)
   - Legal entity name anchor = **GS TECHNO** — must be used identically on the website footer, GST, bank account.
-  - Remaining sub-items: confirm WABA display name (was PENDING_REVIEW) + daily limits in WhatsApp Manager; add GS TECHNO + registered address to the website footer; SIM-side WhatsApp registration for +91 72088 55916 (was in cooldown, per 0.3).
+  - Remaining sub-items: confirm WABA display name (was PENDING_REVIEW) + daily limits in WhatsApp Manager; ~~add GS TECHNO + registered address to the website footer~~ ✅ DONE 2026-09-25 (landing footer shows GS TECHNO + address + GSTIN); SIM-side WhatsApp registration for +91 72088 55916 (was in cooldown, per 0.3).
   - Reference: `sales/whatsapp-business-verification.md`.
 - [x] **1.5 Fix legal contact emails** ✅ DONE 2026-08-10 — real mailbox `support@converza.tech` purchased + wired
   - Footer Contact, FAQ, ToS, and Privacy Policy pages now `mailto:support@converza.tech` (was dead `@leadbridge.com`).
@@ -70,7 +73,14 @@
 - [x] **2.2 Verify per-plan margins** ✅ DONE 2026-08-15 — analysis in `docs/plan-margins.md`
   - `OMNIDIM_COST_PER_MINUTE=4.6`, `PHONE_NUMBER_MONTHLY_COST=200`, `BROKER_CALL_PRICE=70`.
   - STARTER (94% margin) + GROWTH (86%) are safely profitable at every realistic call duration. PRO was the only risk: at the old 5,000-call cap with 4-min avg calls the platform LOSES money (−₹32K/mo). **✅ APPLIED 2026-08-15: `PRO_MONTHLY_CALL_CAP` lowered 5,000 → 2,000** (env + code default). Worst case (6-min calls at 2,000) still ~8% margin. Re-tune after Phase 4.2 real call-duration data.
-- [ ] **2.3 Full payment loop test on production** ✅ SPEC READY `sales/payment-loop-test.md` — run after Razorpay KYC (1.2) is complete
+- [x] **2.3 Razorpay webhook registered + GST decision made** ✅ DONE 2026-09-22
+  - Webhook live at `…/api/v1/webhooks/razorpay` with `RAZORPAY_WEBHOOK_SECRET` set.
+  - CA decision: charge 18% GST — pricing page copy stays. ✅ GSTIN supplied 2026-09-25
+    (`27AEGPH7840P1ZX`): `SELLER_GSTIN` + `SELLER_ADDRESS` set in `server/.env` — invoice PDFs
+    read them automatically. ✅ Render env mirrored 2026-09-25. Local code (footer + PDF layout
+    fix) still needs commit → push → Render deploy.
+    Do not issue the first real invoice before the GSTIN is live on it (post-deploy).
+- [ ] **2.4 Full payment loop test on production** ✅ SPEC READY `sales/payment-loop-test.md` — NOW UNBLOCKED (webhook registered 2026-09-22)
   - Full 8-step runbook: trial → GROWTH checkout → real charge → webhook asserts (activation, invoice PAID, GST PDF, Payment row, revenue) → renewal sim (FIX #9 invoice + cycle reset) → cancel/refund → failure paths → teardown (dogfoods DPDP erasure).
 
 ---

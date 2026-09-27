@@ -88,6 +88,14 @@ const envSchema = z.object({
   FROM_EMAIL: z.string().default("noreply@converza.tech"),
   FROM_NAME: z.string().default("Converza"),
 
+  // Seller identity on GST invoices. Legal entity (Meta-verified + Razorpay KYC): GS TECHNO.
+  // GSTIN 27AEGPH7840P1ZX (issued; supplied + checksum-verified 2026-09-25): proprietorship,
+  // Maharashtra (state code 27) — one GSTIN per state covers all business lines of the same
+  // proprietor, incl. SaaS (SAC 9983). Format-validated below; invalid value fails boot fast.
+  SELLER_LEGAL_NAME: z.string().default("GS TECHNO"),
+  SELLER_ADDRESS: z.string().default(""),
+  SELLER_GSTIN: z.string().regex(/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, "SELLER_GSTIN must be a 15-character GSTIN (e.g. 27AEGPH7840P1ZX)").optional(),
+
   // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),

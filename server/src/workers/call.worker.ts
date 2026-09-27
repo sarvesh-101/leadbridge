@@ -8,6 +8,7 @@ import { getSharedRedisOptions } from "../utils/redis-health";
 import { getVoiceAIProvider } from "../services/voice";
 import { emitCallStarted, emitCallEnded, emitStatusChange } from "../services/websocket.service";
 import { canDispatchCall, canBrokerDispatchCall, incrementBrokerCallCount } from "../services/credit-manager.service";
+import { evaluateCallCompliance } from "../services/call-compliance";
 
 // Track which calls have had their billing increment already applied
 
@@ -148,6 +149,27 @@ const callWorker = new Worker<CallJob>(
       }
     }
 
+    // ─── TRAI COMPLIANCE GATE ─────────────────────────────────────
+    // Consent basis + promotional-window check (TCCCPR Feb-2025 amendment).
+    // AI disclosure itself is baked into every agent prompt (buildAgentContext).
+    const compliance = evaluateCallCompliance({
+      callType,
+      leadSource: lead.source,
+      leadCreatedAt: lead.createdAt,
+    });
+    if (!compliance.allowed) {
+      job.log(`⛔ TRAI gate: ${compliance.reason}`);
+      logger.warn({ leadId, clientId, callType, reason: compliance.reason }, "Call blocked by compliance gate");
+      await enqueueNotification({
+        recipient: "owner", leadId, clientId, type: "ACCOUNT_INACTIVE",
+        data: {
+          leadName: lead.name,
+          message: `Call not placed (compliance): ${compliance.reason}`,
+        },
+      });
+      return { skipped: true, reason: compliance.reason };
+    }
+
     const call = await prisma.call.create({
       data: {
         clientId, leadId, type: callType, direction: "outbound",
@@ -200,7 +222,7 @@ const callWorker = new Worker<CallJob>(
       const voiceResult = await voiceAI.dispatchCall({
         agentId,
         toNumber: lead.phone,
-        callContext,
+        callContext: { ...callContext, consent_basis: compliance.consentBasis },
       });
 
       await prisma.call.update({

@@ -25,7 +25,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">1. Acceptance of Terms</h2>
             <p>
-              By accessing or using LeadFlow AI ("the Platform"), you agree to be bound by these Terms of Service.
+              By accessing or using Converza ("the Platform"), you agree to be bound by these Terms of Service.
               If you do not agree to all the terms, you may not access or use the Platform.
             </p>
           </section>
@@ -33,7 +33,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">2. Description of Service</h2>
             <p>
-              LeadFlow AI provides an AI-powered lead management, appointment booking, customer follow-up,
+              Converza provides an AI-powered lead management, appointment booking, customer follow-up,
               and conversion management platform for businesses. The Platform includes features such as
               automated calling, WhatsApp messaging, lead scoring, booking management, and analytics.
             </p>
@@ -105,7 +105,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">8. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by law, LeadFlow AI shall not be liable for any indirect,
+              To the maximum extent permitted by law, Converza shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages arising out of or relating to your
               use of the Platform. Our total liability shall not exceed the amount paid by you in the
               12 months preceding the claim.
@@ -142,8 +142,12 @@ export default function TermsOfServicePage() {
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center">
           <Link href="/" className="text-[#9FB0A6] hover:text-[#F0F7F3] text-sm">
-            &copy; {new Date().getFullYear()} Converza. All rights reserved.
+            &copy; {new Date().getFullYear()} Converza · Operated by GS TECHNO. All rights reserved.
           </Link>
+          <div className="mt-3 text-xs text-[#6B7C73] leading-relaxed">
+            <p>GS TECHNO — 1, Hanuman Nagar, Behind BMC Chawl 22, Bhatwadi Hill, Ghatkopar, Mumbai Suburban, Maharashtra 400084</p>
+            <p>GSTIN: 27AEGPH7840P1ZX</p>
+          </div>
         </div>
       </div>
     </div>

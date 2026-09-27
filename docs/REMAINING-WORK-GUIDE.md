@@ -150,8 +150,9 @@ Details + exact URLs for each: **`docs/portal-ingestion-setup.md`**.
 - [ ] 1. **Razorpay KYC** — full steps in `docs/YOUR-ACTION-CHECKLIST.md` Priority 1:
       dashboard.razorpay.com → Settings → KYC → pick entity (sole proprietor = simplest) →
       submit PAN/Aadhaar/bank proof → verify bank → wait 3–7 business days
-- [ ] 2. **GST decision** — call your CA with the question in Priority 2 → tell me the answer →
-      I flip the pricing-page GST line + invoice GSTIN (already a flagged code item)
+- [x] 2. **GST decision + GSTIN** ✅ DONE — CA: register + charge 18% (2026-09-22); GSTIN
+      **`27AEGPH7840P1ZX`** supplied 2026-09-25 → `SELLER_GSTIN` set in `server/.env`;
+      invoice PDFs read it automatically. Remaining: mirror the env var on Render → Environment.
 - [ ] 3. Confirm in Render: `RAZORPAY_WEBHOOK_SECRET` is set and the webhook URL
       `https://<your-api-domain>/api/v1/webhooks/razorpay` is registered in the Razorpay dashboard
       (Settings → Webhooks → events: `subscription.charged`, `subscription.cancelled`,

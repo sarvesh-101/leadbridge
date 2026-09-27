@@ -141,6 +141,10 @@ model Client {
   // Language
   language     String    @default("hinglish")
 
+  // Omnidimension feature wiring (call transfer + languages)
+  transferToNumber  String?   // E.164 — call transfers here when prospect asks for a human / hot lead
+  languages         String[]  @default(["hinglish", "English"]) // agent languages (Omnidim supports 100+)
+
   // WhatsApp
   ownerWhatsapp String
 

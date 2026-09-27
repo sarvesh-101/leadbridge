@@ -75,11 +75,30 @@ export async function generateInvoicePdf(invoice: InvoiceData): Promise<string> 
     doc.fontSize(28).font("Helvetica-Bold").fillColor(PRIMARY)
       .text("INVOICE", 50, 50);
 
-    doc.fontSize(10).font("Helvetica").fillColor(GRAY)
-      .text(config.FROM_NAME || "Converza", 50, 85)
-      .text(`GST: Not applicable (below ₹20L threshold)`, 50, 100)
-      .text("Bengaluru, Karnataka", 50, 115)
-      .text(`www.converza.tech`, 50, 130);
+    // Seller block. Legal entity = GS TECHNO (Meta-verified anchor).
+    // ⚠️ We charge 18% GST, so a GST-registered seller identity is REQUIRED on
+    // the invoice. GSTIN is injected via SELLER_GSTIN env — issued 2026-09-25 and set in
+    // server/.env (+ mirror on Render). The warn below still guards envs missing the var
+    // (was previously the contradictory hardcoded line
+    // "GST: Not applicable (below ₹20L threshold)" while charging 18% below).
+    if (!config.SELLER_GSTIN) {
+      logger.warn(
+        "SELLER_GSTIN is not set but invoices charge 18% GST — set it in env as soon as GST registration completes"
+      );
+    }
+    const sellerLines: string[] = [config.SELLER_LEGAL_NAME || config.FROM_NAME || "Converza"];
+    if (config.SELLER_ADDRESS) sellerLines.push(config.SELLER_ADDRESS);
+    if (config.SELLER_GSTIN) sellerLines.push(`GSTIN: ${config.SELLER_GSTIN}`);
+    sellerLines.push(`www.converza.tech`);
+
+    doc.fontSize(10).font("Helvetica").fillColor(GRAY);
+    // Running y instead of fixed 15pt steps — the real registered address wraps to
+    // multiple lines, and fixed spacing overlapped them (and pushed into the divider).
+    let sellerY = 85;
+    for (const line of sellerLines) {
+      doc.text(line, 50, sellerY, { width: 320, lineGap: 2 });
+      sellerY += doc.heightOfString(line, { width: 320, lineGap: 2 }) + 4;
+    }
 
     // Invoice number & date — right aligned
     const rightX = 400;
@@ -97,11 +116,12 @@ export async function generateInvoicePdf(invoice: InvoiceData): Promise<string> 
       );
     }
 
-    // Divider
-    doc.moveTo(50, 155).lineTo(545, 155).strokeColor("#E0E0E0").stroke();
+    // Divider — moved down (was 155) so the wrapped seller block (GS TECHNO address)
+    // never collides with it.
+    doc.moveTo(50, 175).lineTo(545, 175).strokeColor("#E0E0E0").stroke();
 
     // ─── Bill To ──────────────────────────────────────────
-    const billY = 175;
+    const billY = 195;
     doc.fontSize(10).font("Helvetica-Bold").fillColor(DARK)
       .text("Bill To:", 50, billY);
 

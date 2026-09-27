@@ -34,6 +34,10 @@ export interface VoiceAgentConfig {
   name: string;
   welcomeMessage?: string;
   language?: string;
+  /** Full language list (Omnidim display names) — overrides `language` when set. */
+  languages?: string[];
+  /** E.164 number for live call transfer to a human (Omnidim transfer config). */
+  transferToNumber?: string;
   voiceProvider?: string;
   voiceId?: string;
   modelName?: string;

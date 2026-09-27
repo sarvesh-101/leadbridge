@@ -39,6 +39,33 @@ interface KnowledgeDoc {
   attached_agent_id?: number | null;
 }
 
+/** Language options — mirrors server /voice/languages (Omnidim 100+ platform) */
+const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "international" }[] = [
+  { value: "Hinglish", label: "Hinglish", region: "indian" },
+  { value: "Hindi", label: "Hindi", region: "indian" },
+  { value: "English", label: "English", region: "indian" },
+  { value: "Tamil", label: "Tamil", region: "indian" },
+  { value: "Telugu", label: "Telugu", region: "indian" },
+  { value: "Bengali", label: "Bengali", region: "indian" },
+  { value: "Marathi", label: "Marathi", region: "indian" },
+  { value: "Gujarati", label: "Gujarati", region: "indian" },
+  { value: "Kannada", label: "Kannada", region: "indian" },
+  { value: "Malayalam", label: "Malayalam", region: "indian" },
+  { value: "Punjabi", label: "Punjabi", region: "indian" },
+  { value: "Odia", label: "Odia", region: "indian" },
+  { value: "Urdu", label: "Urdu", region: "indian" },
+  { value: "Assamese", label: "Assamese", region: "indian" },
+  { value: "Spanish", label: "Spanish", region: "international" },
+  { value: "French", label: "French", region: "international" },
+  { value: "German", label: "German", region: "international" },
+  { value: "Mandarin", label: "Mandarin", region: "international" },
+  { value: "Arabic", label: "Arabic", region: "international" },
+  { value: "Portuguese", label: "Portuguese", region: "international" },
+  { value: "Russian", label: "Russian", region: "international" },
+  { value: "Japanese", label: "Japanese", region: "international" },
+  { value: "English (US)", label: "English (US)", region: "international" },
+];
+
 export default function VoiceAIPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -56,6 +83,8 @@ export default function VoiceAIPage() {
   const [creatingAgent, setCreatingAgent] = useState(false);
   const [newAgentName, setNewAgentName] = useState("");
   const [newAgentLanguage, setNewAgentLanguage] = useState("hinglish");
+  const [newAgentLanguages, setNewAgentLanguages] = useState<string[]>(["Hinglish", "English"]);
+  const [newAgentTransfer, setNewAgentTransfer] = useState("");
   const [newAgentVoice, setNewAgentVoice] = useState("");
   const [newAgentPrompt, setNewAgentPrompt] = useState("");
 
@@ -127,6 +156,8 @@ export default function VoiceAIPage() {
       const res = await api.post<{ agent: OmnidimAgent; isAssigned: boolean }>("/voice/agents", {
         name: newAgentName,
         language: newAgentLanguage,
+        languages: newAgentLanguages,
+        transferToNumber: newAgentTransfer.trim() || undefined,
         voiceId: newAgentVoice || undefined,
         systemPrompt: newAgentPrompt || undefined,
       });
@@ -396,17 +427,37 @@ export default function VoiceAIPage() {
                           className="w-full px-3 py-2 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
                           placeholder="e.g., Property Assistant" />
                       </div>
+                      {/* Languages — Omnidim 100+ (all Indian + international) */}
+                      <div>
+                        <label className="block text-xs text-[#9FB0A6] mb-1">
+                          Languages the agent speaks <span className="text-[#9FB0A6]/60">(multi-select — Indian + international)</span>
+                        </label>
+                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                          {LANGUAGE_OPTIONS.map(opt => (
+                            <button key={opt.value} type="button"
+                              onClick={() => setNewAgentLanguages(prev => prev.includes(opt.value)
+                                ? prev.filter(v => v !== opt.value)
+                                : [...prev, opt.value])}
+                              className={cn("px-2 py-1 rounded-full text-xs border transition",
+                                newAgentLanguages.includes(opt.value)
+                                  ? "bg-[#34D399]/20 border-[#34D399]/50 text-[#6FE3B0]"
+                                  : "border-white/10 text-[#9FB0A6] hover:border-white/25")}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-[10px] text-gray-600 mt-1">The AI detects and speaks the caller's language. Hinglish + English recommended for most brokers.</p>
+                      </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs text-[#9FB0A6] mb-1">Language</label>
-                          <select value={newAgentLanguage} onChange={e => setNewAgentLanguage(e.target.value)}
+                          <label className="block text-xs text-[#9FB0A6] mb-1">
+                            Transfer to (human handoff) <span className="text-[#9FB0A6]/60">optional</span>
+                          </label>
+                          <input value={newAgentTransfer} onChange={e => setNewAgentTransfer(e.target.value)}
                             className="w-full px-3 py-2 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
-                          >
-                            <option value="hinglish">Hinglish</option>
-                            <option value="hi-IN">Hindi</option>
-                            <option value="en-IN">English (India)</option>
-                            <option value="en-US">English (US)</option>
-                          </select>
+                            placeholder="+919876543210 (E.164)" />
+                          <p className="text-[10px] text-gray-600 mt-1">Call transfers here when the prospect asks for a human or is a hot lead.</p>
                         </div>
                         <div>
                           <label className="block text-xs text-[#9FB0A6] mb-1">Voice ID</label>

@@ -3,9 +3,11 @@
 > **Follow this guide in order.** Each step has exact URLs, exact buttons to click, and exact things to type. Don't skip steps.
 >
 > ⚡ **STATUS UPDATE 2026-09-13 — don't redo finished steps.** Source of truth: **`docs/GO-LIVE-RUNBOOK.md`**.
-> ✅ Done: **Step 1 (KYC)** · **Step 3 (Meta business verification — entity GS TECHNO, verified 2026-08-03)** ·
+> ✅ Done: **Step 1 (KYC)** · **Step 2 (GST)** — ✅ DONE 2026-09-25: GSTIN **`27AEGPH7840P1ZX`**
+> supplied + set as `SELLER_GSTIN` + `SELLER_ADDRESS` in `server/.env` + Render (2026-09-25) ·
+> **Step 3 (Meta business verification — entity GS TECHNO, verified 2026-08-03)** ·
 > **Step 4 (MessageBird sender ID `CONVERZ`)** · **Step 5 (UptimeRobot)** + all secret rotations.
-> 🔲 Open: **Step 2 (GST/CA call — anchor entity name is GS TECHNO)** ·
+> 🔲 Open:
 > **Step 6 (Razorpay webhook — 10 min, unblocks money — do first)** · **Step 7 (payment loop test)** · **Step 8 (demo call)** ·
 > Step 3 leftovers (display name + daily limits check; website footer with GS TECHNO + address).
 

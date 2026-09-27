@@ -159,8 +159,12 @@ export default function PrivacyPolicyPage() {
 
         <div className="mt-12 pt-8 border-t border-white/10 text-center">
           <Link href="/" className="text-[#9FB0A6] hover:text-[#F0F7F3] text-sm">
-            &copy; {new Date().getFullYear()} Converza. All rights reserved.
+            &copy; {new Date().getFullYear()} Converza · Operated by GS TECHNO. All rights reserved.
           </Link>
+          <div className="mt-3 text-xs text-[#6B7C73] leading-relaxed">
+            <p>GS TECHNO — 1, Hanuman Nagar, Behind BMC Chawl 22, Bhatwadi Hill, Ghatkopar, Mumbai Suburban, Maharashtra 400084</p>
+            <p>GSTIN: 27AEGPH7840P1ZX</p>
+          </div>
         </div>
       </div>
     </div>

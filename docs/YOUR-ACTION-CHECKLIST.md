@@ -13,11 +13,15 @@
 > - ✅ All Phase 8 code gaps (WhatsApp retry, campaign worker, Sheets UI, tests) — fixed
 >
 > ✅ **Priority 3 (WhatsApp business verification)** — Meta business verified: **GS TECHNO**, verified 2026-08-03
-> (confirmed 2026-09-13). Leftovers: check display name + daily limits in WhatsApp Manager; add GS TECHNO +
-> registered address to the website footer.
+> (confirmed 2026-09-13). Leftovers: check display name + daily limits in WhatsApp Manager.
+> ✅ Website footer done 2026-09-25 — GS TECHNO + registered address + GSTIN on the landing page.
 >
-> Still open: **Priority 2 (GST/CA call — anchor entity name is GS TECHNO)** ·
-> **Priority 6 (payment loop test)** — blocked first on registering the Razorpay webhook · **Priority 7 (demo call)**.
+> ✅ **Priority 2 (GST)** — ✅ DONE 2026-09-25: GSTIN **`27AEGPH7840P1ZX`** supplied + set as
+> `SELLER_GSTIN` + `SELLER_ADDRESS` in `server/.env`, mirrored on Render (2026-09-25). Entity:
+> **GS TECHNO** (Maharashtra proprietorship — one GSTIN covers SaaS/SAC 9983 billing too).
+>
+> Still open: **Priority 6 (payment loop test)** — blocked first on registering the Razorpay webhook ·
+> **Priority 7 (demo call)**.
 
 ---
 

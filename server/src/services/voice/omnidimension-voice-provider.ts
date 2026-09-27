@@ -8,6 +8,7 @@
 import { config } from "../../config";
 import { logger } from "../../utils/logger";
 import { VoiceAIProvider } from "./voice-ai-provider.interface";
+import { toOmnidimLanguageNames } from "./supported-languages";
 import type {
   DispatchCallParams,
   DispatchCallResult,
@@ -96,14 +97,23 @@ export class OmnidimensionVoiceProvider implements VoiceAIProvider {
   // ─── Agent Management ─────────────────────────────────────────
 
   async createAgent(cfg: VoiceAgentConfig): Promise<VoiceAgentInfo> {
+    // Prepend the mandatory TRAI AI-disclosure to every agent's instructions
+    // (TCCCPR Feb-2025 amendment: auto-dialer/robo-call use must be disclosed).
+    const systemPrompt = [
+      "MANDATORY DISCLOSURE (TRAI TCCCPR compliance): At the start of every call, immediately after your greeting, clearly state that you are an automated AI assistant and that the call may be recorded. Never deny being an AI if asked — always acknowledge it honestly.",
+      cfg.systemPrompt || "You are a friendly real estate AI assistant. Help prospects with their property inquiries, qualify their needs (budget, location, timeline), and schedule site visits.",
+    ].join("\n\n");
+
     const agent = await omniCreateAgent({
       name: cfg.name,
       welcomeMessage: cfg.welcomeMessage,
       language: cfg.language || "hi-IN",
+      languages: cfg.languages,
+      transferToNumber: cfg.transferToNumber,
       voiceProvider: cfg.voiceProvider || "eleven_labs",
       voiceId: cfg.voiceId,
       modelName: cfg.modelName || "gpt-4o-mini",
-      systemPrompt: cfg.systemPrompt,
+      systemPrompt,
       webhookUrl: cfg.webhookUrl,
     });
 
