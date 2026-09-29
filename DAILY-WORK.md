@@ -32,6 +32,13 @@
 
 ## ✅ COMPLETED (reverse-chronological)
 
+### 2026-09-29 (later) — PROD INCIDENT FIXED: "Not Found" on all auth screens
+- **Symptom:** signup/login/forgot-password all showed "Not Found" after submit. DB/Redis/SMTP all healthy — NOT a backend outage.
+- **Root cause:** Vercel env `NEXT_PUBLIC_API_URL` had lost its `/api/v1` suffix → every frontend API call hit `/auth/login` instead of `/api/v1/auth/login` → 404.
+- **Fix:** `frontend/src/lib/api.ts` now normalizes `NEXT_PUBLIC_API_URL` — always appends/keeps `/api/v1` regardless of how the env var is set (tsc clean). Deployed via Vercel auto-deploy.
+- **Diag bonus:** created `diagnostic-check-929@converzatest.com` via API (unverified trial account — can be erased later via DPDP flow).
+- **Reminder:** email-verification gate is by design (Round-2 #3) — verification emails often land in SPAM; mark "Not Spam" when testing.
+
 ### 2026-09-29 — REDIS P0 FIXED (Aiven for Valkey)
 - **Migrated `REDIS_URL`** Upstash (quota-exhausted free tier) → **Aiven for Valkey free tier** (`rediss://`, TLS). Zero code changes — every client reads `config.REDIS_URL`.
 - **Verified live** `/health`: `status: healthy` · `redis: healthy` · **`queues: healthy`** (BullMQ alive → AI calls dispatch again) · `warnings: []`.
@@ -75,7 +82,7 @@
 
 ### P2 — next week (sales weapons)
 - [ ] **Record demo call** → side-by-side asset vs Vyora (download recording + transcript). *Owner: Sarvesh*
-- [ ] **Entry-tier pricing decision** — draft ₹2,499 credits-style plan w/ margin math to counter Vyora ₹799 (Codebuff drafts on request). *Owner: Sarvesh decides*
+- [x] **Entry-tier pricing draft DONE** (`sales/entry-tier-pricing.md`, commit `df3b1e2`) — ₹2,499 wallet @ ₹160/call, 87–91% margin. **AWAITING SARVESH GO** → Codebuff builds Razorpay one-time flow + credit expiry + pricing page. *Owner: Sarvesh decides*
 - [ ] **TRAI compliance guide page** — Codebuff builds after Omnidim reply (must be accurate, beat Vyora's generic page). *Owner: Codebuff*
 - [ ] **WhatsApp leftovers**: display name + daily limits in WhatsApp Manager; SIM-side registration of +91 72088 55916. *Owner: Sarvesh*
 

@@ -1,6 +1,10 @@
 import { useAuthStore } from "../stores/auth.store";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+// Harden against env misconfiguration (2026-09-29 prod incident: env var was
+// set without the /api/v1 suffix → every API call 404'd → "Not Found" on all
+// auth screens). Normalize whatever we're given to always end in /api/v1.
+const RAW_API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/+$/, "");
+const API_BASE = /\/api\/v1$/.test(RAW_API_BASE) ? RAW_API_BASE : `${RAW_API_BASE}/api/v1`;
 
 interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
