@@ -3,7 +3,7 @@
 > **PURPOSE:** This file is the single source of truth across sessions. When a new session starts,
 > READ THIS FILE FIRST — terminal memory dies when the terminal closes, this file doesn't.
 > **RULE:** After every work session, update the "Completed" and "Remaining" sections. Keep it honest.
-> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-09-28
+> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-09-29
 
 ---
 
@@ -22,7 +22,7 @@
 | SMS fallback | MessageBird, sender ID `CONVERZ` |
 | Payments | Razorpay (KYC ✅, webhook ✅, GST 18%) |
 | DB | Supabase Postgres `oavzflfdjluxvdlymbug` |
-| Redis (queues) | Upstash — free tier quota is a known risk |
+| Redis (queues) | **Aiven for Valkey** (free Developer tier, `rediss://` TLS) — migrated from Upstash 2026-09-29; no command quota |
 | Competitor to beat | **Vyora AI** (vyora.ai) — ₹799/₹3,449 plans, CSV-upload flow, 8 languages |
 | Our positioning | *"Vyora calls the leads you upload. Converza calls the leads you haven't seen yet."* |
 
@@ -31,6 +31,13 @@
 ---
 
 ## ✅ COMPLETED (reverse-chronological)
+
+### 2026-09-29 — REDIS P0 FIXED (Aiven for Valkey)
+- **Migrated `REDIS_URL`** Upstash (quota-exhausted free tier) → **Aiven for Valkey free tier** (`rediss://`, TLS). Zero code changes — every client reads `config.REDIS_URL`.
+- **Verified live** `/health`: `status: healthy` · `redis: healthy` · **`queues: healthy`** (BullMQ alive → AI calls dispatch again) · `warnings: []`.
+- Cost path decided: $0 free now → ~$5 Developer tier when Mumbai region/1GB needed → HA tier only when paying brokers are live. Provider switch anytime = swap one env var in Render.
+- Upstash quota-backoff logic in `redis-health.ts` left in place (harmless with Aiven; still useful if we ever return).
+- Old Upstash instance kept (not deleted) = instant rollback via env var.
 
 ### 2026-09-28 — Big shipping day (commit `f3bbb28`, deployed + verified live)
 - **Omnidim call transfer WIRED**: agent creation sends real `transfer` config; transfers to broker when prospect asks for human or is a hot lead. New `Client.transferToNumber` column.
@@ -56,7 +63,6 @@
 ## 🔴 REMAINING — DO IN THIS ORDER
 
 ### P0 — now
-- [ ] **Fix Redis (P0!)** — Render env `REDIS_URL` missing-or-Upstash-quota-exhausted. Free tier 500K cmds/mo; if exhausted → upgrade (~$10/mo). Then `/health` must show `redis: healthy`, `status: ok`. *Owner: Sarvesh*
 - [ ] **Forward Omnidim's reply** (140 vs 1600 series + voicemail access) → Codebuff finishes DND/DLT campaign wiring based on it. *Owner: Sarvesh → Codebuff*
 - [ ] **Confirm transfer actually rang the phone** in the 2026-09-28 test call (AI disclosure heard ✅?). *Owner: Sarvesh*
 
@@ -80,7 +86,6 @@
 
 ### Backlog / known risks
 - DLT registration + DND scrubbing for PROMOTIONAL campaigns (needs Omnidim RTM/DLT answer) — **the one open TRAI item**
-- Upstash free-tier quota = recurring outage risk (P0 above)
 - Gmail SMTP for invoices → move to proper transactional email (Loops/SES researched, not wired)
 - PRO plan margin: re-tune `PRO_MONTHLY_CALL_CAP` after real call-duration data (Phase 4.2)
 
