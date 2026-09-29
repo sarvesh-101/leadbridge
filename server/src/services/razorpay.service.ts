@@ -70,8 +70,11 @@ export async function createSubscription(params: {
       status: response.data.status,
     };
   } catch (error: any) {
-    logger.error({ err: error.response?.data?.error?.description || error.message }, "Razorpay subscription failed");
-    throw new Error("Failed to create subscription");
+    const description = error.response?.data?.error?.description || error.message;
+    logger.error({ err: description }, "Razorpay subscription failed");
+    // Surface the REAL Razorpay reason (invalid plan id, mode mismatch, auth…)
+    // instead of a generic string — this is what the checkout banner shows.
+    throw new Error(`Failed to create subscription: ${description}`);
   }
 }
 

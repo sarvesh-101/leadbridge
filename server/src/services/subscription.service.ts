@@ -78,6 +78,8 @@ export interface SubscriptionCheckoutResult {
   };
   /** Razorpay payment short URL (null when Razorpay unavailable). */
   paymentUrl: string | null;
+  /** Why Razorpay rejected the sub (null when fine) — shown in checkout banner. */
+  razorpayError?: string | null;
 }
 
 /**
@@ -108,6 +110,7 @@ export async function createSubscriptionCheckout(
 
   // ─── Create the live Razorpay subscription FIRST ─────────────────
   let razorpaySub: { id: string; shortUrl: string; status: string } | null = null;
+  let razorpayError: string | null = null;
   const razorpayPlanId = getRazorpayPlanIdForTier(planTier);
   if (razorpayPlanId) {
     try {
@@ -121,6 +124,7 @@ export async function createSubscriptionCheckout(
       });
     } catch (err: any) {
       fastify.log.warn({ err: err.message, planTier }, "Razorpay subscription creation failed");
+      razorpayError = err.message;
       if (opts.strict) {
         throw err;
       }
@@ -221,5 +225,8 @@ export async function createSubscriptionCheckout(
       amount: invoice.amount,
     },
     paymentUrl: razorpaySub?.shortUrl || null,
+    // Real Razorpay rejection reason (null when all good) — checkout surfaces it
+    // in the banner so mode/config mismatches are diagnosable without log dives.
+    razorpayError,
   };
 }

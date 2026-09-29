@@ -118,7 +118,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
     }
 
     // ─── Shared checkout flow (single source of truth — subscription.service.ts) ──
-    const { subscription, paymentUrl } = await createSubscriptionCheckout(fastify, client, planTier, {
+    const { subscription, paymentUrl, razorpayError } = await createSubscriptionCheckout(fastify, client, planTier, {
       billingCycle,
     });
 
@@ -130,6 +130,12 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
     return reply.status(201).send({
       subscription,
       paymentUrl,
+      razorpayError: razorpayError || null,
+      message: razorpayError
+        ? `Subscription created, but Razorpay rejected the payment setup: ${razorpayError}`
+        : paymentUrl
+          ? "Subscription created. Complete payment via Razorpay to activate."
+          : "Subscription created (manual payment required — Razorpay not configured).",
       razorpay: razorpaySubId
         ? {
             keyId: config.RAZORPAY_KEY_ID,
