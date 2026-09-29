@@ -45,16 +45,31 @@ export async function createSubscription(params: {
   trialDays?: number;
 }): Promise<{ id: string; shortUrl: string; status: string }> {
   try {
+    // Plans created in the dashboard may carry their OWN trial period. Razorpay
+    // rejects a subscription that sends start_at (or trial_period_days) against
+    // such a plan: "trial_period_days is/are not required and should not be
+    // sent" (hit live 2026-09-29). Read the plan first and shape the payload
+    // accordingly — works for both clean and trial-configured plans.
+    let planTrialDays = 0;
+    try {
+      const planResp = await razorpayApi.get(`/plans/${params.planId}`);
+      planTrialDays = Number(planResp.data?.item?.trial_period_days ?? planResp.data?.trial_period_days ?? 0) || 0;
+    } catch {
+      // Plan lookup is best-effort; default to no-plan-trial behaviour.
+    }
+    const planHasTrial = planTrialDays > 0;
+
     const response = await razorpayApi.post("/subscriptions", {
       plan_id: params.planId,
       customer_notify: 1,
       total_count: params.totalCount,
-      // REQUIRED — without start_at Razorpay returns a generic "Validation failed"
-      // (verified live on 2026-08-04: every payload variant 400'd until start_at added).
-      // start_at = now → the subscription begins immediately (trial_period_days still
-      // applies on top for the STARTER trial).
-      start_at: Math.floor(Date.now() / 1000),
-      ...(params.trialDays ? { trial_period_days: params.trialDays } : {}),
+      // start_at is required ONLY for plans without a trial — with a plan-level
+      // trial, the subscription starts at the trial's end and start_at is invalid.
+      ...(!planHasTrial ? { start_at: Math.floor(Date.now() / 1000) } : {}),
+      // Send trial_period_days only when the plan has none and a trial was requested.
+      ...(!planHasTrial && params.trialDays && params.trialDays > 0
+        ? { trial_period_days: params.trialDays }
+        : {}),
       notes: {
         customer_email: params.customerEmail,
         customer_phone: params.customerPhone,
