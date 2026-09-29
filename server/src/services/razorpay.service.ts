@@ -165,6 +165,34 @@ export async function getInvoice(invoiceId: string) {
 }
 
 /**
+ * Probe: does the configured key pair actually authenticate against the
+ * Razorpay API? Returns the key-id PREFIX only (never the secret) so ops can
+ * verify which credential the running instance holds. GET /health/razorpay.
+ */
+export async function verifyRazorpayAuth(): Promise<{
+  ok: boolean;
+  httpStatus?: number;
+  error?: string;
+  keyIdPrefix: string;
+}> {
+  const keyIdPrefix = (config.RAZORPAY_KEY_ID || "").slice(0, 14);
+  if (!config.RAZORPAY_KEY_ID || !config.RAZORPAY_KEY_SECRET) {
+    return { ok: false, error: "KEY_ID or KEY_SECRET not set", keyIdPrefix };
+  }
+  try {
+    await razorpayApi.get("/plans?count=1");
+    return { ok: true, keyIdPrefix };
+  } catch (error: any) {
+    return {
+      ok: false,
+      httpStatus: error.response?.status,
+      error: error.response?.data?.error?.description || error.message,
+      keyIdPrefix,
+    };
+  }
+}
+
+/**
  * Signature for the embedded Razorpay Checkout modal (subscription mode).
  * Checkout.js requires HMAC-SHA256(subscription_id, key_secret) as
  `subscription: { handler }` validation — without it the modal errors with

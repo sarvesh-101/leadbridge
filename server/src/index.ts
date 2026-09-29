@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import { config } from "./config";
 import { logger } from "./utils/logger";
 import { verifySignedAssetUrl } from "./utils/signed-asset-url";
+import { verifyRazorpayAuth } from "./services/razorpay.service";
 
 // ─── Request ID generation ────────────────────────────────────
 function generateRequestId(): string {
@@ -209,6 +210,14 @@ export async function buildServer() {
           ]
         : [],
     };
+  });
+
+  // ─── Razorpay auth probe ────────────────────────────────────
+  // GET /health/razorpay — live-tests the configured key pair against the
+  // Razorpay API. Returns the key-id PREFIX (first 14 chars, never the secret)
+  // so we can verify which credential the running instance actually holds.
+  server.get("/health/razorpay", async () => {
+    return { razorpayAuth: await verifyRazorpayAuth() };
   });
 
   // ─── Detailed Integration Health ─────────────────────────
