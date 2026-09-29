@@ -1,6 +1,7 @@
 import { Plan } from "@prisma/client";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { cancelSubscription as cancelRazorpaySub, refundPayment } from "../../services/razorpay.service";
+import { config } from "../../config";
+import { cancelSubscription as cancelRazorpaySub, refundPayment, generateSubscriptionOrderSignature } from "../../services/razorpay.service";
 import { PLAN_DEFINITIONS, createSubscriptionCheckout, getRazorpayPlanIdForTier } from "../../services/subscription.service";
 import { signAssetUrl } from "../../utils/signed-asset-url";
 
@@ -121,12 +122,26 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       billingCycle,
     });
 
+    // Embedded Checkout support: when the live Razorpay sub exists, return the
+    // public key + HMAC of the subscription_id so the frontend can open the
+    // Razorpay modal on-page (QR/UPI/cards in one sheet) instead of bouncing
+    // the broker to a hosted page / popup window.
+    const razorpaySubId = (subscription as { providerSubscriptionId?: string | null })?.providerSubscriptionId || null;
     return reply.status(201).send({
       subscription,
       paymentUrl,
-      message: paymentUrl
-        ? "Subscription created. Complete payment via Razorpay to activate."
-        : "Subscription created (manual payment required — Razorpay not configured).",
+      razorpay: razorpaySubId
+        ? {
+            keyId: config.RAZORPAY_KEY_ID,
+            subscriptionId: razorpaySubId,
+            signature: generateSubscriptionOrderSignature(razorpaySubId),
+            name: "Converza",
+            description: `${PLAN_DEFINITIONS[planTier].name} Plan — Monthly`,
+            prefillName: client.ownerName,
+            prefillContact: client.phone,
+            prefillEmail: client.email,
+          }
+        : null,
     });
   });
 

@@ -146,6 +146,64 @@ interface InvoiceEntry {
   payments: Array<{ id: string; status: string; amount: number }>;
 }
 
+// ─── Razorpay embedded Checkout ──────────────────────────────
+// Loads checkout.js once and opens the payment modal on-page (QR + UPI + cards
+// in one sheet) instead of bouncing the broker to a hosted page or a popup —
+// popups get blocked and lose the payment session.
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void; on: (event: string, cb: (resp: unknown) => void) => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  if (typeof window === "undefined") return Promise.resolve(false);
+  if (window.Razorpay) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+interface RazorpayCheckoutData {
+  keyId: string;
+  subscriptionId: string;
+  signature: string;
+  name: string;
+  description: string;
+  prefillName?: string;
+  prefillContact?: string;
+  prefillEmail?: string;
+}
+
+async function openRazorpayModal(
+  data: RazorpayCheckoutData,
+  onSuccess: () => void,
+  onDismiss: () => void
+): Promise<boolean> {
+  const loaded = await loadRazorpayScript();
+  if (!loaded || !window.Razorpay) return false;
+  const rzp = new window.Razorpay({
+    key: data.keyId,
+    subscription_id: data.subscriptionId,
+    name: data.name,
+    description: data.description,
+    theme: { color: "#1B4332" },
+    prefill: {
+      name: data.prefillName,
+      contact: data.prefillContact,
+      email: data.prefillEmail,
+    },
+    handler: () => onSuccess(),
+    modal: { ondismiss: onDismiss },
+  });
+  rzp.open();
+  return true;
+}
+
 export default function BillingPage() {
   const [billing, setBilling] = useState<BillingData | null>(null);
   const [invoices, setInvoices] = useState<InvoiceEntry[]>([]);
@@ -162,10 +220,13 @@ export default function BillingPage() {
     loadInvoices();
   }, []);
 
-  // Poll for plan change after Razorpay checkout opens in a new tab
+  // Poll for plan activation after checkout (modal or hosted page).
+  // Fires on plan CHANGE or on status change (TRIAL → ACTIVE covers paying for
+  // the plan you're already trialing — the plan name doesn't change then).
   useEffect(() => {
     if (!pollingPlan) return;
     const startPlan = billing?.plan;
+    const startStatus = billing?.planStatus;
     let attempts = 0;
     const maxAttempts = 40;
 
@@ -173,10 +234,12 @@ export default function BillingPage() {
       attempts++;
       try {
         const data: BillingData = await api.get("/billing");
-        if (data.plan !== startPlan) {
+        const planChanged = data.plan !== startPlan;
+        const statusChanged = startStatus === "TRIAL" && data.planStatus !== "TRIAL";
+        if (planChanged || statusChanged) {
           setBilling(data);
           setPollingPlan(null);
-          toast.success(`Upgraded to ${data.plan} plan!`);
+          toast.success(data.planStatus === "ACTIVE" ? `Payment confirmed — ${data.plan} plan is live!` : `Plan updated: ${data.plan} (${data.planStatus})`);
           clearInterval(interval);
           return;
         }
@@ -214,37 +277,44 @@ export default function BillingPage() {
     setUpgrading(plan);
     setError(null);
     try {
-      // Try the new subscription endpoint first (FIX #1: creates Razorpay sub)
+      // Single source of truth: POST creates the Razorpay subscription and
+      // returns embedded-checkout params when Razorpay is properly configured.
       const res = await api.post("/subscriptions", {
         planTier: plan,
         billingCycle: "MONTHLY",
       });
 
-      if (res.paymentUrl) {
-        // Payment URL from Razorpay — open in new tab
-        window.open(res.paymentUrl, "_blank");
-        setBilling((prev) => prev ? { ...prev, paymentUrl: res.paymentUrl } : prev);
-        setManualPaymentNotice(null);
-        setPollingPlan(plan);
-        toast.success("Razorpay checkout opened. Waiting for payment confirmation...");
-      } else if (res.subscription) {
-        // No payment URL means Razorpay is NOT configured — never pretend the
-        // subscription is paid. Surface an honest notice so brokers contact you.
-        await loadBilling();
-        setManualPaymentNotice(
-          res.message ||
-          `Your ${plan} subscription was created, but online payment isn't configured yet. Contact the Converza team to complete payment.`
+      if (res.razorpay?.subscriptionId) {
+        // Preferred path: payment modal opens ON this page (QR/UPI/cards).
+        const opened = await openRazorpayModal(
+          res.razorpay as RazorpayCheckoutData,
+          () => {
+            setPollingPlan(plan); // webhook flips planStatus → poll picks it up
+            toast.success("Payment received! Activating your plan...");
+          },
+          () => toast.info("Payment cancelled — no money was charged."),
         );
-        toast.warning("Subscription created — payment required manually");
-      } else {
-        // Fall back to the legacy upgrade endpoint
-        const legacyRes = await api.post("/billing/upgrade", { plan });
-        if (legacyRes.subscription?.shortUrl) {
-          window.open(legacyRes.subscription.shortUrl, "_blank");
-          setPollingPlan(plan);
-          toast.success("Razorpay checkout opened. Waiting for payment confirmation...");
+        if (opened) return;
+        // checkout.js failed to load (ad-blocker/offline) → same-tab redirect
+        if (res.paymentUrl) {
+          window.location.href = res.paymentUrl;
+          return;
         }
       }
+
+      if (res.paymentUrl) {
+        // Hosted checkout fallback — SAME tab (new-tab popups get blocked).
+        window.location.href = res.paymentUrl;
+        return;
+      }
+
+      // Razorpay genuinely unconfigured — honest manual-payment notice.
+      await loadBilling();
+      setManualPaymentNotice(
+        res.message ||
+        `Your ${plan} subscription was created, but online payment isn't configured yet. Contact the Converza team to complete payment.`
+      );
+      toast.warning("Subscription created — payment required manually");
     } catch (err: any) {
       setError(err.message || "Upgrade failed");
       toast.error(err.message || "Upgrade failed");

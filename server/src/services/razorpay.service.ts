@@ -160,3 +160,17 @@ export async function getInvoice(invoiceId: string) {
     return null;
   }
 }
+
+/**
+ * Signature for the embedded Razorpay Checkout modal (subscription mode).
+ * Checkout.js requires HMAC-SHA256(subscription_id, key_secret) as
+ `subscription: { handler }` validation — without it the modal errors with
+ * "signature validation failed". Same secret as webhooks (key_secret), but a
+ * different algorithm: raw subscription_id, no payload body.
+ */
+export function generateSubscriptionOrderSignature(subscriptionId: string): string {
+  return crypto
+    .createHmac("sha256", config.RAZORPAY_KEY_SECRET || "")
+    .update(subscriptionId)
+    .digest("hex");
+}
