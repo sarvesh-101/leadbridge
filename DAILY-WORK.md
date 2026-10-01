@@ -32,6 +32,17 @@
 
 ## ✅ COMPLETED (reverse-chronological)
 
+### 2026-09-29 (evening) — PAYMENT LOOP: 95% wired (₹5 charge pending) + embedded checkout shipped
+- **Embedded Razorpay Checkout SHIPPED** (`6b45493`): POST /subscriptions returns key+subId+HMAC → billing page opens the Razorpay modal ON-page (QR/UPI/cards) — no more popup tabs or dead-end banner. Hosted-page same-tab fallback kept; activation poller also fires on TRIAL→ACTIVE.
+- **Self-diagnosing checkout** (`3f0c7a1`): Razorpay rejection reasons now surface in the banner.
+- **/health/razorpay probe** (`9b5dfc4`): live-tests key pair, shows key PREFIX only. Caught the bug: Render held STALE keys `rzp_live_TLZtN…` vs real `rzp_live_Ti0DZ…` → Sarvesh updated keys → probe now `ok:true`.
+- **Payload fix** (`9963446`): Razorpay rejects start_at/trial_period_days on plans that carry their own trial — code now GETs the plan and adapts.
+- **Plans reality:** 6 old LeadBridge plans (₹5-first-cycle quirk) + 4 NEW Converza plans created (Launch/Starter/Growth/Pro) — Trial field was left non-empty on first attempts (₹5 validation charge on hosted page; recurring ₹35K from day 2 — MANDATE NOT ACTIVATED YET, no money moved).
+- **PENDING (Sarvesh, deadline before ~9 AM 30-Sep):** pay ₹5 on the Converza Growth checkout → verify ACTIVE + GSTIN invoice → **CANCEL sub immediately in Razorpay dashboard** (kills tomorrow's ₹35K auto-debit) → refund ₹5 → erase test account. If skipped: cancel pending subs instead.
+- **Fix-on-sight later:** dashboard-created plans get a ₹5 first charge — decide whether to delete/recreate clean plans or accept (standard mandate-validation practice).
+- DB connection crash pattern during deploys: Supabase pooler EMAXCONNSESSION (15 max, session mode) — workaround = Supabase Restart → Render retry. PERMANENT FIX QUEUED: switch DATABASE_URL to transaction pooler (port 6543) + `?pgbouncer=true&connection_limit=10`.
+- **Soft-launch gate verdict (researched vs launch-plan):** after today's 6 tasks (IMAP, backups, rebrand, WEBHOOK_URL, MessageBird number, ₹5 payment test+teardown) → YES for Phase 4 soft launch (2–3 hand-held brokers); public marketing only after 2–4 weeks + 1 testimonial (Phase 5 rule).
+
 ### 2026-09-29 (later) — PROD INCIDENT FIXED: "Not Found" on all auth screens
 - **Symptom:** signup/login/forgot-password all showed "Not Found" after submit. DB/Redis/SMTP all healthy — NOT a backend outage.
 - **Root cause:** Vercel env `NEXT_PUBLIC_API_URL` had lost its `/api/v1` suffix → every frontend API call hit `/auth/login` instead of `/api/v1/auth/login` → 404.
@@ -69,8 +80,13 @@
 
 ## 🔴 REMAINING — DO IN THIS ORDER
 
-### P0 — now
-- [ ] **Forward Omnidim's reply** (140 vs 1600 series + voicemail access) → Codebuff finishes DND/DLT campaign wiring based on it. *Owner: Sarvesh → Codebuff*
+### P0 — now (2026-09-29 evening — the 6-task soft-launch sprint, guides delivered in chat)
+- [ ] **Task 4:** `WEBHOOK_URL` env (Omnidim call events) — 2 min, codebuff verifies
+- [ ] **Task 1:** IMAP Gmail app password + 4 env vars + test lead — codebuff verifies ingestion
+- [ ] **Task 2:** Supabase `db-backups` bucket + Render Cron Job `0 */6 * * *` — codebuff verifies first dump
+- [ ] **Task 3:** Rename Render→`converza-api` + Vercel→`converza` → paste new URLs to Codebuff → staged URL switch
+- [ ] **Task 5:** MessageBird SMS number buy + callback webhook + `FORWARDING_SMS_NUMBER` + SMS lead test + dedupe check
+- [ ] **Task 6 (⏰ deadline ~9 AM 30-Sep):** pay ₹5 → "paid" → verify GSTIN invoice → CANCEL sub immediately in Razorpay (kill ₹35K auto-debit) → refund ₹5 → DPDP erase → **money loop CERTIFIED** (140 vs 1600 series + voicemail access) → Codebuff finishes DND/DLT campaign wiring based on it. *Owner: Sarvesh → Codebuff*
 - [ ] **Confirm transfer actually rang the phone** in the 2026-09-28 test call (AI disclosure heard ✅?). *Owner: Sarvesh*
 
 ### P1 — this week (money loop)
