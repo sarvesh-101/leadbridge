@@ -80,13 +80,19 @@
 
 ## 🔴 REMAINING — DO IN THIS ORDER
 
+### 2026-09-30 — OMNIDIM REPLY RECEIVED → P0 #2 RESOLVED
+- **Their answer:** outbound calls originate from numbers PURCHASED on Omnidim's platform (mobile series or landline series — no 140/1600 series from our side). **Voicemail detection is platform-side, enabled on Early Deployers plan and above** (pricing: omnidim.io/pricing).
+- **What it means for us:** (1) transactional calls to inbound leads launch on standard purchased numbers — our consent-basis compliance gate already restricts promotional calling; DLT/140 only needed later for PROMOTIONAL campaigns (backlog stays). (2) Dedicated number per Growth+/Pro client (₹200/mo, already in margin math) = buy from Omnidim at onboarding. (3) Sarvesh: **check current Omnidim plan tier** — if below Early Deployers, upgrade to unlock voicemail detection.
+- **Shipped (`see commit`):** voicemail behaviour added to every agent prompt in `omnidimension-agents.service.ts` — on detection, agent leaves ONE brief callback message then ends (platform detects once plan tier allows).
+- P0 remaining: transfer-ring confirmation (still unanswered) + Task 6 ₹5 payment test.
+
 ### P0 — now (2026-09-29 evening — the 6-task soft-launch sprint, guides delivered in chat)
 - [ ] **Task 4:** `WEBHOOK_URL` env (Omnidim call events) — 2 min, codebuff verifies
 - [ ] **Task 1:** IMAP Gmail app password + 4 env vars + test lead — codebuff verifies ingestion
 - [ ] **Task 2:** Supabase `db-backups` bucket + Render Cron Job `0 */6 * * *` — codebuff verifies first dump
 - [ ] **Task 3:** Rename Render→`converza-api` + Vercel→`converza` → paste new URLs to Codebuff → staged URL switch
 - [ ] **Task 5:** MessageBird SMS number buy + callback webhook + `FORWARDING_SMS_NUMBER` + SMS lead test + dedupe check
-- [ ] **Task 6 (⏰ deadline ~9 AM 30-Sep):** pay ₹5 → "paid" → verify GSTIN invoice → CANCEL sub immediately in Razorpay (kill ₹35K auto-debit) → refund ₹5 → DPDP erase → **money loop CERTIFIED** (140 vs 1600 series + voicemail access) → Codebuff finishes DND/DLT campaign wiring based on it. *Owner: Sarvesh → Codebuff*
+- [ ] **Task 6 (do it fresh, no mandate live yet):** cancel stale "Created" subs in Razorpay → pay ₹5 on Converza Growth checkout → "paid" → verify GSTIN invoice → CANCEL sub immediately in Razorpay (kill next-cycle ₹35K auto-debit) → refund ₹5 → DPDP erase → **money loop CERTIFIED** *Owner: Sarvesh → Codebuff*
 - [ ] **Confirm transfer actually rang the phone** in the 2026-09-28 test call (AI disclosure heard ✅?). *Owner: Sarvesh*
 
 ### P1 — this week (money loop)

@@ -116,11 +116,20 @@ export async function createAgent(params: CreateAgentParams): Promise<OmnidimAge
     temperature: params.temperature ?? 0.7,
   };
 
-  // System prompt / context — Omnidimension requires this field
+  // System prompt / context — Omnidimension requires this field.
+  // VOICEMAIL GUIDANCE (2026-09-30): Omnidim confirmed voicemail detection is a
+  // platform feature (enabled on their Early Deployers plan and above). The
+  // post-detection BEHAVIOUR is driven by the prompt — every agent now gets the
+  // same short-message-then-end rule so prospects never get rambling voicemails.
+  const voicemailGuidance =
+    "\n\nVOICEMAIL BEHAVIOUR: If you reach a voicemail, wait for the greeting tone, then leave ONE brief message: your first name, the broker's business name, and a polite request to call back. Do not explain the whole offer on voicemail. After the message, say thank you and end the call.";
   body.context_breakdown = [
     {
       title: "Instructions",
-      body: params.systemPrompt || "You are a friendly real estate AI assistant. Help prospects with their property inquiries, qualify their needs (budget, location, timeline), and schedule site visits.",
+      body:
+        (params.systemPrompt ||
+          "You are a friendly real estate AI assistant. Help prospects with their property inquiries, qualify their needs (budget, location, timeline), and schedule site visits.") +
+        voicemailGuidance,
     },
   ];
 
