@@ -124,8 +124,9 @@ const envSchema = z.object({
   // ─── Cost Tracking ───────────────────────────────────────
   // How much does the platform pay per minute for OmniDimension calls
   OMNIDIM_COST_PER_MINUTE: z.coerce.number().default(4.6),  // ₹4.6/min (Growth plan pricing)
-  // Phone number monthly rental cost
-  PHONE_NUMBER_MONTHLY_COST: z.coerce.number().default(200), // ₹200/month
+  // Phone number monthly rental cost — Omnidim +91 number = $5.06/mo (confirmed
+  // 2026-09-30 by their support; purchased directly from their platform).
+  PHONE_NUMBER_MONTHLY_COST: z.coerce.number().default(430), // ≈₹430/month ($5.06)
   // Platform credit low balance warning threshold (percentage of minutes remaining)
   CREDIT_WARN_THRESHOLD_PERCENT: z.coerce.number().default(20),
   // Average duration per call for cost estimation
