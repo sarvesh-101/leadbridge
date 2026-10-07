@@ -209,15 +209,61 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
     return result;
   });
 
-  /** Purchase a new phone number using the configured provider */
+  /**
+   * Search the Omnidim number shop (search → buy flow).
+   * GET /voice/phone-numbers/search?region=india[&carrier=carrier-1][&pattern=…]
+   * Without `carrier`, the response may instead list the region's carriers
+   * (needsCarrier=true) — the UI shows them as chips first.
+   */
+  fastify.get("/voice/phone-numbers/search", async (
+    request: FastifyRequest<{ Querystring: {
+      region?: string; carrier?: string; pattern?: string; page?: string; limit?: string;
+    } }>
+  ) => {
+    const { searchAvailableNumbers } = await import("../../services/omnidimension-phone.service");
+    return searchAvailableNumbers({
+      region: request.query.region,
+      carrier: request.query.carrier,
+      pattern: request.query.pattern,
+      page: request.query.page ? parseInt(request.query.page, 10) : undefined,
+      limit: request.query.limit ? parseInt(request.query.limit, 10) : undefined,
+    });
+  });
+
+  /**
+   * Purchase a specific number from the shop (provider-agnostic).
+   * Omnidim requires {carrier, phoneNumber} from a prior /search call;
+   * optionally auto-attaches the number to one of the client's agents.
+   */
   fastify.post("/voice/phone-numbers/purchase", async (
-    request: FastifyRequest<{ Body: { region?: string; areaCode?: string } }>, reply: FastifyReply
+    request: FastifyRequest<{ Body: {
+      region?: string; carrier?: string; phoneNumber?: string; areaCode?: string; attachToAgentId?: number | string | null;
+    } }>
   ) => {
     const phoneProvider = getPhoneProvider();
     const result = await phoneProvider.purchaseNumber({
       region: request.body.region,
       areaCode: request.body.areaCode,
+      carrier: request.body.carrier,
+      phoneNumber: request.body.phoneNumber,
     });
+
+    // Optional: attach the freshly bought number to an agent right away.
+    if (result.success && result.phoneNumber && request.body.attachToAgentId) {
+      const agentId = parseInt(String(request.body.attachToAgentId), 10);
+      if (Number.isFinite(agentId)) {
+        try {
+          const { attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
+          await attachPhoneNumber(parseInt(result.phoneNumber.id, 10), agentId);
+          return { ...result, attachedAgentId: agentId, message: `${result.message} Attached to your agent.` };
+        } catch (err: any) {
+          // Purchase succeeded — never fail the request over attach; the user
+          // can attach manually from the Numbers list.
+          return { ...result, attachError: err.message };
+        }
+      }
+    }
+
     return result;
   });
 

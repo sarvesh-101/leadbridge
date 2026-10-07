@@ -88,11 +88,18 @@ export default function VoiceAIPage() {
   const [newAgentVoice, setNewAgentVoice] = useState("");
   const [newAgentPrompt, setNewAgentPrompt] = useState("");
 
-  // Buy number modal
+  // Buy number modal (Omnidim number shop: search → buy → attach)
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [buyLoading, setBuyLoading] = useState(false);
-  const [buyResult, setBuyResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [buyResult, setBuyResult] = useState<{ success: boolean; message: string; errorCode?: string } | null>(null);
   const [selectedRegion, setSelectedRegion] = useState("india");
+  const [shopLoading, setShopLoading] = useState(false);
+  const [shopNumbers, setShopNumbers] = useState<{ phone_number: string; monthly_rental_usd: number; validity_days: number; kyc_required: boolean }[]>([]);
+  const [shopCarriers, setShopCarriers] = useState<{ carrier: string; label: string }[]>([]);
+  const [needsCarrier, setNeedsCarrier] = useState(false);
+  const [selectedCarrier, setSelectedCarrier] = useState("");
+  const [selectedNumber, setSelectedNumber] = useState("");
+  const [attachAfterBuy, setAttachAfterBuy] = useState("");
 
   // Import number modal (Exotel / Twilio)
   const [showImportModal, setShowImportModal] = useState(false);
@@ -195,18 +202,63 @@ export default function VoiceAIPage() {
     }
   };
 
-  // ─── Phone Actions ────────────────────────────────────────────
+  // ─── Phone Actions (number shop: search → buy → attach) ──────
+
+  const resetShop = () => {
+    setShopNumbers([]);
+    setShopCarriers([]);
+    setNeedsCarrier(false);
+    setSelectedCarrier("");
+    setSelectedNumber("");
+  };
+
+  const loadShopNumbers = async (carrier?: string, regionOverride?: string) => {
+    setShopLoading(true);
+    try {
+      const q = new URLSearchParams({ region: regionOverride || selectedRegion });
+      if (carrier) q.set("carrier", carrier);
+      const res = await api.get<{
+        success: boolean;
+        numbers: { phone_number: string; monthly_rental_usd: number; validity_days: number; kyc_required: boolean }[];
+        carriers: { carrier: string; label: string }[];
+        needsCarrier: boolean;
+        carrier?: string;
+        message: string;
+      }>(`/voice/phone-numbers/search?${q.toString()}`);
+      if (res.needsCarrier) {
+        setNeedsCarrier(true);
+        setShopCarriers(res.carriers || []);
+        setShopNumbers([]);
+      } else if (res.success) {
+        setNeedsCarrier(false);
+        setShopCarriers([]);
+        setShopNumbers(res.numbers || []);
+        if (res.carrier) setSelectedCarrier(res.carrier);
+      } else {
+        toast.error(res.message || "Could not load available numbers");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Could not load available numbers");
+    } finally {
+      setShopLoading(false);
+    }
+  };
 
   const handleBuyNumber = async () => {
+    if (!selectedNumber || !selectedCarrier) return;
     setBuyLoading(true);
     setBuyResult(null);
     try {
-      const res = await api.post<{ success: boolean; message: string }>("/voice/phone-numbers/purchase", {
+      const res = await api.post<{ success: boolean; message: string; errorCode?: string }>("/voice/phone-numbers/purchase", {
         region: selectedRegion,
+        carrier: selectedCarrier,
+        phoneNumber: selectedNumber,
+        attachToAgentId: attachAfterBuy ? Number(attachAfterBuy) : undefined,
       });
       setBuyResult(res);
       if (res.success) {
-        setTimeout(() => { loadData(); setShowBuyModal(false); }, 1500);
+        toast.success("Number purchased!");
+        setTimeout(() => loadData(), 1500);
       }
     } catch (err: any) {
       setBuyResult({ success: false, message: err.message || "Purchase failed" });
@@ -733,7 +785,7 @@ export default function VoiceAIPage() {
                     <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#6FE3B0]" />
                   </button>
                 )}
-                <button onClick={() => setShowBuyModal(true)}
+                <button onClick={() => { resetShop(); setBuyResult(null); setShowBuyModal(true); loadShopNumbers(); }}
                   className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-[#34D399]/40 text-left group"
                 >
                   <div className="flex items-center gap-3">
@@ -823,12 +875,86 @@ export default function VoiceAIPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs text-[#9FB0A6] mb-1.5">Region</label>
-                    <select value={selectedRegion} onChange={e => setSelectedRegion(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
+                    <select value={selectedRegion}
+                      onChange={e => { const v = e.target.value; setSelectedRegion(v); resetShop(); setBuyResult(null); loadShopNumbers(undefined, v); }}
+                      className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50"
                     >
-                      <option value="india">India</option>
+                      <option value="india">India (+91)</option>
+                      <option value="us">United States (+1)</option>
                     </select>
                   </div>
+
+                  {/* Carrier pick — India stocks numbers per carrier */}
+                  {needsCarrier && shopCarriers.length > 0 && (
+                    <div>
+                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Carrier</label>
+                      <div className="flex flex-wrap gap-2">
+                        {shopCarriers.map(c => (
+                          <button key={c.carrier}
+                            onClick={() => { setSelectedCarrier(c.carrier); setSelectedNumber(""); loadShopNumbers(c.carrier); }}
+                            className={cn(
+                              "px-3 py-1.5 rounded-lg text-xs border transition-colors",
+                              selectedCarrier === c.carrier
+                                ? "bg-[#34D399]/15 border-[#34D399]/50 text-[#34D399]"
+                                : "bg-white/[0.06] border-white/10 text-[#9FB0A6] hover:border-[#34D399]/30"
+                            )}
+                          >
+                            {c.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Available numbers from the shop */}
+                  {shopLoading && (
+                    <div className="flex items-center justify-center gap-2 py-6 text-xs text-[#9FB0A6]">
+                      <Loader2 className="w-4 h-4 animate-spin" /> Loading available numbers…
+                    </div>
+                  )}
+                  {!shopLoading && shopNumbers.length > 0 && (
+                    <div>
+                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Available numbers</label>
+                      <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                        {shopNumbers.map(n => (
+                          <button key={n.phone_number}
+                            onClick={() => setSelectedNumber(n.phone_number)}
+                            className={cn(
+                              "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm border transition-colors text-left",
+                              selectedNumber === n.phone_number
+                                ? "bg-[#34D399]/15 border-[#34D399]/50"
+                                : "bg-white/[0.06] border-white/10 hover:border-[#34D399]/30"
+                            )}
+                          >
+                            <span className="font-mono text-[#F0F7F3]">{n.phone_number}</span>
+                            <span className="text-[11px] text-[#9FB0A6]">
+                              ${n.monthly_rental_usd?.toFixed(2)}/mo
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {!shopLoading && !needsCarrier && shopNumbers.length === 0 && shopCarriers.length === 0 && (
+                    <button onClick={() => loadShopNumbers(selectedCarrier || undefined)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#34D399]/40 text-[#34D399] text-xs hover:bg-[#34D399]/10"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Load available numbers
+                    </button>
+                  )}
+
+                  {/* Attach after purchase */}
+                  {agents.length > 0 && (
+                    <div>
+                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Attach to agent after purchase</label>
+                      <select value={attachAfterBuy} onChange={e => setAttachAfterBuy(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50"
+                      >
+                        <option value="">Don&apos;t attach now</option>
+                        {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                      </select>
+                    </div>
+                  )}
 
                   {buyResult && (
                     <div className={cn(
@@ -836,12 +962,23 @@ export default function VoiceAIPage() {
                       buyResult.success ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
                       "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                     )}>
-                      {buyResult.message}
+                      <p>{buyResult.message}</p>
+                      {!buyResult.success && buyResult.errorCode &&
+                        ["kyc_incomplete", "insufficient_balance", "feature_disabled"].includes(buyResult.errorCode) && (
+                        <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
+                          className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-[11px] hover:bg-white/[0.1]"
+                        >
+                          Open Omnidim Dashboard <ExternalLink className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   )}
 
                   <p className="text-[11px] text-[#9FB0A6] leading-relaxed">
-                    Numbers are purchased through our telephony provider. After purchase, the number will appear in your list and you can attach it to your AI agent.
+                    Numbers are rented from our telephony provider and charged to its wallet
+                    (~$5.06/mo for +91). First purchase needs a one-time verification (Aadhaar
+                    eKYC for India) — if asked, complete it in the Omnidim dashboard and buy
+                    here again.
                   </p>
                 </div>
 
@@ -850,11 +987,11 @@ export default function VoiceAIPage() {
                     className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
                   >Cancel</button>
                   {!buyResult?.success ? (
-                    <button onClick={handleBuyNumber} disabled={buyLoading}
+                    <button onClick={handleBuyNumber} disabled={buyLoading || !selectedNumber}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#34D399] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                     >
                       {buyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
-                      {buyLoading ? "Purchasing..." : "Buy Number"}
+                      {buyLoading ? "Purchasing..." : selectedNumber ? `Buy ${selectedNumber}` : "Buy Number"}
                     </button>
                   ) : (
                     <button onClick={() => { setShowBuyModal(false); setBuyResult(null); }}

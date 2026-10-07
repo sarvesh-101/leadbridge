@@ -66,10 +66,18 @@ export class OmnidimensionPhoneProvider implements PhoneProvider {
 
   async purchaseNumber(options?: PurchasePhoneOptions): Promise<PurchasePhoneResult> {
     try {
+      if (!options?.carrier || !options?.phoneNumber) {
+        return {
+          success: false,
+          message:
+            "Pick a number from the list first — Omnidim sells specific numbers per carrier (search → buy).",
+        };
+      }
+
       const result = await omniPurchaseNumber({
-        region: options?.region,
-        areaCode: options?.areaCode,
-        provider: "omnidim",
+        region: options.region,
+        carrier: options.carrier,
+        phoneNumber: options.phoneNumber,
       });
 
       if (!result.success || !result.phoneNumber) {

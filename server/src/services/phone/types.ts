@@ -17,6 +17,8 @@ export interface PhoneNumberInfo {
 export interface PurchasePhoneOptions {
   region?: string;
   areaCode?: string;
+  /** Omnidim number shop: the carrier to buy from (from /phone_number/search) */
+  carrier?: string;
   phoneNumber?: string;         // For importing an existing number
 }
 
