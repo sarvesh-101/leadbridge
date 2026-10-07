@@ -32,6 +32,13 @@
 
 ## ✅ COMPLETED (reverse-chronological)
 
+### 2026-10-07 — BUY-NUMBER FIXED (in-app number shop) + Task 2 root-caused
+- **Buy Phone Number ROOT CAUSE (`91d157f`):** our code called `POST /phone_number/purchase` with `{provider, region: "india", area_code}` — Omnidim's CURRENT API rejects that shape (400). Their real flow (docs.omnidim.io/docs/buy-a-number-api): `GET /phone_number/search?region=IN&carrier=…` → pick a specific number → `POST /phone_number/purchase {region, carrier, phone_number}` + `Idempotency-Key` header. NOT an outage — stale payload; the old "buy at app.omnidim.io" message was our generic catch-all.
+- **Shipped:** full in-app number shop — `GET /voice/phone-numbers/search` proxy (carriers via 409 carrier_required → chips → available numbers with $/mo) + correct purchase call (Idempotency-Key) + every documented refusal mapped to plain language (kyc_incomplete / insufficient_balance / number_unavailable / in_progress / feature_disabled) + optional auto-attach to agent + "Open Omnidim Dashboard" button on gate errors. Old fallbacks kept. tsc clean both sides.
+- **Sarvesh prerequisites for first buy (one-time, no code):** ① Aadhaar eKYC in app.omnidim.io → Numbers Shop (per-carrier, minutes) ② wallet top-up (~$6 covers $5.06/mo rental).
+- **Task 2 ROOT-CAUSED — NOT a Render Cron Job:** `.github/workflows/db-backup.yml` already runs `backup-db.sh` every 6h on GitHub Actions (installs pg_dump itself) — but it has been FAILING since it started: **repo has ZERO Actions secrets** (`gh secret list` empty). Fix = Supabase `db-backups` PRIVATE bucket + 3 GitHub secrets (`PROD_DATABASE_URL` session-pooler URI WITHOUT `?pgbouncer` params, `PROD_SUPABASE_URL`, `PROD_SUPABASE_SERVICE_KEY`) → Actions → DB Backup → Run workflow → green + file in bucket. No Render Cron needed.
+- **Task 1 (IMAP no-lead) diagnosis — pipeline is fine, check 4 things:** pipeline matches the lead to a Client by the SENDER email (`[EMAIL] No broker found` → ignored silently); poller only reads UNSEEN (opening the test email in Gmail before the 5-min poll = invisible); reads only INBOX (spam excluded); parser requires a phone number. Verify via Render logs: `[EMAIL] …`, `IMAP email pull cycle complete`, `IMAP email pull failed`. `/health/integrations` shows `email_forwarding:false` — that's the WEBHOOK channel check (expected; IMAP is separate and silent when idle).
+
 ### 2026-09-29 (evening) — PAYMENT LOOP: 95% wired (₹5 charge pending) + embedded checkout shipped
 - **Embedded Razorpay Checkout SHIPPED** (`6b45493`): POST /subscriptions returns key+subId+HMAC → billing page opens the Razorpay modal ON-page (QR/UPI/cards) — no more popup tabs or dead-end banner. Hosted-page same-tab fallback kept; activation poller also fires on TRIAL→ACTIVE.
 - **Self-diagnosing checkout** (`3f0c7a1`): Razorpay rejection reasons now surface in the banner.
@@ -87,10 +94,11 @@
 - **Follow-up answers received (2026-09-30):** +91 numbers purchasable directly from Omnidim at **$5.06/mo** → `PHONE_NUMBER_MONTHLY_COST` default corrected ₹200 → ₹430. Early Deployers unlocks: live call monitoring, voicemail detection, agent versioning, workflow builder (10k executions/mo). Inbound call credits included in plan. **Still unanswered: concurrent outbound call limit on Starter** — asked again; matters for campaign scale. Current plan = Starter $15/mo — decision: STAY on Starter (India voicemail prevalence low; upgrade when data shows screening/voicemail hits or a client needs live monitoring). Sarvesh on Starter + no upgrade.
 - P0 remaining: transfer-ring confirmation (still unanswered) + Task 6 ₹5 payment test.
 
-### P0 — now (2026-09-29 evening — the 6-task soft-launch sprint, guides delivered in chat)
-- [ ] **Task 4:** `WEBHOOK_URL` env (Omnidim call events) — 2 min, codebuff verifies
-- [ ] **Task 1:** IMAP Gmail app password + 4 env vars + test lead — codebuff verifies ingestion
-- [ ] **Task 2:** Supabase `db-backups` bucket + Render Cron Job `0 */6 * * *` — codebuff verifies first dump
+### P0 — now (2026-10-07 status update on the 6-task sprint)
+- [x] **Task 4:** `WEBHOOK_URL` env — DONE, boot banner clean
+- [ ] **Task 1:** env DONE ✅ but test-lead FAILED — redo test: send FROM the Converza account's own email, DON'T open it in Gmail, include a phone number, wait 6+ min, then check Render logs for `[EMAIL]` lines
+- [ ] **Task 2:** SIMPLIFIED → Supabase `db-backups` PRIVATE bucket + 3 GitHub Actions secrets (workflow already exists + runs) → Run workflow → verify green + file in bucket
+- [ ] **Number shop prerequisites:** Sarvesh does Aadhaar eKYC (app.omnidim.io Numbers Shop) + wallet top-up ~$6 → then buy +91 in the Converza dashboard (new shop UI, commit `91d157f`)
 - [ ] **Task 3:** Rename Render→`converza-api` + Vercel→`converza` → paste new URLs to Codebuff → staged URL switch
 - [ ] **Task 5:** MessageBird SMS number buy + callback webhook + `FORWARDING_SMS_NUMBER` + SMS lead test + dedupe check
 - [ ] **Task 6 (do it fresh, no mandate live yet):** cancel stale "Created" subs in Razorpay → pay ₹5 on Converza Growth checkout → "paid" → verify GSTIN invoice → CANCEL sub immediately in Razorpay (kill next-cycle ₹35K auto-debit) → refund ₹5 → DPDP erase → **money loop CERTIFIED** *Owner: Sarvesh → Codebuff*
