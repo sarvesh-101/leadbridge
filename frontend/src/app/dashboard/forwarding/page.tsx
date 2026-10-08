@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare, Mail, CheckCircle2, XCircle, Loader2, Copy,
   ChevronDown, ChevronUp, Smartphone, Inbox, ArrowRight, Send,
-  Phone, ExternalLink, AlertCircle, RefreshCw, History, Users,
+  Phone, ExternalLink, AlertCircle, RefreshCw, History, Users, Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
@@ -103,6 +104,246 @@ function SkeletonCard() {
         <div className="h-8 w-32 bg-white/[0.06] rounded-lg" />
       </div>
     </div>
+  );
+}
+
+// ─── Portal Auto-Forward Wizard — zero-touch lead setup ─────────────────────
+// The pitch: ONE-TIME setup per portal → every future enquiry is AI-called
+// automatically. No per-lead forwarding, no CSV uploads (the Vyora way).
+
+interface AutoForwardPortal {
+  id: string;
+  name: string;
+  emoji: string;
+  hasDirectApi: boolean;
+  /** Word the auto-forward app matches in the SMS body */
+  matchWord: string;
+  /** Domain(s) for the Gmail auto-forward filter */
+  emailDomains: string;
+}
+
+const AUTO_FORWARD_PORTALS: AutoForwardPortal[] = [
+  { id: "indiamart", name: "IndiaMART", emoji: "🟢", hasDirectApi: true, matchWord: "IndiaMART", emailDomains: "indiamart.com" },
+  { id: "justdial", name: "JustDial", emoji: "📞", hasDirectApi: false, matchWord: "JustDial", emailDomains: "justdial.com" },
+  { id: "99acres", name: "99acres", emoji: "🏠", hasDirectApi: false, matchWord: "99acres", emailDomains: "99acres.com" },
+  { id: "magicbricks", name: "MagicBricks", emoji: "🪄", hasDirectApi: false, matchWord: "Magic", emailDomains: "magicbricks.com" },
+  { id: "housing", name: "Housing.com", emoji: "🏡", hasDirectApi: false, matchWord: "Housing", emailDomains: "housing.com" },
+  { id: "other", name: "Any other portal", emoji: "✳️", hasDirectApi: false, matchWord: "the portal's name (Sulekha, NoBroker, TradeIndia…)", emailDomains: "the portal's domain (sulekha.com, nobroker.in…)" },
+];
+
+type ChannelTab = "api" | "sms" | "email";
+
+function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: string; forwardingNumber: string }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [tab, setTab] = useState<ChannelTab>("sms");
+  const [donePortals, setDonePortals] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try { setDonePortals(JSON.parse(localStorage.getItem("converza-portal-setup") || "{}")); } catch { /* corrupt flag — start fresh */ }
+  }, []);
+
+  const markDone = (id: string) => {
+    const next = { ...donePortals, [id]: !donePortals[id] };
+    setDonePortals(next);
+    try { localStorage.setItem("converza-portal-setup", JSON.stringify(next)); } catch { /* private mode */ }
+    if (next[id]) toast.success(`${AUTO_FORWARD_PORTALS.find(p => p.id === id)?.name} marked as live 🎉`);
+  };
+
+  const openPortal = (id: string) => {
+    setSelected(selected === id ? null : id);
+    const p = AUTO_FORWARD_PORTALS.find(x => x.id === id);
+    setTab(p?.hasDirectApi ? "api" : "sms");
+  };
+
+  const portal = AUTO_FORWARD_PORTALS.find(p => p.id === selected) || null;
+  const domainsOr = portal ? portal.emailDomains.split(" ").slice(0, 1).join("") : "";
+  const playStoreSearch = "https://play.google.com/store/search?q=sms%20forwarder%20auto%20forward&c=apps";
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+      className="p-5 rounded-2xl app-card"
+    >
+      <div className="flex items-start justify-between mb-1 gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-[#F0F7F3] flex items-center gap-2">
+            <Zap className="w-4 h-4 text-[#E8C468]" />
+            Zero-Touch Setup — connect each portal ONCE
+          </h2>
+          <p className="text-xs text-[#9FB0A6] mt-1">
+            Do this once per portal. After that <strong className="text-[#6FE3B0]">every enquiry is AI-called automatically</strong> — you never forward a lead or upload a CSV again.
+          </p>
+        </div>
+      </div>
+
+      {/* Portals grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-4">
+        {AUTO_FORWARD_PORTALS.map(p => (
+          <button key={p.id} onClick={() => openPortal(p.id)}
+            className={cn(
+              "p-3 rounded-xl border text-left transition-all",
+              selected === p.id ? "border-[#34D399]/50 bg-[#34D399]/5" : "border-white/10 bg-black/20 hover:border-[#34D399]/30"
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-lg">{p.emoji}</span>
+              {donePortals[p.id] && (
+                <span className="flex items-center gap-1 text-[10px] text-green-400 font-medium">
+                  <CheckCircle2 className="w-3 h-3" /> Live
+                </span>
+              )}
+            </div>
+            <p className="text-[12px] font-medium text-[#F0F7F3] mt-1">{p.name}</p>
+            <p className="text-[10px] text-[#9FB0A6]">
+              {p.hasDirectApi ? "Official API · best" : "Auto-forward"}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      {/* Detail panel */}
+      <AnimatePresence>
+        {portal && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="mt-4 overflow-hidden"
+          >
+            <div className="p-4 rounded-xl bg-black/30 border border-white/10">
+              <div className="flex items-center gap-2 mb-4">
+                <span>{portal.emoji}</span>
+                <span className="text-sm font-semibold text-[#F0F7F3]">{portal.name}</span>
+                <span className="text-[10px] text-green-400 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 ml-auto">
+                  one-time · ~{portal.hasDirectApi ? "10" : "15"} min
+                </span>
+              </div>
+
+              {/* Channel tabs */}
+              <div className="flex gap-1.5 mb-4">
+                {[
+                  ...(portal.hasDirectApi ? [{ id: "api" as ChannelTab, label: "Direct API ★ best" }] : []),
+                  { id: "sms" as ChannelTab, label: "Auto-forward SMS" },
+                  { id: "email" as ChannelTab, label: "Auto-forward Email" },
+                ].map(t => (
+                  <button key={t.id} onClick={() => setTab(t.id)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[11px] border transition-colors",
+                      tab === t.id
+                        ? "bg-[#34D399]/15 border-[#34D399]/50 text-[#34D399] font-medium"
+                        : "bg-white/[0.06] border-white/10 text-[#9FB0A6] hover:border-[#34D399]/30"
+                    )}
+                  >{t.label}</button>
+                ))}
+              </div>
+
+              {/* ── Direct API tab (IndiaMART) ── */}
+              {tab === "api" && (
+                <ol className="space-y-3 text-xs text-[#9FB0A6]">
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">1.</span>
+                    <span>Open <a href="https://seller.indiamart.com/leadmanager/crmapi" target="_blank" rel="noopener noreferrer" className="text-[#6FE3B0] hover:underline inline-flex items-center gap-1">seller.indiamart.com/leadmanager/crmapi <ExternalLink className="w-3 h-3" /></a> → tap <strong className="text-[#F0F7F3]">⋮ → CRM Integration → Generate Key</strong>. The key is emailed to your registered email.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">2.</span>
+                    <span>In Converza, open <Link href="/dashboard/integrations" className="text-[#6FE3B0] hover:underline">Integrations → IndiaMART → Connect</Link> → enter your 10-digit IndiaMART mobile + paste the key → <strong className="text-[#F0F7F3]">Save &amp; Verify</strong>.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">3.</span>
+                    <span>For real-time push: IndiaMART → <strong className="text-[#F0F7F3]">Lead Manager → Import/Export Leads → Push API</strong> → choose platform <strong className="text-[#F0F7F3]">"Other"</strong> → name it Converza → paste the webhook URL shown on our Integrations page → confirm the OTP on your phone.</span>
+                  </li>
+                  <li className="p-2.5 rounded-lg bg-green-500/5 border border-green-500/15"><span className="text-[11px] text-[#6FE3B0]">✅ Done forever — every future IndiaMART enquiry reaches Converza in real time and gets AI-called. You never touch it again.</span></li>
+                  <li className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10"><span className="text-[11px] text-amber-400">⚠️ IndiaMART's Leads API is a paid IndiaMART add-on. If "Generate Key" doesn't work, ask your IndiaMART account manager — or use the Auto-forward SMS/Email tabs below (same result, ₹0).</span></li>
+                </ol>
+              )}
+
+              {/* ── Auto-forward SMS tab ── */}
+              {tab === "sms" && (
+                <ol className="space-y-3 text-xs text-[#9FB0A6]">
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">1.</span>
+                    <span>On your Android phone, install a free auto-forward app — <a href={playStoreSearch} target="_blank" rel="noopener noreferrer" className="text-[#6FE3B0] hover:underline inline-flex items-center gap-1">Play Store: "SMS Forwarder" <ExternalLink className="w-3 h-3" /></a> (any app with "auto forward + filter" works; iPhone users: use the Email tab or the manual forward steps below).</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">2.</span>
+                    <span>Create a forwarding rule. <strong className="text-[#F0F7F3]">Forward TO this number:</strong>
+                      <span className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
+                        <strong className="text-[11px] text-[#F0F7F3] font-mono break-all">{forwardingNumber}</strong>
+                        <span className="ml-auto"><CopyBtn text={forwardingNumber} /></span>
+                      </span>
+                    </span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">3.</span>
+                    <span>Set the match filter to <strong className="text-[#F0F7F3]">"text contains"</strong> →<br /><strong className="text-[11px] text-[#F0F7F3] font-mono">{portal.matchWord}</strong> — every SMS from {portal.name} matches, whatever sender ID they use.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">4.</span>
+                    <span>Allow the app to run in background (accept the battery-optimisation prompt). Test with the <strong className="text-[#F0F7F3]">Test Forward</strong> section below, then tap <strong className="text-[#F0F7F3]">Mark as live</strong>. ✅ Every future {portal.name} SMS self-forwards — zero work per lead.</span>
+                  </li>
+                </ol>
+              )}
+
+              {/* ── Auto-forward Email tab ── */}
+              {tab === "email" && (
+                <ol className="space-y-3 text-xs text-[#9FB0A6]">
+                  <li className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10"><span className="text-[11px] text-amber-400">⚠️ Do this from the <strong>same Gmail account you signed up with</strong> — Converza matches forwarded emails to your account by sender. Forwards from other addresses are ignored.</span></li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">1.</span>
+                    <span>Gmail on a computer → <strong className="text-[#F0F7F3]">⚙ → See all settings → Forwarding and POP/IMAP</strong> → <strong className="text-[#F0F7F3]">Add a forwarding address</strong> → paste:
+                      <span className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
+                        <strong className="text-[11px] text-[#F0F7F3] font-mono break-all">{forwardingEmail}</strong>
+                        <span className="ml-auto"><CopyBtn text={forwardingEmail} /></span>
+                      </span>
+                      Gmail sends a confirmation to that mailbox — we help you confirm it during onboarding.
+                    </span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">2.</span>
+                    <span>In the Gmail search bar, click the <strong className="text-[#F0F7F3]">filter sliders icon</strong> → in <strong className="text-[#F0F7F3]">From</strong> enter: <strong className="text-[11px] text-[#F0F7F3] font-mono">{domainsOr}</strong> → <strong className="text-[#F0F7F3]">Create filter</strong>.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">3.</span>
+                    <span>Tick <strong className="text-[#F0F7F3]">"Forward it to: {forwardingEmail}"</strong> → <strong className="text-[#F0F7F3]">Create filter</strong>. ✅ Every future {portal.name} enquiry email auto-forwards and gets AI-called — you never open it.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-[#34D399] shrink-0 font-bold">4.</span>
+                    <span>Test with a real enquiry email → check <strong className="text-[#F0F7F3]">Leads</strong> within ~5 minutes → <strong className="text-[#F0F7F3]">Mark as live</strong>.</span>
+                  </li>
+                </ol>
+              )}
+
+              {/* Mark as live */}
+              <button onClick={() => markDone(portal.id)}
+                className={cn(
+                  "mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors",
+                  donePortals[portal.id]
+                    ? "bg-green-500/15 border border-green-500/30 text-green-400"
+                    : "bg-[#34D399] text-black hover:opacity-90"
+                )}
+              >
+                {donePortals[portal.id] ? <><CheckCircle2 className="w-4 h-4" /> {portal.name} is LIVE — tap to undo</> : <><Zap className="w-4 h-4" /> Mark {portal.name} as live</>}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function CopyBtn({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch { /* clipboard unavailable */ }
+      }}
+      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors shrink-0"
+      title="Copy"
+    >
+      {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
   );
 }
 
@@ -304,6 +545,12 @@ export default function LeadForwardingPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* ═══ Portal Auto-Forward Wizard — set each portal ONCE, then zero work ═══ */}
+        <PortalWizard
+          forwardingEmail={status?.forwardingEmail || ""}
+          forwardingNumber={status?.forwardingNumber || ""}
+        />
 
         {/* How to Forward — SMS & Email Sections */}
         <div className="space-y-3">
