@@ -39,7 +39,13 @@ jobs:
           wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc >/dev/null
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client-17
-          pg_dump --version
+          # Ubuntu keeps /usr/bin/pg_dump as an alternatives symlink that may still
+          # point at the pre-installed 16.x — force it to the version we just installed.
+          sudo update-alternatives --install /usr/bin/pg_dump pg_dump /usr/lib/postgresql/17/bin/pg_dump 1700
+          sudo update-alternatives --set pg_dump /usr/lib/postgresql/17/bin/pg_dump
+          PG_DUMP_VER="$(pg_dump --version)"
+          echo "$PG_DUMP_VER"
+          echo "$PG_DUMP_VER" | grep -q ' 17\.' || { echo "ERROR: pg_dump must be v17, got: $PG_DUMP_VER"; exit 1; }
 
       - name: Run backup script (dump + off-site upload)
         env:
