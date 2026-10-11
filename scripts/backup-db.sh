@@ -65,6 +65,7 @@ if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ]; then
   HTTP_CODE="$(curl -sS -o "${RESP_FILE}" -w '%{http_code}' \
     -X POST "${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILENAME}" \
     -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+    -H "apikey: ${SUPABASE_SERVICE_KEY}" \
     -H "Content-Type: application/gzip" \
     -H "x-upsert: true" \
     --data-binary @"${OUTFILE}")"

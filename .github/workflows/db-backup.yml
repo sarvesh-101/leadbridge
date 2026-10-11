@@ -5,7 +5,10 @@
 # One-time setup (repo Settings → Secrets and variables → Actions):
 #   PROD_DATABASE_URL          session-pooler Postgres URI (see setup doc)
 #   PROD_SUPABASE_URL          https://oavzflfdjluxvdlymbug.supabase.co
-#   PROD_SUPABASE_SERVICE_KEY  service key
+#   PROD_SUPABASE_SERVICE_KEY  legacy JWT service_role key:
+#                              Dashboard → Project Settings → API → "secret_jwt_template"
+#                              section → copy the long eyJ... token (NOT the sb_secret_... key —
+#                              storage REST uploads require the JWT). It is ~200+ chars.
 #   BACKUP_HEARTBEAT_URL       (optional) UptimeRobot heartbeat — paged when a run is missed
 #
 # ⚠️ GitHub disables scheduled workflows after 60 days without repo activity —
