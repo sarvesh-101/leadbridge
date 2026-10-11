@@ -58,7 +58,20 @@ echo "  Local dir: ${BACKUP_DIR}"
 #   Supabase dashboard → Storage → New bucket → name "db-backups" → PRIVATE
 # Exit-codes non-zero on failure so the cron job shows FAILED (never silent).
 # ─────────────────────────────────────────────────────────────────────────────
-if [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ]; then
+if [ -n "${SUPABASE_S3_ACCESS_KEY:-}" ] && [ -n "${SUPABASE_S3_SECRET_KEY:-}" ]; then
+  # ── S3-compatible Storage gateway (preferred — no JWT involved) ───────────
+  # Uses the Access Key pair from Supabase → Storage → Settings → S3 API.
+  # Independent of the JWT secret, so it survives JWT rotations/legacy-key removal.
+  S3_ENDPOINT="${SUPABASE_S3_ENDPOINT:-${SUPABASE_URL}/s3}"
+  S3_REGION="${SUPABASE_S3_REGION:-ap-south-1}"
+  echo "→ Uploading off-site copy via S3 gateway → ${S3_ENDPOINT}"
+  aws s3 cp "${OUTFILE}" "s3://${SUPABASE_BACKUP_BUCKET:-db-backups}/${FILENAME}" \
+    --endpoint-url "${S3_ENDPOINT}" \
+    --region "${S3_REGION}" \
+    --no-progress
+  echo "✓ Off-site copy uploaded (S3): ${FILENAME}"
+elif [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ]; then
+  # ── Legacy Storage REST upload (requires a valid eyJ... service_role JWT) ──
   BUCKET="${SUPABASE_BACKUP_BUCKET:-db-backups}"
   RESP_FILE="$(mktemp)"
   echo "→ Uploading off-site copy to Supabase Storage bucket '${BUCKET}'"
