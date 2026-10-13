@@ -65,6 +65,30 @@ if [ -n "${SUPABASE_S3_ACCESS_KEY:-}" ] && [ -n "${SUPABASE_S3_SECRET_KEY:-}" ];
   S3_ENDPOINT="${SUPABASE_S3_ENDPOINT:-${SUPABASE_URL}/s3}"
   S3_REGION="${SUPABASE_S3_REGION:-ap-south-1}"
   echo "→ Uploading off-site copy via S3 gateway → ${S3_ENDPOINT}"
+
+  # Self-heal: ensure the backup bucket exists (Supabase returns 404 on
+  # PutObject for a missing bucket instead of AccessDenied). Tolerate the
+  # bucket already existing; surface any real failure but don't abort —
+  # the upload below is the source of truth.
+  echo "→ Ensuring bucket '${SUPABASE_BACKUP_BUCKET:-db-backups}' exists"
+  CR_ERR="$(mktemp)"
+  if ! AWS_ACCESS_KEY_ID="${SUPABASE_S3_ACCESS_KEY}" \
+       AWS_SECRET_ACCESS_KEY="${SUPABASE_S3_SECRET_KEY}" \
+       AWS_DEFAULT_REGION="${S3_REGION}" \
+       aws s3api create-bucket --bucket "${SUPABASE_BACKUP_BUCKET:-db-backups}" \
+         --endpoint-url "${S3_ENDPOINT}" \
+         --region "${S3_REGION}" \
+         --create-bucket-configuration LocationConstraint="${S3_REGION}" 2>"${CR_ERR}"; then
+    if grep -q "BucketAlreadyOwnedByYou\|BucketAlreadyExists" "${CR_ERR}"; then
+      echo "✓ Bucket already exists"
+    else
+      echo "⚠️  create-bucket failed (bucket may need manual creation): $(cat "${CR_ERR}")"
+    fi
+  else
+    echo "✓ Bucket created"
+  fi
+  rm -f "${CR_ERR}"
+
   # AWS CLI only understands AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY —
   # map the Supabase S3-gateway key pair onto them (was a silent no-auth bug).
   AWS_ACCESS_KEY_ID="${SUPABASE_S3_ACCESS_KEY}" \
