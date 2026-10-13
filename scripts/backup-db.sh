@@ -58,6 +58,30 @@ echo "  Local dir: ${BACKUP_DIR}"
 #   Supabase dashboard → Storage → New bucket → name "db-backups" → PRIVATE
 # Exit-codes non-zero on failure so the cron job shows FAILED (never silent).
 # ─────────────────────────────────────────────────────────────────────────────
+# REST upload — legacy path (needs SUPABASE_URL + service_role JWT).
+# Used as a standalone path AND as fallback when the S3 gateway fails.
+do_rest_upload() {
+  local BUCKET="${SUPABASE_BACKUP_BUCKET:-db-backups}"
+  local RESP_FILE HTTP_CODE
+  RESP_FILE="$(mktemp)"
+  echo "→ Uploading off-site copy to Supabase Storage bucket '${BUCKET}' (REST)"
+  HTTP_CODE="$(curl -sS -o "${RESP_FILE}" -w '%{http_code}' \
+    -X POST "${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILENAME}" \
+    -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+    -H "apikey: ${SUPABASE_SERVICE_KEY}" \
+    -H "Content-Type: application/gzip" \
+    -H "x-upsert: true" \
+    --data-binary @"${OUTFILE}")"
+  if [ "${HTTP_CODE}" = "200" ] || [ "${HTTP_CODE}" = "201" ]; then
+    echo "✓ Off-site copy uploaded: ${BUCKET}/${FILENAME}"
+    rm -f "${RESP_FILE}"
+    return 0
+  fi
+  echo "❌ REST upload FAILED (HTTP ${HTTP_CODE}): $(cat "${RESP_FILE}")"
+  rm -f "${RESP_FILE}"
+  return 1
+}
+
 if [ -n "${SUPABASE_S3_ACCESS_KEY:-}" ] && [ -n "${SUPABASE_S3_SECRET_KEY:-}" ]; then
   # ── S3-compatible Storage gateway (preferred — no JWT involved) ───────────
   # Uses the Access Key pair from Supabase → Storage → Settings → S3 API.
@@ -91,34 +115,23 @@ if [ -n "${SUPABASE_S3_ACCESS_KEY:-}" ] && [ -n "${SUPABASE_S3_SECRET_KEY:-}" ];
 
   # AWS CLI only understands AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY —
   # map the Supabase S3-gateway key pair onto them (was a silent no-auth bug).
-  AWS_ACCESS_KEY_ID="${SUPABASE_S3_ACCESS_KEY}" \
-  AWS_SECRET_ACCESS_KEY="${SUPABASE_S3_SECRET_KEY}" \
-  AWS_DEFAULT_REGION="${S3_REGION}" \
-  aws s3 cp "${OUTFILE}" "s3://${SUPABASE_BACKUP_BUCKET:-db-backups}/${FILENAME}" \
-    --endpoint-url "${S3_ENDPOINT}" \
-    --region "${S3_REGION}" \
-    --no-progress
-  echo "✓ Off-site copy uploaded (S3): ${FILENAME}"
-elif [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ]; then
-  # ── Legacy Storage REST upload (requires a valid eyJ... service_role JWT) ──
-  BUCKET="${SUPABASE_BACKUP_BUCKET:-db-backups}"
-  RESP_FILE="$(mktemp)"
-  echo "→ Uploading off-site copy to Supabase Storage bucket '${BUCKET}'"
-  HTTP_CODE="$(curl -sS -o "${RESP_FILE}" -w '%{http_code}' \
-    -X POST "${SUPABASE_URL}/storage/v1/object/${BUCKET}/${FILENAME}" \
-    -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
-    -H "apikey: ${SUPABASE_SERVICE_KEY}" \
-    -H "Content-Type: application/gzip" \
-    -H "x-upsert: true" \
-    --data-binary @"${OUTFILE}")"
-  if [ "${HTTP_CODE}" = "200" ] || [ "${HTTP_CODE}" = "201" ]; then
-    echo "✓ Off-site copy uploaded: ${BUCKET}/${FILENAME}"
+  if AWS_ACCESS_KEY_ID="${SUPABASE_S3_ACCESS_KEY}" \
+     AWS_SECRET_ACCESS_KEY="${SUPABASE_S3_SECRET_KEY}" \
+     AWS_DEFAULT_REGION="${S3_REGION}" \
+     aws s3 cp "${OUTFILE}" "s3://${SUPABASE_BACKUP_BUCKET:-db-backups}/${FILENAME}" \
+       --endpoint-url "${S3_ENDPOINT}" \
+       --region "${S3_REGION}" \
+       --no-progress; then
+    echo "✓ Off-site copy uploaded (S3): ${FILENAME}"
+  elif [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ]; then
+    echo "⚠️  S3 gateway upload failed — falling back to legacy REST upload"
+    do_rest_upload
   else
-    echo "❌ Off-site upload FAILED (HTTP ${HTTP_CODE}): $(cat "${RESP_FILE}")"
-    rm -f "${RESP_FILE}"
+    echo "❌ Off-site upload FAILED (S3 path broken and no REST creds for fallback)"
     exit 1
   fi
-  rm -f "${RESP_FILE}"
+elif [ -n "${SUPABASE_URL:-}" ] && [ -n "${SUPABASE_SERVICE_KEY:-}" ]; then
+  do_rest_upload
 fi
 
 # ─── Optional S3 off-site copy (alternative to Supabase Storage) ────────────
