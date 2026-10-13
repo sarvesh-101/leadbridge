@@ -65,6 +65,11 @@ if [ -n "${SUPABASE_S3_ACCESS_KEY:-}" ] && [ -n "${SUPABASE_S3_SECRET_KEY:-}" ];
   S3_ENDPOINT="${SUPABASE_S3_ENDPOINT:-${SUPABASE_URL}/s3}"
   S3_REGION="${SUPABASE_S3_REGION:-ap-south-1}"
   echo "→ Uploading off-site copy via S3 gateway → ${S3_ENDPOINT}"
+  # AWS CLI only understands AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY —
+  # map the Supabase S3-gateway key pair onto them (was a silent no-auth bug).
+  AWS_ACCESS_KEY_ID="${SUPABASE_S3_ACCESS_KEY}" \
+  AWS_SECRET_ACCESS_KEY="${SUPABASE_S3_SECRET_KEY}" \
+  AWS_DEFAULT_REGION="${S3_REGION}" \
   aws s3 cp "${OUTFILE}" "s3://${SUPABASE_BACKUP_BUCKET:-db-backups}/${FILENAME}" \
     --endpoint-url "${S3_ENDPOINT}" \
     --region "${S3_REGION}" \
