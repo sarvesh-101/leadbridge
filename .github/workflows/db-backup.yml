@@ -61,7 +61,11 @@ jobs:
           # When both are set the script uploads via S3 and ignores the JWT key.
           SUPABASE_S3_ACCESS_KEY: ${{ secrets.PROD_SUPABASE_S3_ACCESS_KEY }}
           SUPABASE_S3_SECRET_KEY: ${{ secrets.PROD_SUPABASE_S3_SECRET_KEY }}
-          SUPABASE_S3_REGION: ap-south-1
+          SUPABASE_S3_REGION: ${{ vars.PROD_SUPABASE_S3_REGION || 'ap-south-1' }}
+          # Retry transient 5xx / connection blips on the S3 gateway instead of
+          # failing the whole run with the generic CLI exit code 1.
+          AWS_RETRY_MODE: standard
+          AWS_MAX_ATTEMPTS: "5"
           BACKUP_KEEP: "3"
           BACKUP_DIR: /tmp/converza-backups
         run: bash scripts/backup-db.sh
