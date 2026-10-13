@@ -101,7 +101,7 @@
 ### P0 — now (2026-10-07 status update on the 6-task sprint)
 - [x] **Task 4:** `WEBHOOK_URL` env — DONE, boot banner clean
 - [ ] **Task 1:** env DONE ✅ but test-lead FAILED — redo test: send FROM the Converza account's own email, DON'T open it in Gmail, include a phone number, wait 6+ min, then check Render logs for `[EMAIL]` lines
-- [ ] **Task 2:** SIMPLIFIED → Supabase `db-backups` PRIVATE bucket + 3 GitHub Actions secrets (workflow already exists + runs) → Run workflow → verify green + file in bucket
+- [~] **Task 2 (2026-10-13, Codebuff debugging session):** ~90% done. Bucket `db-backups` created + secrets `PROD_SUPABASE_URL`, `PROD_SUPABASE_S3_ACCESS_KEY`, `PROD_SUPABASE_S3_SECRET_KEY` confirmed (4th restored).Workflow hardened: region overridable + AWS retry (commit `3bcc6d3`). Debug chain: (1) empty endpoint `/s3` → `PROD_SUPABASE_URL` was missing → fixed; (2) `Invalid Compact JWS` → legacy JWT path, superseded by S3 keys; (3) latest run: `pg_dump: fe_sendauth: no password supplied` → **`PROD_DATABASE_URL` was deleted and recreated from local `server/.env`, whose DB lines have EMPTY password** → REMAINING: Sarvesh copies real `DATABASE_URL` WITH password from Render → Environment (do NOT reset Supabase password) → set GitHub secret `PROD_DATABASE_URL` → re-run workflow → verify green + file in bucket
 - [ ] **Number shop prerequisites:** Sarvesh does Aadhaar eKYC (app.omnidim.io Numbers Shop) + wallet top-up ~$6 → then buy +91 in the Converza dashboard (new shop UI, commit `91d157f`)
 - [ ] **Task 3:** Rename Render→`converza-api` + Vercel→`converza` → paste new URLs to Codebuff → staged URL switch
 - [ ] **Task 5:** MessageBird SMS number buy + callback webhook + `FORWARDING_SMS_NUMBER` + SMS lead test + dedupe check
