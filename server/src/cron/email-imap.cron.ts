@@ -82,7 +82,22 @@ export async function runImapEmailPull(): Promise<{
       }
     }
   } catch (err: any) {
-    logger.error({ err: err.message }, "IMAP email pull failed");
+    // imapflow wraps auth/server rejections in a generic "Command failed" —
+    // the real reason lives in textCode/responseText (e.g. AUTHENTICATIONFAILED).
+    logger.error(
+      {
+        err: err.message,
+        code: err.code || undefined,
+        textCode: err.textCode || undefined,
+        responseStatus: err.responseStatus || undefined,
+        responseText: err.responseText || undefined,
+        errName: err.constructor ? err.constructor.name : undefined,
+        user: config.IMAP_USER,
+        host: `${config.IMAP_HOST}:${config.IMAP_PORT}`,
+        folder: config.IMAP_FOLDER,
+      },
+      "IMAP email pull failed"
+    );
   } finally {
     await client.logout().catch(() => {});
   }
