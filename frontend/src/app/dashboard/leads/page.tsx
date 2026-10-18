@@ -14,6 +14,7 @@ import type { Lead, LeadFilterState, LeadStatus } from "../../../types";
 import { useAuthStore } from "../../../stores/auth.store";
 import { exportToCSV, EXPORT_HEADERS } from "../../../lib/csv-export";
 import { BulkActionBar } from "../../../components/leads/BulkActionBar";
+import { AddLeadModal } from "../../../components/leads/AddLeadModal";
 
 function LeadsPageContent() {
   const searchParams = useSearchParams();
@@ -30,21 +31,61 @@ function LeadsPageContent() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectionKey, setSelectionKey] = useState(0);
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const PAGE_SIZE = 50;
+
+  // Build the query for the current filter set — shared by loadLeads and the
+  // full export so both honor exactly what the broker is looking at.
+  const buildLeadsQuery = (pageNum: number) => {
+    const params = new URLSearchParams();
+    params.set("page", String(pageNum));
+    params.set("limit", String(PAGE_SIZE));
+    if (filters.search) params.set("search", filters.search);
+    if (filters.status.length > 0) params.set("status", filters.status.join(","));
+    if (filters.source.length > 0) params.set("source", filters.source.join(","));
+    if (filters.dateFrom) params.set("from", filters.dateFrom);
+    if (filters.dateTo) params.set("to", filters.dateTo);
+    return params.toString();
+  };
+
+  // FIX (2026-10-18): export the ENTIRE filtered result set, not just the
+  // currently loaded page (≤50 rows). Brokers with hundreds of leads were
+  // silently getting partial CSVs with no indication anything was missing.
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const allLeads: Lead[] = [];
+      let pageNum = 1;
+      const MAX_PAGES = 20; // 50/page → hard cap of 1000 rows per export
+      while (pageNum <= MAX_PAGES) {
+        const data = await api.get<{ leads?: Lead[]; total?: number }>(
+          `/leads?${buildLeadsQuery(pageNum)}`
+        );
+        const batch = data.leads ?? [];
+        allLeads.push(...batch);
+        if (batch.length === 0 || allLeads.length >= (data.total ?? allLeads.length)) break;
+        pageNum++;
+      }
+      if (allLeads.length === 0) {
+        toast.error("No leads match the current filters");
+        return;
+      }
+      exportToCSV(allLeads, `leads-export-${new Date().toISOString().split("T")[0]}`, EXPORT_HEADERS.leads);
+      toast.success(`${allLeads.length} leads exported`);
+    } catch {
+      toast.error("Failed to export leads");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const loadLeads = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.set("page", String(page));
-      params.set("limit", String(PAGE_SIZE));
-      if (filters.search) params.set("search", filters.search);
-      if (filters.status.length > 0) params.set("status", filters.status.join(","));
-      if (filters.source.length > 0) params.set("source", filters.source.join(","));
-      if (filters.dateFrom) params.set("from", filters.dateFrom);
-      if (filters.dateTo) params.set("to", filters.dateTo);
+      const params = buildLeadsQuery(page);
 
-      const data = await api.get(`/leads?${params.toString()}`);
+      const data = await api.get(`/leads?${params}`);
       setLeads(data.leads);
       setTotal(data.total);
     } catch (err) {
@@ -79,17 +120,21 @@ function LeadsPageContent() {
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
-            onClick={() => {
-              exportToCSV(leads, `leads-export-${new Date().toISOString().split("T")[0]}`, EXPORT_HEADERS.leads);
-              toast.success(`${leads.length} leads exported`);
-            }}
-            disabled={leads.length === 0}
+            onClick={handleExportCSV}
+            disabled={leads.length === 0 || exporting}
             className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-600 text-[#9FB0A6] text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all disabled:opacity-50"
           >
-            <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            {exporting ? (
+              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            )}
             <span className="hidden sm:inline">Export CSV</span>
           </button>
-          <button className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs sm:text-sm font-medium hover:opacity-90 transition-all">
+          <button
+            onClick={() => setAddLeadOpen(true)}
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs sm:text-sm font-medium hover:opacity-90 transition-all"
+          >
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Add Lead</span>
           </button>
@@ -131,6 +176,15 @@ function LeadsPageContent() {
         onClose={() => {
           setPanelOpen(false);
           setSelectedLead(null);
+        }}
+      />
+
+      <AddLeadModal
+        open={addLeadOpen}
+        onClose={() => setAddLeadOpen(false)}
+        onCreated={() => {
+          setPage(1);
+          loadLeads();
         }}
       />
     </div>

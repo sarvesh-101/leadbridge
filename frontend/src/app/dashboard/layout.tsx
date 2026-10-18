@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "../../components/shared/Sidebar";
 import { TopBar } from "../../components/shared/TopBar";
 import { ErrorBoundary } from "../../components/shared/ErrorBoundary";
@@ -17,10 +17,26 @@ import { initPWA } from "../../lib/pwa";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarOpen, toggleSidebar } = useUIStore();
   const { isAuthenticated } = useAuthStore();
   const [setupCheckDone, setSetupCheckDone] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // FIX (2026-10-18): redirect unauthenticated visitors to login. Middleware
+  // deliberately punts to a client-side guard that only /admin ever had —
+  // logged-out users were stranded on /dashboard watching every API call 401.
+  // This also covers session-expiry: refreshAccessToken() calls logout() when
+  // the refresh token is dead, which flips isAuthenticated → this effect fires.
+  useEffect(() => {
+    setAuthChecked(true);
+  }, []);
+  useEffect(() => {
+    if (authChecked && !isAuthenticated && !pathname.startsWith("/auth")) {
+      router.replace("/auth/login");
+    }
+  }, [authChecked, isAuthenticated, pathname, router]);
 
   useEffect(() => {
     // Load user profile data once and always show the dashboard

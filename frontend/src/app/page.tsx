@@ -255,6 +255,7 @@ export default function LandingPage() {
                 links: [
                   { label: "Privacy", href: "/legal/privacy" },
                   { label: "Terms", href: "/legal/terms" },
+                  { label: "TRAI Calling Guide", href: "/compliance/trai" },
                 ],
               },
             ].map((col) => (

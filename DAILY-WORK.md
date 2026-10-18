@@ -3,7 +3,7 @@
 > **PURPOSE:** This file is the single source of truth across sessions. When a new session starts,
 > READ THIS FILE FIRST — terminal memory dies when the terminal closes, this file doesn't.
 > **RULE:** After every work session, update the "Completed" and "Remaining" sections. Keep it honest.
-> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-09-29
+> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-10-18
 
 ---
 
@@ -31,6 +31,20 @@
 ---
 
 ## ✅ COMPLETED (reverse-chronological)
+
+### 2026-10-18 — BROKER-HAT AUDIT + 6 CODE FIXES SHIPPED (Codebuff, local commit — NOT yet deployed)
+- **Deep-dive audit done** (code-path verified + live API probes; `/health` fully green). NEW issues found and ALL FIXED in code:
+  1. **Logout didn't revoke server-side** — `serverLogout()` sent NO Authorization header; route has `preHandler: fastify.authenticate` → server 401'd → refresh token stayed replayable. Now sends Bearer header. **Verified mismatch live.**
+  2. **Stranded dashboard** — no client-side auth guard for `/dashboard` (only `/admin` had one; middleware punts). Added guard in `dashboard/layout.tsx` → redirects to `/auth/login` when unauthenticated; also covers session-expiry (refresh fail flips `isAuthenticated` → redirect fires).
+  3. **Logout now navigates** to `/auth/login` (hard nav = clean slate for stale in-memory state).
+  4. **"Add Lead" button was dead** (no onClick!). Built `AddLeadModal` wired to `POST /leads` (name+phone required, email/source optional) → 201 creates lead + AI calls within 60s; duplicate → "not re-called" toast; server error messages surfaced.
+  5. **Multi-tab rotation logouts fixed** — refresh tokens are single-use; two tabs = one burns the token, the other 401s → auto-logout. Added `storage`-event cross-tab sync in `auth.store.ts`; `refreshAccessToken` now, on 401, checks the persisted (fresher) token and retries once before logging out.
+  6. **Network-blip logouts fixed** — refresh catch no longer calls `logout()`; only a definitive 401 logs out. Transient failures return null and the caller says "Connection issue — session is safe, please retry".
+  7. **CSV export** exported only the current page (≤50). Now fetches ALL pages of the current filter (cap 1000) with spinner + accurate count.
+  8. **WS polling fallback** — base URL now uses the SAME `/api/v1` normalization as `api.ts` (the 9-29 incident would have silently 404'd it); polls diff against a snapshot (seed-only first pass) instead of re-emitting 10 events per cycle; bucket raised 10→25.
+- **TRAI compliance guide page SHIPPED**: `/compliance/trai` — 6 rules in plain English (enquiry follow-up vs promotional, 9–9 window, 140-series, DND/NCPR, number series, AI disclosure) with a "Converza behaviour" callout per rule + 5-point broker self-check. Facts web-verified (TCCCPR 2018 + Feb 2025 amendments). Linked in landing footer under Legal.
+- `frontend` tsc clean ×3 after fixes. **Sarvesh: deploy (Vercel auto-deploy on push) and smoke-test: logout → land on login; add-lead modal → AI call; CSV export count; 2-tab session.**
+- P0 BACKLOG note: earlier probes confirmed `/api/v1/auth/logout` is POST-only (deeper diagnosis in session log). Remaining user-gated P0s unchanged below.
 
 ### 2026-10-07 — PORTAL ZERO-TOUCH WIZARD shipped (answers "isn't forwarding every lead manual/hectic?")
 - Sarvesh's objection was RIGHT: manual per-lead forwarding would kill retention. Reality: forwarding code exists as FALLBACK only; IndiaMART = full direct API, FB = webhook, Sheets = sync. JustDial/99acres/MagicBricks have NO public lead API (for any CRM) → solved via ONE-TIME auto-forward (Android SMS Forwarder app rule "text contains JustDial" → our number; Gmail filter from:portal-domain → auto-forward to us).

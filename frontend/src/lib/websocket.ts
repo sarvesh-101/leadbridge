@@ -120,13 +120,23 @@ class WebSocketClient {
   /**
    * Start polling as fallback when WebSocket is unavailable.
    * Uses a lightweight endpoint to check for recent lead changes.
+   *
+   * FIX (2026-10-18):
+   * 1. Reuse the SAME /api/v1 normalization as lib/api.ts — the polling base
+   *    was built from the raw env var, so the exact misconfig from the
+   *    2026-09-29 incident would have silently 404'd this fallback forever.
+   * 2. Diff against the previous poll snapshot instead of re-emitting events
+   *    for the same 10 leads every cycle, and seed the snapshot on the first
+   *    poll without emitting.
    */
   private pollConsecutiveFailures = 0;
+  private lastSnapshot: Map<string, string> | null = null;
 
   startPolling() {
     if (this.isPolling) return;
     this.isPolling = true;
     this.pollConsecutiveFailures = 0;
+    this.lastSnapshot = null;
     console.log("[WS] WebSocket unavailable — starting polling fallback");
 
     const poll = async () => {
@@ -138,9 +148,11 @@ class WebSocketClient {
           return;
         }
 
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
+        // Same normalization as lib/api.ts (2026-09-29 incident hardening)
+        const rawBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/+$/, "");
+        const apiBase = /\/api\/v1$/.test(rawBase) ? rawBase : `${rawBase}/api/v1`; 
         const params = new URLSearchParams({
-          limit: "10",
+          limit: "25",
           ...(this.lastPollTimestamp ? { updatedSince: this.lastPollTimestamp } : {}),
         });
 
@@ -153,15 +165,22 @@ class WebSocketClient {
           this.lastPollTimestamp = new Date().toISOString();
           this.pollConsecutiveFailures = 0; // Reset backoff on success
 
-          if (data.leads?.length) {
-            data.leads.forEach((lead: any) => {
-              this.notifyHandlers("lead.status_changed", {
-                event: "lead.status_changed",
-                data: { leadId: lead.id, newStatus: lead.status },
-                timestamp: new Date().toISOString(),
-              });
+          const leads: Array<{ id: string; status: string }> = data.leads ?? [];
+          const nextSnapshot = new Map<string, string>();
+
+          leads.forEach((lead) => {
+            nextSnapshot.set(lead.id, lead.status);
+            const previous = this.lastSnapshot?.get(lead.id);
+            if (previous === undefined) return;    // first poll — seed only
+            if (previous === lead.status) return;   // no change — stay quiet
+            this.notifyHandlers("lead.status_changed", {
+              event: "lead.status_changed",
+              data: { leadId: lead.id, newStatus: lead.status },
+              timestamp: new Date().toISOString(),
             });
-          }
+          });
+
+          this.lastSnapshot = nextSnapshot;
         }
       } catch {
         this.pollConsecutiveFailures++;
