@@ -57,9 +57,16 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
 
   /** Save the client's agent ID */
   fastify.patch("/voice/agent-id", async (
-    request: FastifyRequest<{ Body: { agentId: string | null } }>, reply: FastifyReply
+    request: FastifyRequest<{ Body: { agentId: string | number | null } }>, reply: FastifyReply
   ) => {
-    const { agentId } = request.body;
+    // FIX (500 on Assign): omniAgentId is a String column — the dashboard sends
+    // the numeric agent id, so it must be coerced or Prisma throws a
+    // validation error and the route 500s.
+    if (!request.clientId) {
+      return reply.status(400).send({ error: "Client account required — agent assignment is per client." });
+    }
+    const raw = request.body?.agentId;
+    const agentId = raw == null || raw === "" ? null : String(raw);
     const client = await fastify.prisma.client.update({
       where: { id: request.clientId },
       data: { omniAgentId: agentId },
@@ -67,7 +74,7 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
     return { agentId: client.omniAgentId };
   });
 
-  // ─── Agents ────────────────────────────────────────────────────
+  // ─── Agents ──────────────────────────────────────────────────
 
   /** Create a new AI agent using the configured provider */
   fastify.post("/voice/agents", async (
@@ -202,11 +209,153 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
 
   // ─── Phone Numbers ─────────────────────────────────────────────
 
-  /** List phone numbers using the configured phone provider */
-  fastify.get("/voice/phone-numbers", async () => {
+  /** List phone numbers using the configured phone provider.
+   *  Adds per-number assignment state from the DB so the dashboard can run the
+   *  "choose from already-purchased numbers" flow:
+   *    - assigned          — some client holds this number (one client per number)
+   *    - assignedToMe      — the CALLING client holds it
+   *    - assignedClientName — admin-only detail of who holds it
+   */
+  fastify.get("/voice/phone-numbers", async (request: FastifyRequest) => {
     const phoneProvider = getPhoneProvider();
     const result = await phoneProvider.listNumbers();
-    return result;
+    let numbers: any[] = (result.numbers || []).map((n) => ({
+      id: Number(n.id),
+      phone_number: n.phoneNumber,
+      number_provider: n.provider,
+      name: (n as any).name,
+    }));
+
+    // Merge Omnidim bot-attachment info (thin-client UI expects active_bot_*).
+    if (phoneProvider.name === "omnidimension" && numbers.length) {
+      const { listPhoneNumbers } = await import("../../services/omnidimension-phone.service");
+      const raw = await listPhoneNumbers().catch(() => []);
+      numbers = numbers.map((n) => {
+        const r = raw.find((x: any) => x.id === n.id);
+        return r ? { ...n, name: r.name ?? n.name, active_bot_id: r.active_bot_id ?? null, active_bot_name: r.active_bot_name } : n;
+      });
+    }
+
+    // Merge client ownership: omniPhoneNumberId is the single source of truth
+    // for "which broker has which platform number".
+    const holders = await fastify.prisma.client.findMany({
+      where: { omniPhoneNumberId: { not: null } },
+      select: { id: true, businessName: true, ownerName: true, omniPhoneNumberId: true },
+    });
+    const holderByNumber = new Map<number, (typeof holders)[number]>();
+    for (const h of holders) holderByNumber.set(h.omniPhoneNumberId as number, h);
+
+    numbers = numbers.map((n) => {
+      const holder = holderByNumber.get(n.id);
+      return {
+        ...n,
+        assigned: !!holder,
+        assignedToMe: request.role === "client" && holder?.id === request.clientId,
+        ...(request.role === "admin" && holder
+          ? { assignedClientName: holder.businessName || holder.ownerName || "Client" }
+          : {}),
+      };
+    });
+
+    return { numbers, total: numbers.length };
+  });
+
+  /**
+   * Client "chooses" one of the PLATFORM's already-purchased numbers.
+   * Instant assignment (no admin approval): one client per number, enforced
+   * transactionally + last-writer-wins sweep as belt-and-braces. If the client
+   * has an active Omnidim agent, the number is attached to it right away so it
+   * goes live for calling without admin action.
+   */
+  fastify.post("/voice/phone-numbers/choose", {
+    preHandler: [fastify.authenticate],
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    if (!request.clientId) {
+      return reply.status(403).send({ error: "Sign in as a broker client to choose a number — admins assign via the admin panel." });
+    }
+    const body = request.body as { phoneNumberId: number | string };
+    const numberId = parseInt(String(body.phoneNumberId), 10);
+    if (!Number.isFinite(numberId)) {
+      return reply.status(400).send({ error: "phoneNumberId is required" });
+    }
+
+    const phoneProvider = getPhoneProvider();
+    const all = await phoneProvider.listNumbers();
+    const target = (all.numbers || []).find((n) => String(n.id) === String(numberId));
+    if (!target) {
+      return reply.status(404).send({ error: "Phone number not found in the platform inventory" });
+    }
+    const phoneNumber = target.phoneNumber;
+
+    let clash = false;
+    await fastify.prisma.$transaction(async (tx) => {
+      const taken = await tx.client.count({
+        where: { omniPhoneNumberId: numberId, NOT: { id: request.clientId! } },
+      });
+      if (taken > 0) { clash = true; return; }
+      await tx.client.update({
+        where: { id: request.clientId! },
+        data: { omniPhoneNumberId: numberId, omniPhoneNumber: phoneNumber },
+      });
+      // Belt-and-braces: never leave two clients on the same number — the
+      // chooser wins (last-writer-wins), others get released to the pool.
+      await tx.client.updateMany({
+        where: { id: { not: request.clientId! }, omniPhoneNumberId: numberId },
+        data: { omniPhoneNumberId: null, omniPhoneNumber: null },
+      });
+    });
+    if (clash) {
+      return reply.status(409).send({ error: "This number is already assigned to another broker — pick another one." });
+    }
+
+    // Attach to the client's active agent (best-effort — assignment still stands).
+    const client = await fastify.prisma.client.findUnique({
+      where: { id: request.clientId },
+      select: { omnidimensionAgentId: true },
+    });
+    let agentAttached = false;
+    let attachError: string | undefined;
+    if (client?.omnidimensionAgentId) {
+      try {
+        const { attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
+        await attachPhoneNumber(numberId, client.omnidimensionAgentId);
+        agentAttached = true;
+      } catch (err: any) {
+        attachError = err.message;
+      }
+    }
+
+    request.log.info({ clientId: request.clientId, numberId }, "Phone number chosen by client");
+    return reply.status(201).send({
+      success: true,
+      phoneNumberId: numberId,
+      phoneNumber,
+      agentAttached,
+      ...(attachError ? { attachError } : {}),
+      message: agentAttached
+        ? `${phoneNumber} is now yours and attached to your agent.`
+        : `${phoneNumber} is now yours.` + (attachError ? ` Could not auto-attach to agent: ${attachError}` : ''),
+    });
+  });
+
+  /** Attach a platform number to an agent (admin — mutates shared Omnidim inventory) */
+  fastify.post("/voice/phone-numbers/attach", {
+    preHandler: [fastify.authenticateAdmin],
+  }, async (request: FastifyRequest) => {
+    const body = request.body as { phoneNumberId: number | string; agentId: number | string };
+    const { attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
+    await attachPhoneNumber(parseInt(String(body.phoneNumberId), 10), parseInt(String(body.agentId), 10));
+    return { success: true, message: "Phone number attached to agent" };
+  });
+
+  /** Detach a platform number from its agent (admin — mutates shared Omnidim inventory) */
+  fastify.post("/voice/phone-numbers/detach", {
+    preHandler: [fastify.authenticateAdmin],
+  }, async (request: FastifyRequest) => {
+    const body = request.body as { phoneNumberId: number | string };
+    const { detachPhoneNumber } = await import("../../services/omnidimension-phone.service");
+    await detachPhoneNumber(parseInt(String(body.phoneNumberId), 10));
+    return { success: true, message: "Phone number detached" };
   });
 
   /**
@@ -235,22 +384,31 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
    * Omnidim requires {carrier, phoneNumber} from a prior /search call;
    * optionally auto-attaches the number to one of the client's agents.
    */
-  fastify.post("/voice/phone-numbers/purchase", async (
-    request: FastifyRequest<{ Body: {
+  /**
+   * SECURITY: every number action below that spends or mutates the PLATFORM's
+   * Omnidim account (purchase = real money from the shared wallet; release/import
+   * = mutate shared inventory) is ADMIN-ONLY. Broker clients authenticate too,
+   * but must never be able to spend or release platform resources — they get a
+   * number by plan entitlement/request, never self-serve.
+   */
+  fastify.post("/voice/phone-numbers/purchase", {
+    preHandler: [fastify.authenticateAdmin],
+  }, async (request: FastifyRequest) => {
+    // Websocket plugin overloads force an untyped request here — cast the body.
+    const body = request.body as {
       region?: string; carrier?: string; phoneNumber?: string; areaCode?: string; attachToAgentId?: number | string | null;
-    } }>
-  ) => {
+    };
     const phoneProvider = getPhoneProvider();
     const result = await phoneProvider.purchaseNumber({
-      region: request.body.region,
-      areaCode: request.body.areaCode,
-      carrier: request.body.carrier,
-      phoneNumber: request.body.phoneNumber,
+      region: body.region,
+      areaCode: body.areaCode,
+      carrier: body.carrier,
+      phoneNumber: body.phoneNumber,
     });
 
     // Optional: attach the freshly bought number to an agent right away.
-    if (result.success && result.phoneNumber && request.body.attachToAgentId) {
-      const agentId = parseInt(String(request.body.attachToAgentId), 10);
+    if (result.success && result.phoneNumber && body.attachToAgentId) {
+      const agentId = parseInt(String(body.attachToAgentId), 10);
       if (Number.isFinite(agentId)) {
         try {
           const { attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
@@ -268,16 +426,18 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
   });
 
   /** Release a phone number */
-  fastify.post("/voice/phone-numbers/release", async (
-    request: FastifyRequest<{ Body: { phoneNumberId: string } }>
-  ) => {
+  fastify.post("/voice/phone-numbers/release", {
+    preHandler: [fastify.authenticateAdmin],
+  }, async (request: FastifyRequest) => {
+    const body = request.body as { phoneNumberId: string };
     const phoneProvider = getPhoneProvider();
-    await phoneProvider.releaseNumber(request.body.phoneNumberId);
+    await phoneProvider.releaseNumber(body.phoneNumberId);
     return { message: "Phone number released" };
   });
 
   /** Import an existing Exotel number into Omnidimension */
   fastify.post("/voice/phone-numbers/import/exotel", {
+    preHandler: [fastify.authenticateAdmin],
     schema: {
       body: {
         type: "object",
@@ -291,21 +451,23 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         },
       },
     },
-  }, async (request: FastifyRequest<{ Body: {
-    phoneNumber: string;
-    sid: string;
-    apiKey: string;
-    apiToken: string;
-    subdomain?: string;
-  } }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    // Websocket plugin overloads force an untyped request here — cast the body.
+    const body = request.body as {
+      phoneNumber: string;
+      sid: string;
+      apiKey: string;
+      apiToken: string;
+      subdomain?: string;
+    };
     const { importExotelNumber } = await import("../../services/omnidimension-phone.service");
     try {
       const number = await importExotelNumber({
-        phoneNumber: request.body.phoneNumber,
-        sid: request.body.sid,
-        apiKey: request.body.apiKey,
-        apiToken: request.body.apiToken,
-        subdomain: request.body.subdomain,
+        phoneNumber: body.phoneNumber,
+        sid: body.sid,
+        apiKey: body.apiKey,
+        apiToken: body.apiToken,
+        subdomain: body.subdomain,
       });
       return { success: true, number, message: `Exotel number ${number.phone_number} imported` };
     } catch (err: any) {
@@ -315,6 +477,7 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
 
   /** Import an existing Twilio number into Omnidimension */
   fastify.post("/voice/phone-numbers/import/twilio", {
+    preHandler: [fastify.authenticateAdmin],
     schema: {
       body: {
         type: "object",
@@ -326,17 +489,18 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         },
       },
     },
-  }, async (request: FastifyRequest<{ Body: {
-    phoneNumber: string;
-    sid: string;
-    authToken: string;
-  } }>, reply: FastifyReply) => {
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    const body = request.body as {
+      phoneNumber: string;
+      sid: string;
+      authToken: string;
+    };
     const { importTwilioNumber } = await import("../../services/omnidimension-phone.service");
     try {
       const number = await importTwilioNumber({
-        phoneNumber: request.body.phoneNumber,
-        sid: request.body.sid,
-        authToken: request.body.authToken,
+        phoneNumber: body.phoneNumber,
+        sid: body.sid,
+        authToken: body.authToken,
       });
       return { success: true, number, message: `Twilio number ${number.phone_number} imported` };
     } catch (err: any) {

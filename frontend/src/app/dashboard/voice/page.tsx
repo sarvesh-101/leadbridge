@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth.store";
 import { toast } from "sonner";
 import {
   Bot, Phone, Smartphone, Radio, RadioTower, Check, X, Plus, Trash2,
@@ -28,6 +29,10 @@ interface PhoneNumber {
   number_provider: string;
   active_bot_id?: number | null;
   active_bot_name?: string;
+  /** Server-merged assignment state — who holds this platform number */
+  assigned?: boolean;
+  assignedToMe?: boolean;
+  assignedClientName?: string;
 }
 
 interface KnowledgeDoc {
@@ -64,9 +69,13 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
   { value: "Russian", label: "Russian", region: "international" },
   { value: "Japanese", label: "Japanese", region: "international" },
   { value: "English (US)", label: "English (US)", region: "international" },
-];
+];export default function VoiceAIPage() {
+  /** SECURITY: buying/releasing numbers spends or mutates the PLATFORM's shared
+   * Omnidim inventory — the server enforces admin-only on those routes, so the
+   * buy UI is only rendered for admin logins. Clients get numbers by plan. */
+  const isAdmin = useAuthStore((s) => s.user?.role === "admin");
 
-export default function VoiceAIPage() {
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -288,6 +297,21 @@ export default function VoiceAIPage() {
       toast.success("Phone number detached");
     } catch (err: any) {
       toast.error(err.message || "Failed to detach phone");
+    }
+  };
+
+  /** BROKER FLOW: the number is already purchased by the platform — the broker
+   *  picks one of the free ones and it is assigned to him instantly (one
+   *  client per number, enforced server-side). */
+  const handleChooseNumber = async (phoneId: number) => {
+    try {
+      const res = await api.post<{ success: boolean; message?: string }>("/voice/phone-numbers/choose", { phoneNumberId: phoneId });
+      if (res.success) {
+        toast.success(res.message || "Number assigned to you!");
+        await loadData();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to assign this number");
     }
   };
 
@@ -602,30 +626,44 @@ export default function VoiceAIPage() {
                   <Smartphone className="w-5 h-5 text-[#34D399]" />
                   <h2 className="text-base font-semibold text-[#F0F7F3]">Phone Numbers</h2>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => { resetImportForm(); setShowImportModal(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.06]"
-                  >
-                    <ArrowRight className="w-3.5 h-3.5" /> Import
-                  </button>
-                  <button onClick={() => setShowBuyModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Buy Number
-                  </button>
-                </div>
+                {/* SECURITY: Import and Buy mutate/spend the PLATFORM's Omnidim
+                    account — server enforces admin-only; hide the buttons for brokers. */}
+                {isAdmin && (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => { resetImportForm(); setShowImportModal(true); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.06]"
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" /> Import
+                    </button>
+                    <button onClick={() => setShowBuyModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Buy Number
+                    </button>
+                  </div>
+                )}
               </div>
 
               {phoneNumbers.length === 0 ? (
                 <div className="text-center py-10">
                   <Phone className="w-10 h-10 mx-auto mb-3 text-[#9FB0A6]" />
                   <p className="text-sm text-[#9FB0A6]">No phone numbers</p>
-                  <p className="text-xs text-gray-600 mt-1">Buy or import a number to enable outbound calling.</p>
-                  <button onClick={() => setShowBuyModal(true)}
-                    className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Buy a Phone Number
-                  </button>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {isAdmin
+                      ? "Buy or import a number to enable outbound calling."
+                      : "Available company numbers will appear here — pick one to get started."}
+                  </p>
+                  {isAdmin ? (
+                    <button onClick={() => setShowBuyModal(true)}
+                      className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Buy a Phone Number
+                    </button>
+                  ) : (
+                    <Link href="/dashboard/settings" className="mt-4 inline-flex items-center px-4 py-2 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.1]">
+                      Contact support
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -653,16 +691,29 @@ export default function VoiceAIPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {isAttached ? (
-                            <button onClick={() => handleDetachPhone(pn.id)}
-                              className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs hover:bg-amber-500/20"
-                            >Detach</button>
-                          ) : (
-                            agentId && (
-                              <button onClick={() => handleAttachPhone(pn.id, agentId)}
-                                className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs hover:bg-[#34D399]/25"
-                              >Attach to Agent</button>
+                          {isAdmin ? (
+                            isAttached ? (
+                              <button onClick={() => handleDetachPhone(pn.id)}
+                                className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs hover:bg-amber-500/20"
+                              >Detach</button>
+                            ) : (
+                              agentId && (
+                                <button onClick={() => handleAttachPhone(pn.id, agentId)}
+                                  className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs hover:bg-[#34D399]/25"
+                                >Attach to Agent</button>
+                              )
                             )
+                          ) : pn.assignedToMe ? (
+                            <span className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium">Your number</span>
+                          ) : pn.assigned ? (
+                            <span
+                              className="px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-xs"
+                              title={pn.assignedClientName ? `Assigned to ${pn.assignedClientName}` : "Already in use"}
+                            >Reserved</span>
+                          ) : (
+                            <button onClick={() => handleChooseNumber(pn.id)}
+                              className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
+                            >Use this number</button>
                           )}
                         </div>
                       </div>
@@ -785,15 +836,23 @@ export default function VoiceAIPage() {
                     <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#6FE3B0]" />
                   </button>
                 )}
-                <button onClick={() => { resetShop(); setBuyResult(null); setShowBuyModal(true); loadShopNumbers(); }}
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-[#34D399]/40 text-left group"
-                >
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-4 h-4 text-[#34D399]" />
-                    <span className="text-xs text-[#F0F7F3]">Buy Phone Number</span>
+                {isAdmin ? (
+                  <button onClick={() => { resetShop(); setBuyResult(null); setShowBuyModal(true); loadShopNumbers(); }}
+                    className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-[#34D399]/40 text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-4 h-4 text-[#34D399]" />
+                      <span className="text-xs text-[#F0F7F3]">Buy Phone Number</span>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#34D399]" />
+                  </button>
+                ) : (
+                  <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                    <p className="text-[11px] text-[#9FB0A6]">
+                      Need a phone number? Phone numbers are provisioned by the platform team — <Link href="/dashboard/settings" className="text-[#6FE3B0] hover:underline">contact support</Link>.
+                    </p>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#34D399]" />
-                </button>
+                )}
                 <button onClick={handleTestCall} disabled={testCallLoading || !hasAgent}
                   className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-emerald-500/30 text-left group disabled:opacity-50"
                 >
