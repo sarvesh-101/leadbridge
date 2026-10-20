@@ -136,10 +136,14 @@ export async function apiFetch<T = any>(
 ): Promise<T> {
   const { accessToken, isAuthenticated } = useAuthStore.getState();
 
-  // For FormData, let the browser set Content-Type with boundary
+  // For FormData, let the browser set Content-Type with boundary. For requests
+  // with no body (e.g. POST /voice/test-call) sending "Content-Type:
+  // application/json" made Fastify reject the request with 400 Bad Request
+  // ("Body cannot be empty when content-type is set to 'application/json'").
   const isFormData = options.body instanceof FormData;
+  const hasBody = options.body !== undefined && options.body !== null;
   const headers: Record<string, string> = {
-    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    ...(isFormData || !hasBody ? {} : { "Content-Type": "application/json" }),
     ...(options.headers as Record<string, string>),
   };
 
@@ -212,13 +216,19 @@ export const api = {
     return apiFetch<T>(endpoint, {
       ...options,
       method: "POST",
-      body: isFormData ? body : JSON.stringify(body),
+      // JSON.stringify(undefined) is undefined — keep it that way so apiFetch
+      // omits Content-Type instead of sending an empty JSON body.
+      body: body === undefined || isFormData ? body : JSON.stringify(body),
       headers: isFormData ? { ...(options?.headers as Record<string, string>) } : undefined,
     });
   },
 
   patch: <T = any>(endpoint: string, body?: any, options?: FetchOptions) =>
-    apiFetch<T>(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
+    apiFetch<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
 
   delete: <T = any>(endpoint: string, options?: FetchOptions) =>
     apiFetch<T>(endpoint, { ...options, method: "DELETE" }),
