@@ -124,6 +124,9 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
   // Test call
   const [testCallLoading, setTestCallLoading] = useState(false);
   const [testCallResult, setTestCallResult] = useState<string | null>(null);
+  // Number the test call dials — prefilled with the account phone, editable so
+  // a broker can ring any handset instead of always their own.
+  const [testCallNumber, setTestCallNumber] = useState("");
 
   // Upload
   const [uploading, setUploading] = useState(false);
@@ -147,6 +150,7 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
       setKnowledgeDocs(kbRes.documents);
       setWebhookUrl(webhookRes.webhookUrl);
       setPhoneSetupStatus(meRes.client?.phoneSetupStatus || "PENDING");
+      setTestCallNumber((prev) => prev || meRes.client?.phone || "");
     } catch {
       // Silently fail
     } finally {
@@ -362,7 +366,9 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
     setTestCallLoading(true);
     setTestCallResult(null);
     try {
-      const res = await api.post<{ message: string; status: string }>("/voice/test-call");
+      const res = await api.post<{ message: string; status: string }>("/voice/test-call", {
+        toNumber: testCallNumber.trim() || undefined,
+      });
       setTestCallResult(res.status);
       toast.success(res.message);
     } catch (err: any) {
@@ -455,13 +461,22 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
              `Agent "${activeAgent?.name}" is ready — ${connectedPhone?.phone_number} connected`}
           </p>
         </div>
-        {hasAgent && hasPhoneConnected && (
-          <button onClick={handleTestCall} disabled={testCallLoading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-50 shrink-0"
-          >
-            {testCallLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-            Test Call
-          </button>
+        {hasAgent && (
+          <div className="flex items-center gap-2 shrink-0">
+            <input
+              value={testCallNumber}
+              onChange={(e) => setTestCallNumber(e.target.value)}
+              placeholder="Number to call"
+              inputMode="tel"
+              className="w-40 px-3 py-2 rounded-lg bg-[#101713] border border-white/10 text-xs text-[#F0F7F3] placeholder:text-[#9FB0A6] focus:outline-none focus:border-emerald-500/40"
+            />
+            <button onClick={handleTestCall} disabled={testCallLoading}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-50 shrink-0"
+            >
+              {testCallLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+              Test Call
+            </button>
+          </div>
         )}
       </div>
 

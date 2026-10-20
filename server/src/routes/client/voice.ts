@@ -621,9 +621,24 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "No AI agent configured. Create an agent first." });
     }
 
-    if (!/^\+[1-9]\d{7,14}$/.test(client.phone || "")) {
+    // The test call dials a real phone, so brokers choose the destination: their
+    // own number by default, or any number they type in (a colleague's phone, a
+    // spare handset). Without this the call always rang the account owner.
+    let toNumber = client.phone || "";
+    const requestedNumber = (request.body as { toNumber?: string } | undefined)?.toNumber?.trim();
+    if (requestedNumber) {
+      const { normalizePhone } = await import("../../utils/phone");
+      try {
+        toNumber = requestedNumber.startsWith("+") ? requestedNumber : normalizePhone(requestedNumber);
+      } catch {
+        return reply.status(400).send({
+          error: `"${requestedNumber}" is not a valid phone number — use a 10-digit Indian number or E.164 format (+919876543210).`,
+        });
+      }
+    }
+    if (!/^\+[1-9]\d{7,14}$/.test(toNumber)) {
       return reply.status(400).send({
-        error: `Your account phone "${client.phone}" is not a valid E.164 number (e.g. +919876543210). Fix it in Settings and retry — the test call dials this number.`,
+        error: `The test call needs a valid phone number to dial — got "${toNumber}". Enter the number in the Test Call box, or fix the phone on your account in Settings.`,
       });
     }
 
@@ -655,7 +670,7 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         data: {
           clientId: client.id,
           name: `Test Call — ${client.ownerName}`,
-          phone: client.phone,
+          phone: toNumber,
           source: "test",
           rawPayload: {},
           status: "CALLING" as LeadStatus,
@@ -690,7 +705,7 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       const voiceAI = getVoiceAIProvider();
       const result = await voiceAI.dispatchCall({
         agentId: client.omniAgentId,
-        toNumber: client.phone,
+        toNumber,
         fromNumber: String(callerNumberId),
         callContext: {
           lead_id: testLead.id,
