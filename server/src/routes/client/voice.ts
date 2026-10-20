@@ -621,17 +621,26 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "No AI agent configured. Create an agent first." });
     }
 
-    // Outbound calls need a caller ID — without one Omnidim rejects the dispatch
-    // and the broker only sees a generic failure, so say what is actually wrong.
-    if (!client.omniPhoneNumberId) {
-      return reply.status(400).send({
-        error: "No phone number assigned — choose one under Phone Numbers first. Outbound calls need a caller ID.",
-      });
-    }
     if (!/^\+[1-9]\d{7,14}$/.test(client.phone || "")) {
       return reply.status(400).send({
         error: `Your account phone "${client.phone}" is not a valid E.164 number (e.g. +919876543210). Fix it in Settings and retry — the test call dials this number.`,
       });
+    }
+
+    // Outbound calls need a caller ID, and brokers routinely assign an agent but
+    // never pick a number (the button is easy to miss). Resolve one instead of
+    // refusing: prefer a platform number already attached to their agent, else
+    // the first number no other broker holds. Same rule as the choose route.
+    const { resolveCallerNumber } = await import("../../services/phone/caller-id");
+    const callerNumber = await resolveCallerNumber(fastify.prisma, client.id);
+    if (!callerNumber) {
+      return reply.status(400).send({
+        error: "No caller ID available — every number on the platform account is assigned to another broker. Ask the platform team to buy or release one under Phone Numbers.",
+      });
+    }
+    const callerNumberId = callerNumber.id;
+    if (callerNumber.assignedNow) {
+      request.log.info({ clientId: client.id, numberId: callerNumberId }, "Auto-assigned caller ID for test call");
     }
 
     let callRecord: { id: string } | null = null;
@@ -669,10 +678,10 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       try {
         const { listPhoneNumbers, attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
         const numbers = await listPhoneNumbers();
-        const own = numbers.find((n: any) => Number(n.id) === client.omniPhoneNumberId);
+        const own = numbers.find((n: any) => Number(n.id) === callerNumberId);
         if (own && String((own as any).active_bot_id ?? "") !== String(client.omniAgentId)) {
-          await attachPhoneNumber(client.omniPhoneNumberId, Number(client.omniAgentId));
-          request.log.info({ numberId: client.omniPhoneNumberId }, "Attached caller ID to agent before test call");
+          await attachPhoneNumber(callerNumberId, Number(client.omniAgentId));
+          request.log.info({ numberId: callerNumberId }, "Attached caller ID to agent before test call");
         }
       } catch (attachErr: any) {
         request.log.warn({ err: attachErr.message }, "Could not pre-attach caller ID for test call");
@@ -682,7 +691,7 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       const result = await voiceAI.dispatchCall({
         agentId: client.omniAgentId,
         toNumber: client.phone,
-        fromNumber: String(client.omniPhoneNumberId),
+        fromNumber: String(callerNumberId),
         callContext: {
           lead_id: testLead.id,
           client_id: client.id,

@@ -222,8 +222,16 @@ const callWorker = new Worker<CallJob>(
       const voiceResult = await voiceAI.dispatchCall({
         agentId,
         toNumber: lead.phone,
+        // Without a caller ID Omnidim rejects the dispatch, so always pass the
+        // number the broker holds (resolved by /voice/phone-numbers/choose or
+        // auto-assigned on the first test call).
+        fromNumber: client.omniPhoneNumberId ? String(client.omniPhoneNumberId) : undefined,
         callContext: { ...callContext, consent_basis: compliance.consentBasis },
       });
+
+      if (!voiceResult.success || Number(voiceResult.requestId) <= 0) {
+        throw new Error(`Voice provider did not accept the call (status: ${voiceResult.status}).`);
+      }
 
       await prisma.call.update({
         where: { id: call.id },
