@@ -3,7 +3,7 @@
 > **PURPOSE:** This file is the single source of truth across sessions. When a new session starts,
 > READ THIS FILE FIRST — terminal memory dies when the terminal closes, this file doesn't.
 > **RULE:** After every work session, update the "Completed" and "Remaining" sections. Keep it honest.
-> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-10-18
+> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-10-20
 
 ---
 
@@ -31,6 +31,12 @@
 ---
 
 ## ✅ COMPLETED (reverse-chronological)
+
+### 2026-10-20 — LAUNCH PUSH DEPLOYED + SMOKE TESTS PASS + call-not-executing DIAGNOSED
+- **Pending commit `03307c8` pushed → Vercel deploy triggered.** Sarvesh smoke-tested it: **logout → login ✅, Add Lead modal ✅ (lead created), CSV export ✅, everything fine.**
+- **"AI call not executed" after Add Lead — diagnosed, NOT a regression.** Verified code path (`call.worker.ts`): queues healthy → credit gate → agent gate (`omniAgentId` empty = "no AI agent configured") → Omnidim dispatch, which originates ONLY from Omnidim-purchased numbers (their 9-30 reply). No +91 number purchased yet → the number gate is the prime suspect; credits/agent attach are the fallbacks. The lead's call record `transcript` field stores the literal failure message — check there if still blocked after purchase.
+- **Fix = today's Step 4 (owner: Sarvesh):** Omnidim Aadhaar eKYC → wallet top-up ~$6 → buy +91 number in Converza dashboard (auto-attach) → retest lead.
+- Still open from the day plan (owner: Sarvesh): DB password rotation (Render `DATABASE_URL` still has the c94c8d0 leaked password), ₹5 payment test + immediate cancel, IMAP retest, MessageBird SMS number, Render/Vercel renames.
 
 ### 2026-10-18 — BROKER-HAT AUDIT + 6 CODE FIXES SHIPPED (Codebuff, local commit — NOT yet deployed)
 - **Deep-dive audit done** (code-path verified + live API probes; `/health` fully green). NEW issues found and ALL FIXED in code:
