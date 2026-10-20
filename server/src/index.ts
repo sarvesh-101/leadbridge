@@ -128,6 +128,23 @@ export async function buildServer() {
     (request as unknown as Record<string, unknown>).requestId = requestId;
   });
 
+  // ─── Tolerate Empty JSON Bodies ────────────────────────────
+  // Fastify rejects a request that declares Content-Type: application/json but
+  // carries no payload (FST_ERR_CTP_EMPTY_JSON_BODY → 400 "Bad Request") before
+  // any route runs, which broke every bodyless POST from clients that always set
+  // the header (e.g. POST /voice/test-call). Treat an empty payload as {}.
+  server.addContentTypeParser("application/json", { parseAs: "string" }, (_request, body, done) => {
+    const raw = typeof body === "string" ? body.trim() : "";
+    if (!raw) return done(null, {});
+    try {
+      done(null, JSON.parse(raw));
+    } catch (err) {
+      // Same shape Fastify uses, so the global error handler still reports 400.
+      (err as Error & { statusCode?: number }).statusCode = 400;
+      done(err as Error, undefined);
+    }
+  });
+
   // ─── Register Plugins ──────────────────────────────────────
   await server.register(cors, {
     origin: config.FRONTEND_URL
