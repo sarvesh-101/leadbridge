@@ -184,7 +184,13 @@ export async function apiFetch<T = any>(
     const error = await res.json().catch(() => ({ error: res.statusText }));
     // Attach the status + full body so callers can branch on flags like
     // verificationRequired (FIX Round-2 #3) instead of just the message.
-    const err = new Error(error.error || error.message || `HTTP ${res.status}`) as Error & {
+    // Routes often send a short `error` headline plus a detailed `message`
+    // (vendor reason, validation hint). Show both — otherwise the toast says
+    // "Voice AI provider unavailable" and the broker has nothing to act on.
+    const detail = typeof error.message === "string" ? error.message.trim() : "";
+    const headline = error.error || detail || `HTTP ${res.status}`;
+    const text = detail && detail !== headline ? `${headline} — ${detail}` : headline;
+    const err = new Error(text) as Error & {
       status?: number;
       data?: unknown;
     };

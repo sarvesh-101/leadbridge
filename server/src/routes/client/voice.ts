@@ -621,6 +621,19 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "No AI agent configured. Create an agent first." });
     }
 
+    // Outbound calls need a caller ID — without one Omnidim rejects the dispatch
+    // and the broker only sees a generic failure, so say what is actually wrong.
+    if (!client.omniPhoneNumberId) {
+      return reply.status(400).send({
+        error: "No phone number assigned — choose one under Phone Numbers first. Outbound calls need a caller ID.",
+      });
+    }
+    if (!/^\+[1-9]\d{7,14}$/.test(client.phone || "")) {
+      return reply.status(400).send({
+        error: `Your account phone "${client.phone}" is not a valid E.164 number (e.g. +919876543210). Fix it in Settings and retry — the test call dials this number.`,
+      });
+    }
+
     let callRecord: { id: string } | null = null;
     try {
       // FIX: Create a Lead + Call record BEFORE dispatching so the completed-call
@@ -651,11 +664,25 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
       });
       callRecord = { id: created.id };
 
+      // The caller ID must be attached to this agent in Omnidim, otherwise the
+      // dispatch is rejected. Pre-attach when it is missing or on another agent.
+      try {
+        const { listPhoneNumbers, attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
+        const numbers = await listPhoneNumbers();
+        const own = numbers.find((n: any) => Number(n.id) === client.omniPhoneNumberId);
+        if (own && String((own as any).active_bot_id ?? "") !== String(client.omniAgentId)) {
+          await attachPhoneNumber(client.omniPhoneNumberId, Number(client.omniAgentId));
+          request.log.info({ numberId: client.omniPhoneNumberId }, "Attached caller ID to agent before test call");
+        }
+      } catch (attachErr: any) {
+        request.log.warn({ err: attachErr.message }, "Could not pre-attach caller ID for test call");
+      }
+
       const voiceAI = getVoiceAIProvider();
       const result = await voiceAI.dispatchCall({
         agentId: client.omniAgentId,
         toNumber: client.phone,
-        fromNumber: client.omniPhoneNumberId ? String(client.omniPhoneNumberId) : undefined,
+        fromNumber: String(client.omniPhoneNumberId),
         callContext: {
           lead_id: testLead.id,
           client_id: client.id,
@@ -667,6 +694,12 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
           call_type: "QUALIFICATION",
         },
       });
+
+      // Providers that report failure in the payload instead of throwing must
+      // not be recorded as a successful dispatch (that produced "-1" call ids).
+      if (!result.success || Number(result.requestId) <= 0) {
+        throw new Error(`Voice provider did not accept the call (status: ${result.status}).`);
+      }
 
       // Store the Omni request ID so the completed webhook matches this call
       await fastify.prisma.call.update({

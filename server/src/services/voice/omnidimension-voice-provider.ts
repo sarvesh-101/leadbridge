@@ -74,8 +74,11 @@ export class OmnidimensionVoiceProvider implements VoiceAIProvider {
         status: result.status,
       };
     } catch (error: any) {
+      // Fail loudly: returning a fake result made callers persist -1 as the
+      // Omnidimension call id and report the test call as started, so the
+      // broker only saw a useless "failed" badge instead of the vendor reason.
       logger.error({ err: error.message }, "Voice AI: dispatch call failed");
-      return { success: false, requestId: -1, status: "failed" };
+      throw new Error(`Omnidimension dispatch failed: ${error.message}`);
     }
   }
 
