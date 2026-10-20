@@ -67,11 +67,38 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
     }
     const raw = request.body?.agentId;
     const agentId = raw == null || raw === "" ? null : String(raw);
-    const client = await fastify.prisma.client.update({
-      where: { id: request.clientId },
-      data: { omniAgentId: agentId },
-    });
-    return { agentId: client.omniAgentId };
+    // Both columns describe the same Omnidim agent and both are @unique. The
+    // dashboard lists every agent on the shared Omnidim account, so a second
+    // broker assigning an agent that is already taken used to make Prisma
+    // throw P2002 → 500 "Internal Server Error". Answer with a clear 409.
+    if (agentId) {
+      const holder = await fastify.prisma.client.findFirst({
+        where: { omniAgentId: agentId, NOT: { id: request.clientId } },
+        select: { businessName: true, ownerName: true },
+      });
+      if (holder) {
+        return reply.status(409).send({
+          error: `That agent is already assigned to ${holder.businessName || holder.ownerName || "another broker"}. Create your own agent instead.`,
+        });
+      }
+    }
+    // Keep the Int mirror in sync — stale values there made the number-choose
+    // flow attach numbers to the agent the broker had previously.
+    const agentIdInt = agentId && /^\d+$/.test(agentId) ? Number(agentId) : null;
+    try {
+      const client = await fastify.prisma.client.update({
+        where: { id: request.clientId },
+        data: { omniAgentId: agentId, omnidimensionAgentId: agentIdInt },
+      });
+      return { agentId: client.omniAgentId };
+    } catch (err: any) {
+      if (err?.code === "P2002") {
+        return reply.status(409).send({
+          error: "That agent is already assigned to another broker — create your own agent instead.",
+        });
+      }
+      throw err;
+    }
   });
 
   // ─── Agents ──────────────────────────────────────────────────
@@ -311,14 +338,19 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
     // Attach to the client's active agent (best-effort — assignment still stands).
     const client = await fastify.prisma.client.findUnique({
       where: { id: request.clientId },
-      select: { omnidimensionAgentId: true },
+      select: { omnidimensionAgentId: true, omniAgentId: true },
     });
+    // omniAgentId (String) is what the dashboard writes; the Int mirror can be
+    // stale on older rows, so prefer the String id when it is numeric.
+    const attachAgentId = client?.omniAgentId && /^\d+$/.test(client.omniAgentId)
+      ? Number(client.omniAgentId)
+      : client?.omnidimensionAgentId ?? null;
     let agentAttached = false;
     let attachError: string | undefined;
-    if (client?.omnidimensionAgentId) {
+    if (attachAgentId) {
       try {
         const { attachPhoneNumber } = await import("../../services/omnidimension-phone.service");
-        await attachPhoneNumber(numberId, client.omnidimensionAgentId);
+        await attachPhoneNumber(numberId, attachAgentId);
         agentAttached = true;
       } catch (err: any) {
         attachError = err.message;
