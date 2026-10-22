@@ -138,7 +138,7 @@
 ### P2 — next week (sales weapons)
 - [ ] **Record demo call** → side-by-side asset vs Vyora (download recording + transcript). *Owner: Sarvesh*
 - [x] **Entry-tier pricing draft DONE** (`sales/entry-tier-pricing.md`, commit `df3b1e2`) — ₹2,499 wallet @ ₹160/call, 87–91% margin. **AWAITING SARVESH GO** → Codebuff builds Razorpay one-time flow + credit expiry + pricing page. *Owner: Sarvesh decides*
-- [ ] **TRAI compliance guide page** — Codebuff builds after Omnidim reply (must be accurate, beat Vyora's generic page). *Owner: Codebuff*
+- [x] **TRAI compliance guide page** ✅ DONE + LIVE VERIFIED (2026-10-22): `/compliance/trai` live at the Vercel frontend (HTTP 200), linked in landing footer under Legal as "TRAI Calling Guide". Covers TCCCPR 2018 + Feb 2025 amendment (140-series promo / 1600 series transactional, 9AM–9PM window, AI disclosure, consent basis, DLT for bulk), broker 5-point self-check, not-legal-advice disclaimer, CTA. Rule claims mirror `server/src/services/call-compliance.ts` behaviour. (Note: an earlier session had already shipped it to origin/main — a same-day duplicate build was correctly discarded on rebase.) *Owner: Codebuff*
 - [ ] **WhatsApp leftovers**: display name + daily limits in WhatsApp Manager; SIM-side registration of +91 72088 55916. *Owner: Sarvesh*
 
 ### P3 — soft launch (the real launch)
