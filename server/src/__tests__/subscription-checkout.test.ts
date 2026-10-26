@@ -5,7 +5,7 @@ import type { FastifyInstance } from "fastify";
 vi.mock("../services/razorpay.service", () => ({
   createSubscription: vi.fn(),
   getPlanIds: vi.fn(),
-  cancelSubscription: vi.fn().mockResolvedValue(undefined),
+  cancelSubscription: vi.fn().mockResolvedValue({ ok: true }),
   refundPayment: vi.fn(),
   verifyWebhookSignature: vi.fn(),
   getInvoice: vi.fn(),
@@ -79,7 +79,7 @@ beforeEach(() => {
 });
 
 describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
-  it("creates the live Razorpay sub with totalCount 1200 + STARTER trial, then DB sub + SENT invoice", async () => {
+  it("creates the live Razorpay sub PENDING (not ACTIVE) until the charged webhook confirms payment, then DB sub + SENT invoice", async () => {
     const result = await createSubscriptionCheckout(mockFastify, client, "GROWTH");
 
     // Razorpay called with the plan ID + total_count 1200 (renews until cancelled)
@@ -92,12 +92,13 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
     );
     expect(mockCreateSubscription.mock.calls[0][0].trialDays).toBe(0);
 
-    // DB subscription created with limits + provider id + ACTIVE
+    // DB subscription created PENDING — the Razorpay sub exists but is
+    // unauthenticated; ACTIVE comes only from the subscription.charged webhook.
     const subData = mockPrisma.subscription.create.mock.calls[0][0].data;
     expect(subData).toMatchObject({
       clientId: client.id,
       planTier: "GROWTH",
-      status: "ACTIVE",
+      status: "PENDING",
       amount: PLAN_DEFINITIONS.GROWTH.monthly,
       providerSubscriptionId: "sub_live_123",
       limits: { users: 15, leads: 3000, calls: 500 },
@@ -110,12 +111,16 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
     expect(invData.amount).toBe(PLAN_DEFINITIONS.GROWTH.monthly);
     expect(invData.subscriptionId).toBe("sub_db_1");
 
-    // Client updated with plan + callsLimit + trial→paid conversion
+    // Client updated with plan + callsLimit, PAST_DUE (not ACTIVE) until payed,
+    // and NO conversion stamp at checkout — that moved to the first
+    // subscription.charged webhook (checkout stamps it BEFORE payment, which
+    // broke the webhook's first-charge detection and converted brokers who
+    // never payed).
     expect(mockPrisma.client.update).toHaveBeenCalled();
     const clientData = mockPrisma.client.update.mock.calls[0][0].data;
     expect(clientData.callsLimit).toBe(500);
-    expect(clientData.planStatus).toBe("ACTIVE");
-    expect(clientData.convertedFromTrialAt).toBeInstanceOf(Date);
+    expect(clientData.planStatus).toBe("PAST_DUE");
+    expect(clientData.convertedFromTrialAt).toBeUndefined();
 
     expect(result.paymentUrl).toBe("https://rzp.io/test");
   });
@@ -123,6 +128,14 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
   it("passes TRIAL_DAYS (30) as the trial for STARTER checkout", async () => {
     await createSubscriptionCheckout(mockFastify, client, "STARTER");
     expect(mockCreateSubscription.mock.calls[0][0].trialDays).toBe(30);
+  });
+
+  it("lands a STARTER checkout on TRIAL (the plan carries its own trial), not ACTIVE", async () => {
+    await createSubscriptionCheckout(mockFastify, client, "STARTER");
+    const subData = mockPrisma.subscription.create.mock.calls[0][0].data;
+    expect(subData.status).toBe("TRIAL");
+    const clientData = mockPrisma.client.update.mock.calls[0][0].data;
+    expect(clientData.planStatus).toBe("TRIAL");
   });
 
   it("charges LAUNCH without a trial (checkout is the trial)", async () => {
@@ -157,6 +170,34 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
         data: expect.objectContaining({ status: "CANCELLED" }),
       })
     );
+  });
+
+  it("keeps a prior sub ACTIVE locally when its Razorpay cancel FAILS (no phantom cancel)", async () => {
+    mockPrisma.subscription.findMany.mockResolvedValue([
+      { id: "old-db-1", providerSubscriptionId: "sub_old_1" },
+    ]);
+    mockCancelSubscription.mockResolvedValue({ ok: false, error: "network" });
+
+    await createSubscriptionCheckout(mockFastify, client, "GROWTH");
+
+    // The failed prior row must be excluded from the CANCELLED update — otherwise
+    // the DB says cancelled while Razorpay keeps charging.
+    expect(mockPrisma.subscription.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ id: { notIn: ["old-db-1"] } }),
+      })
+    );
+  });
+
+  it("keeps a client already on TRIAL in TRIAL after an abandoned upgrade checkout", async () => {
+    await createSubscriptionCheckout(
+      mockFastify,
+      { ...client, planStatus: "TRIAL" },
+      "GROWTH"
+    );
+    const clientData = mockPrisma.client.update.mock.calls[0][0].data;
+    expect(clientData.planStatus).toBe("TRIAL");
+    expect(mockPrisma.subscription.create.mock.calls[0][0].data.status).toBe("TRIAL");
   });
 
   it("does NOT cancel the new sub or duplicate cancels when no prior subs exist", async () => {

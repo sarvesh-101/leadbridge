@@ -5,8 +5,8 @@
  *  1. AI disclosure   — the 2025 amendment REQUIRES disclosure of auto-dialer/robo-call use.
  *                       Non-disclosed automated calls = violation → telecom resources barred
  *                       15 days (first), 1 year + blacklisting (repeat).
- *  2. Calling window  — promotional/commercial calls only 9 AM–9 PM IST (worker enforces 8–8,
- *                       which is stricter and compliant).
+ *  2. Calling window  — promotional/commercial calls only 9 AM–9 PM IST (worker enforces 9–21,
+ *                       matching the /compliance/trai published guide).
  *  3. Consent basis   — promotional campaigns (RE_ENGAGEMENT, PROMOTIONAL) need explicit
  *                       consent; enquiry-response calls rely on the prospect's portal enquiry.
  *  4. Audit trail     — every call logs consent basis, source, and gate outcome (TRAI
@@ -21,9 +21,9 @@ import { logger } from "../utils/logger";
 /** Call types that are promotional under TCCCPR (need explicit consent basis). */
 export const PROMOTIONAL_CALL_TYPES = new Set(["RE_ENGAGEMENT", "PROMOTIONAL"]);
 
-/** Allowed calling window, IST. Keep in sync with call.worker.ts (8–8). */
+/** Allowed calling window, IST. Keep in sync with call.worker.ts (9–21). */
 export const CALL_WINDOW_START_HOUR = 9; // 9 AM IST
-export const CALL_WINDOW_END_HOUR = 20; // 9 PM IST (exclusive)
+export const CALL_WINDOW_END_HOUR = 21; // 9 PM IST (exclusive)
 
 export type ConsentBasis = "PORTAL_ENQUIRY" | "PRIOR_CONTACT" | "EXPLICIT_OPTIN" | "UNKNOWN";
 

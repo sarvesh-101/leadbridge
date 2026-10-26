@@ -1,7 +1,7 @@
 import { Plan } from "@prisma/client";
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { config } from "../../config";
-import { cancelSubscription as cancelRazorpaySub, refundPayment, generateSubscriptionOrderSignature } from "../../services/razorpay.service";
+import { cancelSubscription as cancelRazorpaySub, refundPayment, generateSubscriptionOrderSignature, getLatestCapturedSubscriptionPayment } from "../../services/razorpay.service";
 import { PLAN_DEFINITIONS, createSubscriptionCheckout, getRazorpayPlanIdForTier } from "../../services/subscription.service";
 import { signAssetUrl } from "../../utils/signed-asset-url";
 
@@ -111,7 +111,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
     // Get client info for Razorpay
     const client = await fastify.prisma.client.findUnique({
       where: { id: clientId },
-      select: { id: true, email: true, phone: true, ownerName: true, trialStartedAt: true },
+      select: { id: true, email: true, phone: true, ownerName: true, trialStartedAt: true, planStatus: true },
     });
     if (!client) {
       return reply.status(404).send({ error: "Client not found" });
@@ -156,8 +156,12 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
   fastify.post("/subscriptions/cancel", async (request: FastifyRequest, reply: FastifyReply) => {
     const clientId = request.clientId!;
 
+    // P1 LOOP FIX: include PENDING — since the checkout-state fix, unauthenticated
+    // (unpaid) subscriptions are stored as PENDING, and those must be cancellable
+    // too (the checkout was created → abandoned → still charging scenario is gone,
+    // but a pending sub created seconds ago still needs a cancel path).
     const subscription = await fastify.prisma.subscription.findFirst({
-      where: { clientId, status: { in: ["ACTIVE", "TRIAL"] } },
+      where: { clientId, status: { in: ["ACTIVE", "TRIAL", "PENDING"] } },
       include: {
         invoices: { where: { status: "PAID" }, orderBy: { issueDate: "desc" }, take: 1 },
       },
@@ -168,9 +172,23 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
     }
 
     // Cancel with Razorpay
+    // P1 LOOP FIX: cancelSubscription previously swallowed all errors, so the DB
+    // could say CANCELLED while Razorpay kept charging. Now a failed Razorpay
+    // cancel aborts the flow with a 502 — neither the sub nor the client is
+    // marked cancelled, so the broker can simply retry.
     const razorpaySubId = subscription.providerSubscriptionId || null;
     if (razorpaySubId) {
-      await cancelRazorpaySub(razorpaySubId);
+      const cancelResult = await cancelRazorpaySub(razorpaySubId);
+      if (!cancelResult.ok) {
+        fastify.log.error(
+          { clientId, razorpaySubId, err: cancelResult.error },
+          "Razorpay subscription cancel FAILED — aborting local cancel so it can be retried"
+        );
+        return reply.status(502).send({
+          error: "Could not cancel with Razorpay — please try again in a minute. The subscription was NOT cancelled.",
+          detail: cancelResult.error,
+        });
+      }
     }
 
     // ─── Pro-rated Refund + Razorpay execution ──────────────────
@@ -192,10 +210,45 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         refundNote = `Pro-rated refund: ₹${refundAmount} for ${remainingDays}/${totalDays} days remaining`;
 
         // Find the paid Razorpay payment to execute the actual refund
-        const paidPayment = await fastify.prisma.payment.findFirst({
+        let paidPayment = await fastify.prisma.payment.findFirst({
           where: { invoiceId: paidInvoice.id, status: "SUCCESSFUL" },
           orderBy: { createdAt: "desc" },
         });
+
+        // P1 LOOP FIX (refund fallback): if the Payment row has no provider id yet
+        // (the ₹5-style test: pay → cancel within seconds, while the
+        // subscription.charged webhook that records the Payment is still in
+        // flight), resolve the payment id straight from the Razorpay API so the
+        // refund actually EXECUTES instead of being "logged but not processed".
+        if (!paidPayment?.providerPaymentId && razorpaySubId) {
+          const fallbackPaymentId = await getLatestCapturedSubscriptionPayment(razorpaySubId);
+          if (fallbackPaymentId) {
+            fastify.log.info(
+              { clientId, razorpaySubId, fallbackPaymentId },
+              "Refund fallback: resolved Razorpay payment id via API"
+            );
+            if (paidPayment) {
+              await fastify.prisma.payment.update({
+                where: { id: paidPayment.id },
+                data: { providerPaymentId: fallbackPaymentId },
+              });
+              paidPayment = { ...paidPayment, providerPaymentId: fallbackPaymentId };
+            } else {
+              // No local Payment row at all — synthesize a minimal record so the
+              // standard refund path below can execute and be audited.
+              paidPayment = (await fastify.prisma.payment.create({
+                data: {
+                  clientId,
+                  invoiceId: paidInvoice.id,
+                  amount: paidInvoice.totalAmount,
+                  status: "SUCCESSFUL",
+                  provider: "razorpay",
+                  providerPaymentId: fallbackPaymentId,
+                },
+              })) as any;
+            }
+          }
+        }
 
         if (paidPayment?.providerPaymentId) {
           try {
@@ -386,6 +439,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         callsThisMonth: true,
         callsLimit: true,
         rolloverCalls: true,
+        prepaidCalls: true,
         leadsThisMonth: true,
         lastUsageAlertSentAt: true,
         usageAlertLevel: true,
@@ -398,7 +452,10 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
       return { plan: null, planStatus: null, usage: { callsThisMonth: 0, callsLimit: 0 } };
     }
 
-    const totalAvailable = client.callsLimit + client.rolloverCalls;
+    // P3 FIX: include prepaidCalls — getBrokerCredits() counts them in total
+    // available, this display route silently dropped them (brokers with wallet
+    // credits saw a WRONG remaining balance here).
+    const totalAvailable = client.callsLimit + client.rolloverCalls + client.prepaidCalls;
     const totalRemaining = Math.max(0, totalAvailable - client.callsThisMonth);
     const usagePercent = totalAvailable > 0
       ? Math.round((client.callsThisMonth / totalAvailable) * 100)
@@ -418,6 +475,7 @@ export default async function clientBillingRoutes(fastify: FastifyInstance) {
         callsThisMonth: client.callsThisMonth,
         callsLimit: client.callsLimit,
         rolloverCalls: client.rolloverCalls,
+        prepaidCalls: client.prepaidCalls,
         leadsThisMonth: client.leadsThisMonth,
         leadsLimit: getMonthlyLeadsLimit(client.plan),
         totalAvailable,

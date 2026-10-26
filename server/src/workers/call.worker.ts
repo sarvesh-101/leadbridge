@@ -36,8 +36,11 @@ const callWorker = new Worker<CallJob>(
     const istOffset = 5.5 * 60 * 60 * 1000; // UTC+5:30
     const istTime = new Date(now.getTime() + istOffset);
     const currentHourIST = istTime.getUTCHours();
-    const WORKING_HOUR_START = 8;  // 8:00 AM IST
-    const WORKING_HOUR_END = 20;   // 8:00 PM IST
+    // P3 FIX: aligned to the published TRAI window (9 AM–9 PM IST) that the
+    // compliance gate and the /compliance/trai guide page advertise — the old
+    // 8–20 span called prospects BEFORE 9 AM, which our own guide calls out.
+    const WORKING_HOUR_START = 9;  // 9:00 AM IST
+    const WORKING_HOUR_END = 21;   // 9:00 PM IST
 
     if (currentHourIST < WORKING_HOUR_START || currentHourIST >= WORKING_HOUR_END) {
       // Re-queue the call for next working hour start (8:00 AM IST next day or today)
@@ -190,7 +193,11 @@ const callWorker = new Worker<CallJob>(
       where: { id: leadId },
       data: {
         status: newStatus,
-        callAttempts: lead.callAttempts + 1,
+        // P3 FIX: atomic increment — two same-lead jobs could clone the stale
+        // `lead.callAttempts + 1` here and lose an attempt (lead exceeds
+        // maxAttempts). BullMQ retries make this rare in theory, concurrency 5
+        // makes it far from impossible.
+        callAttempts: { increment: 1 },
         firstCalledAt: lead.firstCalledAt || new Date(),
       },
     });
@@ -260,11 +267,21 @@ callWorker.on("completed", async (job) => {
   if (!job) return;
   const { clientId, leadId } = job.data;
 
-  // Use the latest call record's ID to identify this dispatch.
-  const lastCall = await prisma.call.findFirst({
-    where: { leadId, clientId },
-    orderBy: { createdAt: "desc" },
-  });
+  // P3 FIX: bill the EXACT dispatch this job made. Previously the handler took
+  // whatever call was latest for the lead — when two same-lead jobs completed
+  // near-simultaneously both could resolve to the same "latest" call, billing
+  // one call twice and its neighbour not at all. The worker now returns the
+  // created call id in its return value; a job that took a skip path (outside
+  // hours, blocked, capped) made NO dispatch and must not bill anything.
+  const returnValue = (job.returnvalue || {}) as { callId?: string; skipped?: boolean; reason?: string };
+  if (returnValue.skipped) return;
+
+  const lastCall = returnValue.callId
+    ? await prisma.call.findFirst({ where: { id: returnValue.callId, clientId } })
+    : await prisma.call.findFirst({
+        where: { leadId, clientId },
+        orderBy: { createdAt: "desc" },
+      });
   if (!lastCall) return;
 
   // DB-backed idempotency marker — survives restarts (replaces the old in-memory

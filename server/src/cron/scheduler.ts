@@ -26,6 +26,8 @@ import { runDunning } from "./dunning";
 import { runRevenueRecognition } from "./revenue-recognition";
 import { runIndiaMartPull } from "./indiamart-pull.cron";
 import { runImapEmailPull } from "./email-imap.cron";
+import { runUnpaidActivationSweep } from "./unpaid-activation";
+import { unstickStaleCalls } from "./stale-calls";
 import { runWithCronLock } from "../utils/cron-lock";
 
 export function registerCronJobs() {
@@ -182,6 +184,39 @@ export function registerCronJobs() {
         await runImapEmailPull();
       } catch (error: any) {
         logger.error({ err: error.message }, "Cron: IMAP email pull failed");
+      }
+    });
+  });
+
+  // ─── Unpaid-Activation Sweep — hourly ─────────────────────
+  // P0 money-loop fix: demote ACTIVE clients whose Razorpay sub never produced
+  // a successful payment (abandoned checkout, lost charged webhook). Runs long
+  // AFTER the dunning cron — PAST_DUE is its input.
+  cron.schedule("5 * * * *", async () => {
+    await runWithCronLock("unpaid-activation", 3600, async () => {
+      try {
+        const result = await runUnpaidActivationSweep();
+        if (result.swept > 0) {
+          logger.info(result, "Cron: Unpaid-activation sweep complete");
+        }
+      } catch (error: any) {
+        logger.error({ err: error.message }, "Cron: Unpaid-activation sweep failed");
+      }
+    });
+  });
+
+  // ─── Stale-Call Unstick Sweep — every 10 minutes ──────────
+  // P2 workflow fix: release leads stranded in CALLING by a lost Omnidim
+  // status webhook, so the retry pipeline can still reach them.
+  cron.schedule("*/10 * * * *", async () => {
+    await runWithCronLock("stale-calls", 600, async () => {
+      try {
+        const result = await unstickStaleCalls();
+        if (result.unstuck > 0) {
+          logger.info(result, "Cron: Stale-call sweep complete");
+        }
+      } catch (error: any) {
+        logger.error({ err: error.message }, "Cron: Stale-call sweep failed");
       }
     });
   });

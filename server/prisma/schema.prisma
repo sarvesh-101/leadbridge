@@ -1002,7 +1002,11 @@ model Payment {
 
   // Provider
   provider           String  @default("razorpay")
-  providerPaymentId  String?
+  // P2 LOOP FIX: unique per provider payment id — a subscription charge arrives
+  // as BOTH subscription.charged and invoice.paid; without the DB-level unique
+  // constraint the find-then-create idempotency guard could race and
+  // double-count revenue. NULLs are exempt (offline/manual payments).
+  providerPaymentId  String? @unique
   providerOrderId    String?
   providerSignature  String?
 

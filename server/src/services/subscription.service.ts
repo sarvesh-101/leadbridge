@@ -62,6 +62,8 @@ export interface CheckoutClient {
   phone: string;
   ownerName: string;
   trialStartedAt: Date | null;
+  /** Current plan status — a client already on TRIAL stays TRIAL after checkout. */
+  planStatus?: PlanStatus | null;
 }
 
 export interface SubscriptionCheckoutResult {
@@ -146,22 +148,45 @@ export async function createSubscriptionCheckout(
   });
 
   if (priorSubs.length > 0) {
+    // P1 LOOP FIX: cancelSubscription reports success instead of swallowing
+    // errors. A prior sub whose Razorpay cancel FAILED must stay ACTIVE in our
+    // DB — marking it CANCELLED anyway is exactly the "DB says cancelled while
+    // Razorpay keeps charging" bug. Cancelling them was also previously
+    // impossible from the UI, since the cancel route only looks for ACTIVE/TRIAL.
+    const failedPriorIds: string[] = [];
     for (const prior of priorSubs) {
       if (prior.providerSubscriptionId && prior.providerSubscriptionId !== razorpaySub?.id) {
-        // cancelSubscription never throws (catches internally and logs)
-        await cancelRazorpaySub(prior.providerSubscriptionId);
-        fastify.log.info(
-          { clientId: client.id, oldSubId: prior.providerSubscriptionId },
-          "Previous live Razorpay subscription cancelled on new checkout"
-        );
+        const cancelResult = await cancelRazorpaySub(prior.providerSubscriptionId);
+        if (cancelResult.ok) {
+          fastify.log.info(
+            { clientId: client.id, oldSubId: prior.providerSubscriptionId },
+            "Previous live Razorpay subscription cancelled on new checkout"
+          );
+        } else {
+          failedPriorIds.push(prior.id);
+          fastify.log.error(
+            { clientId: client.id, oldSubId: prior.providerSubscriptionId, err: cancelResult.error },
+            "Previous live Razorpay subscription could NOT be cancelled — keeping it ACTIVE locally"
+          );
+        }
       }
     }
 
     await fastify.prisma.subscription.updateMany({
-      where: { clientId: client.id, status: { in: ["ACTIVE", "TRIAL"] } },
+      where: {
+        clientId: client.id,
+        status: { in: ["ACTIVE", "TRIAL"] },
+        ...(failedPriorIds.length > 0 ? { id: { notIn: failedPriorIds } } : {}),
+      },
       data: { status: "CANCELLED", cancelledAt: now },
     });
   }
+
+  // A checkout only lands in TRIAL when the plan carries its own trial
+  // (STARTER) or the client is ALREADY inside a trial. A paying client who
+  // abandons an upgrade must not be pushed into the dunning chain — that ends
+  // in account cleanup (agent deleted, number released) on day 7.
+  const staysInTrial = planTier === "STARTER" || client.planStatus === PlanStatus.TRIAL;
 
   // ─── Create Subscription DB record ────────────────────────────────
   const subscription = await fastify.prisma.subscription.create({
@@ -170,7 +195,11 @@ export async function createSubscriptionCheckout(
       planName: plan.name,
       planTier,
       billingCycle: (opts.billingCycle as BillingCycle) || BillingCycle.MONTHLY,
-      status: razorpaySub ? "ACTIVE" : "PENDING",
+      // P0 LOOP FIX: the DB sub is PENDING (not ACTIVE) until the first real
+      // charge — the Razorpay sub exists but is unauthenticated at this point.
+      // TRIAL when a trial applies; otherwise PENDING until the
+      // subscription.charged webhook confirms payment and flips it to ACTIVE.
+      status: razorpaySub ? (staysInTrial ? "TRIAL" : "PENDING") : "PENDING",
       amount,
       totalAmount: amount,
       startDate: now,
@@ -183,17 +212,30 @@ export async function createSubscriptionCheckout(
   });
 
   // ─── Update client plan info ──────────────────────────────────────
+  // P0 LOOP FIX: checkout must NOT grant ACTIVE access before payment.
+  // Previously planStatus flipped to ACTIVE here, so a broker who abandoned the
+  // Razorpay modal stayed ACTIVE forever (the call gate only allows TRIAL/ACTIVE
+  // and dunning only starts from PAST_DUE) → unpaid free AI calls up to plan
+  // limits. Now:
+  //   • trial applies (STARTER, or already in a trial) → TRIAL — bounded by the
+  //     50-call trial cap until the first subscription.charged webhook fires.
+  //   • otherwise (no trial — the charge fires as soon as the mandate is
+  //     authorized) → PAST_DUE: call-gated immediately; the unpaid-activation
+  //     sweep cron and the subscription.pending/halted webhooks back this up,
+  //     and any subscription.charged webhook flips it to ACTIVE when they pay.
+  // The trial→paid conversion stamp (convertedFromTrialAt) moved to the
+  // subscription.charged first-payment branch in the Razorpay webhook — it
+  // previously stamped HERE (at click time, before payment), which broke that
+  // webhook's newPayers first-charge detection.
   await fastify.prisma.client.update({
     where: { id: client.id },
     data: {
       plan: planTier as Plan,
-      planStatus: razorpaySub ? PlanStatus.ACTIVE : PlanStatus.TRIAL,
+      planStatus: razorpaySub && !staysInTrial ? PlanStatus.PAST_DUE : PlanStatus.TRIAL,
       callsLimit: plan.calls,
       razorpaySubId: razorpaySub?.id || undefined,
       // Track trial start if this is the first sub
       trialStartedAt: client.trialStartedAt || now,
-      // Track trial → paid conversion if they were on trial
-      ...(planTier !== "STARTER" && client.trialStartedAt ? { convertedFromTrialAt: now } : {}),
     },
   });
 

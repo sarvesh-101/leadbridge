@@ -99,6 +99,12 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
             // ⚠️ Do NOT increment callAttempts here — the call worker already
             // incremented it when it dispatched the call. Incrementing again
             // would double-count every attempt.
+            // P2 LOOP FIX: also park the lead in NO_ANSWER. The retry job queued
+            // below is a QUALIFICATION call, and the call worker only dispatches
+            // QUALIFICATION for PENDING / NO_ANSWER / CALL_FAILED — the lead used
+            // to stay in CALLING, so EVERY retry job skipped with "Status not
+            // callable" and no-answer leads were never retried.
+            status: "NO_ANSWER",
             nextRetryAt: null,
           },
         });

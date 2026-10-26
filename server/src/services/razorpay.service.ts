@@ -95,15 +95,26 @@ export async function createSubscription(params: {
 
 /**
  * Cancel a subscription.
+ *
+ * P1 LOOP FIX: previously ALL Razorpay errors were swallowed (caught → log),
+ * so the caller never knew the cancellation silently failed: our DB said
+ * CANCELLED while Razorpay kept charging the broker. The function now reports
+ * success explicitly (still never throws, so the checkout path that treats it
+ * as best-effort keeps working); the cancel/refund route in billing.ts acts
+ * on the result.
  */
-export async function cancelSubscription(subscriptionId: string): Promise<void> {
+export async function cancelSubscription(
+  subscriptionId: string
+): Promise<{ ok: boolean; error?: string }> {
   try {
     await razorpayApi.post(`/subscriptions/${subscriptionId}/cancel`, {
       cancel_at_cycle_end: 0,
     });
     logger.info({ subscriptionId }, "Razorpay subscription cancelled");
+    return { ok: true };
   } catch (error: any) {
     logger.error({ subscriptionId, err: error.message }, "Failed to cancel subscription");
+    return { ok: false, error: error.response?.data?.error?.description || error.message };
   }
 }
 
@@ -175,6 +186,39 @@ export async function getInvoice(invoiceId: string) {
     const response = await razorpayApi.get(`/invoices/${invoiceId}`);
     return response.data;
   } catch {
+    return null;
+  }
+}
+
+/**
+ * P1 LOOP FIX (refund fallback): find the latest captured payment for a Razorpay
+ * subscription via the API. Used by the cancel/refund route when the DB Payment
+ * row has no providerPaymentId yet — e.g. the broker pays and cancels within
+ * seconds and the subscription.charged webhook (which records the Payment) is
+ * still in flight. Without this the refund is "logged but never executed".
+ * Returns just the Razorpay payment id (never raw credentials), or null.
+ */
+export async function getLatestCapturedSubscriptionPayment(
+  subscriptionId: string
+): Promise<string | null> {
+  try {
+    const response = await razorpayApi.get("/payments", {
+      params: { subscription_id: subscriptionId, count: 10 },
+    });
+    const payments = (response.data?.items || []) as Array<{
+      id: string;
+      status: string;
+      created_at: number;
+    }>;
+    const captured = payments
+      .filter((p) => p.status === "captured")
+      .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+    return captured[0]?.id || null;
+  } catch (error: any) {
+    logger.warn(
+      { subscriptionId, err: error.message },
+      "Could not fetch subscription payments from Razorpay for refund fallback"
+    );
     return null;
   }
 }

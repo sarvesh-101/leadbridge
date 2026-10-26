@@ -174,10 +174,55 @@ export default async function razorpayWebhookRoutes(fastify: FastifyInstance) {
         const razorpaySubId = subscription?.id as string | undefined;
 
         if (razorpaySubId) {
+          // Never demote a client who is inside a TRIAL: `subscription.pending`
+          // also fires while a new mandate awaits authorization, which is exactly
+          // when a STARTER trial signup sits. The trial cap (50 calls) + trial
+          // expiry cron already bound those accounts.
           await fastify.prisma.client.updateMany({
-            where: { razorpaySubId },
+            where: { razorpaySubId, planStatus: { not: "TRIAL" } },
             data: { planStatus: "PAST_DUE" },
           });
+        }
+        break;
+      }
+
+      // P0 LOOP FIX: Razorpay HALTS a subscription after ~6 consecutive failed
+      // renewal retries (payment failures / mandate revoked). Previously this
+      // event was unhandled, so a halted client stayed ACTIVE in our DB and
+      // kept calling while unpaid — `payment.failed` alone only logged a warning.
+      case "subscription.halted": {
+        const payloadData = event.payload as Record<string, any> | undefined;
+        const subscription = payloadData?.subscription?.entity as Record<string, unknown> | undefined;
+        const razorpaySubId = subscription?.id as string | undefined;
+
+        if (razorpaySubId) {
+          await fastify.prisma.client.updateMany({
+            where: { razorpaySubId },
+            data: {
+              planStatus: "PAST_DUE",
+              // Start (or resume) the dunning timeline from now — the daily
+              // dunning cron nags PAST_DUE clients and deactivates at day 7.
+              dunningStartedAt: new Date(),
+            },
+          });
+          fastify.log.warn({ razorpaySubId }, "Subscription HALTED by Razorpay — client marked PAST_DUE");
+        }
+        break;
+      }
+
+      // Razorpay marks the sub COMPLETED after the final charge/period — nothing
+      // to charge ever again. Previously unhandled: the client stayed ACTIVE.
+      case "subscription.completed": {
+        const payloadData = event.payload as Record<string, any> | undefined;
+        const subscription = payloadData?.subscription?.entity as Record<string, unknown> | undefined;
+        const razorpaySubId = subscription?.id as string | undefined;
+
+        if (razorpaySubId) {
+          await fastify.prisma.client.updateMany({
+            where: { razorpaySubId },
+            data: { planStatus: "CANCELLED" },
+          });
+          fastify.log.info({ razorpaySubId }, "Subscription completed/run out — client marked CANCELLED");
         }
         break;
       }
@@ -404,18 +449,31 @@ export async function recordPaymentAndRevenue(
     }
   }
 
-  await fastify.prisma.payment.create({
-    data: {
-      clientId,
-      invoiceId: params.invoiceId || null,
-      amount: params.amountInr,
-      currency: "INR",
-      status: "SUCCESSFUL",
-      paymentMethod: params.paymentMethod || "razorpay",
-      provider: "razorpay",
-      providerPaymentId: params.paymentId || null,
-    },
-  });
+  try {
+    await fastify.prisma.payment.create({
+      data: {
+        clientId,
+        invoiceId: params.invoiceId || null,
+        amount: params.amountInr,
+        currency: "INR",
+        status: "SUCCESSFUL",
+        paymentMethod: params.paymentMethod || "razorpay",
+        provider: "razorpay",
+        providerPaymentId: params.paymentId || null,
+      },
+    });
+  } catch (err: any) {
+    // P2 LOOP FIX: the unique index on providerPaymentId is the real race guard —
+    // the findFirst above is check-then-create and two concurrent events
+    // (subscription.charged + invoice.paid) can both miss it. The loser lands
+    // here; the winner already recorded the row AND incremented revenue, so
+    // returning here keeps revenue exact instead of double-counting it.
+    if (err?.code === "P2002") {
+      fastify.log.info({ paymentId: params.paymentId }, "Concurrent duplicate payment event — already recorded");
+      return;
+    }
+    throw err;
+  }
 
   await fastify.prisma.client.update({
     where: { id: clientId },
