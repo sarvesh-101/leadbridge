@@ -55,8 +55,8 @@ describe("createSubscription — trial handling", () => {
 
     const body = sentBody();
     expect(body.trial_period_days).toBeUndefined();
-    expect(body.start_at).toBeGreaterThanOrEqual(before + 30 * 86400 + 10);
-    expect(body.start_at).toBeLessThanOrEqual(before + 30 * 86400 + 15);
+    expect(body.start_at).toBeGreaterThanOrEqual(before + 30 * 86400 + 60);
+    expect(body.start_at).toBeLessThanOrEqual(before + 30 * 86400 + 65);
   });
 
   it("starts immediately when no trial is requested (GROWTH / PRO / LAUNCH)", async () => {
@@ -69,8 +69,10 @@ describe("createSubscription — trial handling", () => {
     expect(body.trial_period_days).toBeUndefined();
     // start_at must be strictly in the future or Razorpay rejects it; this is the
     // fix for the Launch route "start_at cannot be lesser than the current time".
-    expect(body.start_at).toBeGreaterThanOrEqual(before + 10);
-    expect(body.start_at).toBeLessThanOrEqual(before + 15);
+    // The production service now uses a 60s safety margin, so we assert the
+    // window matches that rather than the old +10s.
+    expect(body.start_at).toBeGreaterThanOrEqual(before + 60);
+    expect(body.start_at).toBeLessThanOrEqual(before + 65);
   });
 
   it("omits start_at entirely for a plan that carries its own trial", async () => {
@@ -99,8 +101,8 @@ describe("createSubscription — trial handling", () => {
 
     const body = sentBody();
     expect(body.trial_period_days).toBeUndefined();
-    expect(body.start_at).toBeGreaterThanOrEqual(before + 10);
-    expect(body.start_at).toBeLessThanOrEqual(before + 15);
+    expect(body.start_at).toBeGreaterThanOrEqual(before + 60);
+    expect(body.start_at).toBeLessThanOrEqual(before + 65);
   });
 
   it("always sends the plan id, cycle count and customer notes", async () => {
