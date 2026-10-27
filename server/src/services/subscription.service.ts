@@ -188,74 +188,113 @@ export async function createSubscriptionCheckout(
   // in account cleanup (agent deleted, number released) on day 7.
   const staysInTrial = planTier === "STARTER" || client.planStatus === PlanStatus.TRIAL;
 
-  // ─── Create Subscription DB record ────────────────────────────────
-  const subscription = await fastify.prisma.subscription.create({
-    data: {
-      clientId: client.id,
-      planName: plan.name,
-      planTier,
-      billingCycle: (opts.billingCycle as BillingCycle) || BillingCycle.MONTHLY,
-      // P0 LOOP FIX: the DB sub is PENDING (not ACTIVE) until the first real
-      // charge — the Razorpay sub exists but is unauthenticated at this point.
-      // TRIAL when a trial applies; otherwise PENDING until the
-      // subscription.charged webhook confirms payment and flips it to ACTIVE.
-      status: razorpaySub ? (staysInTrial ? "TRIAL" : "PENDING") : "PENDING",
-      amount,
-      totalAmount: amount,
-      startDate: now,
-      endDate,
-      features: { maxUsers: plan.users, maxLeads: plan.leads, maxCalls: plan.calls },
-      limits: { users: plan.users, leads: plan.leads, calls: plan.calls },
-      autoRenew: true,
-      providerSubscriptionId: razorpaySub?.id || null,
-    },
-  });
-
-  // ─── Update client plan info ──────────────────────────────────────
-  // P0 LOOP FIX: checkout must NOT grant ACTIVE access before payment.
-  // Previously planStatus flipped to ACTIVE here, so a broker who abandoned the
-  // Razorpay modal stayed ACTIVE forever (the call gate only allows TRIAL/ACTIVE
-  // and dunning only starts from PAST_DUE) → unpaid free AI calls up to plan
-  // limits. Now:
-  //   • trial applies (STARTER, or already in a trial) → TRIAL — bounded by the
-  //     50-call trial cap until the first subscription.charged webhook fires.
-  //   • otherwise (no trial — the charge fires as soon as the mandate is
-  //     authorized) → PAST_DUE: call-gated immediately; the unpaid-activation
-  //     sweep cron and the subscription.pending/halted webhooks back this up,
-  //     and any subscription.charged webhook flips it to ACTIVE when they pay.
-  // The trial→paid conversion stamp (convertedFromTrialAt) moved to the
-  // subscription.charged first-payment branch in the Razorpay webhook — it
-  // previously stamped HERE (at click time, before payment), which broke that
-  // webhook's newPayers first-charge detection.
-  await fastify.prisma.client.update({
-    where: { id: client.id },
-    data: {
-      plan: planTier as Plan,
-      planStatus: razorpaySub && !staysInTrial ? PlanStatus.PAST_DUE : PlanStatus.TRIAL,
-      callsLimit: plan.calls,
-      razorpaySubId: razorpaySub?.id || undefined,
-      // Track trial start if this is the first sub
-      trialStartedAt: client.trialStartedAt || now,
-    },
-  });
-
-  // ─── Create initial invoice as SENT ───────────────────────────────
+  // ─── Create Subscription DB record + client update + invoice ───────
+  // ALL THREE WRITES ARE ONE TRANSACTION. Previously each ran on its own, so a
+  // failure part-way through (e.g. prod's `Plan` enum rejecting 'LAUNCH' at
+  // client.update) left a half-created checkout behind: a PENDING Subscription
+  // row with no invoice, piled up one per retry. If the DB write fails AFTER
+  // Razorpay already created the mandate, that live subscription is cancelled
+  // too — otherwise it stays authorized and can charge a card for a checkout
+  // that never completed.
   const invoiceNumber = `INV-${Date.now()}-${client.id.slice(-4)}`;
-  const invoice = await fastify.prisma.invoice.create({
-    data: {
-      clientId: client.id,
-      subscriptionId: subscription.id,
-      invoiceNumber,
-      status: "SENT",
-      description: `${plan.name} (Monthly)`,
-      amount,
-      totalAmount: amount,
-      issueDate: now,
-      dueDate: endDate,
-      periodStart: now,
-      periodEnd: endDate,
-    },
-  });
+  let subscription: Subscription;
+  let invoice: { id: string; invoiceNumber: string; status: string; amount: number };
+
+  try {
+    ({ subscription, invoice } = await fastify.prisma.$transaction(async (tx) => {
+      const createdSub = await tx.subscription.create({
+        data: {
+          clientId: client.id,
+          planName: plan.name,
+          planTier,
+          billingCycle: (opts.billingCycle as BillingCycle) || BillingCycle.MONTHLY,
+          // P0 LOOP FIX: the DB sub is PENDING (not ACTIVE) until the first real
+          // charge — the Razorpay sub exists but is unauthenticated at this point.
+          // TRIAL when a trial applies; otherwise PENDING until the
+          // subscription.charged webhook confirms payment and flips it to ACTIVE.
+          status: razorpaySub ? (staysInTrial ? "TRIAL" : "PENDING") : "PENDING",
+          amount,
+          totalAmount: amount,
+          startDate: now,
+          endDate,
+          features: { maxUsers: plan.users, maxLeads: plan.leads, maxCalls: plan.calls },
+          limits: { users: plan.users, leads: plan.leads, calls: plan.calls },
+          autoRenew: true,
+          providerSubscriptionId: razorpaySub?.id || null,
+        },
+      });
+
+      // ─── Update client plan info ──────────────────────────────────
+      // P0 LOOP FIX: checkout must NOT grant ACTIVE access before payment.
+      // Previously planStatus flipped to ACTIVE here, so a broker who abandoned the
+      // Razorpay modal stayed ACTIVE forever (the call gate only allows TRIAL/ACTIVE
+      // and dunning only starts from PAST_DUE) → unpaid free AI calls up to plan
+      // limits. Now:
+      //   • trial applies (STARTER, or already in a trial) → TRIAL — bounded by the
+      //     50-call trial cap until the first subscription.charged webhook fires.
+      //   • otherwise (no trial — the charge fires as soon as the mandate is
+      //     authorized) → PAST_DUE: call-gated immediately; the unpaid-activation
+      //     sweep cron and the subscription.pending/halted webhooks back this up,
+      //     and any subscription.charged webhook flips it to ACTIVE when they pay.
+      // The trial→paid conversion stamp (convertedFromTrialAt) moved to the
+      // subscription.charged first-payment branch in the Razorpay webhook — it
+      // previously stamped HERE (at click time, before payment), which broke that
+      // webhook's newPayers first-charge detection.
+      await tx.client.update({
+        where: { id: client.id },
+        data: {
+          plan: planTier as Plan,
+          planStatus: razorpaySub && !staysInTrial ? PlanStatus.PAST_DUE : PlanStatus.TRIAL,
+          callsLimit: plan.calls,
+          razorpaySubId: razorpaySub?.id || undefined,
+          // Track trial start if this is the first sub
+          trialStartedAt: client.trialStartedAt || now,
+        },
+      });
+
+      // ─── Create initial invoice as SENT ─────────────────────────────
+      const createdInvoice = await tx.invoice.create({
+        data: {
+          clientId: client.id,
+          subscriptionId: createdSub.id,
+          invoiceNumber,
+          status: "SENT",
+          description: `${plan.name} (Monthly)`,
+          amount,
+          totalAmount: amount,
+          issueDate: now,
+          dueDate: endDate,
+          periodStart: now,
+          periodEnd: endDate,
+        },
+      });
+
+      return {
+        subscription: createdSub,
+        invoice: {
+          id: createdInvoice.id,
+          invoiceNumber: createdInvoice.invoiceNumber,
+          status: createdInvoice.status,
+          amount: createdInvoice.amount,
+        },
+      };
+    }));
+  } catch (err: any) {
+    fastify.log.error(
+      { clientId: client.id, planTier, razorpaySubId: razorpaySub?.id, err: err.message },
+      "Checkout DB write failed — rolled back"
+    );
+    if (razorpaySub) {
+      const rollback = await cancelRazorpaySub(razorpaySub.id);
+      fastify.log[rollback.ok ? "warn" : "error"](
+        { clientId: client.id, razorpaySubId: razorpaySub.id, rollbackOk: rollback.ok },
+        rollback.ok
+          ? "Orphan live Razorpay subscription cancelled after failed checkout"
+          : "Could NOT cancel orphan Razorpay subscription — cancel it manually in the dashboard"
+      );
+    }
+    throw err;
+  }
 
   return {
     razorpaySub,

@@ -302,9 +302,13 @@ export async function buildServer() {
         config.RAZORPAY_KEY_SECRET &&
           config.RAZORPAY_PLAN_STARTER
         ),
+        // Every tier is listed individually: a plan missing its Razorpay plan ID
+        // does not error, it silently downgrades that tier to "manual payment"
+        // (no payment page), so this list is the only place the gap is visible.
         missingVars: buildMissingList([
           ["RAZORPAY_KEY_ID", config.RAZORPAY_KEY_ID],
           ["RAZORPAY_KEY_SECRET", config.RAZORPAY_KEY_SECRET],
+          ["RAZORPAY_PLAN_LAUNCH", config.RAZORPAY_PLAN_LAUNCH],
           ["RAZORPAY_PLAN_STARTER", config.RAZORPAY_PLAN_STARTER],
           ["RAZORPAY_PLAN_GROWTH", config.RAZORPAY_PLAN_GROWTH],
           ["RAZORPAY_PLAN_PRO", config.RAZORPAY_PLAN_PRO],

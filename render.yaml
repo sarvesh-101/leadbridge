@@ -4,7 +4,13 @@ services:
     runtime: node
     plan: free
     rootDir: server
-    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
+    # `prisma migrate deploy` runs on every deploy. Without it, schema migrations
+    # only land when someone runs them by hand — which is how prod ended up with a
+    # `Plan` enum that rejects 'LAUNCH' (migration 20260907000000_add_launch_plan
+    # was in the repo but never applied → 500 on every LAUNCH checkout). It runs in
+    # the BUILD step so a bad migration aborts the deploy and the previous good
+    # container keeps serving, instead of the service failing to boot.
+    buildCommand: npm ci --include=dev && npx prisma generate && npm run build && npx prisma migrate deploy
     startCommand: node dist/index.js
     healthCheckPath: /health
     envVars:
@@ -58,6 +64,8 @@ services:
         sync: false
       - key: RAZORPAY_WEBHOOK_SECRET
         sync: false
+      # REQUIRED for the Launch plan to reach Razorpay checkout. Unset = checkout
+      # silently degrades to "payment required manually" (no payment page).
       - key: RAZORPAY_PLAN_LAUNCH
         sync: false
       - key: RAZORPAY_PLAN_STARTER

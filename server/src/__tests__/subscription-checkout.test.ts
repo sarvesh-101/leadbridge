@@ -28,6 +28,10 @@ const mockGetPlanIds = getPlanIds as ReturnType<typeof vi.fn>;
 const mockCancelSubscription = cancelSubscription as ReturnType<typeof vi.fn>;
 
 const mockPrisma = {
+  // The real Prisma client always exposes $transaction, and the checkout wraps
+  // its three writes in one. The mock hands the same delegate object back as
+  // `tx` so existing assertions on mockPrisma.* keep working.
+  $transaction: vi.fn(),
   subscription: {
     findMany: vi.fn(),
     updateMany: vi.fn(),
@@ -66,6 +70,7 @@ beforeEach(() => {
     shortUrl: "https://rzp.io/test",
     status: "created",
   });
+  mockPrisma.$transaction.mockImplementation((fn: any) => fn(mockPrisma));
   mockPrisma.subscription.findMany.mockResolvedValue([]);
   mockPrisma.subscription.create.mockImplementation(({ data }: any) =>
     Promise.resolve({ id: "sub_db_1", ...data })
@@ -250,6 +255,29 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
     await createSubscriptionCheckout(mockFastify, client, "GROWTH");
     expect(mockCancelSubscription).toHaveBeenCalledWith("sub_old_1");
     expect(mockCancelSubscription).not.toHaveBeenCalledWith("sub_live_123");
+  });
+
+  it("rolls back the DB writes AND cancels the live Razorpay sub when the DB write fails", async () => {
+    // Reproduces the prod LAUNCH failure: the `Plan` enum rejected the tier at
+    // client.update — AFTER Razorpay had already created a live subscription.
+    mockGetPlanIds.mockReturnValue({
+      launch: "plan_launch",
+      starter: "plan_starter",
+      growth: "plan_growth",
+      pro: "plan_pro",
+    });
+    mockPrisma.client.update.mockRejectedValue(
+      new Error('invalid input value for enum "Plan": "LAUNCH"')
+    );
+
+    await expect(
+      createSubscriptionCheckout(mockFastify, client, "LAUNCH")
+    ).rejects.toThrow(/enum/);
+
+    // No invoice is left behind for a checkout that never completed…
+    expect(mockPrisma.invoice.create).not.toHaveBeenCalled();
+    // …and the live mandate is cancelled, so it can never charge a card for it.
+    expect(mockCancelSubscription).toHaveBeenCalledWith("sub_live_123");
   });
 });
 
