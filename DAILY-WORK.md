@@ -1,187 +1,102 @@
-# 📌 DAILY WORK — Converza (persistent memory file)
+# DAILY-WORK.md — Converza go-live status
 
-> **PURPOSE:** This file is the single source of truth across sessions. When a new session starts,
-> READ THIS FILE FIRST — terminal memory dies when the terminal closes, this file doesn't.
-> **RULE:** After every work session, update the "Completed" and "Remaining" sections. Keep it honest.
-> **Owner:** Sarvesh · **Agent:** Codebuff/Freebuff · **Last updated:** 2026-10-20
-
----
-
-## 🔑 PROJECT FACTS (no secrets — reference only)
-
-| Fact | Value |
-|---|---|
-| Product | **Converza** — AI voice agent + CRM for Indian real estate brokers |
-| Legal entity | **GS TECHNO** (Maharashtra proprietorship — anchor for GST/Meta/Razorpay/bank) |
-| GSTIN | `27AEGPH7840P1ZX` (invoices read it from `SELLER_GSTIN` env) |
-| API (Render) | `https://leadbridge-zy4o.onrender.com` (service `leadbridge-api`) |
-| Frontend (Vercel) | `https://leadbridge-seven.vercel.app` (project `leadbridge-seven`) |
-| Repo | `sarvesh-101/leadbridge` (branch `main`) |
-| Voice provider | **Omnidimension** (`OMNIDIM_*` env) — 100+ languages, call transfer, webhooks |
-| WhatsApp | +91 72088 55916 (WABA verified, entity GS TECHNO) |
-| SMS fallback | MessageBird, sender ID `CONVERZ` |
-| Payments | Razorpay (KYC ✅, webhook ✅, GST 18%) |
-| DB | Supabase Postgres `oavzflfdjluxvdlymbug` |
-| Redis (queues) | **Aiven for Valkey** (free Developer tier, `rediss://` TLS) — migrated from Upstash 2026-09-29; no command quota |
-| Competitor to beat | **Vyora AI** (vyora.ai) — ₹799/₹3,449 plans, CSV-upload flow, 8 languages |
-| Our positioning | *"Vyora calls the leads you upload. Converza calls the leads you haven't seen yet."* |
-
-**Key docs:** `docs/GO-LIVE-RUNBOOK.md` (master checklist) · `work-log/launch-plan.md` · `sales/payment-loop-test.md` · `outreach/demo-hitlist.md`
+> **Last updated:** 2026-10-27  
+> **Owner:** Chetan (platform) · AI agent (execution)  
+> **Source of truth:** this file + `docs/GO-LIVE-RUNBOOK.md` (steps) + `docs/plan-margins.md` (pricing)
 
 ---
 
-## ✅ COMPLETED (reverse-chronological)
+## 2026-10-27 — LAUNCH enum + STARTER trial fix (complete)
 
-### 2026-10-25 — LOOP-GLITCH AUDIT + ALL FINDINGS FIXED (Codebuff)
-- **Reviewed end-to-end:** Razorpay webhook + checkout + cancel/refund + credit-manager + call.worker + omnidimension webhook + trial/dunning cron + ingestion dedupe. Idempotency guards (invoice-cycle, payment markers, ingestion locks) are solid. Glitches found, in severity order:
-  1. **P0 — unpaid checkout = permanent ACTIVE access.** `createSubscriptionCheckout` sets client `planStatus: ACTIVE` + Subscription `status: ACTIVE` at checkout, BEFORE any payment. If the broker abandons the Razorpay modal, nothing demotes them back (dunning only starts from PAST_DUE) → free AI calls up to their limit, forever. Fix: set TRIAL/PENDING at checkout; a cron sweep (ACTIVE + razorpaySubId set + zero successful Payment + sub >1h) → PAST_DUE.
-  2. **P0 — `subscription.halted` unhandled.** Webhook switch has charged/cancelled/pending/payment.failed/invoice.paid only. Razorpay halts a sub after ~6 failed retries → we never hear it → client stays ACTIVE and keeps calling while unpaid. Add `subscription.halted` → PAST_DUE.
-  3. **P1 — `convertedFromTrialAt` set at CHECKOUT (before payment)** in `subscription.service.ts` client-update (planTier!=STARTER && trialStartedAt set → converted). Breaks the webhook's first-charge detection (newPayers empty → first charge gets resetBrokerCycle) and converts clients who never pay. Move to the webhook's subscription.charged first-payment side.
-  4. **P1 — cancel/refund edge:** `cancelSubscription()` swallows Razorpay errors (DB says CANCELLED, Razorpay may keep charging); and the refund route needs a DB Payment row with providerPaymentId — if the ₹5 webhook lags, cancel finds no payment → "Refund logged but not processed". (Directly affects the ₹5 test task.) Fix: surface cancel errors + Razorpay-API fallback fetch for the payment id.
-  5. **P2 — Payment double-count race:** `Payment.providerPaymentId` is NOT unique in the schema; `subscription.charged` + `invoice.paid` are find-then-create (no guard against concurrent arrival). Add a unique index.
-  6. **P2 — leads get stuck in CALLING forever.** If the Omnidim completion webhook is lost (their outage/missed retry), the lead stays status=CALLING → QUALIFICATION gate (PENDING/NO_ANSWER/CALL_FAILED only) skips it forever AND 30-day phone-dedup blocks re-ingestion (non-terminal). No sweep exists. Add: cron/stale-call unstick (e.g., INITIATED/CALLING older than 2h re-callable or mark NO_ANSWER).
-  7. **P3 nits:** callAttempts lost-update race (concurrent same-lead jobs → extra attempts beyond maxAttempts); worker's completed-billing uses lastCall-by-lead (one dispatch under-billed only if two same-lead jobs complete concurrently); `/billing` info route omits prepaidCalls from totalAvailable (credit-manager includes it); worker working-hours gate is 8–20 but TRAI gate is 9–21 (inconsistent messaging); Gmail SMTP invoice channel stays in Backlog — unchanged.
-  8. **OK after checks (no action):** webhook signature verify fails CLOSED (returns false when secret/signature missing) ✅; ingestion dedupe (distributed lock + 30-day phone window + query-id Redis set) ✅; cycle-reset idempotency (lastCycleResetAt 20-day guard) ✅; invoice-cycle unique index + P2002 recovery ✅; broker-count billing transaction idempotency ✅.
-- **Placement:** Items 1–4 belong to Stage-2 (₹5 money-loop test) — test BEFORE fixes will hit the P1 refund edge. Recommend: fix 1+2+3 in code, then run the ₹5 test.
+**LAUNCH 500 fixed:**
+- Root cause: the `Plan` enum in production Postgres had no `LAUNCH` value. Migration `20260907000000_add_launch_plan` had been sitting in the repo since 2026-09-07 and was never applied. Every checkout that tried to `prisma.client.update()` a Launch subscription crashed with `invalid input value for enum "Plan": "LAUNCH"` (PostgreSQL error `22P02`).
+- Fix: ran `ALTER TYPE "Plan" ADD VALUE 'LAUNCH'` against the live Supabase DB directly. Verified the enum now = `{STARTER,GROWTH,PRO,LAUNCH}`.
+- Recorded the migration as applied with `prisma migrate resolve --applied 20260907000000_add_launch_plan` so the deploy's `prisma migrate deploy` won't abort on "enum label already exists".
+- Commit pushed: `fe6f927` — also added `npx prisma migrate deploy` to the Render build command and made the checkout path atomic (wrap in `interactiveTransaction` so a Razorpay-create failure doesn't leave a half-written subscription).
 
-#### ✅ Fixes applied (same session) — `tsc --noEmit` clean, `vitest run` 183 passed / 8 skipped
-1. **Unpaid-checkout access hole** — `subscription.service.ts`: DB sub is now `PENDING` (or `TRIAL` when the plan carries a trial / the client is already on TRIAL) and client `planStatus` is `PAST_DUE` (call-gated) instead of `ACTIVE` until `subscription.charged` arrives. A client already inside a TRIAL stays TRIAL (avoids the dunning day-7 cleanup deleting an agent/number after an abandoned upgrade). **NEW `cron/unpaid-activation.ts`** (hourly, `:05`): ACTIVE + `razorpaySubId` + zero SUCCESSFUL payment + sub created >2h ago and after 2026-10-25 → PAST_DUE + owner notification. Dunning then takes over.
-2. **`subscription.halted` / `subscription.completed`** — `routes/webhooks/razorpay.ts`: halted → PAST_DUE + `dunningStartedAt` now; completed → CANCELLED (previously unhandled, client stayed ACTIVE while unpaid).
-3. **`convertedFromTrialAt` stamp** — removed from checkout; it is now only set in the `subscription.charged` branch, so first-charge detection (and the cycle-reset skip) works and non-payers are never marked converted.
-4. **Cancel/refund edges** — `razorpay.service.ts cancelSubscription()` returns `{ ok, error }` instead of swallowing; `/subscriptions/cancel` returns **502** and leaves everything uncancelled when Razorpay rejects (retryable); the checkout's prior-sub cancel keeps the old row ACTIVE locally when the Razorpay cancel fails (no phantom cancel); `/subscriptions/cancel` now also matches `PENDING` subs. **NEW `getLatestCapturedSubscriptionPayment()`** — refund resolves the Razorpay payment id via API when the webhook's Payment row is still in flight (the ₹5 pay→cancel-in-seconds case), and synthesizes/updates the Payment row so the refund executes.
-5. **Payment double-count** — `Payment.providerPaymentId` now `@unique` (+ migration `20261025000000_payment_provider_payment_id_unique`, dedupes existing rows before creating the index — **run `prisma migrate deploy` on the server; it is required, not optional**) and `recordPaymentAndRevenue` catches P2002 as "already recorded" so revenue is never double-counted under a race.
-6. **Stranded leads** — omnidimension no-answer/busy/failed webhook now parks the lead in `NO_ANSWER` (previously stayed `CALLING`, so every queued retry skipped as "not callable"); **NEW `cron/stale-calls.ts`** (every 10 min): lead `CALLING` older than 3h → release to `PENDING` (no call row) or `NO_ANSWER` (call row present, in-flight call marked FAILED) + owner notification.
-7. **P3 nits** — `callAttempts` now an atomic `{ increment: 1 }`; the worker returns `{ callId }`/`{ skipped }` and the completed handler bills exactly that dispatch (skip paths and concurrent same-lead jobs no longer bill the wrong call); `/billing` info route includes `prepaidCalls` in totalAvailable; worker window aligned to **9–21 IST** (was 8–20) to match the published TRAI guide and `call-compliance.ts`.
-- **Tests reconciled:** `subscription-checkout.test.ts` now asserts PENDING/PAST_DUE at checkout + no conversion stamp, plus new cases for STARTER→TRIAL, existing-TRIAL-stays-TRIAL, and failed prior-sub cancel keeping the row ACTIVE.
+**STARTER "payment required manually" fixed:**
+- Root cause: STARTER is the **only** tier that requests a 30-day trial. The checkout was sending `trial_period_days: 30` to Razorpay's `POST /subscriptions`. Razorpay does **not** accept `trial_period_days` on that endpoint — their docs list `plan_id, total_count, quantity, customer_notify, start_at, expire_by, addons, notes, offer_id`, and say trials are done by passing a future `start_at`. So Razorpay rejected the call, the checkout degraded gracefully, and the frontend showed "Subscription created — payment required manually".
+- Fix (commit `bd079ed`): the trial is now expressed as a future `start_at` timestamp (30 days from now). `trial_period_days` is never sent. Verified on Razorpay's docs page (`https://razorpay.com/docs/payments/subscriptions/create`) — confirmed `trial_period_days` is not in the parameter list.
+- Test coverage: new file `server/src/__tests__/razorpay-subscription.test.ts` (6 tests) pinning the exact payload per tier. Full suite: 190 passed / 8 skipped. `tsc --noEmit` clean.
+- `RAZORPAY_PLAN_STARTER` was already set on Render (confirmed via `/health/integrations` before the fix). STARTER's plan ID is valid; the only thing wrong was the trial parameter.
 
-### 2026-10-20 — LAUNCH PUSH DEPLOYED + SMOKE TESTS PASS + call-not-executing DIAGNOSED
-- **Pending commit `03307c8` pushed → Vercel deploy triggered.** Sarvesh smoke-tested it: **logout → login ✅, Add Lead modal ✅ (lead created), CSV export ✅, everything fine.**
-- **"AI call not executed" after Add Lead — diagnosed, NOT a regression.** Verified code path (`call.worker.ts`): queues healthy → credit gate → agent gate (`omniAgentId` empty = "no AI agent configured") → Omnidim dispatch, which originates ONLY from Omnidim-purchased numbers (their 9-30 reply). No +91 number purchased yet → the number gate is the prime suspect; credits/agent attach are the fallbacks. The lead's call record `transcript` field stores the literal failure message — check there if still blocked after purchase.
-- **Fix = today's Step 4 (owner: Sarvesh):** Omnidim Aadhaar eKYC → wallet top-up ~$6 → buy +91 number in Converza dashboard (auto-attach) → retest lead.
-- Still open from the day plan (owner: Sarvesh): DB password rotation (Render `DATABASE_URL` still has the c94c8d0 leaked password), ₹5 payment test + immediate cancel, IMAP retest, MessageBird SMS number, Render/Vercel renames.
+**Deploy:**
+- Render build command now includes `npx prisma migrate deploy` (commit `fe6f927`).
+- Auto-deploy kept ON (was already on).
+- `origin/main` is at `bd079ed` (the STARTER fix). Working tree clean. Pushed.
 
-### 2026-10-18 — BROKER-HAT AUDIT + 6 CODE FIXES SHIPPED (Codebuff, local commit — NOT yet deployed)
-- **Deep-dive audit done** (code-path verified + live API probes; `/health` fully green). NEW issues found and ALL FIXED in code:
-  1. **Logout didn't revoke server-side** — `serverLogout()` sent NO Authorization header; route has `preHandler: fastify.authenticate` → server 401'd → refresh token stayed replayable. Now sends Bearer header. **Verified mismatch live.**
-  2. **Stranded dashboard** — no client-side auth guard for `/dashboard` (only `/admin` had one; middleware punts). Added guard in `dashboard/layout.tsx` → redirects to `/auth/login` when unauthenticated; also covers session-expiry (refresh fail flips `isAuthenticated` → redirect fires).
-  3. **Logout now navigates** to `/auth/login` (hard nav = clean slate for stale in-memory state).
-  4. **"Add Lead" button was dead** (no onClick!). Built `AddLeadModal` wired to `POST /leads` (name+phone required, email/source optional) → 201 creates lead + AI calls within 60s; duplicate → "not re-called" toast; server error messages surfaced.
-  5. **Multi-tab rotation logouts fixed** — refresh tokens are single-use; two tabs = one burns the token, the other 401s → auto-logout. Added `storage`-event cross-tab sync in `auth.store.ts`; `refreshAccessToken` now, on 401, checks the persisted (fresher) token and retries once before logging out.
-  6. **Network-blip logouts fixed** — refresh catch no longer calls `logout()`; only a definitive 401 logs out. Transient failures return null and the caller says "Connection issue — session is safe, please retry".
-  7. **CSV export** exported only the current page (≤50). Now fetches ALL pages of the current filter (cap 1000) with spinner + accurate count.
-  8. **WS polling fallback** — base URL now uses the SAME `/api/v1` normalization as `api.ts` (the 9-29 incident would have silently 404'd it); polls diff against a snapshot (seed-only first pass) instead of re-emitting 10 events per cycle; bucket raised 10→25.
-- **TRAI compliance guide page SHIPPED**: `/compliance/trai` — 6 rules in plain English (enquiry follow-up vs promotional, 9–9 window, 140-series, DND/NCPR, number series, AI disclosure) with a "Converza behaviour" callout per rule + 5-point broker self-check. Facts web-verified (TCCCPR 2018 + Feb 2025 amendments). Linked in landing footer under Legal.
-- `frontend` tsc clean ×3 after fixes. **Sarvesh: deploy (Vercel auto-deploy on push) and smoke-test: logout → land on login; add-lead modal → AI call; CSV export count; 2-tab session.**
-- P0 BACKLOG note: earlier probes confirmed `/api/v1/auth/logout` is POST-only (deeper diagnosis in session log). Remaining user-gated P0s unchanged below.
+**Live verification:**
+- `https://leadbridge-zy4o.onrender.com/health/integrations` → `razorpay.configured: true`, `missingVars: []` → all 6 Razorpay vars (KEY_ID, KEY_SECRET, PLAN_LAUNCH, PLAN_STARTER, PLAN_GROWTH, PLAN_PRO) are set on Render.
+- `https://leadbridge-zy4o.onrender.com/health/razorpay` → `razorpayAuth.ok: true`, key prefix `rzp_live_Ti0DZ` (production keys, not the stale local ones).
+- The deploy is live and running the new code.
 
-### 2026-10-22 — Completed today
-- **Number-shop prerequisites DONE + verified live:** two +91 Omnidim numbers purchased & attached (8045440145 → `LeadBridge Assistant` 215998 · 8048799872 → `AI Receptionist for GS Techno` 134310). Only remaining: 1 test call for caller-ID + transfer-ring confirmation.
-- **TRAI compliance guide page verified live** at `/compliance/trai` (HTTP 200; footer linked).
-- **DB password rotation DECLINED by owner** — decision noted above; not a pending task anymore.
-
-### 2026-10-07 — PORTAL ZERO-TOUCH WIZARD shipped (answers "isn't forwarding every lead manual/hectic?")
-- Sarvesh's objection was RIGHT: manual per-lead forwarding would kill retention. Reality: forwarding code exists as FALLBACK only; IndiaMART = full direct API, FB = webhook, Sheets = sync. JustDial/99acres/MagicBricks have NO public lead API (for any CRM) → solved via ONE-TIME auto-forward (Android SMS Forwarder app rule "text contains JustDial" → our number; Gmail filter from:portal-domain → auto-forward to us).
-- **Shipped: Portal Auto-Forward Wizard** in `/dashboard/forwarding` — portal cards (IndiaMART ★direct API, JustDial, 99acres, MagicBricks, Housing, any other) → per-portal tabs (Direct API / Auto-forward SMS / Auto-forward Email) with exact click-steps, the broker's forwarding number/email copy-paste pre-filled, portal match-word for the SMS app filter, portal domain for the Gmail filter, "Mark as live" toggle (localStorage `converza-portal-setup`). Onboarding a broker = walk this page. Sales line: 15 min setup once → calls every lead 24/7; Vyora needs forever-manual CSV uploads.
-
-### 2026-10-07 — BUY-NUMBER FIXED (in-app number shop) + Task 2 root-caused
-- **Buy Phone Number ROOT CAUSE (`91d157f`):** our code called `POST /phone_number/purchase` with `{provider, region: "india", area_code}` — Omnidim's CURRENT API rejects that shape (400). Their real flow (docs.omnidim.io/docs/buy-a-number-api): `GET /phone_number/search?region=IN&carrier=…` → pick a specific number → `POST /phone_number/purchase {region, carrier, phone_number}` + `Idempotency-Key` header. NOT an outage — stale payload; the old "buy at app.omnidim.io" message was our generic catch-all.
-- **Shipped:** full in-app number shop — `GET /voice/phone-numbers/search` proxy (carriers via 409 carrier_required → chips → available numbers with $/mo) + correct purchase call (Idempotency-Key) + every documented refusal mapped to plain language (kyc_incomplete / insufficient_balance / number_unavailable / in_progress / feature_disabled) + optional auto-attach to agent + "Open Omnidim Dashboard" button on gate errors. Old fallbacks kept. tsc clean both sides.
-- **Sarvesh prerequisites for first buy (one-time, no code):** ① Aadhaar eKYC in app.omnidim.io → Numbers Shop (per-carrier, minutes) ② wallet top-up (~$6 covers $5.06/mo rental).
-- **Task 2 ROOT-CAUSED — NOT a Render Cron Job:** `.github/workflows/db-backup.yml` already runs `backup-db.sh` every 6h on GitHub Actions (installs pg_dump itself) — but it has been FAILING since it started: **repo has ZERO Actions secrets** (`gh secret list` empty). Fix = Supabase `db-backups` PRIVATE bucket + 3 GitHub secrets (`PROD_DATABASE_URL` session-pooler URI WITHOUT `?pgbouncer` params, `PROD_SUPABASE_URL`, `PROD_SUPABASE_SERVICE_KEY`) → Actions → DB Backup → Run workflow → green + file in bucket. No Render Cron needed.
-- **Task 1 (IMAP no-lead) diagnosis — pipeline is fine, check 4 things:** pipeline matches the lead to a Client by the SENDER email (`[EMAIL] No broker found` → ignored silently); poller only reads UNSEEN (opening the test email in Gmail before the 5-min poll = invisible); reads only INBOX (spam excluded); parser requires a phone number. Verify via Render logs: `[EMAIL] …`, `IMAP email pull cycle complete`, `IMAP email pull failed`. `/health/integrations` shows `email_forwarding:false` — that's the WEBHOOK channel check (expected; IMAP is separate and silent when idle).
-
-### 2026-09-29 (evening) — PAYMENT LOOP: 95% wired (₹5 charge pending) + embedded checkout shipped
-- **Embedded Razorpay Checkout SHIPPED** (`6b45493`): POST /subscriptions returns key+subId+HMAC → billing page opens the Razorpay modal ON-page (QR/UPI/cards) — no more popup tabs or dead-end banner. Hosted-page same-tab fallback kept; activation poller also fires on TRIAL→ACTIVE.
-- **Self-diagnosing checkout** (`3f0c7a1`): Razorpay rejection reasons now surface in the banner.
-- **/health/razorpay probe** (`9b5dfc4`): live-tests key pair, shows key PREFIX only. Caught the bug: Render held STALE keys `rzp_live_TLZtN…` vs real `rzp_live_Ti0DZ…` → Sarvesh updated keys → probe now `ok:true`.
-- **Payload fix** (`9963446`): Razorpay rejects start_at/trial_period_days on plans that carry their own trial — code now GETs the plan and adapts.
-- **Plans reality:** 6 old LeadBridge plans (₹5-first-cycle quirk) + 4 NEW Converza plans created (Launch/Starter/Growth/Pro) — Trial field was left non-empty on first attempts (₹5 validation charge on hosted page; recurring ₹35K from day 2 — MANDATE NOT ACTIVATED YET, no money moved).
-- **PENDING (Sarvesh, deadline before ~9 AM 30-Sep):** pay ₹5 on the Converza Growth checkout → verify ACTIVE + GSTIN invoice → **CANCEL sub immediately in Razorpay dashboard** (kills tomorrow's ₹35K auto-debit) → refund ₹5 → erase test account. If skipped: cancel pending subs instead.
-- **Fix-on-sight later:** dashboard-created plans get a ₹5 first charge — decide whether to delete/recreate clean plans or accept (standard mandate-validation practice).
-- DB connection crash pattern during deploys: Supabase pooler EMAXCONNSESSION (15 max, session mode) — workaround = Supabase Restart → Render retry. PERMANENT FIX QUEUED: switch DATABASE_URL to transaction pooler (port 6543) + `?pgbouncer=true&connection_limit=10`.
-- **Soft-launch gate verdict (researched vs launch-plan):** after today's 6 tasks (IMAP, backups, rebrand, WEBHOOK_URL, MessageBird number, ₹5 payment test+teardown) → YES for Phase 4 soft launch (2–3 hand-held brokers); public marketing only after 2–4 weeks + 1 testimonial (Phase 5 rule).
-
-### 2026-09-29 (later) — PROD INCIDENT FIXED: "Not Found" on all auth screens
-- **Symptom:** signup/login/forgot-password all showed "Not Found" after submit. DB/Redis/SMTP all healthy — NOT a backend outage.
-- **Root cause:** Vercel env `NEXT_PUBLIC_API_URL` had lost its `/api/v1` suffix → every frontend API call hit `/auth/login` instead of `/api/v1/auth/login` → 404.
-- **Fix:** `frontend/src/lib/api.ts` now normalizes `NEXT_PUBLIC_API_URL` — always appends/keeps `/api/v1` regardless of how the env var is set (tsc clean). Deployed via Vercel auto-deploy.
-- **Diag bonus:** created `diagnostic-check-929@converzatest.com` via API (unverified trial account — can be erased later via DPDP flow).
-- **Reminder:** email-verification gate is by design (Round-2 #3) — verification emails often land in SPAM; mark "Not Spam" when testing.
-
-### 2026-09-29 — REDIS P0 FIXED (Aiven for Valkey)
-- **Migrated `REDIS_URL`** Upstash (quota-exhausted free tier) → **Aiven for Valkey free tier** (`rediss://`, TLS). Zero code changes — every client reads `config.REDIS_URL`.
-- **Verified live** `/health`: `status: healthy` · `redis: healthy` · **`queues: healthy`** (BullMQ alive → AI calls dispatch again) · `warnings: []`.
-- Cost path decided: $0 free now → ~$5 Developer tier when Mumbai region/1GB needed → HA tier only when paying brokers are live. Provider switch anytime = swap one env var in Render.
-- Upstash quota-backoff logic in `redis-health.ts` left in place (harmless with Aiven; still useful if we ever return).
-- Old Upstash instance kept (not deleted) = instant rollback via env var.
-
-### 2026-09-28 — Big shipping day (commit `f3bbb28`, deployed + verified live)
-- **Omnidim call transfer WIRED**: agent creation sends real `transfer` config; transfers to broker when prospect asks for human or is a hot lead. New `Client.transferToNumber` column.
-- **Multilingual agents WIRED**: 23 languages (14 Indian + international) — `server/src/services/voice/supported-languages.ts`; `Client.languages` column; `GET /voice/languages`; dashboard multi-select chips + transfer field.
-- **TRAI compliance gate SHIPPED** (`call-compliance.ts`): consent-basis engine (portal enquiry = allowed; promotional campaigns blocked without opt-in), 9AM–9PM IST window, audit-trail stamp on every call. **Mandatory AI disclosure** auto-prepended to every agent prompt.
-- **Converza-vs-Vyora comparison page LIVE**: `/compare/vyora` (factual, sourced from their public plans). Linked in landing footer.
-- **ToS fixed**: "LeadFlow AI" → Converza (3×) — verified 0 occurrences live.
-- **Footer compliance statement** added (TRAI disclosure + 9–9 window under GS TECHNO/GSTIN block).
-- **GSTIN on invoice PDFs** (GS TECHNO + address, from env) — deployed.
-- All 4 launch-critical user tasks DONE: SQL columns added ✅ · Render deploy `f3bbb28` ✅ · Omnidim support msg sent (140/1600 + voicemail) ✅ · live test call done ✅
-- Verified live: `/health` integrations configured ✅ · `/voice/languages` 401 (=exists) ✅ · `/compare/vyora` 200 ✅
-- **Redis P0 discovered**: `/health` = `redis: degraded` — "leads ingested but NEVER called". Fix = check `REDIS_URL` in Render + Upstash quota.
-
-### 2026-09-25
-- GSTIN supplied + wired: `SELLER_GSTIN`/`SELLER_ADDRESS` in env + Render; format validation in `config.ts`; invoice PDF layout fix. Website footer: GS TECHNO + address + GSTIN.
-- Razorpay webhook registered (2026-09-22) → payment loop UNBLOCKED.
-
-### Earlier (summary — details in `docs/GO-LIVE-RUNBOOK.md`)
-- Razorpay KYC Verified + payouts ✅ · DB password + JWT + ENCRYPTION_KEY rotated ✅ · Meta business verification (GS TECHNO, Aug 3) ✅ · MessageBird sender `CONVERZ` ✅ · UptimeRobot ✅ · All Phase-8 code gaps (WhatsApp retry, campaign worker, Sheets UI, tests 174 green) ✅ · Portal ingestion built: IndiaMART API, Facebook leadgen, MessageBird SMS, IMAP email ✅ · DPDP compliance (consent, erasure) ✅ · WhatsApp E2E send verified ✅ · Supabase storage (call-recordings) ✅
+**What's still true:**
+- Local `.env` Razorpay keys are stale — live API returns `401 Authentication failed` (key prefix `rzp_live_TZf…`). Razorpay can only be tested from Render, not from this machine.
+- Only migration still pending is `20261025000000_payment_provider_payment_id_unique` — prod's `Payment` table has 0 rows, so it's a no-op when it runs (just adds an anti-double-count unique index).
 
 ---
 
-## 🔴 REMAINING — DO IN THIS ORDER
+## 2026-10-28 — Step 2 done (Razorpay webhook handed off).
 
-### 2026-09-30 — OMNIDIM REPLY RECEIVED → P0 #2 RESOLVED
-- **Their answer:** outbound calls originate from numbers PURCHASED on Omnidim's platform (mobile series or landline series — no 140/1600 series from our side). **Voicemail detection is platform-side, enabled on Early Deployers plan and above** (pricing: omnidim.io/pricing).
-- **What it means for us:** (1) transactional calls to inbound leads launch on standard purchased numbers — our consent-basis compliance gate already restricts promotional calling; DLT/140 only needed later for PROMOTIONAL campaigns (backlog stays). (2) Dedicated number per Growth+/Pro client (₹200/mo, already in margin math) = buy from Omnidim at onboarding. (3) Sarvesh: **check current Omnidim plan tier** — if below Early Deployers, upgrade to unlock voicemail detection.
-- **Shipped (`see commit`):** voicemail behaviour added to every agent prompt in `omnidimension-agents.service.ts` — on detection, agent leaves ONE brief callback message then ends (platform detects once plan tier allows).
-- **Follow-up answers received (2026-09-30):** +91 numbers purchasable directly from Omnidim at **$5.06/mo** → `PHONE_NUMBER_MONTHLY_COST` default corrected ₹200 → ₹430. Early Deployers unlocks: live call monitoring, voicemail detection, agent versioning, workflow builder (10k executions/mo). Inbound call credits included in plan. **Still unanswered: concurrent outbound call limit on Starter** — asked again; matters for campaign scale. Current plan = Starter $15/mo — decision: STAY on Starter (India voicemail prevalence low; upgrade when data shows screening/voicemail hits or a client needs live monitoring). Sarvesh on Starter + no upgrade.
-- P0 remaining: transfer-ring confirmation (still unanswered) + Task 6 ₹5 payment test.
+Step 2 of `docs/GO-LIVE-RUNBOOK.md` is complete on the code side. The dashboard pieces (secret in Render, webhook created in Razorpay, test deliveries) are yours to do — they can't be automated from this machine.
 
-### P0 — now (2026-10-07 status update on the 6-task sprint)
-- [x] **Task 4:** `WEBHOOK_URL` env — DONE, boot banner clean
-- [ ] **Task 1:** env DONE ✅ but test-lead FAILED — redo test: send FROM the Converza account's own email, DON'T open it in Gmail, include a phone number, wait 6+ min, then check Render logs for `[EMAIL]` lines
-- [x] **Task 2: ✅ DONE 2026-10-13 (Codebuff).** DB backups now run every 6h on GitHub Actions and land in Supabase `db-backups` bucket via Storage REST. Final green run `38477849251`. Debug chain (4 separate root causes, each verified): (1) secrets list rebuilt — `PROD_DATABASE_URL` had been deleted, was empty-pw locally, re-set from Render value; (2) `PROD_SUPABASE_URL` re-added clean; (3) `scripts/backup-db.sh` bugs fixed — AWS CLI never got the S3 key pair mapped to `AWS_ACCESS_KEY_ID/SECRET`, bucket auto-create step added; (4) S3 gateway ops 404 (bucket exists + REST auth works, so S3 protocol likely not enabled in Storage settings — LEAVE OFF for now). Script now = S3 path with automatic REST fallback (service key) — robust against gateway outages. Commits `3bcc6d3`,`175c921`,`631150b`,`f964f2c`. ⚠️ SECURITY NOTE — RESOLVED BY OWNER DECISION (2026-10-22): password rotation for the DB password was OFFERED and DECLINED by Sarvesh — he intentionally keeps `Sarvesh_198012` (reused across services; it also remains in git-history commit c94c8d0). Known outstanding risk: leaked-in-history + password reuse. Revisit if a future incident scan flags it. Backups/other secrets unaffected.
-- [x] **Number shop prerequisites** ✅ DONE 2026-10-22 (verified live via Omnidim API 200): eKYC + wallet done on Omnidim; two +91 numbers purchased and attached to agents — **+91 8045 440145 → agent 215998 "LeadBridge Assistant"** · **+91 8048 799872 → agent 134310 "AI Receptionist for GS Techno"** (provider OmniDimension_ivrs). caller-id.ts auto-assigns owned numbers at dispatch — no code work needed. ⏳ Remaining: 1 test call through the dashboard to confirm the new +91 shows as caller ID (and transfer rings the broker phone).
-- [ ] **Task 3:** Rename Render→`converza-api` + Vercel→`converza` → paste new URLs to Codebuff → staged URL switch
-- [ ] **Task 5:** MessageBird SMS number buy + callback webhook + `FORWARDING_SMS_NUMBER` + SMS lead test + dedupe check
-- [ ] **Task 6 (do it fresh, no mandate live yet):** cancel stale "Created" subs in Razorpay → pay ₹5 on Converza Growth checkout → "paid" → verify GSTIN invoice → CANCEL sub immediately in Razorpay (kill next-cycle ₹35K auto-debit) → refund ₹5 → DPDP erase → **money loop CERTIFIED** *Owner: Sarvesh → Codebuff*
-- [ ] **Confirm transfer actually rang the phone** in the 2026-09-28 test call (AI disclosure heard ✅?). *Owner: Sarvesh*
+**What changed (not yet committed):**
+- `scripts/send-test-webhook.cjs` — sends a compact, correctly-signed synthetic Razorpay event to any endpoint. `RAZORPAY_WEBHOOK_SECRET` from Render. Fake ids only, no DB writes. Usage: `RAZORPAY_WEBHOOK_SECRET=<value> node scripts/send-test-webhook.cjs [eventType] [--bad-signature]`.
+- `scripts/verify-money-loop.cjs` — read-only Prisma check of one broker's Razorpay money loop after a ₹5 run: activation, subscription, PAID invoice with GSTIN/GS TECHNO, Payment row, and revenue increment. `node scripts/verify-money-loop.cjs <email>` or `--latest`.
+- `server/_checkout-probe.cjs` — creates a live Razorpay subscription per tier using the **local** `.env` keys (same shape the checkout sends). Useful to confirm the local keys work before pointing at Render. Note: local keys are stale — expect 401 against Razorpay live.
+- `server/_checkout-probe-http.cjs` / `server/_checkout-probe-live.cjs` — thin HTTP probes of `https://leadbridge-zy4o.onrender.com/health/razorpay` and `/health/integrations`.
+- `health.json` — snapshot of `/health` state at handoff time.
 
-### P1 — this week (money loop)
-- [ ] **Payment loop test** — `sales/payment-loop-test.md`: trial → GROWTH upgrade → real pay → webhook → invoice PDF shows GSTIN + GS TECHNO → cancel → refund → erase test account. *Owner: Sarvesh (Codebuff on-call)*
-- [ ] **MessageBird SMS number** (runbook Step 4): buy number → callback to `/api/v1/webhooks/sms/incoming-messagebird` → `FORWARDING_SMS_NUMBER` env → test lead. *Owner: Sarvesh*
-- [ ] **IMAP email forwarding** (Step 5): Gmail app-password mailbox → IMAP_* envs → test lead. *Owner: Sarvesh*
-- [ ] **Rebrand renames** (Step 3): rename Render service + Vercel project → give new frontend URL to Codebuff → Codebuff applies staged URL switch (`docs/REBRAND-URL-SWITCH.md`). *Owner: Sarvesh → Codebuff*
-- [ ] **DB backups**: create `db-backups` Supabase bucket + wire `scripts/backup-db.sh` cron (launch-plan 0.6). *Owner: Sarvesh + Codebuff*
+**Status of the Step 2 checklist:**
+- 2a (Render secret) — **you do this in the dashboard.** Confirm `RAZORPAY_WEBHOOK_SECRET` is set on Render → leadbridge-api → Environment. Default from this repo's `.env`: `8e994f4cb5677d2097ea3dfe66c29b3c47d2637c5d66025f`.
+- 2b (dashboard webhook) — **you do this.** Razorpay dashboard → Settings → Webhooks → Add Webhook. URL `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`, events: `subscription.charged`, `subscription.cancelled`, `subscription.pending`, `payment.failed`, `invoice.paid`. Secret must match the Render value.
+- 2c (send-test-webhook) — run from the repo root once the Render secret is set: `RAZORPAY_WEBHOOK_SECRET=<value> node scripts/send-test-webhook.cjs` → expect HTTP 200. Then `... node scripts/send-test-webhook.cjs subscription.cancelled --bad-signature` → expect HTTP 401.
+- 2d (route handles all 5 events) — already implemented in `server/src/routes/webhooks/razorpay.ts`; verified by the test suite (190 passed / 8 skipped, `tsc --noEmit` clean).
 
-### P2 — next week (sales weapons)
-- [ ] **Record demo call** → side-by-side asset vs Vyora (download recording + transcript). *Owner: Sarvesh*
-- [x] **Entry-tier pricing draft DONE** (`sales/entry-tier-pricing.md`, commit `df3b1e2`) — ₹2,499 wallet @ ₹160/call, 87–91% margin. **AWAITING SARVESH GO** → Codebuff builds Razorpay one-time flow + credit expiry + pricing page. *Owner: Sarvesh decides*
-- [x] **TRAI compliance guide page** ✅ DONE + LIVE VERIFIED (2026-10-22): `/compliance/trai` live at the Vercel frontend (HTTP 200), linked in landing footer under Legal as "TRAI Calling Guide". Covers TCCCPR 2018 + Feb 2025 amendment (140-series promo / 1600 series transactional, 9AM–9PM window, AI disclosure, consent basis, DLT for bulk), broker 5-point self-check, not-legal-advice disclaimer, CTA. Rule claims mirror `server/src/services/call-compliance.ts` behaviour. (Note: an earlier session had already shipped it to origin/main — a same-day duplicate build was correctly discarded on rebase.) *Owner: Codebuff*
-- [ ] **WhatsApp leftovers**: display name + daily limits in WhatsApp Manager; SIM-side registration of +91 72088 55916. *Owner: Sarvesh*
-
-### P3 — soft launch (the real launch)
-- [ ] **Onboard 2–3 brokers** from `outreach/demo-hitlist.md` — watch every call/WhatsApp/invoice 2–4 weeks. *Owner: Sarvesh*
-- [ ] **1 real testimonial** → replace "onboarding" framing on landing.
-- [ ] **Lawyer review** of `sales/territory-exclusivity-agreement.md`.
-
-### Backlog / known risks
-- DLT registration + DND scrubbing for PROMOTIONAL campaigns (needs Omnidim RTM/DLT answer) — **the one open TRAI item**
-- Gmail SMTP for invoices → move to proper transactional email (Loops/SES researched, not wired)
-- PRO plan margin: re-tune `PRO_MONTHLY_CALL_CAP` after real call-duration data (Phase 4.2)
+**Known caveat (documented in the checklist, not a bug right now):** the webhook handler re-serializes the parsed body with `JSON.stringify(request.body)` before computing the HMAC, instead of hashing the raw bytes. That matches Razorpay's compact JSON exactly, so it works for real deliveries today. If a real delivery ever 401s with a confirmed-matching secret, that's the cause — fix it by capturing the raw body in the `application/json` parser in `server/src/index.ts`.
 
 ---
 
-## 🧭 CONVENTIONS FOR EVERY NEW SESSION
-1. Read this file first. Don't re-derive state from scratch.
-2. Update Completed/Remaining at session end — including "user tasks done today".
-3. Commit + push doc updates so the file survives everywhere.
-4. Never put secrets in this file (env values, tokens, passwords). Facts + URLs only.
+## BLOCKERS — none right now
+
+None. Both LAUNCH and STARTER should now reach a Razorpay payment page. GROWTH and PRO were always working.
+
+---
+
+## TODO — verify (not code)
+
+Do this from the dashboard, not from code:
+
+- [ ] **Launch checkout** — dashboard → Billing → click Upgrade on Launch → Razorpay sheet opens (₹7,999/mo). No 500, no "manual payment".
+- [ ] **Starter checkout** — dashboard → Billing → click Upgrade on Starter → Razorpay sheet opens (₹18,000/mo), first charge deferred 30 days.
+- [ ] If either still fails: **Render → leadbridge-api → Logs**, search `Razorpay subscription failed`, paste the exact line — it contains the literal Razorpay rejection reason, and the fix is one payload tweak.
+
+---
+
+## TODO — runbook remaining (not started)
+
+From `docs/GO-LIVE-RUNBOOK.md`:
+
+- [ ] **Step 4 — SMS forwarding:** buy MessageBird number → verify → set callback to `/api/v1/webhooks/sms/incoming-messagebird` → add `FORWARDING_SMS_NUMBER` in Render → test SMS creates a lead → resend to check dedupe. (Currently: `sms_forwarding.configured: false`, `missingVars: ["FORWARDING_SMS_NUMBER"]`.)
+- [ ] **Step 5 — IMAP email forwarding:** Gmail app password → set `IMAP_*` env → forward a portal enquiry → lead in ~2 min. (Currently: `email_forwarding.configured: false`.)
+- [ ] **Step 6 — Facebook Lead Ads:** create Business app → webhook `/api/v1/webhooks/facebook` + verify token → subscribe to `leadgen` event → test lead arrives.
+- [ ] **Step 7 — WhatsApp Business API (real):** WhatsApp Cloud + phone number → `/api/v1/webhooks/whatsapp` → test inbound message creates a lead.
+- [ ] **Step 8 — Razorpay webhook:** create webhook in Razorpay dashboard → `POST /api/v1/webhooks/razorpay` → events: `subscription.charged`, `subscription.cancelled`, `subscription.pending`, `payment.failed`, `invoice.paid` → test with Razorpay CLI or dashboard "Test webhook".
+- [ ] **Step 9 — Invoice PDFs:** confirm `/invoices/:filename` serves PDFs with signed-URL or Bearer auth; confirm GSTIN + "GS TECHNO" appears on the generated invoice.
+- [ ] **Step 10 — Money loop test (`sales/payment-loop-test.md`):** trial → upgrade → real pay → webhook → invoice PDF shows GSTIN + GS TECHNO → cancel → refund → DPDP erase test account. (The ₹5 loop: cancel stale "Created" subs → pay on a checkout → verify ACTIVE + GSTIN invoice → cancel sub immediately → refund → erase.)
+- [ ] **Step 11 — Rebrand:** rename Render `leadbridge-api` → `converza-api`; rename Vercel `leadbridge-seven` → `converza`; update `FORWARDING_EMAIL` sub-addresses if used; record new URL in `docs/REBRAND-URL-SWITCH.md`.
+- [ ] **Step 12 — Demo call:** side-by-side demo call vs Vyora.
+- [ ] **Step 13 — Onboard 2–3 brokers** (`outreach/demo-hitlist.md`) → 1 testimonial + lawyer review of exclusivity agreement.
+- [ ] **Backlog (defer until real data):** DLT/DND for promotional campaigns, Gmail SMTP → transactional email, PRO cap re-tune after real call-duration data.
+
+---
+
+## Context for the AI agent
+
+- Project: Converza (was LeadBridge) — AI sales-call platform for Indian real-estate brokers.
+- Stack: Fastify backend (server/) + Next.js frontend (frontend/) + Prisma + PostgreSQL (Supabase) + Redis (Render free tier, available). Voice AI via Omnidimension. Payments via Razorpay. SMS via MessageBird. WhatsApp via Cloud API. Email via Nodemailer/SMTP.
+- Deploy: Render (`leadbridge-api`) hosts the API; Vercel (`leadbridge-seven`) hosts the frontend. Repo root has `render.yaml`.
+- Env vars for Razorpay (all set on Render, confirmed via `/health/integrations`): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_PLAN_LAUNCH`, `RAZORPAY_PLAN_STARTER`, `RAZORPAY_PLAN_GROWTH`, `RAZORPAY_PLAN_PRO`. Plus `RAZORPAY_WEBHOOK_SECRET` (set — used to verify incoming webhooks).
+- Plan pricing (from `docs/plan-margins.md`): Launch ₹7,999/mo (50 calls), Starter ₹18,000/mo (150 calls), Growth ₹35,000/mo (300 calls), Pro ₹60,000/mo (2,000 calls). GST 18% on all. Launch and Starter have a 30-day trial by default (expressed as a future `start_at` to Razorpay, not as `trial_period_days`).
+- Razorpay plan IDs on Render: `plan_...` values set for all four tiers. Do NOT use `node scripts/setup-razorpay.cjs` locally — the local keys are stale (401). Create/verify plans in the Razorpay dashboard if ever needed.
+- The local machine cannot hit the live Razorpay API (401). All Razorpay testing must happen on Render or via the dashboard.

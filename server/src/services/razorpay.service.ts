@@ -72,10 +72,17 @@ export async function createSubscription(params: {
     //
     // A plan that carries its OWN trial already defers the first charge, and
     // start_at is invalid alongside it, so we omit start_at in that case.
+    // Razorpay rejects start_at <= now. Even with trialDays === 0 we must give
+    // Razorpay a timestamp strictly in the future. Floor-then-add-10 keeps it
+    // future-proof against clock skew between our server and Razorpay's servers,
+    // and is effectively instantaneous for the user (checkout → sheet takes longer
+    // than this). This is what fixes the Launch "start_at cannot be lesser than
+    // the current time" rejection surfaced by the ₹5 test.
+    const floorNow = Math.floor(Date.now() / 1000);
+    const futureNow = floorNow + 10;
     const startAt = planHasTrial
       ? null
-      : Math.floor(Date.now() / 1000) +
-        (params.trialDays && params.trialDays > 0 ? params.trialDays * 86400 : 0);
+      : futureNow + (params.trialDays && params.trialDays > 0 ? params.trialDays * 86400 : 0);
 
     const response = await razorpayApi.post("/subscriptions", {
       plan_id: params.planId,
