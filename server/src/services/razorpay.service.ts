@@ -59,17 +59,29 @@ export async function createSubscription(params: {
     }
     const planHasTrial = planTrialDays > 0;
 
+    // Razorpay's POST /subscriptions has NO `trial_period_days` parameter — the
+    // documented request body is plan_id, total_count, quantity, customer_notify,
+    // start_at, expire_by, addons, notes, offer_id. The only supported way to give
+    // a free trial is a FUTURE start_at (docs "Create Subscriptions": "you can add
+    // a trial period by passing a future start date in the start-at parameter").
+    //
+    // Sending trial_period_days is what broke every STARTER checkout: STARTER is
+    // the only tier that requests a trial (trialDays = TRIAL_DAYS), so it was the
+    // only tier Razorpay rejected — the checkout then degraded to "payment
+    // required manually" while GROWTH/PRO/LAUNCH (trialDays 0) went through.
+    //
+    // A plan that carries its OWN trial already defers the first charge, and
+    // start_at is invalid alongside it, so we omit start_at in that case.
+    const startAt = planHasTrial
+      ? null
+      : Math.floor(Date.now() / 1000) +
+        (params.trialDays && params.trialDays > 0 ? params.trialDays * 86400 : 0);
+
     const response = await razorpayApi.post("/subscriptions", {
       plan_id: params.planId,
       customer_notify: 1,
       total_count: params.totalCount,
-      // start_at is required ONLY for plans without a trial — with a plan-level
-      // trial, the subscription starts at the trial's end and start_at is invalid.
-      ...(!planHasTrial ? { start_at: Math.floor(Date.now() / 1000) } : {}),
-      // Send trial_period_days only when the plan has none and a trial was requested.
-      ...(!planHasTrial && params.trialDays && params.trialDays > 0
-        ? { trial_period_days: params.trialDays }
-        : {}),
+      ...(startAt !== null ? { start_at: startAt } : {}),
       notes: {
         customer_email: params.customerEmail,
         customer_phone: params.customerPhone,
