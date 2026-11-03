@@ -37,6 +37,10 @@ const envSchema = z.object({
   // Omnidimension — AI Voice Agent Platform
   // Required ONLY when DEMO_MODE=false
   OMNIDIM_API_KEY: z.string().default(""),
+  // V2 (T7): platform low-credit auto-pause thresholds (minutes).
+  // 0 disables auto-pause entirely (call workers then hard-stop per call).
+  PLATFORM_PAUSE_MINUTES: z.coerce.number().int().default(0),
+  PLATFORM_PAUSE_RESUME_MINUTES: z.coerce.number().int().default(30),
   OMNIDIM_BASE_URL: z.string().default("https://backend.omnidim.io/api/v1"),
 
   // Default ElevenLabs voice ID for AI agents (Rachel)

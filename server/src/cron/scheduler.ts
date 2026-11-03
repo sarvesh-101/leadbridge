@@ -28,9 +28,22 @@ import { runIndiaMartPull } from "./indiamart-pull.cron";
 import { runImapEmailPull } from "./email-imap.cron";
 import { runUnpaidActivationSweep } from "./unpaid-activation";
 import { unstickStaleCalls } from "./stale-calls";
+import { runPlatformCreditMonitor } from "./platform-credit-monitor";
 import { runWithCronLock } from "../utils/cron-lock";
 
 export function registerCronJobs() {
+  // --- Platform Low-Credit Monitor (V2 T7) -- every 30 minutes ---
+  cron.schedule("*/30 * * * *", async () => {
+    await runWithCronLock("platform-credit-monitor", 1200, async () => {
+      try {
+        await runPlatformCreditMonitor();
+      } catch (error: any) {
+        logger.error({ err: error.message }, "Cron: platform credit monitor failed");
+      }
+    });
+  });
+
+
   logger.info("Registering cron jobs...");
 
   // ─── No-Show Detection — Every 15 minutes ──────────────────

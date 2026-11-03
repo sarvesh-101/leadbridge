@@ -14,7 +14,7 @@ import {
   checkCreditHealth,
   getBrokerCostAnalysis,
   getOrCreateCurrentCredit,
-} from "../../services/credit-manager.service";
+  setPlatformDispatchPaused } from "../../services/credit-manager.service";
 import { purchaseCredits } from "../../services/omnidimension.service";
 
 export default async function adminCreditRoutes(fastify: FastifyInstance) {
@@ -107,6 +107,10 @@ export default async function adminCreditRoutes(fastify: FastifyInstance) {
   }>, reply: FastifyReply) => {
     try {
       const { minutes, totalCost, description } = request.body;
+
+      // V2 (T7): a real recharge resumes dispatch (defensive clear -- the
+      // monitor auto-clears too, but only every 30 min).
+      await setPlatformDispatchPaused(fastify.prisma, false).catch(() => {});
 
       const updated = await topUpCredits(fastify.prisma, {
         minutes,

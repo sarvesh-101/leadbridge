@@ -146,8 +146,12 @@ const callWorker = new Worker<CallJob>(
             leadName: lead.name,
             message: `Call could not be dispatched: ${creditCheck.reason}. Please contact support.`,
           },
-        });
-        return { skipped: true, reason: creditCheck.reason };
+        }).catch(() => {});
+        // V2 (T7): never let low platform credits silently kill a lead --
+        // the job waits 2h and retries; once the admin recharges, it moves.
+        const RETRY_MS = 2 * 60 * 60 * 1000;
+        await enqueueCall({ leadId, clientId, callType, attempt }, RETRY_MS);
+        return { skipped: true, reason: `${creditCheck.reason} (re-queued +2h)` };
       }
     }
 

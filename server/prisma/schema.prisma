@@ -536,6 +536,10 @@ model PlatformCredit {
   billingMonth   String   @default("")  // e.g. "2026-07"
   lastRechargedAt DateTime?
 
+  // V2 (T7): platform-level pause — set by the low-credit monitor, cleared
+  // on recharge. When true, the call worker re-queues instead of dispatching.
+  dispatchPaused Boolean @default(false)
+
   // Low credit alert threshold (percentage)
   alertThresholdPercent Int @default(20)
   lastAlertSentAt        DateTime?

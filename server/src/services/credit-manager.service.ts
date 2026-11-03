@@ -54,14 +54,36 @@ export async function getOrCreateCurrentCredit(prisma: PrismaClient) {
 }
 
 /**
+ * V2 (T7): hard pause switch for platform dispatch. Set by the low-credit
+ * monitor; cleared automatically by the same monitor after recharge (and
+ * defensively by the admin top-up endpoint).
+ */
+export async function setPlatformDispatchPaused(
+  prisma: PrismaClient,
+  paused: boolean
+): Promise<void> {
+  const credit = await getOrCreateCurrentCredit(prisma);
+  if (credit.dispatchPaused === paused) return;
+  await prisma.platformCredit.update({
+    where: { id: credit.id },
+    data: { dispatchPaused: paused },
+  });
+  logger[paused ? "warn" : "info"](
+    { minutesRemaining: credit.totalMinutesPurchased - credit.minutesUsed },
+    paused ? "PLATFORM DISPATCH PAUSED — low credits" : "PLATFORM DISPATCH RESUMED"
+  );
+}
+
+/**
  * Check if the platform has enough credits to dispatch a call.
- * Returns { canProceed: boolean, reason?: string }
+ * Returns { canProceed: boolean, reason?: string, paused?: boolean }
  */
 export async function canDispatchCall(prisma: PrismaClient): Promise<{
   canProceed: boolean;
   reason?: string;
   minutesRemaining?: number;
   minutesAvailable?: number;
+  paused?: boolean;
 }> {
   const credit = await getOrCreateCurrentCredit(prisma);
 
@@ -76,6 +98,17 @@ export async function canDispatchCall(prisma: PrismaClient): Promise<{
 
   const minutesRemaining = credit.totalMinutesPurchased - credit.minutesUsed;
   const estimatedCallMinutes = AVG_CALL_MINUTES;
+
+  // V2 (T7): monitor-driven batch pause — leads wait instead of dying.
+  if (credit.dispatchPaused) {
+    return {
+      canProceed: false,
+      paused: true,
+      reason: "Platform dispatch temporarily paused (low credits) — calls re-queue automatically after recharge",
+      minutesRemaining,
+      minutesAvailable: credit.totalMinutesPurchased,
+    };
+  }
 
   if (minutesRemaining < estimatedCallMinutes) {
     return {
