@@ -13,6 +13,7 @@
 
 import { PrismaClient, Plan } from "@prisma/client";
 import { config } from "../config";
+import { monthlyCharged, RETIRED_PLANS } from "../config/plans";
 
 /**
  * Feature-to-plan mapping.
@@ -20,8 +21,10 @@ import { config } from "../config";
  * Features available to all plans are not listed here.
  */
 export const FEATURE_PLANS: Record<string, Plan[]> = {
-  // Multi-broker / team
-  team: ["GROWTH", "PRO"],
+  // Multi-broker / team — V2 rule (§1.2): EVERY paid plan gets team access,
+  // capped by the plan's user count in PLAN_DEFINITIONS.users. This removes
+  // the old Launch(2)/Starter(5)-users-but-gated conflict found in discovery.
+  team: ["LAUNCH", "STARTER", "GROWTH", "PRO"],
 
   // AI voice agent configuration
   voice: ["GROWTH", "PRO"],
@@ -44,12 +47,15 @@ export const FEATURE_PLANS: Record<string, Plan[]> = {
 
 /**
  * Human-readable plan display names.
+ * T1: charged figures come from config/plans.ts (incl. GST display) —
+ * never hardcode rupee amounts here again.
  */
+const inr = (n: number) => n.toLocaleString("en-IN");
 export const PLAN_DISPLAY_NAMES: Record<string, string> = {
-  LAUNCH: "Launch (₹8K/mo)",
-  STARTER: "Starter (₹18K/mo)",
-  GROWTH: "Growth (₹35K/mo)",
-  PRO: "Pro (₹60K/mo)",
+  LAUNCH: `Launch (legacy — ₹${inr(RETIRED_PLANS.LAUNCH.legacyMonthlyCharged)}/mo)`,
+  STARTER: `Starter (₹${inr(monthlyCharged("STARTER"))}/mo incl. GST)`,
+  GROWTH: `Growth (₹${inr(monthlyCharged("GROWTH"))}/mo incl. GST)`,
+  PRO: `Pro (₹${inr(monthlyCharged("PRO"))}/mo incl. GST)`,
 };
 
 /**
