@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import Fastify from "fastify";
+import Fastify, { FastifyRequest } from "fastify";
 import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
 import multipart from "@fastify/multipart";
@@ -81,6 +81,7 @@ import customerRoutes from "./routes/customer";
 import metricsRoutes from "./routes/metrics";
 import demoRoutes from "./routes/demo";
 import publicRoutes from "./routes/public";
+import publicDemoRoutes from "./routes/public-demo";
 // ─── Cron Jobs ────────────────────────────────────────────────
 import { registerCronJobs } from "./cron/scheduler";
 
@@ -133,8 +134,16 @@ export async function buildServer() {
   // carries no payload (FST_ERR_CTP_EMPTY_JSON_BODY → 400 "Bad Request") before
   // any route runs, which broke every bodyless POST from clients that always set
   // the header (e.g. POST /voice/test-call). Treat an empty payload as {}.
-  server.addContentTypeParser("application/json", { parseAs: "string" }, (_request, body, done) => {
-    const raw = typeof body === "string" ? body.trim() : "";
+  server.addContentTypeParser("application/json", { parseAs: "string" }, (request, body, done) => {
+    const rawBody = typeof body === "string" ? body : "";
+    // Keep the exact bytes we were sent. Webhook providers (Razorpay) sign the
+    // raw request body, so re-serializing the parsed object with
+    // JSON.stringify() can only verify by luck: any difference in key order,
+    // whitespace or number formatting changes the HMAC input. The handler reads
+    // request.rawBody and hashes that instead. Stored UNTRIMMED — trimming would
+    // change the signed bytes.
+    (request as FastifyRequest & { rawBody?: string }).rawBody = rawBody;
+    const raw = rawBody.trim();
     if (!raw) return done(null, {});
     try {
       done(null, JSON.parse(raw));
@@ -379,6 +388,8 @@ export async function buildServer() {
 
   // Public landing-page stats (no auth — aggregate numbers only)
   await server.register(publicRoutes, { prefix: apiPrefix });
+  // V2 (T6): public "call me now" demo funnel (OTP + real scheduled call).
+  await server.register(publicDemoRoutes, { prefix: apiPrefix });
 
   // Admin routes
   await server.register(adminDashboardRoutes, { prefix: apiPrefix });

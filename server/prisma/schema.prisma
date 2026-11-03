@@ -376,6 +376,36 @@ model Lead {
   paymentLinks         PaymentLink[]
 }
 
+// V2 (T6): public "call me now" demo funnel — request → OTP → scheduled real call.
+model DemoRequest {
+  id          String @id @default(cuid())
+
+  phone       String
+  name        String
+
+  // OTP
+  otpHash      String?
+  otpExpiresAt DateTime?
+  otpAttempts  Int    @default(0) // failed verify tries; block after 5
+  verified     Boolean @default(false)
+
+  // Lifecycle
+  status      String  @default("PENDING") // PENDING | VERIFIED_QUEUED | RUNNING | COMPLETED | EXPIRED
+  leadId      String?
+  calledAt    DateTime?
+
+  // Provenance / anti-abuse
+  ip        String? @map("ip_addr")
+  userAgent String?
+  honeypot  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([createdAt])
+}
+
 model Call {
   id       String @id @default(cuid())
   clientId String

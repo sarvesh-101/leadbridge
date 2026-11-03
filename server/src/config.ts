@@ -15,6 +15,10 @@ const envSchema = z.object({
 
   // Demo Mode — run without external APIs for investor demos
   DEMO_MODE: z.string().transform((v) => v === "true").default("false"),
+  // V2 (T6): public "call me now" demo funnel.
+  DEMO_DAILY_CAP: z.coerce.number().int().default(25),
+  DEMO_CLIENT_ID: z.string().optional(),   // client record whose agent receives demo calls
+  DEMO_OTP_REQUIRED: z.string().transform((v) => v === "true").default("true"),
 
   // JWT
   JWT_SECRET: z.string().min(32),
