@@ -29,35 +29,24 @@ const callWorker = new Worker<CallJob>(
       return { skipped: true, reason: `Status ${lead.status} not callable` };
     }
 
-    // ─── WORKING HOURS CHECK ──────────────────────────────────────
-    // Don't call leads outside 8:00 AM - 8:00 PM IST (Asia/Kolkata)
-    // Real estate calls outside these hours create bad customer experience
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // UTC+5:30
-    const istTime = new Date(now.getTime() + istOffset);
-    const currentHourIST = istTime.getUTCHours();
-    // P3 FIX: aligned to the published TRAI window (9 AM–9 PM IST) that the
-    // compliance gate and the /compliance/trai guide page advertise — the old
-    // 8–20 span called prospects BEFORE 9 AM, which our own guide calls out.
-    const WORKING_HOUR_START = 9;  // 9:00 AM IST
-    const WORKING_HOUR_END = 21;   // 9:00 PM IST
+    // ─── WORKING HOURS CHECK (V2 T5) ───────────────────────────────
+    // TRAI/TCCCPR window from config/plans.ts (ALWAYS 09:00–21:00 IST,
+    // never "24/7"). Out-of-window calls re-queue for the next window
+    // start, plus small random jitter so the queue doesn't stampede at 9am.
+    {
+      const { isWithinCallingWindow, nextWindowStart, windowJitterMs } = await import("../utils/call-window");
+      const now = new Date();
+      if (!isWithinCallingWindow(now)) {
+        const target = nextWindowStart(now).getTime();
+        const jitterMs = windowJitterMs();
+        const delayMs = Math.max(0, target - now.getTime()) + jitterMs;
+        job.log(`⏰ Outside calling window (IST) — re-queued for T+${delayMs}ms (incl. ${Math.round(jitterMs / 60000)}m jitter)`);
+        await enqueueCall({
+          leadId, clientId, callType, attempt,
+        }, delayMs);
 
-    if (currentHourIST < WORKING_HOUR_START || currentHourIST >= WORKING_HOUR_END) {
-      // Re-queue the call for next working hour start (8:00 AM IST next day or today)
-      const nextCallTime = new Date(istTime);
-      nextCallTime.setUTCHours(WORKING_HOUR_START, 0, 0, 0);
-      if (currentHourIST >= WORKING_HOUR_END) {
-        // Past end of day — schedule for tomorrow 8:00 AM
-        nextCallTime.setUTCDate(nextCallTime.getUTCDate() + 1);
+        return { skipped: true, reason: `Outside working hours, re-queued for ${delayMs}ms delay` };
       }
-      const delayMs = Math.max(0, nextCallTime.getTime() - now.getTime());
-
-      job.log(`⏰ Outside working hours (${currentHourIST}:00 IST) — re-queuing for ${nextCallTime.toISOString()}`);
-      await enqueueCall({
-        leadId, clientId, callType, attempt,
-      }, delayMs);
-
-      return { skipped: true, reason: `Outside working hours, re-queued for ${delayMs}ms delay` };
     }
 
     if (lead.callAttempts >= lead.maxAttempts) {

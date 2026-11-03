@@ -152,6 +152,9 @@ export const CALL_WINDOW = {
 /** Fair-use ceiling: cumulative ANSWERED minutes per lead per billing month. */
 export const FAIR_USE_MINUTES_PER_LEAD = 8;
 
+/** V2 (T5): minimum wait between lead receipt and the first outbound attempt. */
+export const FIRST_CALL_DELAY_MINUTES = 10;
+
 /** Forward-compatible feature gates consumed by the frontend (T3). */
 export const FEATURE_GATES = {
   teamAccessOnEveryPaidPlan: true,

@@ -212,6 +212,17 @@ export async function enqueueCall(job: CallJob, delayMs?: number): Promise<boole
   const q = getCallQueue();
   const jobId = `call:${job.leadId}:${job.callType}:${job.attempt}`;
 
+  // V2 (T5): a fresh lead never gets dialed instantly — the first
+  // QUALIFICATION attempt waits ≥ 10 min from ingest (config/plans.ts),
+  // regardless of which connector queued it.
+  if (job.callType === "QUALIFICATION" && (job.attempt ?? 1) === 1) {
+    const { firstCallDelayMs } = await import("../utils/call-window");
+    const firstDelay = firstCallDelayMs();
+    if (firstDelay > (delayMs ?? 0)) {
+      delayMs = firstDelay;
+    }
+  }
+
   const ok = await safeAdd(q, jobId, job, delayMs ?? 0);
   if (!ok) {
     logger.error({ job }, "Redis unavailable — storing call job in DB for replay when Redis recovers.");
