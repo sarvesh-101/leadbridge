@@ -70,6 +70,15 @@ const callWorker = new Worker<CallJob>(
       return { skipped: true, reason: "Max attempts reached" };
     }
 
+    // ─── FAIR-USE CAP (V2 §1.2) ─────────────────────────────────────
+    // 8 answered AI-minutes per lead per billing cycle: AI calls stop,
+    // WhatsApp follow-ups keep running. Not a failure — no retry, no spam.
+    if (lead.fairUseCappedAt != null || lead.status === "FAIR_USE_CAP") {
+      job.log("⏱️ Fair-use cap reached — AI call skipped (WhatsApp follow-ups continue)");
+      logger.info({ leadId, clientId }, "Call skipped — fair-use cap reached");
+      return { skipped: true, reason: "Fair-use cap reached" };
+    }
+
     // ─── ACCOUNT STATUS CHECK ────────────────────────────────────
     // Block calls if account is PAST_DUE, CANCELLED, or EXPIRED
     if (client.planStatus !== "TRIAL" && client.planStatus !== "ACTIVE") {
@@ -85,25 +94,26 @@ const callWorker = new Worker<CallJob>(
       return { skipped: true, reason: `Account ${client.planStatus}` };
     }
 
-    // ─── TRIAL TOTAL CALL LIMIT ───────────────────────────────────
-    // Trial accounts get a hard cap on total calls to prevent platform credit drain.
-    // Limit: 50 total calls during entire trial period.
-    const TRIAL_MAX_CALLS = 50;
+    // ─── TRIAL LEAD LIMIT (V2) ─────────────────────────────────────
+    // Trial = 30 days / 50 handled LEADS / 25 ingested per day (config/plans.ts).
+    // Metered on leads handled (a lead with any AI call in the DB), not calls.
     if (client.planStatus === "TRIAL") {
-      const totalTrialCalls = await prisma.call.count({
-        where: { clientId },
+      const { TRIAL } = await import("../config/plans");
+      const TRIAL_MAX_LEADS = TRIAL.maxLeads;
+      const trialLeadsHandled = await prisma.lead.count({
+        where: { clientId, calls: { some: {} } },
       });
-      if (totalTrialCalls >= TRIAL_MAX_CALLS) {
-        job.log(`⛔ Trial call limit reached: ${totalTrialCalls}/${TRIAL_MAX_CALLS}`);
-        logger.warn({ leadId, clientId, totalTrialCalls }, "Call blocked — trial limit reached");
+      if (trialLeadsHandled >= TRIAL_MAX_LEADS) {
+        job.log(`⛔ Trial lead limit reached: ${trialLeadsHandled}/${TRIAL_MAX_LEADS}`);
+        logger.warn({ leadId, clientId, trialLeadsHandled }, "Call blocked — trial limit reached");
         await enqueueNotification({
           recipient: "owner", leadId, clientId, type: "TRIAL_LIMIT_REACHED",
           data: {
             leadName: lead.name,
-            message: `Your trial has used ${totalTrialCalls} of ${TRIAL_MAX_CALLS} AI calls. Subscribe to a plan to continue.`,
+            message: `Your trial has handled ${trialLeadsHandled} of ${TRIAL_MAX_LEADS} leads. Subscribe to a plan to continue.`,
           },
         });
-        return { skipped: true, reason: `Trial limit ${totalTrialCalls}/${TRIAL_MAX_CALLS}` };
+        return { skipped: true, reason: `Trial limit ${trialLeadsHandled}/${TRIAL_MAX_LEADS}` };
       }
     }
 

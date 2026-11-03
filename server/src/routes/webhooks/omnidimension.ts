@@ -166,6 +166,28 @@ export default async function omnidimensionWebhookRoutes(fastify: FastifyInstanc
           data: updateData,
         });
 
+        // ─── V2 (T2): fair-use metering — accumulate ANSWERED seconds ────
+        // 8 answered minutes per lead per cycle; the util also flips the
+        // lead to FAIR_USE_CAP (once) when the ceiling is crossed.
+        if (duration > 0) {
+          const { recordAnsweredSeconds } = await import("../../utils/lead-limits");
+          const gotCapped = await recordAnsweredSeconds(fastify.prisma, lead.id, duration);
+          if (gotCapped) {
+            await enqueueNotification({
+              recipient: "owner",
+              leadId: lead.id,
+              clientId: call.clientId,
+              type: "FAIR_USE_CAP",
+              data: {
+                leadName: lead.name,
+                message: `${lead.name} reached the fair-use limit of answered AI conversation time for this billing period (8 min per lead). AI calls stop for now — WhatsApp follow-ups continue next month.`,
+              },
+            });
+            await emitStatusChange(lead.id, "FAIR_USE_CAP", call.clientId, {});
+            fastify.log.info({ leadId: lead.id }, "Fair-use cap reached — AI calls stopped for this lead");
+          }
+        }
+
         // ─── Track platform cost for this call ──────────────────
         if (!config.DEMO_MODE) {
           const durationMinutes = Math.max(0.5, duration / 60); // Convert seconds to minutes, min 30s

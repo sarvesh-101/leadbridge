@@ -48,6 +48,9 @@ enum LeadStatus {
   REBOOKED
   COLD
   CONVERTED
+  // V2 (T2) — additive lifecycle values:
+  FAIR_USE_CAP
+  QUEUED_WAITING_CREDITS
 }
 
 enum CallType {
@@ -163,6 +166,7 @@ model Client {
   callsLimit      Int @default(500) // Growth plan default (matches PLAN_DEFINITIONS.GROWTH.calls in billing.ts)
   rolloverCalls   Int @default(0)   // Unused calls rolled over from previous months (capped at 3x callsLimit)
   prepaidCalls    Int @default(0)   // Purchased call credits (offline payments) — never expire
+  prepaidLeads    Int @default(0)   // V2 (T2): prepaid overage LEADS credit — never expires, carries over
 
   // FIX Round-2 #6: leads ingested this billing month (vs plan.leads cap)
   // Reset together with callsThisMonth in resetBrokerCycle so usage aligns
@@ -329,6 +333,10 @@ model Lead {
   callAttempts  Int        @default(0)
   maxAttempts   Int        @default(3)
   nextRetryAt   DateTime?
+
+  // V2 (T2) — fair-use metering per lead per billing cycle:
+  answeredSecondsThisCycle Int       @default(0)
+  fairUseCappedAt          DateTime?
 
   // Booking
   bookingId     String?  @unique

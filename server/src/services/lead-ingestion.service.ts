@@ -83,12 +83,9 @@ export async function ingestExternalLead(
   }
 
   // ─── Monthly leads cap ──────────────────────────────────────
-  const { checkMonthlyLeadsCapacity, tryConsumeMonthlyLead } = await import("../utils/lead-limits");
-  const monthly = await checkMonthlyLeadsCapacity(prisma, clientId, client.plan);
-  if (!monthly.canIngest) {
-    logger.warn({ clientId, limit: monthly.limit }, `${logLabel}: monthly lead limit reached`);
-    return { status: "skipped" };
-  }
+  // V2 (T2): the early cap-skip is GONE — duplicates must never consume (or
+  // be blocked by) allowance, so dedup runs FIRST and allowance is consumed
+  // after (plan → prepaid overage → QUEUED_WAITING_CREDITS, never dropped).
 
   // ─── Dedup by external query id (Redis set) ─────────────────
   if (redis && dedupQueryId) {
@@ -122,7 +119,11 @@ export async function ingestExternalLead(
     return { status: "duplicate" };
   }
 
-  const callAllowed = client.plan === "PRO" || client.callsThisMonth < client.callsLimit;
+  // ─── V2 (T2): consume ONE "lead handled" slot ────
+  // Plan allowance first, then prepaid overage credit, else hold.
+  const { consumeLeadAllowance } = await import("../utils/lead-limits");
+  const allowance = await consumeLeadAllowance(prisma, clientId, client.plan);
+  const callAllowed = allowance !== "none";
 
   const created = await prisma.lead.create({
     data: {
@@ -132,13 +133,18 @@ export async function ingestExternalLead(
       email: email || null,
       source,
       portalSource: portalSource || null,
-      status: "PENDING",
+      status: callAllowed ? "PENDING" : "QUEUED_WAITING_CREDITS",
       receivedAt: new Date(),
       rawPayload,
     },
   });
 
-  await tryConsumeMonthlyLead(prisma, clientId, client.plan);
+  if (allowance === "overage") {
+    logger.info(
+      { clientId, leadId: created.id },
+      `${logLabel}: plan allowance used — 1 prepaid lead credit consumed (overage)`
+    );
+  }
 
   // ─── Kick off the AI calling pipeline ───────────────────────
   const { assignLead } = await import("./lead-assignment.service");
@@ -155,14 +161,17 @@ export async function ingestExternalLead(
         data: {
           clientId,
           leadId: created.id,
-          type: "CALL_SKIPPED_LIMIT",
-          message: `New ${portalSource || source} lead (${name}) received — AI call skipped because your monthly call limit is reached. Upgrade to resume AI calls.`,
+          type: "LEADS_CREDIT_EXHAUSTED",
+          message: `New ${portalSource || source} lead (${name}) received — held as QUEUED_WAITING_CREDITS. Your monthly plan leads are used up and no prepaid credit is available. The lead is safe; it starts automatically when you add credit.`,
           status: "sent",
           sentAt: new Date(),
         },
       })
       .catch(() => {});
-    logger.warn({ clientId, leadId: created.id }, `${logLabel}: lead stored but AI call skipped — call limit reached`);
+    logger.warn(
+      { clientId, leadId: created.id },
+      `${logLabel}: lead held as QUEUED_WAITING_CREDITS — no allowance or overage credit left`
+    );
   }
 
   const { emitNewLead } = await import("./websocket.service");
