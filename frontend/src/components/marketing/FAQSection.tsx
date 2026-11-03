@@ -3,6 +3,21 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { PLANS } from "@/lib/plans.autogen";
+
+const faqsTemplate = (payload: typeof PLANS) =>
+  payload.plans
+    .map(
+      (p) =>
+        `${p.name} is ₹${p.monthlyExGst.toLocaleString("en-IN")}/mo (+ 18% GST — ₹${p.monthlyInclGst.toLocaleString(
+          "en-IN"
+        )} incl.) for up to ${p.leadsPerMonth.toLocaleString("en-IN")} leads handled per month with team access for ${p.teamUsers} users`
+    )
+    .join(". ");
+
+const PRICING_FAQ_TEXT =
+  faqsTemplate(PLANS) +
+  ". Every plan includes full AI qualification + site-visit booking, WhatsApp notifications, and follow-up automation. Extra leads are bought as prepaid credit. There's no setup fee.";
 
 const faqs = [
   {
@@ -19,7 +34,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "Launch plan is ₹7,999/mo for 50 AI calls. Starter is ₹18,000/mo for 100 calls. Growth is ₹35,000/mo for 500 calls. Pro is ₹60,000/mo for 2,000 calls. All plans include full qualification, booking, WhatsApp notifications, and follow-up automation. There's no setup fee.",
+    a: PRICING_FAQ_TEXT,
   },
   {
     q: "What languages does the AI speak?",
@@ -51,7 +66,7 @@ const faqs = [
   },
   {
     q: "Do you offer a trial?",
-    a: "We offer a 7-day trial with 50 AI calls included — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If Converza isn't right, just let us know.",
+    a: `We offer a ${PLANS.trial.days}-day trial with up to ${PLANS.trial.maxLeads} leads included (${PLANS.trial.maxLeadsPerDay}/day) — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If Converza isn't right, just let us know.`,
   },
 ];
 

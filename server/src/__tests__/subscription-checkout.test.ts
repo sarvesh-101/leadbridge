@@ -106,7 +106,7 @@ describe("createSubscriptionCheckout (shared checkout — both paths)", () => {
       status: "PENDING",
       amount: PLAN_DEFINITIONS.GROWTH.monthly,
       providerSubscriptionId: "sub_live_123",
-      limits: { users: 15, leads: 3000, calls: 500 },
+      limits: { users: 15, leads: 600, calls: 500 },
       autoRenew: true,
     });
 

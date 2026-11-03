@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowLeft, ArrowRight, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 import Link from "next/link";
 
 const STEPS = [
@@ -298,13 +299,13 @@ function Step5() {
     <div className="space-y-4">
       <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Pricing Plan</h2>
       <p className="text-[14px] text-[#5C6B62]">Select the plan and set call limits.</p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { name: "Launch", price: "₹7,999", calls: "50" },
-          { name: "Starter", price: "₹18,000", calls: "100" },
-          { name: "Growth", price: "₹35,000", calls: "500", popular: true },
-          { name: "Pro", price: "₹60,000", calls: "2,000" },
-        ].map((plan) => (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {PLAN_PAYLOAD.plans.map((plan) => ({
+          name: plan.name,
+          price: `₹${plan.monthlyExGst.toLocaleString("en-IN")}`,
+          leads: plan.leadsPerMonth.toLocaleString("en-IN"),
+          popular: plan.id === "GROWTH",
+        })).map((plan) => (
           <div
             key={plan.name}
             className={cn(
@@ -319,7 +320,7 @@ function Step5() {
             )}
             <h3 className="text-[18px] font-display font-bold text-[#1E2B24] mt-1">{plan.name}</h3>
             <p className="text-[24px] font-display font-bold text-[#1E2B24] mt-2">{plan.price}<span className="text-[12px] text-[#5C6B62]">/mo</span></p>
-            <p className="text-[13px] text-[#5C6B62] mt-1">{plan.calls} AI calls</p>
+            <p className="text-[13px] text-[#5C6B62] mt-1">Up to {plan.leads} leads/mo</p>
           </div>
         ))}
       </div>
@@ -337,7 +338,10 @@ function Step6() {
           ["Business", "Sharma Realty"],
           ["Owner", "Rajesh Sharma"],
           ["City", "Mumbai - Andheri West"],
-          ["Plan", "Growth (₹35,000/mo)"],
+          ["Plan", 
+            `Growth (₹${(
+              PLAN_PAYLOAD.plans.find((p) => p.id === "GROWTH")?.monthlyInclGst ?? 0
+            ).toLocaleString("en-IN")}/mo incl. GST)`],
           ["Script", "4 lines configured"],
           ["Status", "Active immediately"],
         ].map(([label, value]) => (

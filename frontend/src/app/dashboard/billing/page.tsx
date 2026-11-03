@@ -12,78 +12,50 @@ import {
   Bell, Ban,
 } from "lucide-react";
 import Link from "next/link";
+import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 
-const PLANS = [
-  {
-    id: "LAUNCH",
-    name: "Launch",
-    price: "₹7,999",
-    period: "/month",
-    description: "Entry tier — test AI calling on live leads",
+// T1 (V2): derive plan cards from the single-source config payload
+// (server/src/config/plans.ts → generated lib/plans.autogen.ts).
+const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+const payloadPlan = (id: string) =>
+  PLAN_PAYLOAD.plans.find((p) => p.id === id) as (typeof PLAN_PAYLOAD.plans)[number] | undefined;
+
+const PLANS = ["STARTER", "GROWTH", "PRO"]
+  .map(payloadPlan)
+  .filter(Boolean)
+  .map((p) => ({
+    id: p!.id,
+    name: p!.name,
+    price: inr(p!.monthlyExGst),
+    period: "/month + GST",
+    description:
+      p!.id === "STARTER"
+        ? "For solo brokers starting with AI-called leads"
+        : p!.id === "GROWTH"
+        ? "For growing brokerages — most popular"
+        : "For high-volume agencies", 
     features: [
-      "50 AI calls/month",
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "3-day follow-up automation",
-      "Shared calling number",
-      "WhatsApp support",
-    ],
-    highlighted: false,
-    color: "from-teal-500 to-teal-600",
-  },
-  {
-    id: "STARTER",
-    name: "Starter",
-    price: "₹18,000",
-    period: "/month",
-    description: "Full qualification + booking automation",
-    features: [
-      "100 AI calls/month",
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "3-day follow-up automation",
-      "Basic analytics",
-    ],
-    highlighted: false,
-    color: "from-blue-500 to-blue-600",
-  },
-  {
-    id: "GROWTH",
-    name: "Growth",
-    price: "₹35,000",
-    period: "/month",
-    description: "For growing brokerages with dedicated number",
-    features: [
-      "500 AI calls/month",
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "3-day follow-up automation",
-      "Dedicated calling number",
-      "Priority support",
-      "Advanced analytics",
-    ],
-    highlighted: true,
-    color: "from-[#1B4332] to-[#2D6A4F]",
-  },
-  {
-    id: "PRO",
-    name: "Pro",
-    price: "₹60,000",
-    period: "/month",
-    description: "For high-volume agencies needing large call capacity",
-    features: [
-      "2,000 AI calls/month",
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "7-day follow-up automation",
-      "Dedicated calling number",
-      "White-label option",
-      "Dedicated account manager",
-    ],
-    highlighted: false,
-    color: "from-purple-500 to-purple-600",
-  },
-] as const;
+      `Up to ${p!.leadsPerMonth.toLocaleString("en-IN")} leads handled per month`,
+      `Team access for ${p!.teamUsers} users`,
+      "Full AI calling + site-visit booking",
+      "WhatsApp summary after every call",
+      `${p!.followUpDays}-day follow-up sequence`,
+      p!.dedicatedNumber ? "Dedicated calling number" : "Shared calling number",
+      p!.id === "GROWTH" ? "Priority support" : [],
+      p!.id === "PRO"
+        ? ["White-label option", "Dedicated account manager"]
+        : p!.id === "STARTER"
+        ? ["WhatsApp support"]
+        : [],
+    ].flat(),
+    highlighted: p!.id === "GROWTH",
+    color:
+      p!.id === "STARTER"
+        ? "from-blue-500 to-blue-600"
+        : p!.id === "GROWTH"
+        ? "from-[#1B4332] to-[#2D6A4F]"
+        : "from-purple-500 to-purple-600",
+  }));
 
 // ─── Usage Alert Config ──────────────────────────────────────
 const ALERT_CONFIG: Record<number, { label: string; color: string; bg: string; icon: React.ReactNode }> = {

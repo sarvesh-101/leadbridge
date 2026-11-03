@@ -2,6 +2,12 @@ import { BillingCycle, Plan, PlanStatus, Subscription } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { config } from "../config";
 import {
+  PLANS,
+  RETIRED_PLANS,
+  monthlyCharged,
+  annualCharged,
+} from "../config/plans";
+import {
   createSubscription,
   getPlanIds,
   cancelSubscription as cancelRazorpaySub,
@@ -28,13 +34,44 @@ export interface PlanDefinition {
 }
 
 export const PLAN_DEFINITIONS: Record<string, PlanDefinition> = {
-  // LAUNCH = entry tier (2026-09-07). Closes the ₹18K → ₹0 cliff: at ₹160/call it is
-  // deliberately the WORST per-call rate in the ladder — designed as a stepping stone
-  // to GROWTH (₹70/call), never a destination. See docs/plan-margins.md § LAUNCH.
-  LAUNCH: { name: "Launch", monthly: 7999, yearly: 79990, users: 2, leads: 200, calls: 50 },
-  STARTER: { name: "Starter", monthly: 18000, yearly: 180000, users: 5, leads: 500, calls: 100 },
-  GROWTH: { name: "Growth", monthly: 35000, yearly: 350000, users: 15, leads: 3000, calls: 500 },
-  PRO: { name: "Pro", monthly: 60000, yearly: 600000, users: 50, leads: 50000, calls: 999999 },
+  // LAUNCH: RETIRED in V2. Kept only so existing Launch subscribers keep the
+  // exact legacy figures that match the Razorpay plan already in the
+  // dashboard — T2 maps these clients to STARTER (additive migration).
+  LAUNCH: {
+    name: "Launch",
+    monthly: RETIRED_PLANS.LAUNCH.legacyMonthlyCharged,
+    yearly: RETIRED_PLANS.LAUNCH.legacyYearlyCharged,
+    users: RETIRED_PLANS.LAUNCH.legacyUsers,
+    leads: RETIRED_PLANS.LAUNCH.legacyLeadsPerMonth,
+    calls: RETIRED_PLANS.LAUNCH.legacyCalls,
+  },
+  // V2 (T1): charged amounts are the GST-INCLUSIVE figures derived from the
+  // ex-GST display prices in config/plans.ts — change a price THERE and
+  // server limits, invoices and the website all follow (see discovery §4).
+  STARTER: {
+    name: "Starter",
+    monthly: monthlyCharged("STARTER"),
+    yearly: annualCharged("STARTER"),
+    users: PLANS.STARTER.teamUsers,
+    leads: PLANS.STARTER.leadsPerMonth,
+    calls: 100, // legacy call-quota bookkeeping — replaced by leads metering in T2
+  },
+  GROWTH: {
+    name: "Growth",
+    monthly: monthlyCharged("GROWTH"),
+    yearly: annualCharged("GROWTH"),
+    users: PLANS.GROWTH.teamUsers,
+    leads: PLANS.GROWTH.leadsPerMonth,
+    calls: 500, // legacy call-quota bookkeeping — replaced by leads metering in T2
+  },
+  PRO: {
+    name: "Pro",
+    monthly: monthlyCharged("PRO"),
+    yearly: annualCharged("PRO"),
+    users: PLANS.PRO.teamUsers,
+    leads: PLANS.PRO.leadsPerMonth,
+    calls: 999999, // legacy call-quota bookkeeping — replaced by leads metering in T2
+  },
 };
 
 /**

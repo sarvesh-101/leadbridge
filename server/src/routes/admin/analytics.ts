@@ -5,6 +5,7 @@
  * Provides super admin with system-wide metrics, growth trends, and health checks.
  */
 import { FastifyInstance, FastifyRequest } from "fastify";
+import { PLAN_DEFINITIONS } from "../../services/subscription.service";
 
 export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
   // All routes require admin auth
@@ -48,13 +49,11 @@ export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
       fastify.prisma.client.count({ where: { createdAt: { gte: monthStart } } }),
     ]);
 
-    // Calculate MRR from active client plans — uses groupBy for efficiency
-    const planPrices: Record<string, number> = {
-      LAUNCH: 7999,
-      STARTER: 18000,
-      GROWTH: 35000,
-      PRO: 60000,
-    };
+    // Calculate MRR from active client plans — uses groupBy for efficiency.
+    // T1: derives from PLAN_DEFINITIONS (config/plans.ts) instead of literals.
+    const planPrices: Record<string, number> = Object.fromEntries(
+      Object.entries(PLAN_DEFINITIONS).map(([tier, def]) => [tier, def.monthly])
+    );
 
     const planCounts = await fastify.prisma.client.groupBy({
       by: ["plan"],

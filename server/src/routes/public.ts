@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { buildPlansPayload } from "../config/plans";
 
 /**
  * Public (no-auth) endpoints for the marketing landing page.
@@ -8,6 +9,16 @@ import { FastifyInstance } from "fastify";
  * city/zone names are exposed — never broker names or lead data.
  */
 export default async function publicRoutes(fastify: FastifyInstance) {
+  // GET /public/plans — the single-source plans payload for the website.
+  // One place to change prices (config/plans.ts) → server, invoices AND the
+  // marketing site all follow. Static data → cache longer than /public/landing.
+  fastify.get("/public/plans", {
+    config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
+  }, async (_request, reply) => {
+    reply.header("Cache-Control", "public, max-age=300");
+    return buildPlansPayload();
+  });
+
   // GET /public/landing — real stats for the landing page
   // Slow-changing public data → cache for 60s to reduce DB pressure.
   fastify.get("/public/landing", {

@@ -1,7 +1,13 @@
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import { sendEmail } from "../services/email.service";
+import { PLAN_DEFINITIONS } from "../services/subscription.service";
 import { prisma } from "../utils/prisma-shared";
+
+const formatINRRupees = (n: number) => n.toLocaleString("en-IN");
+const GROWTH_LABEL = `Growth plan (₹${formatINRRupees(
+  PLAN_DEFINITIONS.GROWTH.monthly
+)}/month, GST included)`;
 
 /**
  * Trial Expiry Checker — runs daily at 8:00 AM.
@@ -49,8 +55,10 @@ Your Converza trial period has ended.
 
 To continue receiving and managing AI-called leads, please upgrade to a paid plan.
 
-Here's what you get with Growth plan (₹35,000/month):
-• 500 AI calls per month
+Here's what you get with ${GROWTH_LABEL}:
+• Up to ${formatINRRupees(
+            PLAN_DEFINITIONS.GROWTH.leads
+          )} leads handled per month
 • WhatsApp notifications
 • Territory exclusivity
 • Daily follow-up sequences

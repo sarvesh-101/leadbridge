@@ -28,10 +28,10 @@ describe("Monthly Leads Limit helper (FIX Round-2 #6)", () => {
 
   describe("getMonthlyLeadsLimit", () => {
     it("returns the plan's leads allowance from PLAN_DEFINITIONS", () => {
-      // LAUNCH leads: 200, STARTER leads: 500, PRO leads: 50000 (subscription.service.ts)
+      // LAUNCH leads: 200 (legacy), STARTER leads: 200, PRO leads: 1200 (config/plans.ts via PLAN_DEFINITIONS)
       expect(getMonthlyLeadsLimit("LAUNCH")).toBe(200);
-      expect(getMonthlyLeadsLimit("STARTER")).toBe(500);
-      expect(getMonthlyLeadsLimit("PRO")).toBe(50000);
+      expect(getMonthlyLeadsLimit("STARTER")).toBe(200);
+      expect(getMonthlyLeadsLimit("PRO")).toBe(1200);
     });
 
     it("falls back to GROWTH for unknown/trial plans (never NaN)", () => {
@@ -45,19 +45,19 @@ describe("Monthly Leads Limit helper (FIX Round-2 #6)", () => {
     it("returns canIngest=true when under the cap", async () => {
       (prisma.client.findUnique as any).mockResolvedValue({ leadsThisMonth: 10 });
       const result = await checkMonthlyLeadsCapacity(prisma, "client-1", "STARTER");
-      expect(result.limit).toBe(500);
+      expect(result.limit).toBe(200);
       expect(result.used).toBe(10);
       expect(result.canIngest).toBe(true);
     });
 
     it("returns canIngest=false at the cap (used === limit)", async () => {
-      (prisma.client.findUnique as any).mockResolvedValue({ leadsThisMonth: 500 });
+      (prisma.client.findUnique as any).mockResolvedValue({ leadsThisMonth: 200 });
       const result = await checkMonthlyLeadsCapacity(prisma, "client-1", "STARTER");
       expect(result.canIngest).toBe(false);
     });
 
     it("returns canIngest=false over the cap", async () => {
-      (prisma.client.findUnique as any).mockResolvedValue({ leadsThisMonth: 501 });
+      (prisma.client.findUnique as any).mockResolvedValue({ leadsThisMonth: 201 });
       const result = await checkMonthlyLeadsCapacity(prisma, "client-1", "STARTER");
       expect(result.canIngest).toBe(false);
     });
@@ -76,7 +76,7 @@ describe("Monthly Leads Limit helper (FIX Round-2 #6)", () => {
       const ok = await tryConsumeMonthlyLead(prisma, "client-1", "STARTER");
       expect(ok).toBe(true);
       expect(prisma.client.updateMany).toHaveBeenCalledWith({
-        where: { id: "client-1", leadsThisMonth: { lt: 500 } },
+        where: { id: "client-1", leadsThisMonth: { lt: 200 } },
         data: { leadsThisMonth: { increment: 1 } },
       });
     });

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { Check, X } from "lucide-react";
+import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 
 const comparisons = [
   { metric: "Response time", bridge: "≤60 seconds", traditional: "4-8 hours" },
@@ -14,7 +15,7 @@ const comparisons = [
   { metric: "WhatsApp notifications", bridge: "Instant after every call", traditional: "None" },
   { metric: "Call recordings & transcripts", bridge: "Every call recorded", traditional: "Rarely done" },
   { metric: "Analytics dashboard", bridge: "Real-time funnel & metrics", traditional: "Excel sheets" },
-  { metric: "Monthly cost", bridge: "₹7,999 - ₹60,000", traditional: "₹20,000 - ₹30,000/person" },
+  { metric: "Monthly cost", bridge: `from ₹${PLAN_PAYLOAD.plans[0].monthlyExGst.toLocaleString("en-IN")} + GST`, traditional: "₹20,000 - ₹30,000/person" },
   // Phase 2.1: the two capability-number claims below carry a footnote so
   // prospects know they're platform capability, not a guaranteed outcome.
   { metric: "Leads handled", bridge: "500+ per month", traditional: "~200 per person", note: true },

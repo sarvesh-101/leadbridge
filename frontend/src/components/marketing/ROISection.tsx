@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { TrendingUp, Users, IndianRupee, Calendar } from "lucide-react";
+import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 
 const scenarios = [
   {
@@ -68,7 +69,7 @@ export default function ROISection() {
   }, [inView, animated]);
 
   const currentCost = scenarios[0].telecallers * scenarios[0].costPerTelecaller;
-  const bridgeCost = 35000; // Growth plan
+  const bridgeCost = PLAN_PAYLOAD.plans.find((p) => p.id === "GROWTH")!.monthlyExGst; // Growth plan (ex-GST)
   const monthlySavings = currentCost - bridgeCost;
   const annualSavings = monthlySavings * 12;
   const bookingIncrease = ((scenarios[1].bookingsPerMonth - scenarios[0].bookingsPerMonth) / scenarios[0].bookingsPerMonth) * 100;

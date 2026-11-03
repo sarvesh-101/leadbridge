@@ -2,94 +2,61 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 
-// Source of truth: server/src/services/subscription.service.ts → PLAN_DEFINITIONS
-// LAUNCH 2 / 200 / 50 · STARTER users 5 / leads 500 / calls 100 · GROWTH 15 / 3000 / 500 ·
-// PRO 50 / 50000 / calls 2000 (PRO_MONTHLY_CALL_CAP — Phase 2.2 margin fix;
-// NOT unlimited: the platform pays per-minute while PRO is flat ₹60K)
-const plans = [
-  {
-    name: "Launch",
-    price: "₹7,999",
-    calls: "50 AI calls",
-    users: "2",
-    leads: "200",
-    dedicatedNumber: false,
-    followups: "3-day",
-    support: "WhatsApp",
-    features: [
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "3-day follow-up automation",
-      "Shared calling number",
-    ],
-    popular: false,
-  },
-  {
-    name: "Starter",
-    price: "₹18,000",
-    calls: "100 AI calls",
-    users: "5",
-    leads: "500",
-    dedicatedNumber: false,
-    followups: "3-day",
-    support: "Basic",
-    features: [
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "3-day follow-up automation",
-      "Basic analytics",
-    ],
-    popular: false,
-  },
-  {
-    name: "Growth",
-    price: "₹35,000",
-    calls: "500 AI calls",
-    users: "15",
-    leads: "3,000",
-    dedicatedNumber: true,
-    followups: "3-day",
-    support: "Priority",
-    features: [
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "3-day follow-up automation",
-      "Dedicated calling number",
-      "Priority support",
-      "Advanced analytics",
-    ],
-    popular: true,
-  },
-  {
-    name: "Pro",
-    price: "₹60,000",
-    calls: "2,000 AI calls",
-    users: "50",
-    leads: "50,000",
-    dedicatedNumber: true,
-    followups: "7-day",
-    support: "Account manager",
-    features: [
-      "Full qualification + booking",
-      "WhatsApp notifications",
-      "7-day follow-up automation",
-      "Dedicated calling number",
-      "White-label option",
-      "Dedicated account manager",
-    ],
-    popular: false,
-  },
-];
+// T1 (V2): single source of truth — server/src/config/plans.ts. This file
+// derives every figure from the generated payload (regenerate with
+// `cd server && npx tsx scripts/gen-plans.ts` after changing the config).
+const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+const payloadPlan = (id: string) =>
+  PLAN_PAYLOAD.plans.find((p) => p.id === id) as
+    | (typeof PLAN_PAYLOAD.plans)[number]
+    | undefined;
 
-// Comparison table rows shared with the plan cards (kept in sync with the
-// `plans` array above — mirrors PLAN_DEFINITIONS in the server).
+const plans = ["STARTER", "GROWTH", "PRO"]
+  .map(payloadPlan)
+  .filter(Boolean)
+  .map((p) => ({
+    name: p!.name,
+    // Display price is ex-GST (doc §1.2); the charged figure is shown as
+    // the GST-inclusive value so the billing page and invoices agree.
+    price: inr(p!.monthlyExGst),
+    incl: inr(p!.monthlyInclGst),
+    perLead: inr(p!.pricePerLeadExGst),
+    leads: p!.leadsPerMonth.toLocaleString("en-IN"),
+    users: String(p!.teamUsers),
+    dedicatedNumber: p!.dedicatedNumber,
+    followups: p!.followUpDays === 7 ? "7-day" : "3-day",
+    support: p!.support,
+    popular: p!.id === "GROWTH",
+    features: [
+      `Up to ${p!.leadsPerMonth.toLocaleString("en-IN")} leads handled per month`,
+      "AI call within 60 seconds of every enquiry",
+      "Site-visit booking + 24-hour reminders",
+      "WhatsApp summary after every call",
+      p!.dedicatedNumber ? "Dedicated calling number" : "Shared calling number",
+      p!.followUpDays === 7
+        ? "7-day follow-up sequence"
+        : "3-day follow-up sequence",
+      ...(p!.id === "GROWTH" ? ["Priority support"] : []),
+      ...(p!.id === "PRO"
+        ? [
+            "White-label option",
+            "Dedicated account manager",
+            "Email + SMS campaigns, A/B testing, API access",
+          ]
+        : []),
+    ],
+  }));
+
+// Comparison rows — every figure derives from the same generated payload as
+// the cards above (single source: server/src/config/plans.ts).
 const compareRows = [
-  { label: "AI calls / month", get: (p: (typeof plans)[number]) => p.calls },
+  { label: "Leads handled / month", get: (p: (typeof plans)[number]) => p.leads },
+  { label: "Price per lead (ex-GST)", get: (p: (typeof plans)[number]) => p.perLead },
   { label: "Team users", get: (p: (typeof plans)[number]) => p.users },
-  { label: "Leads managed / month", get: (p: (typeof plans)[number]) => p.leads },
   { label: "Dedicated calling number", get: (p: (typeof plans)[number]) => p.dedicatedNumber },
-  { label: "Follow-up automation", get: (p: (typeof plans)[number]) => p.followups },
+  { label: "Follow-up sequence", get: (p: (typeof plans)[number]) => p.followups },
   { label: "Support", get: (p: (typeof plans)[number]) => p.support },
   { label: "White-label option", get: (p: (typeof plans)[number]) => p.name === "Pro" },
 ];
@@ -109,7 +76,7 @@ export default function PricingSection() {
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);        const cards = sectionRef.current?.querySelectorAll(".pricing-card");
-      if (!cards || cards.length < 4) return;
+      if (!cards || cards.length < 3) return;
 
       const st1 = ScrollTrigger.create({
         trigger: sectionRef.current,
@@ -117,9 +84,8 @@ export default function PricingSection() {
         toggleActions: "play none none none",
         onEnter: () => {
           gsap.fromTo(cards[0], { opacity: 0, x: -100 }, { opacity: 1, x: 0, duration: 0.6 });
-          gsap.fromTo(cards[3], { opacity: 0, x: 100 }, { opacity: 1, x: 0, duration: 0.6 });
+          gsap.fromTo(cards[2], { opacity: 0, x: 100 }, { opacity: 1, x: 0, duration: 0.6 });
           gsap.fromTo(cards[1], { opacity: 0, y: 100, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6 });
-          gsap.fromTo(cards[2], { opacity: 0, y: 100, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6 });
         },
       });
 
@@ -142,7 +108,7 @@ export default function PricingSection() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full bg-[#34D399] opacity-[0.05] blur-[150px] pointer-events-none" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <h2 className="h1-text text-center mb-16">Simple, transparent pricing</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
           {plans.map((plan, i) => (
             <div
               key={plan.name}
@@ -160,11 +126,12 @@ export default function PricingSection() {
               )}
               <div className="relative z-1">
                 <h3 className="text-[20px] font-semibold text-[#F0F7F3] mb-1">{plan.name}</h3>
-                <p className="text-[13px] text-[#9FB0A6] mb-1">{plan.calls}</p>
+                <p className="text-[13px] text-[#9FB0A6] mb-1">Up to {plan.leads} leads/mo</p>
                 <div className="text-[36px] font-display font-bold text-[#F0F7F3] mt-6 mb-1">
                   {plan.price}
                   <span className="text-[15px] text-[#9FB0A6] font-sans font-normal">/mo</span>
                 </div>
+                <p className="text-[12px] text-[#6B7C73]">+ 18% GST ({plan.incl} incl.) · ≈{plan.perLead}/lead</p>
 
                 {/* Stat chips: users / leads / dedicated number */}
                 <div className="mt-6 grid grid-cols-3 gap-2">
@@ -220,7 +187,7 @@ export default function PricingSection() {
                 <span className="text-[11px] font-semibold text-[#9FB0A6] uppercase tracking-[0.08em]">Feature</span>
               </div>
               {plans.map((p) => (
-                <div key={p.name} className={`px-6 py-4 ${p.popular ? "bg-[#34D399]/[0.07]" : ""} ${p.name !== "Launch" ? "border-l border-white/10" : ""}`}>
+                <div key={p.name} className={`px-6 py-4 border-l border-white/10 ${p.popular ? "bg-[#34D399]/[0.07]" : ""}`}>
                   <span className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${p.popular ? "text-[#6FE3B0]" : "text-[#F0F7F3]"}`}>{p.name}</span>
                 </div>
               ))}
@@ -233,7 +200,7 @@ export default function PricingSection() {
                 {plans.map((p) => {
                   const val = row.get(p);
                   return (
-                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 ${p.popular ? "bg-[#34D399]/[0.07]" : ""} ${p.name !== "Launch" ? "border-l border-white/10" : ""}`}>
+                    <div key={p.name} className={`px-6 py-4 flex items-center gap-2 border-l border-white/10 ${p.popular ? "bg-[#34D399]/[0.07]" : ""}`}>
                       {typeof val === "boolean" ? (
                         val ? (
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="flex-shrink-0">
