@@ -13,7 +13,12 @@ export default async function razorpayWebhookRoutes(fastify: FastifyInstance) {
     config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const signature = request.headers["x-razorpay-signature"] as string;
-    const payload = JSON.stringify(request.body);
+    // Razorpay signs the RAW request body. Hash those exact bytes when the JSON
+    // parser captured them (index.ts sets request.rawBody); fall back to
+    // re-serializing only if the body arrived through another parser.
+    const payload =
+      (request as FastifyRequest & { rawBody?: string }).rawBody ??
+      JSON.stringify(request.body);
 
     // Verify signature
     if (!verifyWebhookSignature(payload, signature)) {

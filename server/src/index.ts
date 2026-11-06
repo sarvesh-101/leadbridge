@@ -108,6 +108,7 @@ import adminCreditRoutes from "./routes/admin/credits";
 import adminRevenueRoutes from "./routes/admin/revenue-recognition";
 import adminPaymentRoutes from "./routes/admin/payments";
 import adminWhatsAppRoutes from "./routes/admin/whatsapp-config";
+import adminIntegrationRoutes from "./routes/admin/integrations";
 
 // Module-level server reference for graceful shutdown
 let __server: Awaited<ReturnType<typeof buildServer>> | null = null;
@@ -403,6 +404,8 @@ export async function buildServer() {
   await server.register(adminRevenueRoutes, { prefix: apiPrefix });
   await server.register(adminPaymentRoutes, { prefix: apiPrefix });
   await server.register(adminWhatsAppRoutes, { prefix: apiPrefix });
+  // V2 (T8): admin integration-status registry (tenant × integrations + portal guide).
+  await server.register(adminIntegrationRoutes, { prefix: apiPrefix });
 
 
   // Client routes

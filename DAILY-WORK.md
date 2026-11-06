@@ -53,7 +53,7 @@ Step 2 of `docs/GO-LIVE-RUNBOOK.md` is complete on the code side. The dashboard 
 - 2c (send-test-webhook) — run from the repo root once the Render secret is set: `RAZORPAY_WEBHOOK_SECRET=<value> node scripts/send-test-webhook.cjs` → expect HTTP 200. Then `... node scripts/send-test-webhook.cjs subscription.cancelled --bad-signature` → expect HTTP 401.
 - 2d (route handles all 5 events) — already implemented in `server/src/routes/webhooks/razorpay.ts`; verified by the test suite (190 passed / 8 skipped, `tsc --noEmit` clean).
 
-**Known caveat (documented in the checklist, not a bug right now):** the webhook handler re-serializes the parsed body with `JSON.stringify(request.body)` before computing the HMAC, instead of hashing the raw bytes. That matches Razorpay's compact JSON exactly, so it works for real deliveries today. If a real delivery ever 401s with a confirmed-matching secret, that's the cause — fix it by capturing the raw body in the `application/json` parser in `server/src/index.ts`.
+**Webhook signature input (fixed):** the `application/json` parser in `server/src/index.ts` now stores the exact bytes on `request.rawBody`, and the Razorpay handler hashes that instead of `JSON.stringify(request.body)`. Re-serializing could only verify by luck (key order/whitespace/number formatting change the HMAC input). Covered by `server/src/__tests__/razorpay-webhook.test.ts` (raw bytes with non-canonical formatting → 200; bad signature → 401).
 
 ---
 

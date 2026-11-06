@@ -57,6 +57,28 @@
 
 ---
 
+## T8 — Admin integration-status registry
+
+**Status: done** · uncommitted at time of writing
+
+**Files changed**
+- **New** `server/src/routes/admin/integrations.ts` — read-only admin registry over the `Integration` model, behind `authenticateAdmin`:
+  - `GET /admin/integrations` — paginated tenant × integration table (`page`, `limit`, `search`, `status`, `health=issues`); each row carries a derived summary (active/error/not-configured counts, total synced/errors, latest sync) and `serviceable` from `planStatus` so a billing problem isn't mistaken for an integration problem.
+  - `GET /admin/integrations/:clientId` — one tenant's integrations + lead/call/booking counts + territory. Credentials (`apiKey`/`apiSecret`/`credentials`) are never selected; only an explicit whitelist of non-secret `settings` keys is returned.
+  - `GET /admin/portal-ingestion-guide` — read-only JSON checklist mirroring `docs/portal-ingestion-setup.md` (per-provider steps/caveats/docs + ingestion channels) so the admin panel needs no markdown renderer.
+- `server/src/index.ts` — registers the route under the API prefix.
+- `server/src/routes/webhooks/razorpay.ts` + `server/src/index.ts` — webhook HMAC now uses `request.rawBody` (captured by the JSON content-type parser) instead of `JSON.stringify(request.body)`, which could only verify by luck. Falls back to re-serialization if a body arrives through another parser.
+
+**Tests**
+- **New** `server/src/__tests__/integration-status.test.ts` — 6 tests: summary reduction, integration-status filter, `serviceable=false` for `PAST_DUE`, 404 on unknown tenant, secret/PII settings stripped from the detail response, portal guide lists every provider with steps.
+- `server/src/__tests__/razorpay-webhook.test.ts` — new case proving a signature over raw non-canonical bytes verifies (200) while `JSON.stringify` would not match.
+
+**Verification:** `npx vitest run` on both files → 11 passed · `tsc --noEmit` clean.
+
+**Decision:** server-only for now — no admin frontend page consumes these endpoints yet; the registry was the missing visibility layer (which tenant is stuck on which portal), not a UI task.
+
+---
+
 ## HUMAN ACTIONS (accumulating)
 
 - [ ] T4 — review `razorpay-sync-plans` DRY-RUN output, then create the new dashboard plans with `--live` (new charged amounts) — **required before deploying this branch**.
