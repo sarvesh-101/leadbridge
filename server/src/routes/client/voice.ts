@@ -3,6 +3,7 @@ import { LeadStatus } from "@prisma/client";
 import { getVoiceAIProvider, VoiceAIProvider } from "../../services/voice";
 import { getPhoneProvider, PhoneProvider } from "../../services/phone";
 import { config } from "../../config";
+import { resolveAgentSystemPrompt } from "../../ai/prompt";
 
 /**
  * Build the public Omnidimension call-events webhook URL.
@@ -155,7 +156,9 @@ export default async function clientVoiceRoutes(fastify: FastifyInstance) {
         voiceProvider: request.body.voiceProvider || "eleven_labs",
         voiceId: request.body.voiceId,
         modelName: request.body.modelName || "gpt-4o-mini",
-        systemPrompt: request.body.systemPrompt,
+        // T12: use the rendered Converza representative prompt (plan +
+        // integration tables) when the broker did not supply their own.
+        systemPrompt: resolveAgentSystemPrompt(request.body.systemPrompt),
         webhookUrl: buildCallEventsWebhookUrl(request),
       });
     } catch (err: any) {

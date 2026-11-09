@@ -46,6 +46,8 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Copy compiled JS output
 COPY --from=builder /app/dist ./dist
+# V2 (T12): the AI prompt template is read at runtime (not emitted by tsc).
+COPY --from=builder /app/src/ai/prompts ./dist/ai/prompts
 
 EXPOSE 3000
 
