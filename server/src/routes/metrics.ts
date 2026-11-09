@@ -15,6 +15,7 @@
  * - process_uptime_seconds — how long the server has been running
  */
 import { FastifyInstance } from "fastify";
+import { renderMetrics } from "../utils/metrics";
 
 export default async function metricsRoutes(fastify: FastifyInstance) {
   fastify.get("/metrics", async (_request, reply) => {
@@ -140,6 +141,10 @@ export default async function metricsRoutes(fastify: FastifyInstance) {
       lines.push("# HELP converza_scrape_duration_seconds Metrics scrape duration");
       lines.push("# TYPE converza_scrape_duration_seconds gauge");
       lines.push(`converza_scrape_duration_seconds ${(Date.now() - start) / 1000}`);
+
+      // V2 (T11): in-process counters/histograms (first-call delay, answer rate,
+      // window blocks, fair-use hits, demo requests).
+      lines.push("", renderMetrics().trimEnd());
 
       return reply
         .header("Content-Type", "text/plain; charset=utf-8")
