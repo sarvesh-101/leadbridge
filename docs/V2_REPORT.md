@@ -53,7 +53,7 @@
 
 **Decision:** LAUNCH kept in the `team` gate despite retirement — removing it in T1/T3 would break access for live Launch subscribers before the T2 migration maps them to STARTER.
 
-**Remaining for T3 (planned):** verify the frontend team UI hides/shows membership controls from the same generated config (currently the dashboard always renders team controls; plan-gates fix may be enough server-side, frontend polish folds into T10).
+**T3 follow-up (2026-11-07):** the team page now shows seats used/limit from `plans.autogen.ts` and disables invites at the cap; `POST /team/invite` enforces the same seat limit from `PLAN_DEFINITIONS` (pending invites count toward the cap).
 
 ---
 
@@ -76,6 +76,32 @@
 **Verification:** `npx vitest run` on both files → 11 passed · `tsc --noEmit` clean.
 
 **Decision:** server-only for now — no admin frontend page consumes these endpoints yet; the registry was the missing visibility layer (which tenant is stuck on which portal), not a UI task.
+
+---
+
+## T9–T17 — working-tree status (verified 2026-11-07)
+
+The T9–T17 artifacts are present in the working tree and now typecheck and test cleanly. They are **not committed**, and production still runs the committed T8 stack.
+
+| Task | Artifact | State |
+|---|---|---|
+| T9 | `server/scripts/claims-lint.{mjs,config.json}`, test, CI step | clean on the tree; fails on a seeded banned phrase |
+| T10 | marketing rewrite, `lib/site.ts`, legal stubs | frontend typecheck clean; banned claims absent |
+| T11 | `services/proof-metrics.ts`, `cron/weekly-proof-report.ts`, `routes/{client,admin}/proof.ts`, `dashboard/proof` | metric tests cover empty periods, proration, rates, profitability |
+| T12 | `ai/prompt.ts` + `ai/prompts/converza-agent.md`, eval script | **wired**: `POST /voice/agents` renders the prompt when the broker supplies none (override wins; render failure falls back safely) |
+| T13 | Territory micro-market fields, auto-release cron (off by default) | RERA numbers normalized and one-account-per-RERA enforced on self-serve register + admin create; optional signup field added |
+| T14 | AI-disclosure helper, admin lead erasure, recording-retention cron, legal stubs | erasure/retention/disclosure tests pass |
+| T15 | onboarding test-call route (3/day, window-aware) | `GET /admin/analytics/onboarding` returns median hours signup→source→call; helper covered by tests |
+| T16 | `frontend/src/lib/feature-flags.ts` | Sidebar consumes `FEATURES.campaigns` (default-on; env "false" hides campaign nav) |
+| T17 | `docs/DOMAIN_EMAIL_SETUP.md` | human-action doc only |
+
+**Typecheck recovery (this session):** regenerated the Prisma client; added `Territory.updatedAt` (schema + additive migration) for the release cron's idle clock; fixed proof-route import depth; stored `null` instead of `"n/a"` in weekly snapshots and passed `recipientType` on WhatsApp sends; rewrote lead erasure against the real schema (`Client.adminId`, `AuditLog.resourceType/resourceId`) and replaced the non-existent `Admin.enabled` gate with a deleted-admin check.
+
+**Verification:** server `tsc --noEmit` clean · server suite **278 passed / 8 skipped** · frontend `tsc --noEmit` clean · claims-lint **0** banned phrases.
+
+**Closed 2026-11-07 (this session):** T12 prompt wiring, RERA duplicate detection, onboarding median endpoint, feature-flag consumer, T3 seat cap + config-driven team UI. Also fixed the T5 jitter cap (was 1–31 min, spec says ≤30).
+
+**Still open:** phone-based duplicate *flagging* (RERA hard-block shipped; phone needs a product decision — hard block vs admin flag), and `Client.inboundToken` has no consumer yet.
 
 ---
 

@@ -91,6 +91,132 @@ From `docs/GO-LIVE-RUNBOOK.md`:
 
 ---
 
+## 2026-11-07 — V2 branch typecheck recovery (working tree only)
+
+**Branch:** `converza-v2` at `3b5a273` + uncommitted T9–T17 work. Nothing pushed; production still runs the committed T8 stack on the old Razorpay account.
+
+- Fixed the blockers that kept the uncommitted V2 work from typechecking:
+  - regenerated the Prisma client for the T5/T11/T13/T15 schema additions (the stale client caused most errors);
+  - `Territory` gained `updatedAt` (schema + additive migration) — the T13 release cron uses it as the idle clock;
+  - corrected the relative import depth in `routes/admin/proof.ts` and `routes/client/proof.ts`;
+  - weekly proof snapshots store `costPerCompletedVisit = null` when the API metric is `"n/a"`, and WhatsApp sends pass `recipientType`;
+  - DPDP lead erasure now uses the real schema (`Client.adminId` ownership gate, `AuditLog.resourceType/resourceId`); the non-existent `Admin.enabled` gate became a deleted-admin check, and tests were aligned.
+- Verified: server `tsc --noEmit` clean; frontend `tsc --noEmit` clean; full server suite **278 passed / 8 skipped**; claims-lint **0** banned phrases.
+- Known gaps (recorded, not claimed done): RERA/phone duplicate-account detection is not wired; the admin onboarding median is not exposed; the T12 agent prompt is built/tested but not yet consumed by the call provider; `Client.inboundToken` and `frontend/src/lib/feature-flags.ts` have no consumers.
+- Still human-only: Step 3 Razorpay account migration (A1–D6) and the Render/Vercel env + DNS actions. Do not deploy this branch before the T4 plan-sync human gate.
+
+---
+
+## 2026-11-07 — Razorpay account under review (2–4 days) — REMINDER
+
+**Razorpay status:** new account is in review; integration expected in **2–4 days**. Until it clears:
+
+- Do NOT touch live Razorpay keys, plan sync (`--live`), or payment-loop tests. T4 stays gated.
+- Spend the window on product/UX fixes that do not depend on payments:
+  - **Mobile billing/dashboard** — observed on a phone: the left sidebar is hidden (desktop-only), so the
+    plan badge and Billing entry were unreachable. Fix: mobile drawer now has a pinned "Your plan" card
+    (`DashboardLayout` → `MobileSidebarOverlay`) linking to `/dashboard/billing`; PWA manifest renamed to Converza.
+  - Sweep the rest of the dashboard on a 390px viewport (billing cards, tabs, tables, modals).
+  - **Rebranding leftovers** (see `docs/V2-100-PERCENT.md` §D): `render.yaml` `leadbridge-api`, Vercel project
+    `leadbridge-seven`, CSP API origin, CI image tags, nginx/prometheus/Grafana names, outreach + sales docs
+    (still say LeadBridge and old ₹8K/18K/35K/60K prices), Razorpay/WhatsApp display names (human).
+- **Closed independently (2026-11-07):** T12 prompt wired into `POST /voice/agents`; RERA one-account-per-number enforced on register + admin create (optional signup field); `GET /admin/analytics/onboarding` median; Sidebar consumes the campaigns flag (default-on); team seat cap enforced server-side + shown in the UI. Also fixed the T5 jitter cap (old formula produced 1–31 min).
+- Full ordered checklist: **`docs/V2-100-PERCENT.md`**.
+
+---
+
+## REMAINING — step-by-step guide (start here each day)
+
+**State on 2026-11-07:** server + frontend typecheck clean · server suite **285 passed / 8 skipped** · claims-lint **0**. All T1–T17 artifacts exist in the working tree. **Nothing is committed** — branch tip is still `3b5a273` (T8), production runs T8. Razorpay's new account is under review (2–4 days).
+
+Do the phases in order. Steps marked **ME** I can do alone; **YOU** needs your account/dashboard/decision.
+
+### Phase 1 — Preserve the work (ME, ~20 min)
+
+1. `git status --short` and confirm the 70+ paths are the V2 set (T9–T17, today's gap fixes, docs).
+2. Remove throwaways before staging: `tmp-claims-scan.cjs` (deleted), `server/_checkout-probe-*.cjs` (delete if unused), keep `docs/step3-new-razorpay-account.md` (moved).
+3. Commit in task-scoped commits, in this order:
+   - `chore(v2): claims lint + CI` (T9, `.github/workflows/ci-cd.yml`, `server/scripts/claims-lint*`)
+   - `feat(marketing): honest landing + legal stubs` (T10/T14 frontend, `lib/site.ts`)
+   - `feat(proof): weekly broker proof engine` (T11 + `DashboardLayout` billing card)
+   - `feat(ai): Converza agent prompt wired into agent creation` (T12, `ai/prompt.ts`, `routes/client/voice.ts`)
+   - `feat(territory): micro-market fields + RERA duplicate account` (T13, schema + migration + `utils/rera.ts`, auth/admin client routes, signup field)
+   - `feat(compliance): erasure, retention, AI disclosure` (T14 server)
+   - `feat(onboarding): test call + onboarding median` (T15, `utils/onboarding-metrics.ts`, analytics route)
+   - `fix(ui): mobile plan visibility, team seat cap, feature flags` (billing card, team page, Sidebar, flags, manifest)
+   - `fix(scheduler): jitter never exceeds 30 min` (T5 correction)
+   - `docs: V2 report, 100% guide, daily reminder`
+4. Re-run checks after committing: `cd server && npx tsc --noEmit && npx vitest run && node scripts/claims-lint.mjs`, then `cd frontend && npx tsc --noEmit`.
+5. **Do not push** until you say so (branch is not deployable before Phase 6).
+
+### Phase 2 — Phone-duplicate policy (YOU decide, then ME ~1 h)
+
+1. **YOU:** choose — hard block on duplicate owner phone, or flag for admin review. Recommendation: **flag, don't block** (family brokerages legitimately share a number).
+2. **ME:** if flag → on register/admin-create, look up an existing `Client.phone`; when found, create an `AuditLog` entry (`action: "duplicate_phone_signup"`, `resourceType: "Client"`) and continue. If block → return 409 like RERA with `phoneDuplicate: true`.
+3. **ME:** tests for both paths; note the policy in `docs/V2_REPORT.md`.
+4. **Check:** duplicate phone → account created + audit row (flag) or 409 (block); unique phone unaffected.
+
+### Phase 3 — `Client.inboundToken` (ME, ~1 h)
+
+1. Decide use vs remove. Use it: expose `leads+<inboundToken>@converza.tech` in the Forwarding page + resolve inbound mail by token (no per-client IMAP config).
+2. If not using it this quarter, drop the column in a migration and remove it from the schema — do not leave a dead unique column.
+3. **Check:** forwarding address shown per client resolves to that client, or `rg inboundToken` returns nothing.
+
+### Phase 4 — Mobile / UX sweep at 390×844 (ME, needs browser; YOU eyeball)
+
+1. Open `/dashboard`, `/dashboard/billing`, `/dashboard/leads`, `/dashboard/analytics`, `/dashboard/settings`, `/dashboard/team` at 390px.
+2. Fix: horizontal scroll (`scale-105` plan card, wide tables → card view), tab strips, modals taller than viewport, top-bar search crowding the avatar.
+3. Confirm the drawer shows the **Your plan** card and Billing is one tap away; plan name + status readable.
+4. **Acceptance:** zero horizontal scroll on those pages; billing reachable in ≤2 taps; no cut-off primary buttons.
+
+### Phase 5 — Rebranding (ME mechanical; YOU vendor renames)
+
+Order matters — customer-facing first.
+1. **ME:** `outreach/*` and `sales/*` — LeadBridge → Converza; replace old prices (₹8K/18K/35K/60K) with the canonical config: Starter ₹17,699, Growth ₹41,299, Pro ₹70,799 incl. GST.
+2. **ME:** `frontend/next.config.js` CSP `connect-src` (https + wss) when the API domain changes; `render.yaml` name/URLs; CI image tags + `/opt/leadbridge`; `start.bat` / `start-frontend.bat` titles; `frontend/package.json` + server package metadata; delete/rewrite `leadbridge-context-prompt.txt`; probe scripts.
+3. **ME (careful):** `infrastructure/` nginx server_names, Prometheus/Grafana titles, `leadbridge_*` metric prefix — rename metrics and dashboards in one pass or dashboards break.
+4. **YOU:** Render service rename `leadbridge-api` → `converza-api`; Vercel project rename; Razorpay plan display names; WhatsApp display name; repo rename.
+5. **Check:** `rg -i leadbridge` only hits `work-log/` history and `docs/REBRAND-URL-SWITCH.md`.
+
+### Phase 6 — Razorpay, only after the review clears (YOU gates, ME supports)
+
+Full human runbook: **`docs/step3-new-razorpay-account.md` (A1–D6)**. Canonical monthly incl. GST is **₹17,699 / ₹41,299 / ₹70,799** (A3 is now correct). No new ₹7,999 LAUNCH plan is created — `RAZORPAY_PLAN_LAUNCH` is legacy only.
+
+1. **YOU:** new account KYC verified, recurring/UPI AutoPay enabled, live keys copied, webhook secret generated.
+2. **ME/YOU:** set the 7 Render vars (`RAZORPAY_KEY_ID`, `_KEY_SECRET`, `_WEBHOOK_SECRET`, `_PLAN_LAUNCH/STARTER/GROWTH/PRO`) → Manual Deploy.
+3. **ME:** plan IDs from config, dry-run first:
+   `cd server && npx tsx scripts/sync-razorpay-plans.ts` → review the printed payloads (touches nothing).
+4. **YOU:** only after reviewing: `npx tsx scripts/sync-razorpay-plans.ts --live`, then `--verify` shows zero drift.
+5. **ME:** `GET /health/razorpay` → `ok: true` and the **new** key prefix; `GET /health/integrations` → `missingVars: []`; signed webhook test 200, bad signature 401.
+6. **YOU:** fresh incognito → Billing → Upgrade → pay **₹5** via UPI (the old blocker); then `verify-money-loop.cjs --latest` all green, cancel + refund check.
+7. **YOU:** swap LAUNCH to the real plan, confirm the sheet shows ₹17,699/mo; expire old-account subscriptions (don't delete the old account until the loop passes).
+8. **ME:** record new key prefix/plan IDs/loop result in this file.
+
+### Phase 7 — Human / vendor gates (YOU, parallel anytime)
+
+- WhatsApp template approvals (proof report + follow-ups) and display name.
+- Real portal sample emails (IndiaMART/99acres/MagicBricks/Housing) — one per parser; IndiaMART API key needs a live client.
+- T6: captcha provider keys + one real recorded demo call (`sales/demo-script.md`).
+- DNS: Vercel apex/www, API custom domain, SPF/DKIM/DMARC per `docs/DOMAIN_EMAIL_SETUP.md`.
+- Render/Vercel/WhatsApp/Razorpay renames from Phase 5.
+
+### Phase 8 — Deploy (only after 6 + 7)
+
+1. Push branch with authorization → CI (typecheck, tests, claims-lint, Docker build) must be green.
+2. Render: deploy the merged commit; `prisma migrate deploy` runs in the build step — watch for migration errors.
+3. Smoke: `/health` OK; `/health/razorpay` new prefix; login; Billing shows the right plan; create an agent (instructions contain the plans table); team seat cap; RERA 409 on a duplicate; `GET /admin/analytics/onboarding` returns medians.
+4. Rollback: old Razorpay account stays live until the money loop passes; revert the merge commit if smoke fails.
+
+### Phase 9 — Done means all true
+
+- [ ] Every T1–T17 row in `docs/V2_REPORT.md` is done with no caveat.
+- [ ] `cd server && npx tsc --noEmit` · `npx vitest run` · `node scripts/claims-lint.mjs` all green.
+- [ ] `cd frontend && npx tsc --noEmit` green.
+- [ ] Working tree committed; CI green; deployed only after Phase 6.
+- [ ] Razorpay ₹5 loop passed and LAUNCH points at the real plan.
+
+---
+
 ## Context for the AI agent
 
 - Project: Converza (was LeadBridge) — AI sales-call platform for Indian real-estate brokers.
