@@ -125,13 +125,23 @@ From `docs/GO-LIVE-RUNBOOK.md`:
 
 ---
 
+## 2026-11-10 — V2 work committed (T9–T16 + docs)
+
+- **Razorpay:** the new business account is **active with the new company bank account** — Phase 6 is unblocked on the KYC side. The remaining steps are still human gates (A1–A6: keys, plans, ₹5 loop); this machine cannot call the live Razorpay API (401).
+- **Committed** the entire V2 working tree as 10 task-scoped commits on `converza-v2`: `74f4d6b` (T9 claims lint) · `207c7fe` (T10 landing) · `63b0c58` (T12 prompt + registry) · `12d1eed` (T11 proof engine) · `5930c5c` (T13 territory/RERA) · `8b8d3ef` (T14 compliance) · `06394c1` (T15 onboarding) · `aa640a3` (mobile/team/flags) · `e69833a` (shared wiring) · `18ced89` (docs), plus the two stragglers `T11` WhatsApp template sender and `T6` captcha helper. Working tree is clean.
+- **Verified on this tree:** server `tsc --noEmit` clean · `vitest run` **285 passed / 8 skipped** · claims-lint **0 banned phrases** · frontend `tsc --noEmit` clean.
+- **Nothing pushed.** Production still runs `3b5a273` (T8) on the old Razorpay account; the branch is not deployable before Phase 6.
+- **Still open (unchanged):** phone-duplicate policy decision, `Client.inboundToken` decision, 390px mobile sweep, mechanical LeadBridge→Converza rebrand pass.
+
+---
+
 ## REMAINING — step-by-step guide (start here each day)
 
-**State on 2026-11-07:** server + frontend typecheck clean · server suite **285 passed / 8 skipped** · claims-lint **0**. All T1–T17 artifacts exist in the working tree. **Nothing is committed** — branch tip is still `3b5a273` (T8), production runs T8. Razorpay's new account is under review (2–4 days).
+**State on 2026-11-10:** server + frontend typecheck clean · server suite **285 passed / 8 skipped** · claims-lint **0**. All T1–T17 artifacts are committed (`18ced89`), working tree clean. Nothing is pushed; production runs `3b5a273` (T8). Razorpay's new account is **active with the new company bank account** — start Phase 6.
 
 Do the phases in order. Steps marked **ME** I can do alone; **YOU** needs your account/dashboard/decision.
 
-### Phase 1 — Preserve the work (ME, ~20 min)
+### Phase 1 — Preserve the work (DONE 2026-11-10 — 10 commits, all gates green)
 
 1. `git status --short` and confirm the 70+ paths are the V2 set (T9–T17, today's gap fixes, docs).
 2. Remove throwaways before staging: `tmp-claims-scan.cjs` (deleted), `server/_checkout-probe-*.cjs` (delete if unused), keep `docs/step3-new-razorpay-account.md` (moved).
