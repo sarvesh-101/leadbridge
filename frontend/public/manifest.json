@@ -1,6 +1,6 @@
 {
-  "name": "LeadBridge",
-  "short_name": "LeadBridge",
+  "name": "Converza",
+  "short_name": "Converza",
   "description": "AI Calling Agent for Real Estate Brokers — Qualifies, books, and follows up on every lead within 60 seconds.",
   "start_url": "/dashboard",
   "display": "standalone",

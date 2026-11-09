@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useAuthStore } from "@/stores/auth.store";
+import { PLANS } from "@/lib/plans.autogen";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
@@ -127,6 +130,14 @@ export default function TeamPage() {
   const activeMembers = members.filter(m => m.status === "ACTIVE");
   const pendingInvites = members.filter(m => m.status === "PENDING");
 
+  // T3: seats come from the generated plans config (3 / 15 / 50), the same
+  // numbers the server enforces on POST /team/invite.
+  const currentPlan = useAuthStore((s) => s.user?.plan);
+  const planConfig = PLANS.plans.find((p) => p.id === currentPlan);
+  const seatLimit = planConfig?.teamUsers ?? null;
+  const seatsUsed = activeMembers.length + pendingInvites.length;
+  const atSeatLimit = seatLimit !== null && seatsUsed >= seatLimit;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -135,11 +146,19 @@ export default function TeamPage() {
           <h1 className="text-2xl font-bold text-[#F0F7F3]">Team</h1>
           <p className="text-[#9FB0A6] mt-1">Manage your team members and permissions</p>
         </div>
-        <button onClick={() => setShowInvite(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
-        >
-          <Plus className="w-4 h-4" /> Invite Member
-        </button>
+        <div className="flex flex-col sm:items-end gap-1.5">
+          <button onClick={() => setShowInvite(true)} disabled={atSeatLimit}
+            title={atSeatLimit ? "All seats are in use — remove a member or upgrade" : "Invite a team member"}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-4 h-4" /> Invite Member
+          </button>
+          {seatLimit !== null && (
+            <p className="text-[11px] text-[#9FB0A6]">
+              {seatsUsed} of {seatLimit} seats used · {planConfig?.name} plan
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -162,6 +181,21 @@ export default function TeamPage() {
           </div>
         ))}
       </div>
+
+      {/* Seat limit reached (T3) */}
+      {atSeatLimit && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+          <p className="flex-1 text-sm text-amber-200">
+            All {seatLimit} seats on the {planConfig?.name} plan are in use. Remove a member or upgrade to add more.
+          </p>
+          <Link href="/dashboard/billing"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-all"
+          >
+            Upgrade plan
+          </Link>
+        </div>
+      )}
 
       {/* Role descriptions */}
       <div className="grid sm:grid-cols-3 gap-3">

@@ -64,6 +64,24 @@ export default async function teamRoutes(fastify: FastifyInstance) {
     }
 
     const clientId = request.clientId!;
+    // T3: seat cap from the plans config (3 / 15 / 50). Pending invites count —
+    // otherwise a broker can queue unlimited invitations past the paid limit.
+    const { PLAN_DEFINITIONS } = await import("../../services/subscription.service");
+    const seatLimit = PLAN_DEFINITIONS[plan]?.users;
+    if (seatLimit && seatLimit > 0) {
+      const seatsUsed = await fastify.prisma.teamMember.count({
+        where: { clientId: request.clientId!, status: { in: ["PENDING", "ACTIVE"] } },
+      });
+      if (seatsUsed >= seatLimit) {
+        return reply.status(409).send({
+          error: `Your ${plan} plan includes ${seatLimit} team seats and all are in use. Remove a member or upgrade to add more.`,
+          seatLimit,
+          seatsUsed,
+          upgradeUrl: `${config.FRONTEND_URL}/dashboard/billing`,
+        });
+      }
+    }
+
     const { email, name, role } = request.body;
 
     // Check if already a member

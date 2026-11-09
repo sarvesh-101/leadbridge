@@ -11,7 +11,7 @@ import { useUIStore } from "../../stores/ui.store";
 import { wsClient } from "../../lib/websocket";
 import { useAuthStore } from "../../stores/auth.store";
 import { api } from "../../lib/api";
-import { Loader2, Menu, X } from "lucide-react";
+import { CreditCard, Loader2, Menu, X } from "lucide-react";
 import { Toaster } from "sonner";
 import { initPWA } from "../../lib/pwa";
 
@@ -140,6 +140,7 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
   const pathname = usePathname();
   const { isAuthenticated } = useAuthStore();
   const isAdmin = useAuthStore((s) => s.user?.role === "admin");
+  const planUser = useAuthStore((s) => s.user);
 
   const NAV_ITEMS = [
     { label: "Dashboard", href: "/dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -183,6 +184,28 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Current plan — the desktop sidebar badge is hidden on phones, so
+            mobile users had no way to see their plan or reach billing. */}
+        {!isAdmin && (
+          <Link
+            href="/dashboard/billing"
+            onClick={onClose}
+            className="mx-2 mt-3 flex items-center gap-3 rounded-xl border border-[#34D399]/25 bg-[#34D399]/10 px-3 py-3"
+          >
+            <div className="w-9 h-9 rounded-lg bg-[#1B4332] flex items-center justify-center shrink-0">
+              <CreditCard className="w-4 h-4 text-[#6FE3B0]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] uppercase tracking-wider text-[#9FB0A6]">Your plan</p>
+              <p className="text-[13px] font-semibold text-[#F0F7F3] truncate">
+                {planUser?.plan || "TRIAL"}
+                <span className="font-normal text-[#9FB0A6]"> · {planUser?.planStatus || "TRIAL"}</span>
+              </p>
+            </div>
+            <span className="text-[11px] font-medium text-[#6FE3B0] shrink-0">Billing</span>
+          </Link>
+        )}
 
         {/* Nav items */}
         <nav className="py-4 px-2 space-y-0.5">

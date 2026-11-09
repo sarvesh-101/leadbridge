@@ -17,6 +17,7 @@ import { useAuthStore } from "../../stores/auth.store";
 import { serverLogout } from "../../lib/api";
 import { Lock } from "lucide-react";
 import { canAccessFeature } from "./FeatureGate";
+import { FEATURES } from "../../lib/feature-flags";
 
 interface NavItem {
   label: string;
@@ -75,7 +76,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "admin";
 
-  const items = isAdmin ? ADMIN_NAV_ITEMS : NAV_ITEMS;
+  // T16: campaigns are a Pro surface that can be paused without deleting the
+  // feature. Default-on, so this is a no-op unless the env var says "false".
+  const CAMPAIGN_HREFS = ["/dashboard/campaigns", "/dashboard/campaigns/whatsapp-templates"];
+  const items = (isAdmin ? ADMIN_NAV_ITEMS : NAV_ITEMS).filter(
+    (item) => FEATURES.campaigns || !CAMPAIGN_HREFS.includes(item.href)
+  );
   const planBadge = user?.plan || "TRIAL";
   const currentPlan = planBadge;
 
