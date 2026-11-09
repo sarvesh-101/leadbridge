@@ -1,73 +1,42 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { useInView } from "react-intersection-observer";
-import {
-  PhoneCall, BrainCircuit, MessageSquareText, BarChart3,
-  Globe2, Timer, ShieldCheck, Users, Zap, Bot,
-  CalendarCheck, TrendingUp, Languages, Target,
-} from "lucide-react";
+import { PhoneCall, MessageSquareText, CalendarCheck, BarChart3, Languages, RefreshCw } from "lucide-react";
 
+// V2 (T10): six outcome cards from Appendix B. The full capability list moved
+// to /features — this section only promises what the product actually does.
 const features = [
   {
-    icon: Bot,
-    title: "AI Calling Agent",
-    description: "Your own AI telecaller that speaks in Hinglish, qualifies leads, answers FAQs, and books site visits — all within 60 seconds of the lead coming in.",
-  },
-  {
-    icon: Timer,
-    title: "60-Second Response",
-    description: "Average broker response time is 4-8 hours. We call within 60 seconds — before the lead even clicks away to your competitor.",
+    icon: PhoneCall,
+    title: "Called in 60 seconds",
+    description: "New leads get an AI call within 60 seconds during calling hours (9 AM to 9 PM IST).",
   },
   {
     icon: Languages,
-    title: "Multilingual (Hinglish)",
-    description: "Speaks naturally in Hindi, English, and Hinglish — whatever your lead is most comfortable with. No robotic scripts.",
+    title: "Qualified in Hinglish",
+    description: "Budget, location, property type and timeline — asked naturally in Hinglish, Hindi or English.",
   },
   {
     icon: CalendarCheck,
-    title: "Smart Scheduling",
-    description: "AI books site visits based on lead's preferred time, sends reminders, detects no-shows, and auto-reschedules with a follow-up call.",
-  },
-  {
-    icon: BrainCircuit,
-    title: "Predictive Lead Scoring",
-    description: "Every lead gets a 0-100 conversion score based on source quality, response time, budget fit, timeline urgency, and call sentiment.",
+    title: "Site visits booked",
+    description: "Reminders go out 24 hours before. Missed visits get recovery follow-ups.",
   },
   {
     icon: MessageSquareText,
-    title: "WhatsApp Automation",
-    description: "Instant WhatsApp notifications for every call outcome, booking confirmation, and follow-up — sent directly to you and your team.",
+    title: "Summary on WhatsApp",
+    description: "After every call: who, what was agreed, next step and a recording.",
   },
   {
-    icon: Target,
-    title: "Smart Campaign Builder",
-    description: "Build multi-step drip campaigns with calls, WhatsApp messages, and SMS — triggered by lead source, status, or score.",
+    icon: RefreshCw,
+    title: "Follow-up until yes or cold",
+    description: "Retries and a 3-day sequence (7-day on Pro). Cold leads are marked so you stop chasing them.",
   },
   {
     icon: BarChart3,
-    title: "Real-Time Analytics",
-    description: "Live dashboard with conversion funnel, call metrics, booking rates, territory performance, and ROI tracking. Updated in real-time.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Territory Exclusivity",
-    description: "One broker per city or zone. Your competitors can't use Converza in your territory. First come, first locked.",
-  },
-  {
-    icon: Users,
-    title: "Team Management",
-    description: "Add your team members with role-based access — Admin, Agent, or Viewer. Share leads, calls, and analytics with your team.",
-  },
-  {
-    icon: Globe2,
-    title: "Multi-Source Ingestion",
-    description: "Connect 99acres, MagicBricks, Housing.com, JustDial, your website, WhatsApp, or any custom webhook. One inbox for all leads.",
-  },
-  {
-    icon: Zap,
-    title: "A/B Testing",
-    description: "Test different call scripts, follow-up sequences, and messaging strategies. Let data decide what converts best.",
+    title: "See what's working",
+    description: "Every recording and transcript, cost per lead and conversion by source, plus a weekly report.",
   },
 ];
 
@@ -120,9 +89,9 @@ export default function FeatureShowcase() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
           <span className="caption text-gradient-emerald mb-4 block">POWERED BY AI</span>
-          <h2 className="h1-text mb-4">Everything you need to convert more leads</h2>
+          <h2 className="h1-text mb-4">What you actually get</h2>
           <p className="text-[16px] text-[#9FB0A6] max-w-[600px] mx-auto">
-            From the moment a lead comes in to the moment they visit — every step is automated, optimized, and trackable.
+            Six outcomes, measured on your own leads — no borrowed benchmarks.
           </p>
         </div>
 
@@ -161,6 +130,12 @@ export default function FeatureShowcase() {
               </div>
             );
           })}
+        </div>
+
+        <div className="text-center mt-10">
+          <Link href="/features" className="inline-flex items-center gap-2 text-[14px] text-[#6FE3B0] hover:text-[#34D399] font-medium transition-colors">
+            See every feature →
+          </Link>
         </div>
       </div>
     </section>

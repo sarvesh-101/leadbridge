@@ -1,212 +1,121 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { TrendingUp, Users, IndianRupee, Calendar } from "lucide-react";
+import { IndianRupee, Users, ArrowRight } from "lucide-react";
 import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 
-const scenarios = [
-  {
-    label: "Your Current Setup",
-    telecallers: 2,
-    costPerTelecaller: 25000,
-    leadsPerMonth: 400,
-    bookingsPerMonth: 12,
-    color: "#E11D48",
-  },
-  {
-    label: "With Converza",
-    telecallers: 0,
-    costPerTelecaller: 0,
-    leadsPerMonth: 400,
-    bookingsPerMonth: 36,
-    color: "#047857",
-  },
-];
+/**
+ * V2 (T10) — ROI calculator, honest version.
+ *
+ * Compares two telecallers (editable monthly cost, default ₹50,000 total) at
+ * ~400 leads against Converza Growth. Output is COST PER LEAD on both sides and
+ * the assumptions are always visible. No uplift percentages, no invented
+ * bookings — we have no published results.
+ */
+const GROWTH = PLAN_PAYLOAD.plans.find((p) => p.id === "GROWTH")!;
+const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 
 export default function ROISection() {
-  const { ref, inView } = useInView({ threshold: 0.2, triggerOnce: true });
-  const [animated, setAnimated] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
+  const { ref } = useInView({ threshold: 0.1, triggerOnce: true });
+  const [telecallerCost, setTelecallerCost] = useState(50000);
+  const [leads, setLeads] = useState(400);
 
-  useEffect(() => {
-    if (!inView || animated) return;
-    setAnimated(true);
-
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
-    let kill: (() => void) | undefined;
-
-    const init = async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-
-      const bars = chartRef.current?.querySelectorAll(".bar-fill");
-      if (!bars) return;
-
-      gsap.fromTo(bars,
-        { height: "0%" },
-        {
-          height: "100%", duration: 0.8, stagger: 0.15,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: chartRef.current,
-            start: "top 75%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
-
-      kill = () => {
-        ScrollTrigger.getAll().forEach((st: any) => st.kill());
-      };
+  const numbers = useMemo(() => {
+    const telecallerPerLead = leads > 0 ? telecallerCost / leads : 0;
+    const converzaPerLead = leads > 0 ? GROWTH.monthlyInclGst / leads : 0;
+    return {
+      telecallerPerLead,
+      converzaPerLead,
+      difference: telecallerPerLead - converzaPerLead,
+      includedLeads: GROWTH.leadsPerMonth,
+      overage: GROWTH.overagePerLeadExGst,
     };
-
-    init();
-    return () => { if (kill) kill(); };
-  }, [inView, animated]);
-
-  const currentCost = scenarios[0].telecallers * scenarios[0].costPerTelecaller;
-  const bridgeCost = PLAN_PAYLOAD.plans.find((p) => p.id === "GROWTH")!.monthlyExGst; // Growth plan (ex-GST)
-  const monthlySavings = currentCost - bridgeCost;
-  const annualSavings = monthlySavings * 12;
-  const bookingIncrease = ((scenarios[1].bookingsPerMonth - scenarios[0].bookingsPerMonth) / scenarios[0].bookingsPerMonth) * 100;
-
-  const stats = [
-    {
-      icon: IndianRupee,
-      value: `₹${(monthlySavings / 1000).toFixed(0)}K`,
-      label: "Monthly savings",
-      subtext: `vs ${scenarios[0].telecallers} telecallers`,
-      positive: true,
-    },
-    {
-      icon: IndianRupee,
-      value: `₹${(annualSavings / 100000).toFixed(1)}L`,
-      label: "Projected annual savings",
-      subtext: "based on the scenario above",
-      positive: true,
-    },
-    {
-      icon: TrendingUp,
-      value: `+${bookingIncrease.toFixed(0)}%`,
-      label: "More bookings (example)",
-      subtext: `${scenarios[1].bookingsPerMonth}/mo vs ${scenarios[0].bookingsPerMonth}/mo — in this scenario`,
-      positive: true,
-    },
-    {
-      icon: Calendar,
-      value: "24/7",
-      label: "Calling hours",
-      subtext: "Never miss a lead again",
-      positive: true,
-    },
-  ];
+  }, [telecallerCost, leads]);
 
   return (
     <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="roi">
-      {/* gold aurora */}
       <div className="absolute top-1/4 right-[-120px] w-[440px] h-[440px] rounded-full bg-[#E8C468] opacity-[0.05] blur-[130px] pointer-events-none" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="text-center mb-16">
-          <span className="caption text-gradient-gold mb-4 block">ROI CALCULATOR</span>
-          <h2 className="h1-text mb-4">See how much you save</h2>
-          <p className="text-[16px] text-[#9FB0A6] max-w-[520px] mx-auto">
-            Estimate the impact of replacing telecallers with AI — based on the example scenario below.
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="text-center mb-12">
+          <span className="caption text-gradient-gold mb-4 block">COST PER LEAD</span>
+          <h2 className="h1-text mb-4">Two telecallers, or Converza</h2>
+          <p className="text-[16px] text-[#9FB0A6] max-w-[560px] mx-auto">
+            A like-for-like cost comparison on the same lead volume. Your team still closes — the AI handles the first call and the follow-ups.
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {stats.map((stat, i) => {
-            const Icon = stat.icon;
-            return (
-              <div key={i} className="p-5 rounded-xl glass-card text-center">
-                <div className={`w-10 h-10 rounded-lg mx-auto mb-3 flex items-center justify-center ${
-                  stat.positive ? "bg-[#34D399]/15" : "bg-[#FB7185]/15"
-                }`}>
-                  <Icon className={`w-5 h-5 ${stat.positive ? "text-[#34D399]" : "text-[#FB7185]"}`} />
-                </div>
-                <p className="text-[24px] font-display font-bold text-[#F0F7F3]">{stat.value}</p>
-                <p className="text-[12px] text-[#9FB0A6] mt-1">{stat.label}</p>
-                <p className="text-[11px] text-[#6B7C73] mt-0.5">{stat.subtext}</p>
-              </div>
-            );
-          })}
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          <label className="p-6 rounded-xl glass-card block">
+            <span className="text-[13px] text-[#9FB0A6] flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4" /> Two telecallers cost you (monthly, total)
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[20px] text-[#9FB0A6]">₹</span>
+              <input
+                type="number"
+                min={0}
+                step={1000}
+                value={telecallerCost}
+                onChange={(e) => setTelecallerCost(Math.max(0, Number(e.target.value) || 0))}
+                className="w-full bg-transparent text-[28px] font-display font-bold text-[#F0F7F3] outline-none focus:ring-0"
+                aria-label="Monthly telecaller cost in rupees"
+              />
+            </div>
+          </label>
+
+          <label className="p-6 rounded-xl glass-card block">
+            <span className="text-[13px] text-[#9FB0A6] flex items-center gap-2 mb-2">
+              <ArrowRight className="w-4 h-4" /> Leads handled per month
+            </span>
+            <input
+              type="number"
+              min={1}
+              step={50}
+              value={leads}
+              onChange={(e) => setLeads(Math.max(1, Number(e.target.value) || 1))}
+              className="w-full bg-transparent text-[28px] font-display font-bold text-[#F0F7F3] outline-none focus:ring-0"
+              aria-label="Leads handled per month"
+            />
+          </label>
         </div>
 
-        {/* Phase 2.1: label the example assumptions — results vary by broker */}
-        <div className="mb-8 p-4 rounded-xl glass-card flex items-start gap-3">
-          <span className="text-[16px] mt-0.5">ℹ️</span>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-6 rounded-xl glass-card">
+            <p className="text-[12px] uppercase tracking-wide text-[#9FB0A6] mb-2">Two telecallers</p>
+            <p className="text-[32px] font-display font-bold text-[#FB7185]">
+              {inr(numbers.telecallerPerLead)}<span className="text-[14px] font-sans font-normal text-[#9FB0A6]"> / lead</span>
+            </p>
+            <p className="text-[12px] text-[#6B7C73] mt-2">
+              {inr(telecallerCost)} a month for about {leads.toLocaleString("en-IN")} leads, in office hours only.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-xl glass-card border-[#34D399]/30">
+            <p className="text-[12px] uppercase tracking-wide text-[#6FE3B0] mb-2">Converza Growth</p>
+            <p className="text-[32px] font-display font-bold text-[#34D399]">
+              {inr(numbers.converzaPerLead)}<span className="text-[14px] font-sans font-normal text-[#9FB0A6]"> / lead</span>
+            </p>
+            <p className="text-[12px] text-[#6B7C73] mt-2">
+              {inr(GROWTH.monthlyInclGst)} incl. 18% GST covers up to {numbers.includedLeads.toLocaleString("en-IN")} leads.
+              Extra leads are prepaid at {inr(numbers.overage)} each, before GST.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 p-4 rounded-xl glass-card">
           <p className="text-[12px] text-[#9FB0A6] leading-relaxed">
-            <strong className="text-[#F0F7F3]">Illustrative calculator — assumptions:</strong>{" "}
-            400 leads/month, 2 telecallers at ₹25,000/month each, and 12 vs 36 bookings/month. These
-            are example inputs, not a promise. Results vary by broker, market and lead flow.
+            <strong className="text-[#F0F7F3]">Assumptions:</strong> two telecallers at {inr(telecallerCost)} a month combined,
+            about {leads.toLocaleString("en-IN")} leads a month, office-hours calling, and the Growth plan at its
+            GST-inclusive price. Telecallers can negotiate and close; Converza runs the first call and the follow-ups.
+            This is arithmetic on your inputs, not a forecast of results.
           </p>
         </div>
 
-        {/* Bar Chart Comparison */}
-        <div ref={chartRef} className="rounded-2xl glass-card p-8">
-          <h3 className="text-[15px] font-semibold text-[#F0F7F3] mb-8 text-center">
-            Monthly cost comparison
-          </h3>
-
-          <div className="flex items-end justify-center gap-16 h-[200px]">
-            {/* Current Setup */}
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-[28px] font-display font-bold text-[#FB7185]">₹{currentCost.toLocaleString()}</span>
-              <div className="relative w-16" style={{ height: "160px" }}>
-                <div
-                  className="bar-fill absolute bottom-0 left-0 right-0 rounded-t-lg bg-gradient-to-t from-[#E11D48] to-[#FB7185] shadow-[0_0_24px_rgba(251,113,133,0.3)]"
-                  style={{ height: animated ? "100%" : "0%" }}
-                />
-                {/* Telecaller icons */}
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex gap-1">
-                  {Array.from({ length: scenarios[0].telecallers }).map((_, i) => (
-                    <div key={i} className="w-6 h-6 rounded-full bg-[#FB7185]/20 flex items-center justify-center">
-                      <Users className="w-3 h-3 text-[#FB7185]" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <p className="text-[12px] text-[#9FB0A6] text-center">{scenarios[0].label}</p>
-            </div>
-
-            {/* Arrow */}
-            <div className="flex items-center self-center pb-8">
-              <TrendingUp className="w-8 h-8 text-[#34D399]" />
-            </div>
-
-            {/* Converza */}
-            <div className="flex flex-col items-center gap-3">
-              <span className="text-[28px] font-display font-bold text-[#34D399]">₹{bridgeCost.toLocaleString()}</span>
-              <div className="relative w-16" style={{ height: "160px" }}>
-                <div
-                  className="bar-fill absolute bottom-0 left-0 right-0 rounded-t-lg bg-gradient-to-t from-[#1B4332] to-[#34D399] shadow-[0_0_24px_rgba(52,211,153,0.3)]"
-                  style={{ height: animated ? `${(bridgeCost / currentCost) * 100}%` : "0%" }}
-                />
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                  <div className="w-6 h-6 rounded-full bg-[#34D399]/20 flex items-center justify-center">
-                    <Users className="w-3 h-3 text-[#34D399]" />
-                  </div>
-                </div>
-              </div>
-              <p className="text-[12px] text-[#9FB0A6] text-center">{scenarios[1].label}</p>
-            </div>
-          </div>
-
-          {/* Savings highlight */}
-          <div className="mt-10 pt-6 border-t border-white/10 text-center">
-            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#34D399]/10 border border-[#34D399]/25">
-              <IndianRupee className="w-4 h-4 text-[#34D399]" />
-              <span className="text-[13px] font-semibold text-[#6FE3B0]">
-                Illustrative: ₹{(monthlySavings / 1000).toFixed(0)}K/mo saved in this scenario — ₹{(annualSavings / 100000).toFixed(1)}L/year
-              </span>
-            </div>
-          </div>
-        </div>
+        <p className="mt-4 text-center text-[12px] text-[#6B7C73] flex items-center justify-center gap-1">
+          <IndianRupee className="w-3.5 h-3.5" />
+          Difference in this scenario: {numbers.difference >= 0 ? inr(numbers.difference) : inr(0)} per lead
+        </p>
       </div>
     </section>
   );

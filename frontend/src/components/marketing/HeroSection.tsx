@@ -37,8 +37,8 @@ export default function HeroSection() {
 
       tl.fromTo(
         ".globe-container",
-        { opacity: 0 },
-        { opacity: 1, duration: 0.8 },
+        { opacity: 0, y: 24, scale: 0.92 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.8 },
         0
       )
         .fromTo(eyebrowRef.current, { y: -20, opacity: 0 }, { y: 0, opacity: 1 }, 0.3)
@@ -89,18 +89,18 @@ export default function HeroSection() {
               ref={eyebrowRef}
               className="caption text-gradient-gold mb-6 block opacity-0"
             >
-              EXCLUSIVE · ONE BROKER PER CITY
+              24/7 LEAD CAPTURE · CALLS 9 AM TO 9 PM IST
             </span>
 
-            <h1 className="text-[clamp(36px,8vw,72px)] font-display font-bold leading-[0.95] text-[#F0F7F3] tracking-[-0.04em] mb-6">
+            <h1 className="text-[clamp(32px,7vw,64px)] font-display font-bold leading-[0.98] text-[#F0F7F3] tracking-[-0.04em] mb-6">
               <span ref={line1Ref} className="block opacity-0">
-                Your leads call
+                Every enquiry
               </span>
               <span
                 ref={line2Ref}
                 className="block opacity-0 mt-2 text-gradient-emerald"
               >
-                themselves back.
+                called back in 60 seconds.
               </span>
             </h1>
 
@@ -108,9 +108,9 @@ export default function HeroSection() {
               ref={subheadRef}
               className="text-[15px] sm:text-[18px] text-[#9FB0A6] max-w-[480px] leading-relaxed mb-10 opacity-0"
             >
-              Converza puts an AI agent on every inbound lead
-              within 60 seconds — qualifying, booking, following up —
-              while you focus on closing.
+              Converza&apos;s AI calls your new real estate leads in Hinglish,
+              qualifies them, books the site visit and sends you the summary on
+              WhatsApp. Calls run 9 AM to 9 PM IST.
             </p>
 
             <div
@@ -118,11 +118,11 @@ export default function HeroSection() {
               className="flex flex-col sm:flex-row items-start sm:items-center gap-4 opacity-0"
             >
               <Link
-                href="/auth/register"
+                href="/demo"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[16px] font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-[0_0_48px_rgba(52,211,153,0.55)] active:scale-[0.98]"
                 style={{ boxShadow: "0 0 32px rgba(52, 211, 153, 0.35)" }}
               >
-                Request Your City
+                Get a test call in 30 seconds
                 <svg
                   width="16"
                   height="16"
@@ -140,10 +140,10 @@ export default function HeroSection() {
                 </svg>
               </Link>
               <Link
-                href="#demo"
+                href="/auth/register"
                 className="inline-flex items-center gap-2 text-[#9FB0A6] text-[16px] font-medium hover:text-[#F0F7F3] hover:underline transition-colors"
               >
-                See it live ↓
+                Start free trial (30 days, no card)
               </Link>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function HeroSection() {
           {/* Right: Globe */}
           <div className="flex-1 relative flex items-center justify-center h-[300px] sm:h-[400px] lg:h-[600px]">
             <div className="globe-container absolute inset-0 opacity-0">
-              <GlobeCanvas />
+              <GlobeCanvas scale={1.25} />
             </div>
           </div>
         </div>

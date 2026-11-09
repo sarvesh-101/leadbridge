@@ -4,78 +4,82 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PLANS } from "@/lib/plans.autogen";
+import { POLICY_REFUND_TEXT, SUPPORT_EMAIL, CAPTURE_LINE } from "@/lib/site";
 
-const faqsTemplate = (payload: typeof PLANS) =>
-  payload.plans
+/**
+ * V2 (T10) — FAQ per Appendix B. No unsourced claims, no "24/7 calling",
+ * no implication that leads mistake the AI for a human. The refund answer only
+ * renders when the owner has supplied POLICY_REFUND_TEXT.
+ */
+const pricingText =
+  PLANS.plans
     .map(
       (p) =>
         `${p.name} is ₹${p.monthlyExGst.toLocaleString("en-IN")}/mo (+ 18% GST — ₹${p.monthlyInclGst.toLocaleString(
           "en-IN"
         )} incl.) for up to ${p.leadsPerMonth.toLocaleString("en-IN")} leads handled per month with team access for ${p.teamUsers} users`
     )
-    .join(". ");
+    .join(". ") +
+  ". Extra leads are bought as prepaid credit and nothing stops mid-month. There is no setup fee.";
 
-const PRICING_FAQ_TEXT =
-  faqsTemplate(PLANS) +
-  ". Every plan includes full AI qualification + site-visit booking, WhatsApp notifications, and follow-up automation. Extra leads are bought as prepaid credit. There's no setup fee.";
-
-const faqs = [
+const baseFaqs = [
   {
-    q: "How does Converza work?",
-    a: "When a lead comes in from 99acres, MagicBricks, JustDial, or any connected source, our AI agent calls them within 60 seconds. It introduces itself, asks qualifying questions (budget, location, timeline, property type), answers their questions, and if interested — books a site visit. You get a WhatsApp summary instantly.",
+    q: "Is it an AI on the call?",
+    a: "Yes. It says so at the start of every call, and it never pretends to be a person if asked.",
   },
   {
-    q: "Do leads know it's an AI?",
-    a: "Our AI speaks in natural Hinglish and handles conversations so seamlessly that most leads don't realize it's AI. If asked directly, it transparently identifies itself as an AI assistant. The focus is on providing value — booking a visit — rather than deception.",
+    q: "Are calls recorded?",
+    a: "They may be, and the lead is told at the start of the call. You can listen to every recording in your dashboard.",
   },
   {
-    q: "Which lead sources do you support?",
-    a: "We integrate with 99acres, MagicBricks, Housing.com, JustDial, and any custom webhook. Leads can also come in via WhatsApp, SMS, or your website contact form. If it can send an HTTP request or webhook, we can ingest it.",
+    q: "When does it call?",
+    a: "Between 9 AM and 9 PM IST. Leads arriving at night are called when the window opens. " + CAPTURE_LINE + ".",
+  },
+  {
+    q: "Does it speak Hinglish?",
+    a: "Hinglish is the default. Hindi and English are also available, and the AI adapts to the language the lead uses.",
   },
   {
     q: "How much does it cost?",
-    a: PRICING_FAQ_TEXT,
+    a: pricingText,
   },
   {
-    q: "What languages does the AI speak?",
-    a: "The AI primarily speaks Hinglish (Hindi + English mix) which is what most Indian real estate leads prefer. It can handle pure Hindi, pure English, and adapts to the lead's preferred language dynamically during the conversation.",
+    q: "What does a lead cost?",
+    a: "From about ₹50 to ₹75 per lead before GST, depending on the plan. The pricing section shows the exact per-lead figure for each plan.",
   },
   {
-    q: "How is this different from a telecaller?",
-    a: "A telecaller costs ₹20,000-₹30,000/mo, handles ~40 calls/day, works limited hours, and takes breaks. Converza costs less, works 24/7, never gets tired, and calls every lead within 60 seconds — including weekends and holidays.",
+    q: "What happens if I use more leads than my plan?",
+    a: "You can buy extra leads as prepaid credit at your plan's overage rate. Nothing stops mid-month, and unused credit carries over.",
   },
   {
-    q: "Can I customize the call script?",
-    a: "Yes! You can customize the AI's greeting, questions, objection handling, and closing script from the dashboard. You can also run A/B tests to see which scripts perform best. The AI uses your property data (from your listings) to answer specific questions.",
+    q: "Can I cancel?",
+    a: "Yes, anytime. Your territory is held while the subscription is active.",
   },
   {
-    q: "What happens if a lead doesn't answer?",
-    a: "The AI automatically retries up to 3 times with increasing intervals. If still no answer, it sends you a notification. If they answer later, follow-up calls are scheduled (Day 1 and Day 3) automatically. You can configure all of this in Campaigns.",
-  },
-  {
-    q: "How do I know what happened on a call?",
-    a: "After every call, you get a WhatsApp notification with a summary — lead name, budget, location, timeline, sentiment, and whether a visit was booked. You can also listen to call recordings and read full transcripts in the dashboard.",
-  },
-  {
-    q: "Is my city/territory exclusive?",
-    a: "Yes! Each city or zone is assigned to one broker only. Once you claim your territory, no other broker can use Converza in that area. Check the Territory Map on this page to see which cities are available. First come, first locked.",
+    q: "Is my city or zone exclusive?",
+    a: "While your territory is active, we will not onboard another Converza broker for the same zone. A zone is a micro-market on the territory map — not a whole metro. It does not stop anyone from using other tools.",
   },
   {
     q: "How do I get started?",
-    a: "Click 'Request Your City', fill in your details and city. We'll verify your territory is available and set you up within 24 hours. Setup takes about 10 minutes — connect your lead sources, configure your script, and the AI starts calling immediately.",
+    a: "Check the territory map, claim a zone, and sign up. Your 30-day trial starts immediately; onboarding covers your business details, AI script, lead sources, calling number and a test call to your own phone.",
   },
   {
     q: "Do you offer a trial?",
-    a: `We offer a ${PLANS.trial.days}-day trial with up to ${PLANS.trial.maxLeads} leads included (${PLANS.trial.maxLeadsPerDay}/day) — no credit card required. You can see the results before committing. After the trial, you can choose any plan that fits your volume. If Converza isn't right, just let us know.`,
+    a: `Yes — ${PLANS.trial.days} days, up to ${PLANS.trial.maxLeads} leads, no credit card. You see your own numbers on your own leads before paying.`,
   },
 ];
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [refundOpen, setRefundOpen] = useState(false);
 
-  const toggle = (i: number) => {
-    setOpenIndex(openIndex === i ? null : i);
-  };
+  const faqs = POLICY_REFUND_TEXT
+    ? [...baseFaqs, { q: "What is your refund policy?", a: POLICY_REFUND_TEXT }]
+    : baseFaqs;
+
+  const toggle = (i: number) => setOpenIndex(openIndex === i ? null : i);
+  void refundOpen;
+  void setRefundOpen;
 
   return (
     <section className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="faq">
@@ -90,13 +94,11 @@ export default function FAQSection() {
 
         <div className="space-y-2">
           {faqs.map((faq, i) => (
-            <div
-              key={i}
-              className="rounded-xl glass-card overflow-hidden transition-colors duration-200 hover:border-[#34D399]/30"
-            >
+            <div key={faq.q} className="rounded-xl glass-card overflow-hidden transition-colors duration-200 hover:border-[#34D399]/30">
               <button
                 onClick={() => toggle(i)}
                 className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
+                aria-expanded={openIndex === i}
               >
                 <span className="text-[14px] font-medium text-[#D5E0D9] flex-1">{faq.q}</span>
                 <ChevronDown
@@ -123,11 +125,10 @@ export default function FAQSection() {
           ))}
         </div>
 
-        {/* Bottom CTA */}
         <div className="text-center mt-10">
           <p className="text-[13px] text-[#9FB0A6] mb-3">Still have questions?</p>
           <a
-            href="mailto:support@converza.tech"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="inline-flex items-center gap-2 text-[14px] text-[#6FE3B0] hover:text-[#34D399] font-medium transition-colors"
           >
             Contact our team →

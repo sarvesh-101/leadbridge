@@ -4,12 +4,15 @@ import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { Check, X } from "lucide-react";
 import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
+import { GST_2_PLAN_DIFF } from "@/lib/site";
+
+const SAVINGS_IN_RUPIAH = GST_2_PLAN_DIFF.toLocaleString("en-IN");
 
 const comparisons = [
-  { metric: "Response time", bridge: "≤60 seconds", traditional: "4-8 hours" },
-  { metric: "Calls per day", bridge: "24/7 answering", traditional: "~40/day" },
+  { metric: "Response time", bridge: "≤60 seconds in calling hours", traditional: "When someone is free" },
+  { metric: "Call capacity", bridge: "Every new lead, automatically", traditional: "About 40 calls a day" },
   { metric: "Languages", bridge: "Hinglish, Hindi, English", traditional: "1 language" },
-  { metric: "Working hours", bridge: "24/7 including holidays", traditional: "9 AM - 6 PM" },
+  { metric: "Working hours", bridge: "9 AM - 9 PM IST, all days", traditional: "Office hours" },
   { metric: "Lead scoring", bridge: "AI-driven (0-100)", traditional: "Manual guesswork" },
   { metric: "Follow-up automation", bridge: "Auto Day 1 + Day 3", traditional: "Manual reminders" },
   { metric: "WhatsApp notifications", bridge: "Instant after every call", traditional: "None" },
@@ -17,9 +20,9 @@ const comparisons = [
   { metric: "Analytics dashboard", bridge: "Real-time funnel & metrics", traditional: "Excel sheets" },
   { metric: "Monthly cost", bridge: `from ₹${PLAN_PAYLOAD.plans[0].monthlyExGst.toLocaleString("en-IN")} + GST`, traditional: "₹20,000 - ₹30,000/person" },
   // Phase 2.1: the two capability-number claims below carry a footnote so
-  // prospects know they're platform capability, not a guaranteed outcome.
-  { metric: "Leads handled", bridge: "500+ per month", traditional: "~200 per person", note: true },
-  { metric: "Script consistency", bridge: "100% consistent", traditional: "Varies by agent", note: true },
+  // prospects know they're platform capability, not a promised outcome.
+  { metric: "Leads handled", bridge: `up to ${PLAN_PAYLOAD.plans[2].leadsPerMonth.toLocaleString("en-IN")}/month on Pro`, traditional: "~200 per person", note: true },
+  { metric: "Script consistency", bridge: "Follows your approved script", traditional: "Varies by agent", note: true },
 ];
 
 export default function ComparisonSection() {
@@ -114,13 +117,13 @@ export default function ComparisonSection() {
 
         {/* Phase 2.1: footnote for the capability claims above */}
         <p className="mt-4 text-[12px] text-[#6B7C73] text-center leading-relaxed">
-          * Platform capability, not a guarantee. Actual results vary by broker, market and lead flow.
+          * Platform capability and a worked cost example, not a promise of results. Actual outcomes vary by broker, market and lead flow.
         </p>
 
         {/* Savings Callout */}
         <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-[#34D399]/10 to-[#1B4332]/20 border border-[#34D399]/20 text-center">
           <p className="text-[15px] text-[#D5E0D9] font-medium">
-            💰 Example: 2 telecallers (₹50K/mo) vs Converza Growth (₹35K/mo) — <span className="text-[#6FE3B0]">about ₹15K/mo less</span> in this scenario
+            💰 Example: 2 telecallers (₹50K/mo) vs Converza Growth (${PLAN_PAYLOAD.plans[1].monthlyInclGst.toLocaleString('en-IN')} incl. GST) — <span className="text-[#6FE3B0]">about ₹${SAVINGS_IN_RUPIAH}</span> in this scenario
           </p>
         </div>
       </div>

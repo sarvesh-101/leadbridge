@@ -38,7 +38,7 @@ const slides = [
   {
     number: "05",
     title: "Your city. Locked.",
-    body: "One broker per territory. Your competitors can't use this.",
+    body: "We won't onboard another Converza broker in your zone while your territory is active.",
     hasMap: true,
   },
 ];

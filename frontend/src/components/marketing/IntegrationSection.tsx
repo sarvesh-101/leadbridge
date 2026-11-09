@@ -1,108 +1,40 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-import { Globe, Smartphone, MessageSquare, Link2, Webhook, Mail } from "lucide-react";
+import { INTEGRATIONS } from "@/lib/integrations.autogen";
+import { Globe, Smartphone, MessageSquare, Link2, Webhook, Mail, FileSpreadsheet, Upload } from "lucide-react";
 
-const integrations = [
-  {
-    name: "Custom Webhook",
-    type: "API",
-    icon: Webhook,
-    description: "Any system that can send an HTTP request — we'll ingest it",
-    status: "ready" as const,
-  },
-  {
-    name: "Website Widget",
-    type: "Embed",
-    icon: Link2,
-    description: "Embed a contact form on your website — leads come directly",
-    status: "ready" as const,
-  },
-  {
-    name: "99acres",
-    type: "Real Estate Portal",
-    icon: Globe,
-    description: "India's #1 property portal — lead import via SMS/email forwarding",
-    status: "setup" as const,
-  },
-  {
-    name: "MagicBricks",
-    type: "Real Estate Portal",
-    icon: Globe,
-    description: "Second largest property portal with high-intent buyers",
-    status: "setup" as const,
-  },
-  {
-    name: "Housing.com",
-    type: "Real Estate Portal",
-    icon: Globe,
-    description: "Premium property listings with quality leads",
-    status: "setup" as const,
-  },
-  {
-    name: "JustDial",
-    type: "Business Directory",
-    icon: Smartphone,
-    description: "India's largest local search — leads with phone numbers",
-    status: "setup" as const,
-  },
-  {
-    name: "WhatsApp",
-    type: "Messaging",
-    icon: MessageSquare,
-    description: "Leads from WhatsApp — requires WhatsApp Business API setup",
-    status: "setup" as const,
-  },
-  {
-    name: "Email Import",
-    type: "Inbound",
-    icon: Mail,
-    description: "Forward enquiry emails to your Converza inbox",
-    status: "setup" as const,
-  },
-];
+/**
+ * V2 (T8/T10) — integration cards read the generated status config.
+ * Changing a status in server/src/config/integration-status.ts + regenerating
+ * is the only edit needed here. No status is hardcoded in this file.
+ */
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  website_form: Link2,
+  custom_webhook: Webhook,
+  csv: Upload,
+  manual: Smartphone,
+  google_sheets: FileSpreadsheet,
+  facebook: Globe,
+  indiamart: Globe,
+  whatsapp_enquiries: MessageSquare,
+  "99acres": Globe,
+  magicbricks: Globe,
+  housing: Globe,
+  justdial: Smartphone,
+  email_forwarding: Mail,
+  sms_forwarding: MessageSquare,
+};
+
+const BADGE: Record<string, string> = {
+  LIVE: "bg-[#34D399]/15 border-[#34D399]/30 text-[#6FE3B0]",
+  SETUP_ASSISTED: "bg-[#E8C468]/10 border-[#E8C468]/25 text-[#E8C468]",
+  IN_SETUP: "bg-white/[0.06] border-white/15 text-[#9FB0A6]",
+  COMING_SOON: "bg-white/[0.03] border-white/10 text-[#6B7C73]",
+};
 
 export default function IntegrationSection() {
-  const { ref, inView } = useInView({ threshold: 0.1, triggerOnce: true });
-  const gridRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!inView) return;
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
-    let kill: (() => void) | undefined;
-
-    const init = async () => {
-      const { gsap } = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-
-      const cards = gridRef.current?.querySelectorAll(".integration-card");
-      if (!cards) return;
-
-      gsap.fromTo(cards,
-        { opacity: 0, y: 20, scale: 0.95 },
-        {
-          opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: gridRef.current,
-            start: "top 80%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
-
-      kill = () => {
-        ScrollTrigger.getAll().forEach((st: any) => st.kill());
-      };
-    };
-
-    init();
-    return () => { if (kill) kill(); };
-  }, [inView]);
+  const { ref } = useInView({ threshold: 0.1, triggerOnce: true });
 
   return (
     <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="integrations">
@@ -110,53 +42,34 @@ export default function IntegrationSection() {
         <div className="text-center mb-16">
           <span className="caption text-gradient-emerald mb-4 block">CONNECT EVERYTHING</span>
           <h2 className="h1-text mb-4">Works with every lead source</h2>
-          <p className="text-[16px] text-[#9FB0A6] max-w-[520px] mx-auto">
-            No matter where your leads come from — portals, social, web, or WhatsApp — they all land in one inbox.
+          <p className="text-[16px] text-[#9FB0A6] max-w-[560px] mx-auto">
+            Every source below shows its real status. We never call a connection instant before it is live.
           </p>
         </div>
 
-        <div ref={gridRef} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {integrations.map((integration, i) => {
-            const Icon = integration.icon;
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {INTEGRATIONS.sources.map((integration) => {
+            const Icon = ICONS[integration.id] || Globe;
             return (
-              <div
-                key={i}
-                className="integration-card group relative p-5 rounded-xl glass-card hover:border-[#34D399]/40 hover:shadow-[0_8px_32px_rgba(52,211,153,0.1)] transition-all duration-300"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#34D399]/20 to-[#1B4332]/30 flex items-center justify-center mb-3 border border-[#34D399]/20 shadow-[0_0_16px_rgba(52,211,153,0.12)]">
+              <div key={integration.id} className="relative p-5 rounded-xl glass-card hover:border-[#34D399]/40 transition-all duration-300">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#34D399]/20 to-[#1B4332]/30 flex items-center justify-center mb-3 border border-[#34D399]/20">
                   <Icon className="w-5 h-5 text-[#6FE3B0]" />
                 </div>
                 <h3 className="text-[14px] font-semibold text-[#F0F7F3] mb-0.5">{integration.name}</h3>
-                <p className="text-[11px] text-[#9FB0A6] mb-2">{integration.type}</p>
-                <p className="text-[11px] text-[#6B7C73] leading-relaxed">{integration.description}</p>
-                {integration.status === "ready" ? (
-                  <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#34D399]/15 border border-[#34D399]/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] shadow-[0_0_6px_#34D399]" />
-                    <span className="text-[9px] font-medium text-[#6FE3B0]">Ready</span>
-                  </span>
-                ) : (
-                  <span className="absolute top-3 right-3 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#E8C468]/10 border border-[#E8C468]/25">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E8C468]" />
-                    <span className="text-[9px] font-medium text-[#E8C468]">In setup</span>
-                  </span>
-                )}
+                <p className="text-[11px] text-[#6B7C73] leading-relaxed mb-3">{integration.note}</p>
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${BADGE[integration.availability]}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                  <span className="text-[9px] font-medium">{integration.label}</span>
+                </span>
               </div>
             );
           })}
         </div>
 
-        {/* Flow description */}
         <div className="mt-12 text-center">
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass-card">
-            <div className="flex items-center gap-1">
-              {[Globe, Smartphone, MessageSquare, Webhook].map((Icon, i) => (
-                <div key={i} className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center">
-                  <Icon className="w-3 h-3 text-[#6FE3B0]" />
-                </div>
-              ))}
-            </div>
             <span className="text-[13px] text-[#9FB0A6]">
-              Any source → Converza AI → You get a WhatsApp notification
+              Any source → Converza AI → you get a WhatsApp summary
             </span>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PLANS as PLAN_PAYLOAD } from "@/lib/plans.autogen";
 
@@ -20,6 +20,8 @@ const plans = ["STARTER", "GROWTH", "PRO"]
     name: p!.name,
     // Display price is ex-GST (doc §1.2); the charged figure is shown as
     // the GST-inclusive value so the billing page and invoices agree.
+    priceEx: p!.monthlyExGst,
+    priceIncl: p!.monthlyInclGst,
     price: inr(p!.monthlyExGst),
     incl: inr(p!.monthlyInclGst),
     perLead: inr(p!.pricePerLeadExGst),
@@ -63,6 +65,8 @@ const compareRows = [
 
 export default function PricingSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  // V2 (T10): "show prices incl. GST" toggle — same derived payload either way.
+  const [showInclGst, setShowInclGst] = useState(false);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -107,7 +111,28 @@ export default function PricingSection() {
       {/* emerald + gold pricing glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full bg-[#34D399] opacity-[0.05] blur-[150px] pointer-events-none" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <h2 className="h1-text text-center mb-16">Simple, transparent pricing</h2>
+        <h2 className="h1-text text-center mb-6">Simple, transparent pricing</h2>
+
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex rounded-full border border-white/15 p-1" role="group" aria-label="GST display">
+            <button
+              type="button"
+              onClick={() => setShowInclGst(false)}
+              aria-pressed={!showInclGst}
+              className={`px-4 py-1.5 rounded-full text-[12px] font-medium transition-colors ${!showInclGst ? "bg-[#34D399] text-[#0A0F0C]" : "text-[#9FB0A6]"}`}
+            >
+              Prices ex-GST
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowInclGst(true)}
+              aria-pressed={showInclGst}
+              className={`px-4 py-1.5 rounded-full text-[12px] font-medium transition-colors ${showInclGst ? "bg-[#34D399] text-[#0A0F0C]" : "text-[#9FB0A6]"}`}
+            >
+              Incl. 18% GST
+            </button>
+          </div>
+        </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
           {plans.map((plan, i) => (
             <div
@@ -128,10 +153,12 @@ export default function PricingSection() {
                 <h3 className="text-[20px] font-semibold text-[#F0F7F3] mb-1">{plan.name}</h3>
                 <p className="text-[13px] text-[#9FB0A6] mb-1">Up to {plan.leads} leads/mo</p>
                 <div className="text-[36px] font-display font-bold text-[#F0F7F3] mt-6 mb-1">
-                  {plan.price}
+                  {showInclGst ? inr(plan.priceIncl) : inr(plan.priceEx)}
                   <span className="text-[15px] text-[#9FB0A6] font-sans font-normal">/mo</span>
                 </div>
-                <p className="text-[12px] text-[#6B7C73]">+ 18% GST ({plan.incl} incl.) · ≈{plan.perLead}/lead</p>
+                <p className="text-[12px] text-[#6B7C73]">
+                  {showInclGst ? "Includes 18% GST" : `+ 18% GST (${plan.incl} incl.)`} · ≈{plan.perLead}/lead
+                </p>
 
                 {/* Stat chips: users / leads / dedicated number */}
                 <div className="mt-6 grid grid-cols-3 gap-2">
@@ -170,7 +197,7 @@ export default function PricingSection() {
                       : "border border-white/15 text-[#F0F7F3] hover:bg-white/[0.06] hover:border-[#34D399]/40"
                   }`}
                 >
-                  Request Your City
+                  Start free trial
                 </Link>
               </div>
             </div>
@@ -220,7 +247,11 @@ export default function PricingSection() {
             ))}
           </div>
           </div>
-          <p className="text-center text-[12px] text-[#6B7C73] mt-4">All plans include full qualification, booking automation, WhatsApp notifications, and follow-up sequences. 18% GST applies.</p>
+          <p className="text-center text-[12px] text-[#6B7C73] mt-4 max-w-[720px] mx-auto">
+            All plans include full qualification, booking automation, WhatsApp notifications and follow-up sequences.
+            Fair use: 8 AI call minutes per lead per month. Extra leads are prepaid at the overage rate shown above.
+            Prices exclude 18% GST unless the toggle says otherwise; annual billing is 10 months for 12.
+          </p>
         </div>
       </div>
     </section>

@@ -24,26 +24,23 @@ export default function PrivacyPolicyPage() {
         <div className="space-y-8 text-[#9FB0A6] leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">1. Information We Collect</h2>
-            <p className="mb-3">We collect information to provide and improve our services:</p>
+            <p className="mb-3">              We collect information only to provide and improve our services:
+</p>
             <h3 className="text-[#F0F7F3] font-medium mb-2">Account Information</h3>
             <p className="mb-3">
-              When you create an account, we collect your name, email address, phone number, business name,
-              and billing information.
+              When you create an account, we collect your name, email address, phone number, business name, and the billing information needed to run your subscription.
             </p>
             <h3 className="text-[#F0F7F3] font-medium mb-2">Lead Data</h3>
             <p className="mb-3">
-              We process lead data that you import or collect through the Platform, including names, phone
-              numbers, email addresses, property preferences, and interaction history.
+              We process lead data that you import or collect through the Platform, including names, phone numbers, email addresses, property preferences, and interaction history.
             </p>
             <h3 className="text-[#F0F7F3] font-medium mb-2">Call Recordings & Transcripts</h3>
             <p className="mb-3">
-              AI calls made through the Platform are recorded and transcribed for quality assurance,
-              training, and lead management purposes.
+              AI calls made through the Platform may be recorded and transcribed for lead management where the lead has been told the call may be recorded and has a lawful basis to be contacted.
             </p>
             <h3 className="text-[#F0F7F3] font-medium mb-2">Usage Data</h3>
             <p>
-              We collect information about how you use the Platform, including features accessed,
-              time spent, and interactions with the AI system.
+              We collect information about how you use the Platform, including features accessed, time spent, and interactions with the AI system.
             </p>
           </section>
 
@@ -77,13 +74,10 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">4. Data Retention</h2>
             <p className="mb-3">
-              We retain your data for as long as your account is active or as needed to provide the Service.
-              Upon account cancellation, we retain your data for 30 days before permanent deletion, unless
-              retention is required by law.
+              We retain your data only as long as your account is active or as needed to provide the Service, and for no longer than the legal minimum where a longer period is required by law.
             </p>
             <p>
-              Call recordings are retained for 90 days unless you choose to download or export them.
-              Transcripts and extracted data are retained for the duration of your account.
+              Call recordings and transcripts are retained only for as long as your account is active, and deleted when your account is deleted, unless a longer retention period is required by law. Retention is not indefinite; it is tied to your active account and any legal requirement.
             </p>
           </section>
 
@@ -114,9 +108,8 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="mt-3">
               <strong>Under the Digital Personal Data Protection Act, 2023 (DPDP Act),</strong> you can
-              withdraw your consent and request full erasure of your personal data at any time. To do
-              so, open <strong>Dashboard → Settings → Privacy &amp; Data</strong> and click
-              <strong> "Request data erasure"</strong>. We process such requests within 30 days.
+              withdraw your consent and request erasure of your personal data.
+              To request erasure, contact us at <a href="mailto:support@converza.tech" className="text-[#6FE3B0] hover:underline">support@converza.tech</a>.
             </p>
           </section>
 
@@ -131,9 +124,8 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">8. International Data Transfers</h2>
             <p>
-              Your data may be processed in data centers located in India and the United States. By using
-              the Platform, you consent to such transfers. We ensure appropriate safeguards are in place
-              for international data transfers.
+              Your data may be processed in data centers located in India and the United States. Where personal data is transferred internationally, we use appropriate safeguards.
+              If you need details for your own records or compliance review, contact us at <a href="mailto:support@converza.tech" className="text-[#6FE3B0] hover:underline">support@converza.tech</a>.
             </p>
           </section>
 

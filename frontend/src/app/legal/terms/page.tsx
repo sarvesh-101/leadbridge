@@ -55,12 +55,10 @@ export default function TermsOfServicePage() {
           <section>
             <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">4. Subscription and Billing</h2>
             <p className="mb-3">
-              The Platform is offered on a subscription basis. Paid plans are billed monthly or annually
-              as selected during signup. All fees are non-refundable except as required by applicable law.
+              The Platform is offered on a subscription basis. Paid plans are billed monthly or annually as selected during signup.
             </p>
             <p>
-              We reserve the right to change our pricing with 30 days&apos; notice. Price changes will not
-              affect your current billing cycle.
+              We reserve the right to change our pricing with notice. Price changes do not affect your current billing cycle.
             </p>
           </section>
 

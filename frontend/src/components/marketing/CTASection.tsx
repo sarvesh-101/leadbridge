@@ -15,8 +15,8 @@ export default function CTASection() {
 
   const urgencyLine =
     stats && stats.citiesClaimed > 0
-      ? `🏙️  ${stats.citiesClaimed} city${stats.citiesClaimed === 1 ? "" : "s"} already claimed — ${stats.citiesAvailable} still open. First come, first locked.`
-      : "🏙️  Every city is still open. Be the first broker to claim yours.";
+      ? `🏙️  ${stats.citiesClaimed} zone${stats.citiesClaimed === 1 ? "" : "s"} already claimed — ${stats.citiesAvailable} still open.`
+      : "🏙️  Every zone is still open. Be the first broker to claim yours.";
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0A0F0C]">
@@ -30,19 +30,19 @@ export default function CTASection() {
 
       {/* Globe - bottom center, half cropped */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-70 pointer-events-none">
-        <GlobeCanvas />
+        <GlobeCanvas scale={1.4} />
       </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="hero-text leading-[0.95] mb-6">
-          Your city is
+          Your zone is still available.
           <br />
-          <span className="text-gradient-emerald">still available.</span>
+          <span className="text-gradient-emerald">Be the first broker to claim yours.</span>
         </h2>
 
         <p className="text-[18px] text-[#9FB0A6] max-w-[540px] mx-auto mb-12">
-          We&apos;re onboarding one broker per city. Request yours before someone else does.
+          We&apos;re onboarding our first brokers. Start free and see your own numbers.
         </p>
 
         <div className="flex justify-center mb-8">
@@ -57,7 +57,7 @@ export default function CTASection() {
               e.currentTarget.style.boxShadow = "0 0 32px rgba(52, 211, 153, 0.4)";
             }}
           >
-            Request Your City
+            Claim your zone
             <svg
               width="20"
               height="20"

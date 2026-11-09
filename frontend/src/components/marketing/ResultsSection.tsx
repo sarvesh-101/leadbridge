@@ -3,10 +3,11 @@
 import { useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 
+// V2 (T10): target metrics only — no unsourced averages, no 24/7 calling claim.
 const stats = [
-  { value: 60, suffix: "s", label: "Target time to first call", subtext: "Industry average response: 4–8 hours" },
-  { value: 24, suffix: "/7", label: "Calling coverage", subtext: "AI never sleeps — weekends included" },
-  { value: 3, suffix: "+", label: "Follow-up attempts", subtext: "Day 1 + Day 3 automatic sequence" },
+  { value: 60, suffix: "s", label: "Target time to first call", subtext: "During calling hours, 9 AM to 9 PM IST" },
+  { value: 9, suffix: "–9", label: "Calling hours, every day", subtext: "Night leads are called when the window opens" },
+  { value: 3, suffix: "+", label: "Follow-up attempts", subtext: "Then a Day 1 and Day 3 sequence (7 days on Pro)" },
 ];
 
 export default function ResultsSection() {
@@ -79,6 +80,11 @@ export default function ResultsSection() {
             </div>
           ))}
         </div>
+
+        {/* V2 (T10): early access is stated plainly — we have no published results. */}
+        <p className="mt-8 text-center text-[13px] text-[#9FB0A6]">
+          We&apos;re onboarding our first brokers. Start free and see your own numbers.
+        </p>
       </div>
     </section>
   );
