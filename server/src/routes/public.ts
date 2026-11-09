@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { buildPlansPayload } from "../config/plans";
+import { buildIntegrationsPayload } from "../config/integration-status";
 
 /**
  * Public (no-auth) endpoints for the marketing landing page.
@@ -17,6 +18,15 @@ export default async function publicRoutes(fastify: FastifyInstance) {
   }, async (_request, reply) => {
     reply.header("Cache-Control", "public, max-age=300");
     return buildPlansPayload();
+  });
+
+  // GET /public/integrations — the single-source lead-source status table
+  // (V2 T8). The website, the prompt and the admin guide all read this config.
+  fastify.get("/public/integrations", {
+    config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
+  }, async (_request, reply) => {
+    reply.header("Cache-Control", "public, max-age=300");
+    return buildIntegrationsPayload();
   });
 
   // GET /public/landing — real stats for the landing page

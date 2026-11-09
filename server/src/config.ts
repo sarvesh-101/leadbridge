@@ -16,9 +16,39 @@ const envSchema = z.object({
   // Demo Mode — run without external APIs for investor demos
   DEMO_MODE: z.string().transform((v) => v === "true").default("false"),
   // V2 (T6): public "call me now" demo funnel.
-  DEMO_DAILY_CAP: z.coerce.number().int().default(25),
+  DEMO_DAILY_CAP: z.coerce.number().int().default(50),
   DEMO_CLIENT_ID: z.string().optional(),   // client record whose agent receives demo calls
   DEMO_OTP_REQUIRED: z.string().transform((v) => v === "true").default("true"),
+  // Dedicated demo agent (T6). When empty the demo falls back to the platform
+  // client's agent — never a broker's configured script.
+  DEMO_AGENT_ID: z.string().optional(),
+  // Captcha (T6). Cloudflare Turnstile or hCaptcha. When neither is set the
+  // endpoint requires the honeypot field instead and logs a loud boot warning.
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+  HCAPTCHA_SECRET_KEY: z.string().optional(),
+
+  // V2 (T5): approved after-hours acknowledgement template. When unset, no
+  // business-initiated free-form message is sent (never allowed by WhatsApp).
+  WHATSAPP_TEMPLATE_AFTER_HOURS_ACK: z.string().optional(),
+  // V2 (T11): approved weekly-report template. Email fallback when unset.
+  WHATSAPP_TEMPLATE_WEEKLY_REPORT: z.string().optional(),
+
+  // V2 (T7): founder alert destinations for platform credit events.
+  FOUNDER_ALERT_EMAIL: z.string().optional(),
+  FOUNDER_ALERT_WHATSAPP: z.string().optional(),
+  // V2 (T11): alert when trailing-7-day average platform cost/lead exceeds this.
+  COST_PER_LEAD_ALERT_RUPEES: z.coerce.number().default(40),
+
+  // V2 (T14): recording retention. UNSET = never auto-delete (default).
+  RECORDING_RETENTION_DAYS: z.coerce.number().int().optional(),
+
+  // V2 (T13): territory auto-release is OFF unless a human enables it.
+  TERRITORY_AUTO_RELEASE_ENABLED: z.string().transform((v) => v === "true").default("false"),
+  TERRITORY_MIN_MONTHLY_LEADS: z.coerce.number().int().default(30),
+
+  // Customer-facing URLs/emails (never hardcode these in copy).
+  SUPPORT_EMAIL: z.string().default("support@converza.tech"),
+  SITE_URL: z.string().default("https://converza.tech"),
 
   // JWT
   JWT_SECRET: z.string().min(32),

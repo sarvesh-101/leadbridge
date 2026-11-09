@@ -4,6 +4,8 @@ import { config } from "../config";
 import { logger } from "../utils/logger";
 import { prisma } from "../utils/prisma-shared";
 import { CallJob, enqueueCall, enqueueNotification } from "./queues";
+import { firstCallDelaySecondsFor } from "../utils/call-window";
+import { observeFirstCallDelay } from "../utils/metrics";
 import { getSharedRedisOptions } from "../utils/redis-health";
 import { getVoiceAIProvider } from "../services/voice";
 import { emitCallStarted, emitCallEnded, emitStatusChange } from "../services/websocket.service";
@@ -202,8 +204,20 @@ const callWorker = new Worker<CallJob>(
         // makes it far from impossible.
         callAttempts: { increment: 1 },
         firstCalledAt: lead.firstCalledAt || new Date(),
+        // V2 (T5): measured from max(receivedAt, windowOpenAt) — the value the
+        // proof engine's medianFirstCallSeconds reads.
+        ...(lead.firstCalledAt
+          ? {}
+          : {
+              firstCallDelaySeconds: firstCallDelaySecondsFor(lead.receivedAt, new Date()),
+            }),
       },
     });
+
+    // V2 (T11): histogram of first-call delay (only the first attempt).
+    if (!lead.firstCalledAt) {
+      observeFirstCallDelay(firstCallDelaySecondsFor(lead.receivedAt, new Date()));
+    }
 
     await emitCallStarted(leadId, call.id, clientId);
     await emitStatusChange(leadId, newStatus, clientId, { callId: call.id, callType });

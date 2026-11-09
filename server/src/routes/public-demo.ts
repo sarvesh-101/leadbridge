@@ -64,6 +64,18 @@ export default async function publicDemoRoutes(fastify: FastifyInstance) {
 
     const ip = (request.headers["x-forwarded-for"] as string || "").split(",")[0]?.trim() || null;
 
+    // V2 (T6): captcha. Turnstile/hCaptcha when keys exist; otherwise the
+    // honeypot above plus the route rate limits apply (boot warning in index.ts).
+    const captchaToken = String((request.body as Record<string, unknown> | null)?.captchaToken || "");
+    const { verifyCaptcha } = await import("../utils/captcha");
+    const captcha = await verifyCaptcha(captchaToken, ip);
+    if (!captcha.ok) {
+      return reply.status(400).send({ error: "Please complete the verification and try again." });
+    }
+
+    const { recordDemoRequest } = await import("../utils/metrics");
+    recordDemoRequest("requested");
+
     // Daily global cap (platform cost guard).
     const todayCount = await fastify.prisma.demoRequest.count({
       where: { createdAt: { gte: startOfDay() } },

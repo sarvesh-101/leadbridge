@@ -10,6 +10,8 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import type Redis from "ioredis";
 import { enqueueCall } from "../workers/queues";
 import { logger } from "../utils/logger";
+import { config } from "../config";
+import { isWithinCallingWindow } from "../utils/call-window";
 
 export interface IngestExternalLeadParams {
   clientId: string;
@@ -138,6 +140,32 @@ export async function ingestExternalLead(
       rawPayload,
     },
   });
+
+  // ─── V2 (T5): after-hours acknowledgement ───────────────────
+  // Only an APPROVED template may be sent business-initiated; when none is
+  // configured we log and skip (never free-form). The lead is still called
+  // when the window opens — the queue reschedules it.
+  if (!isWithinCallingWindow(created.receivedAt)) {
+    if (config.WHATSAPP_TEMPLATE_AFTER_HOURS_ACK) {
+      const { sendNamedTemplate } = await import("./whatsapp-template.service");
+      sendNamedTemplate({ to: phone, templateName: config.WHATSAPP_TEMPLATE_AFTER_HOURS_ACK }).catch(
+        (err: Error) => logger.warn({ leadId: created.id, err: err.message }, `${logLabel}: after-hours template failed`)
+      );
+    } else {
+      logger.info(
+        { clientId, leadId: created.id },
+        `${logLabel}: lead arrived outside 09:00–21:00 IST — no approved after-hours template configured, acknowledgement skipped`
+      );
+    }
+  }
+
+  // ─── V2 (T15): onboarding speed instrumentation ─────────────
+  prisma.client
+    .updateMany({
+      where: { id: clientId, firstLeadSourceConnectedAt: null },
+      data: { firstLeadSourceConnectedAt: new Date(), firstCallAt: new Date() },
+    })
+    .catch(() => {});
 
   if (allowance === "overage") {
     logger.info(

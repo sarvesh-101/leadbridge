@@ -30,6 +30,9 @@ import { runUnpaidActivationSweep } from "./unpaid-activation";
 import { unstickStaleCalls } from "./stale-calls";
 import { runPlatformCreditMonitor } from "./platform-credit-monitor";
 import { runWithCronLock } from "../utils/cron-lock";
+import { runWeeklyProofReport } from "./weekly-proof-report";
+import { runRecordingRetention } from "./recording-retention";
+import { runTerritoryRelease } from "./territory-release";
 
 export function registerCronJobs() {
   // --- Platform Low-Credit Monitor (V2 T7) -- every 30 minutes ---
@@ -247,6 +250,44 @@ export function registerCronJobs() {
         }
       } catch (error: any) {
         logger.error({ err: error.message }, "Cron: Revenue recognition failed");
+      }
+    });
+  });
+
+  // ─── Weekly Proof Report (V2 T11) — Monday 09:00 IST ───────
+  cron.schedule("0 9 * * 1", async () => {
+    await runWithCronLock("weekly-proof-report", 3600, async () => {
+      try {
+        const result = await runWeeklyProofReport();
+        logger.info(result, "Cron: weekly proof report complete");
+      } catch (error: any) {
+        logger.error({ err: error.message }, "Cron: weekly proof report failed");
+      }
+    });
+  });
+
+  // ─── Recording Retention (V2 T14) — daily 03:00, no-op unless configured ──
+  cron.schedule("0 3 * * *", async () => {
+    await runWithCronLock("recording-retention", 1800, async () => {
+      try {
+        const result = await runRecordingRetention();
+        if (result.cleared > 0) logger.info(result, "Cron: recording retention complete");
+      } catch (error: any) {
+        logger.error({ err: error.message }, "Cron: recording retention failed");
+      }
+    });
+  });
+
+  // ─── Territory Release (V2 T13) — daily 04:00, disabled by default ────────
+  cron.schedule("0 4 * * *", async () => {
+    await runWithCronLock("territory-release", 1800, async () => {
+      try {
+        const result = await runTerritoryRelease();
+        if (result.enabled && (result.warned > 0 || result.released > 0)) {
+          logger.info(result, "Cron: territory release complete");
+        }
+      } catch (error: any) {
+        logger.error({ err: error.message }, "Cron: territory release failed");
       }
     });
   });

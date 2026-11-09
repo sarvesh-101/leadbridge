@@ -33,6 +33,14 @@ export async function runPlatformCreditMonitor(): Promise<{ paused: boolean; res
   const canAlert = !credit.lastAlertSentAt || credit.lastAlertSentAt < twelveHoursAgo;
   if (percentLeft <= credit.alertThresholdPercent && canAlert) {
     logger.warn({ remaining, percentLeft }, "PLATFORM CREDITS LOW — admin recharge needed");
+    // V2 (T7): founder email + WhatsApp (both no-op when unset).
+    const { alertFounder } = await import("../services/founder-alerts");
+    await alertFounder(
+      `Platform voice credits low — ${remaining} min left (${percentLeft}%)`,
+      `${remaining} of ${credit.totalMinutesPurchased} purchased minutes remain. ` +
+        `Demo calls pause first; broker leads are held as QUEUED_WAITING_CREDITS instead of failing. ` +
+        `Top up to resume automatically.`
+    );
     await prisma.platformCredit.update({
       where: { id: credit.id },
       data: { lastAlertSentAt: new Date() },
@@ -44,6 +52,12 @@ export async function runPlatformCreditMonitor(): Promise<{ paused: boolean; res
   if (config.PLATFORM_PAUSE_MINUTES > 0 && remaining <= config.PLATFORM_PAUSE_MINUTES && !credit.dispatchPaused) {
     await setPlatformDispatchPaused(prisma, true);
     paused = true;
+    const { alertFounder } = await import("../services/founder-alerts");
+    await alertFounder(
+      "Platform credits exhausted — dispatch paused",
+      `Remaining minutes (${remaining}) are at/below the pause floor (${config.PLATFORM_PAUSE_MINUTES}). ` +
+        `Demo calls are paused and new broker leads are held, not dropped.`
+    );
   }
 
   // ─── Auto-resume after recharge ───────────────────────────

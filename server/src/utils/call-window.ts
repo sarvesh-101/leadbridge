@@ -37,7 +37,8 @@ export function nextWindowStart(d: Date = new Date()): Date {
  * wrapper so tests can pin randomness.
  */
 export function windowJitterMs(): number {
-  return Math.floor((Math.random() * 30 + 1) * 60 * 1000);
+  // 1 ms .. 29m59.999s — strictly >0 (spreads the queue) and never past 30 min.
+  return Math.floor(Math.random() * (30 * 60 * 1000 - 1)) + 1;
 }
 
 /**
@@ -47,4 +48,21 @@ export function windowJitterMs(): number {
 export function firstCallDelayMs(): number {
   void FAIR_USE_MINUTES_PER_LEAD; // keep imports doc-meaningful
   return FIRST_CALL_DELAY_MINUTES * 60 * 1000;
+}
+
+/**
+ * V2 (T5): the moment the window is open for a lead received at `receivedAt`.
+ * Inside the window that is the receipt time itself.
+ */
+export function windowOpenFor(receivedAt: Date): Date {
+  return isWithinCallingWindow(receivedAt) ? receivedAt : nextWindowStart(receivedAt);
+}
+
+/**
+ * V2 (T5) — firstCallDelaySeconds, measured from max(receivedAt, windowOpenAt)
+ * as the doc defines it (a 3 AM lead is not "late"; the clock starts at 09:00).
+ */
+export function firstCallDelaySecondsFor(receivedAt: Date, firstCallAt: Date): number {
+  const baseline = windowOpenFor(receivedAt).getTime();
+  return Math.max(0, Math.round((firstCallAt.getTime() - baseline) / 1000));
 }

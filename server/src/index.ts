@@ -109,6 +109,10 @@ import adminRevenueRoutes from "./routes/admin/revenue-recognition";
 import adminPaymentRoutes from "./routes/admin/payments";
 import adminWhatsAppRoutes from "./routes/admin/whatsapp-config";
 import adminIntegrationRoutes from "./routes/admin/integrations";
+import adminProofRoutes from "./routes/admin/proof";
+import { adminLeadErasureRoutes } from "./routes/admin/lead-erasure";
+import clientProofRoutes from "./routes/client/proof";
+import onboardingTestRoutes from "./routes/client/onboarding-test";
 
 // Module-level server reference for graceful shutdown
 let __server: Awaited<ReturnType<typeof buildServer>> | null = null;
@@ -406,6 +410,9 @@ export async function buildServer() {
   await server.register(adminWhatsAppRoutes, { prefix: apiPrefix });
   // V2 (T8): admin integration-status registry (tenant × integrations + portal guide).
   await server.register(adminIntegrationRoutes, { prefix: apiPrefix });
+  // V2 (T11/T14): admin proof + profitability, DPDP lead erasure.
+  await server.register(adminProofRoutes, { prefix: apiPrefix });
+  await server.register(adminLeadErasureRoutes, { prefix: apiPrefix });
 
 
   // Client routes
@@ -413,6 +420,9 @@ export async function buildServer() {
   await server.register(clientCallRoutes, { prefix: apiPrefix });
   await server.register(clientBookingRoutes, { prefix: apiPrefix });
   await server.register(clientDashboardRoutes, { prefix: apiPrefix });
+  // V2 (T11/T15): broker proof dashboard + onboarding test call.
+  await server.register(clientProofRoutes, { prefix: apiPrefix });
+  await server.register(onboardingTestRoutes, { prefix: apiPrefix });
   await server.register(clientSettingsRoutes, { prefix: apiPrefix });
   await server.register(clientBillingRoutes, { prefix: apiPrefix });
   await server.register(clientCampaignRoutes, { prefix: apiPrefix });
