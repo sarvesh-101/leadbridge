@@ -200,6 +200,18 @@ model Client {
   onboardingComplete Boolean @default(false)
   onboardingStep     Int     @default(0) // 0=not started, 1-6=steps, 7=done
 
+  // V2 (T15): onboarding speed instrumentation (median in admin console).
+  signupAt                    DateTime  @default(now())
+  firstLeadSourceConnectedAt  DateTime?
+  firstCallAt                 DateTime?
+
+  // V2 (T13): business verification (one active account per RERA number).
+  reraNumber        String?
+  businessProofRef  String?
+
+  // V2 (T8): unique inbound token for leads+<token>@<domain> forwarding.
+  inboundToken      String? @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -224,6 +236,7 @@ model Client {
   scheduledReports   ScheduledReport[]
   abTests            ABTest[]
   accountingEntries  AccountingEntry[]
+  weeklyMetrics      WeeklyBrokerMetric[]
 }
 
 model TeamMember {
@@ -268,10 +281,19 @@ model Territory {
   client   Client? @relation(fields: [clientId], references: [id])
   locked   Boolean @default(false)
 
+  // V2 (T13): a zone is a micro-market (a set of PIN codes), not a metro.
+  zoneType  String   @default("MICRO_MARKET") // MICRO_MARKET | CITY
+  pinCodes  String[] @default([])
+  status    String   @default("AVAILABLE")    // AVAILABLE | CLAIMED | WAITLIST
+
+  // V2 (T13): used as the idle clock for cancellation-grace release rules.
+  updatedAt DateTime @updatedAt
+
   // Waitlist for when territory is taken
   waitlistEntries WaitlistEntry[]
 
   @@unique([city, zone])
+  @@index([status])
 }
 
 model WaitlistEntry {
@@ -360,6 +382,10 @@ model Lead {
   // Timestamps
   receivedAt    DateTime @default(now())
   firstCalledAt DateTime?
+  // V2 (T5): measured from max(receivedAt, windowOpenAt) — the proof engine's
+  // medianFirstCallSeconds reads firstCallDelaySeconds directly.
+  answeredAt              DateTime?
+  firstCallDelaySeconds   Int?
   bookedAt      DateTime?
   visitedAt     DateTime?
   coldAt        DateTime?
@@ -549,6 +575,29 @@ model LeadScoreHistory {
 // ─────────────────────────────────────────────
 // PLATFORM CREDIT & COST TRACKING MODELS
 // ─────────────────────────────────────────────
+
+// V2 (T11): one proof snapshot per client per week (Monday 09:00 IST cron).
+model WeeklyBrokerMetric {
+  id       String @id @default(cuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  weekStart DateTime
+  weekEnd   DateTime
+
+  leadsReceived           Int
+  medianFirstCallSeconds  Int?
+  reachRate               Float
+  qualifiedRate           Float
+  visitsBooked            Int
+  visitsCompleted         Int
+  costPerCompletedVisit   Float?
+
+  createdAt DateTime @default(now())
+
+  @@unique([clientId, weekStart])
+  @@index([weekStart])
+}
 
 model PlatformCredit {
   id           String   @id @default(cuid())

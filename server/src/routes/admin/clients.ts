@@ -117,6 +117,7 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
           password: { type: "string", minLength: 6 },
           ownerWhatsapp: { type: "string" },
           language: { type: "string", enum: ["hinglish", "hindi", "english"] },
+          reraNumber: { type: "string" },
         },
       },
     },
@@ -125,13 +126,37 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
       businessName: string; ownerName: string; email: string; phone: string;
       city: string; zone?: string; password: string; ownerWhatsapp: string;
       language?: string;
+      reraNumber?: string;
     };
   }>, reply: FastifyReply) => {
-    const { businessName, ownerName, email, phone, city, zone, password, ownerWhatsapp, language } = request.body;
+    const { businessName, ownerName, email, phone, city, zone, password, ownerWhatsapp, language, reraNumber: rawReraNumber } = request.body;
     const adminId = request.userId;
 
     // Soft territory model (2026-08-06): leads are broker-sourced, so a city
     // is NOT exclusive. Multiple brokers may serve the same city — no 409 here.
+    // V2 (T13): admin-created accounts enforce the same one-account-per-RERA rule.
+    let reraNumber: string | null = null;
+    if (rawReraNumber?.trim()) {
+      const { normalizeReraNumber } = await import("../../utils/rera");
+      try {
+        reraNumber = normalizeReraNumber(rawReraNumber);
+      } catch (err: any) {
+        return reply.status(400).send({ error: err.message });
+      }
+      if (reraNumber) {
+        const holder = await fastify.prisma.client.findFirst({
+          where: { reraNumber },
+          select: { id: true, businessName: true },
+        });
+        if (holder) {
+          return reply.status(409).send({
+            error: `RERA number ${reraNumber} is already registered to ${holder.businessName || "another account"}.`,
+            reraDuplicate: true,
+          });
+        }
+      }
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
 
     const client = await fastify.prisma.client.create({
@@ -146,6 +171,7 @@ export default async function adminClientRoutes(fastify: FastifyInstance) {
         passwordHash,
         ownerWhatsapp,
         language: language || "hinglish",
+        reraNumber,
         // FIX Round-2 #3: admin already verified the broker's identity —
         // skip the self-serve email verification step for admin-created accounts.
         emailVerified: true,

@@ -26,7 +26,7 @@ export default function RegisterPage() {
   const [emailWarning, setEmailWarning] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "", phone: "",
-    companyName: "", city: "", password: "",
+    companyName: "", city: "", password: "", reraNumber: "",
   });
   // DPDP Phase 1.3: explicit consent to the Privacy Policy (required)
   const [consent, setConsent] = useState(false);
@@ -64,6 +64,8 @@ export default function RegisterPage() {
         ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
         phone: formData.phone, city: formData.city,
         consent: true,
+        // T13: optional at signup — prevent a second account on the same RERA number.
+        reraNumber: formData.reraNumber.trim() || undefined,
       }, { skipAuth: true });
       // FIX Round-2 #3: new accounts need email verification before login
       if (res.requiresVerification) {
@@ -218,6 +220,13 @@ export default function RegisterPage() {
                   placeholder="Mumbai" required className={inputClass(fieldErrors.city)} />
               </Field>
             </div>
+
+            <Field label="RERA Number (optional)">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />
+              <input value={formData.reraNumber}
+                onChange={(e) => updateField("reraNumber", e.target.value)}
+                placeholder="e.g. A51900001234" className={inputClass()} />
+            </Field>
 
             <Field label="Password" error={fieldErrors.password}>
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7C73]" />

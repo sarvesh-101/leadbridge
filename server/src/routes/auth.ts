@@ -79,6 +79,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
           ownerWhatsapp: { type: "string" },
           // DPDP Phase 1.3: explicit consent to the Privacy Policy (required)
           consent: { type: "boolean" },
+          // V2 (T13): optional at signup; one active account per RERA number.
+          reraNumber: { type: "string" },
         },
       },
     },
@@ -93,9 +95,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
       zone?: string;
       ownerWhatsapp?: string;
       consent?: boolean;
+      reraNumber?: string;
     };
   }>, reply: FastifyReply) => {
-    const { email, password, businessName, ownerName, phone, city, zone, ownerWhatsapp, consent } = request.body;
+    const { email, password, businessName, ownerName, phone, city, zone, ownerWhatsapp, consent, reraNumber: rawReraNumber } = request.body;
 
     // DPDP Phase 1.3: no account without explicit consent to the Privacy Policy.
     // (Enforced in code — not the JSON schema — so the error message is clear.)
@@ -110,6 +113,30 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const existing = await fastify.prisma.client.findUnique({ where: { email } });
     if (existing) {
       return reply.status(409).send({ error: "An account with this email already exists" });
+    }
+
+    // V2 (T13): one active account per RERA number — a registered broker must
+    // not farm multiple trials/territories with the same registration.
+    let reraNumber: string | null = null;
+    if (rawReraNumber?.trim()) {
+      const { normalizeReraNumber } = await import("../utils/rera");
+      try {
+        reraNumber = normalizeReraNumber(rawReraNumber);
+      } catch (err: any) {
+        return reply.status(400).send({ error: err.message });
+      }
+      if (reraNumber) {
+        const reraHolder = await fastify.prisma.client.findFirst({
+          where: { reraNumber },
+          select: { id: true },
+        });
+        if (reraHolder) {
+          return reply.status(409).send({
+            error: "This RERA number is already registered to another Converza account. Contact support if you need to move it.",
+            reraDuplicate: true,
+          });
+        }
+      }
     }
 
     // Hash password
@@ -141,6 +168,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         leadSources: ["manual"],
         adminId: null,
         emailVerified: false,
+        reraNumber,
         verificationToken,
         verificationTokenExpiresAt,
         // DPDP Phase 1.3: record when + which version of the Privacy Policy
