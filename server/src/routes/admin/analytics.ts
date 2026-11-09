@@ -6,6 +6,7 @@
  */
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { PLAN_DEFINITIONS } from "../../services/subscription.service";
+import { summarizeOnboarding } from "../../utils/onboarding-metrics";
 
 export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
   // All routes require admin auth
@@ -159,6 +160,16 @@ export default async function adminAnalyticsRoutes(fastify: FastifyInstance) {
   });
 
   // ─── System Usage Stats ────────────────────────────────────────
+  // ─── Onboarding Speed (T15) ───────────────────────────────────
+  // Median hours from signup → first lead source → first call, so the admin
+  // console can see whether new brokers actually get live (and where they stall).
+  fastify.get("/admin/analytics/onboarding", async () => {
+    const clients = await fastify.prisma.client.findMany({
+      select: { signupAt: true, firstLeadSourceConnectedAt: true, firstCallAt: true },
+    });
+    return summarizeOnboarding(clients);
+  });
+
   fastify.get("/admin/system/usage", async (_request: FastifyRequest) => {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
