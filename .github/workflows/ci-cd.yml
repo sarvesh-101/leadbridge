@@ -59,6 +59,11 @@ jobs:
           cd server
           npx eslint src/
 
+      - name: Claims lint (V2 T9)
+        run: |
+          cd server
+          node scripts/claims-lint.mjs
+
       - name: Run unit tests (vitest)
         run: |
           cd server

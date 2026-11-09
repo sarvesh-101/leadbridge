@@ -1,0 +1,29 @@
+{
+  "_comment": "V2 T9 banned claims. Edit freely — the lint reads this file. Object entries may carry an 'allow' regex for the one permitted formulation.",
+  "banned": [
+    { "phrase": "24/7 calling", "allow": "24/7 lead capture, calls 9 AM to 9 PM IST" },
+    "predictive",
+    "+200%",
+    "200% more",
+    "24-48 hours",
+    "24–48 hours",
+    "60-80%",
+    "60–80%",
+    "10-15%",
+    "never silently",
+    "100% consistent",
+    "competitors can't",
+    "no competitor can",
+    "guaranteed",
+    "leadbridge"
+  ],
+  "scan": [
+    "frontend/src",
+    "server/src/ai/prompts",
+    "server/src/services/template.service.ts"
+  ],
+  "inCopyOnly": [
+    "24/7 calling",
+    "guaranteed"
+  ]
+}
