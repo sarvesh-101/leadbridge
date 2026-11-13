@@ -1,6 +1,6 @@
 # DAILY-WORK.md — Converza go-live status
 
-> **Last updated:** 2026-10-27  
+> **Last updated:** 2026-11-14  
 > **Owner:** Chetan (platform) · AI agent (execution)  
 > **Source of truth:** this file + `docs/GO-LIVE-RUNBOOK.md` (steps) + `docs/plan-margins.md` (pricing)
 
@@ -49,9 +49,9 @@ Step 2 of `docs/GO-LIVE-RUNBOOK.md` is complete on the code side. The dashboard 
 
 **Status of the Step 2 checklist:**
 - 2a (Render secret) — **you do this in the dashboard.** Confirm `RAZORPAY_WEBHOOK_SECRET` is set on Render → leadbridge-api → Environment. Default from this repo's `.env`: `8e994f4cb5677d2097ea3dfe66c29b3c47d2637c5d66025f`.
-- 2b (dashboard webhook) — **you do this.** Razorpay dashboard → Settings → Webhooks → Add Webhook. URL `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`, events: `subscription.charged`, `subscription.cancelled`, `subscription.pending`, `payment.failed`, `invoice.paid`. Secret must match the Render value.
+- 2b (dashboard webhook) — **you do this.** Razorpay dashboard → Settings → Webhooks → Add Webhook. URL `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`, events: `subscription.charged`, `subscription.cancelled`, `subscription.pending`, `subscription.halted`, `subscription.completed`, `payment.failed`, `invoice.paid` (seven — not `payment_link.cancelled`, which is the Payment Links product we don't use; per-event behaviour table: `docs/razorpay-cutover-steps.md` → Step 5). Secret must match the Render value.
 - 2c (send-test-webhook) — run from the repo root once the Render secret is set: `RAZORPAY_WEBHOOK_SECRET=<value> node scripts/send-test-webhook.cjs` → expect HTTP 200. Then `... node scripts/send-test-webhook.cjs subscription.cancelled --bad-signature` → expect HTTP 401.
-- 2d (route handles all 5 events) — already implemented in `server/src/routes/webhooks/razorpay.ts`; verified by the test suite (190 passed / 8 skipped, `tsc --noEmit` clean).
+- 2d (route handles all seven events) — already implemented in `server/src/routes/webhooks/razorpay.ts`; verified by the test suite (190 passed / 8 skipped, `tsc --noEmit` clean).
 
 **Webhook signature input (fixed):** the `application/json` parser in `server/src/index.ts` now stores the exact bytes on `request.rawBody`, and the Razorpay handler hashes that instead of `JSON.stringify(request.body)`. Re-serializing could only verify by luck (key order/whitespace/number formatting change the HMAC input). Covered by `server/src/__tests__/razorpay-webhook.test.ts` (raw bytes with non-canonical formatting → 200; bad signature → 401).
 
@@ -187,6 +187,22 @@ From `docs/GO-LIVE-RUNBOOK.md`:
 
 ---
 
+## 2026-11-14 (later) — CUTOVER LIVE: production bills on the new business account
+
+**C1–C4 run from this machine against `https://leadbridge-zy4o.onrender.com`:**
+- **C1** `GET /health/razorpay` → `{"razorpayAuth":{"ok":true,"keyIdPrefix":"rzp_live_TzZts"}}`, HTTP 200. The prefix moved `rzp_live_Ti0DZ` → `rzp_live_TzZts`, so the env swap deployed and **production is on the new account**.
+- **C2** `GET /health/integrations` → `razorpay.configured: true`, `missingVars: ["RAZORPAY_PLAN_LAUNCH"]`, HTTP 200. Reading that key as *missing* is the wanted end state — the old account's ₹7,999 ID is no longer configured — and it is expected on the T8 build, whose health check still requires it. No other Razorpay variable is listed, so KEY_ID, KEY_SECRET, WEBHOOK_SECRET, PLAN_STARTER, PLAN_GROWTH and PLAN_PRO are all set.
+- **C3** correctly signed `subscription.charged` → **HTTP 200 `{"status":"received"}`, PASS, exit 0** (1090 ms).
+- **C4** `--bad-signature` → **HTTP 401 `{"error":"Invalid signature"}`, PASS, exit 0** (234 ms) — signature enforcement is genuinely on, not silently permissive.
+
+**Values verified before the swap:** the three Render values match `server/.env` byte-for-byte — KEY_ID 23 chars (`rzp_live_` + 14), KEY_SECRET 24, WEBHOOK_SECRET 48-hex and identical to the documented value; `sync-razorpay-plans.ts --verify` 6/6 ✓.
+
+**Still unproven — needs a real checkout:** that the three plan IDs on Render are the *new-account* ones. `/health/integrations` only checks presence, never values, and no public endpoint exposes them, so a leftover old-account `plan_TLa2…` ID looks exactly like a new one until someone presses Upgrade. The first real checkout is the test.
+
+**Remaining human steps:** enable UPI AutoPay (A2) · create the webhook in the dashboard with all seven events (A5) — C3 proved our endpoint accepts a signed payload, but nothing yet proves *Razorpay* can reach it · ₹5 UPI mandate proof, then the Growth loop, cancel + refund · cancel the old account's subscriptions (do not delete the account) · **D6 rotate the key pair**, it has been pasted into chat twice.
+
+---
+
 ## REMAINING — step-by-step guide (start here each day)
 
 **State on 2026-11-10:** server + frontend typecheck clean · server suite **285 passed / 8 skipped** · claims-lint **0**. All T1–T17 artifacts are committed (`18ced89`), working tree clean. Nothing is pushed; production runs `3b5a273` (T8). Razorpay's new account is **active with the new company bank account** — start Phase 6.
@@ -284,7 +300,7 @@ Full human runbook: **`docs/step3-new-razorpay-account.md` (A1–D6)**. Canonica
 - Project: Converza (was LeadBridge) — AI sales-call platform for Indian real-estate brokers.
 - Stack: Fastify backend (server/) + Next.js frontend (frontend/) + Prisma + PostgreSQL (Supabase) + Redis (Render free tier, available). Voice AI via Omnidimension. Payments via Razorpay. SMS via MessageBird. WhatsApp via Cloud API. Email via Nodemailer/SMTP.
 - Deploy: Render (`leadbridge-api`) hosts the API; Vercel (`leadbridge-seven`) hosts the frontend. Repo root has `render.yaml`.
-- Razorpay env vars: Render still holds the OLD account's values. The new account's `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET` / `RAZORPAY_PLAN_STARTER` / `_GROWTH` / `_PRO` must be set (B1–B8 in `docs/step3-new-razorpay-account.md`); `RAZORPAY_PLAN_LAUNCH` stays unset.
+- Razorpay env vars: Render now holds the NEW account's values — cutover verified 2026-11-14, `/health/razorpay` prefix `rzp_live_TzZts`. `RAZORPAY_PLAN_LAUNCH` is deleted on purpose. Prod still runs the T8 build, so `/health/integrations` keeps listing `RAZORPAY_PLAN_LAUNCH` as missing — ignore that one entry; any other Razorpay key in that list is a real gap.
 - Plan pricing (canonical, `server/src/config/plans.ts`): Starter ₹17,699/mo (200 leads), Growth ₹41,299/mo (600 leads), Pro ₹70,799/mo (1,200 leads), all incl. 18% GST (ex-GST 14,999 / 34,999 / 59,999). Launch is retired at its legacy ₹7,999 and gets no plan on the new account. Only STARTER requests a 30-day trial, expressed as a future `start_at` — never `trial_period_days`.
 - Razorpay plan IDs live only in the Render dashboard (`render.yaml` is `sync: false` for all four). New-account IDs are recorded in `server/razorpay.plan-map.json`. `scripts/setup-razorpay.cjs` is disabled — it would create plans at the retired prices.
 - The local machine CAN reach the live Razorpay API with the new account keys (verified 2026-11-13). The old `rzp_live_Ti0DZ…` pair still 401s. Pass keys inline on the command line; never commit them.

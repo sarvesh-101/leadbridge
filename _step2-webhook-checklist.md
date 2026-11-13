@@ -41,6 +41,9 @@ The webhook **only verifies** if the secret you put in the Razorpay dashboard **
      - `subscription.completed`
      - `payment.failed`
      - `invoice.paid`
+     > `subscription.cancelled` only. The dashboard also lists `payment_link.cancelled` and
+     > `payment_link.paid` — those belong to the Payment Links product, which this repo does not use
+     > (its `/dashboard/payment-links` links are our own `…/pay/<code>` URLs, not Razorpay objects).
    - **Secret** — paste the same value that's in Render env as `RAZORPAY_WEBHOOK_SECRET` (default: `8e994f4cb5677d2097ea3dfe66c29b3c47d2637c5d66025f`, unless you generated a fresh one in 2a).
 4. Click **Create Webhook**.
 
@@ -92,7 +95,7 @@ in the `application/json` content-type parser in `server/src/index.ts`.
 
 ---
 
-## 2d — Confirm the route handles all 5 events
+## 2d — Confirm the route handles all seven events
 
 The route at `src/routes/webhooks/razorpay.ts` handles:
 
@@ -106,14 +109,15 @@ The route at `src/routes/webhooks/razorpay.ts` handles:
 | `payment.failed` | Logs warning with error description. |
 | `invoice.paid` | Marks invoice PAID, records Payment + revenue (when payment entity present). |
 
-All seven are wired. The five you selected in 2b cover the full money loop.
+All seven are wired, and 2b selects exactly these (an unhandled event still returns 200, so an
+extra tick is harmless but pure noise).
 
 ---
 
 ## Done when
 
 - [ ] `RAZORPAY_WEBHOOK_SECRET` is set in Render env and matches the dashboard webhook secret.
-- [ ] Webhook created in Razorpay dashboard with all 5 events, URL = `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`.
+- [ ] Webhook created in Razorpay dashboard with all seven events, URL = `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`.
 - [ ] `node scripts/send-test-webhook.cjs` → `HTTP 200` + log line `Razorpay webhook received { eventType: 'subscription.charged' }`.
 - [ ] `--bad-signature` variant → `HTTP 401` (proves signature enforcement is on).
 - [ ] Real proof deferred to Step 3: during the ₹5 charge, real `subscription.charged` + `invoice.paid` arrive and the client flips ACTIVE.

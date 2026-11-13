@@ -214,8 +214,10 @@ settings*) → **+ Add New Webhook**.
 | Alert Email | your email (you get notified when deliveries fail) |
 | Active Events | the seven below, nothing else |
 
-Tick all seven (omitting `halted`/`completed` leaves a halted or finished client ACTIVE in our
-database and still being called and billed for):
+Tick exactly these seven. The dashboard groups them by product, so they are not in one list:
+`subscription.*` is under **Subscriptions**, `payment.failed` under **Payments**, `invoice.paid`
+under **Invoices**. Omitting `halted`/`completed` leaves a halted or finished client ACTIVE in our
+database and still being called and billed for.
 
 - `subscription.charged`
 - `subscription.cancelled`
@@ -224,6 +226,36 @@ database and still being called and billed for):
 - `subscription.completed`
 - `payment.failed`
 - `invoice.paid`
+
+### What each event type actually does in this repo
+
+Handler: `server/src/routes/webhooks/razorpay.ts`. Every delivery is HMAC-SHA256 verified against
+`RAZORPAY_WEBHOOK_SECRET`; a wrong signature gets **401** and changes nothing.
+
+| Event | Razorpay fires it when… | Our handler… | What the broker sees |
+|---|---|---|---|
+| `subscription.charged` | a subscription charge succeeds — the first payment **and every renewal** (~every 30 days) | sets `planStatus = ACTIVE`; marks the latest **SENT** invoice PAID (renewals have none left, so it creates that cycle's invoice) and kicks off the GST PDF; records a `Payment` row + increments `totalRevenueGenerated` (idempotent on `providerPaymentId`); resets the call allowance — skipped on the **first** charge so trial usage is not rolled over | plan active, that month's GST invoice, fresh call quota |
+| `subscription.cancelled` | the subscription is cancelled for good — by you in the dashboard, by the broker in Billing → Cancel, or because the mandate was revoked | sets `planStatus = CANCELLED`. No refund happens here — the cancel route issues that separately | marked cancelled; the paid plan is treated as ended |
+| `subscription.pending` | a charge could not be completed and Razorpay is waiting on the customer — **also** fires while a brand-new mandate is still awaiting authorisation | sets `planStatus = PAST_DUE`, **except** for clients in `TRIAL` (a trial signup waiting on its mandate must not be demoted) | usually nothing yet; a real payment problem surfaces through dunning |
+| `subscription.halted` | Razorpay gave up after repeated failed renewal retries, or the mandate was revoked | sets `planStatus = PAST_DUE` **and** `dunningStartedAt = now`; the daily dunning cron then reminds on day 1/3/7 and deactivates on day 7 | reminder emails; access cut at day 7 if still unpaid |
+| `subscription.completed` | the subscription reached its final period/charge count — nothing will ever be charged again | sets `planStatus = CANCELLED` | marked cancelled; no further invoices |
+| `payment.failed` | **any** single payment attempt failed (Razorpay may still retry it) | log-only: warns with the order id and `error_description`. Changes no state on purpose — one failed retry must not demote a paying client | nothing immediate; repeated failures become `pending`/`halted` |
+| `invoice.paid` | a Razorpay invoice (one-off or subscription) is paid | marks the invoice PAID + GST PDF, and records `Payment` + revenue when the payload carries the payment entity; duplicate-safe against `subscription.charged` for the same money (unique `providerPaymentId` + per-cycle invoice index) | invoice shows PAID, sometimes alongside `subscription.charged` for the same charge |
+
+### Two "cancelled" events — tick only one
+
+The dashboard lists `subscription.cancelled` **and** `payment_link.cancelled` (Payment Links has its
+own four: `payment_link.paid` / `partially_paid` / `cancelled` / `expired`). They are unrelated:
+
+- **`subscription.cancelled`** — our plans. This is the one to tick.
+- **`payment_link.cancelled`** — fires when a *Razorpay* Payment Link is cancelled. This repo never
+  creates Razorpay Payment Link objects: `/dashboard/payment-links` builds its own `…/pay/<code>`
+  URL and stores it in the `PaymentLink` table, so this event can never fire for us. Leave it off.
+
+Same rule for the other lookalikes — `subscription.paused` / `resumed` / `updated` /
+`authenticated` / `activated`, `invoice.expired`, `payment.captured`, `refund.*`. None are handled:
+the route answers **200** and logs the event type, so an extra one is harmless but pure noise. Keep
+the list at exactly seven so the "done when" below stays checkable.
 
 Click **Create Webhook**.
 
@@ -407,10 +439,10 @@ require touching the webhook.
 - [ ] Six `RAZORPAY_*` vars on Render, `RAZORPAY_PLAN_LAUNCH` deleted.
 - [ ] `/health/razorpay` → `keyIdPrefix: rzp_live_TzZts`.
 - [ ] Webhook Active, seven events, no trailing slash, secret matches Render.
-- [ ] C1 new prefix, C3 200 + exit 0, C4 401 + exit 0.
+- [x] C1 new prefix, C3 200 + exit 0, C4 401 + exit 0. *(re-run 2026-11-14 after the dashboard webhook was created: 200 / exit 0, 401 / exit 0)*
 
 **Part B — money**
-- [ ] ₹5 UPI AutoPay mandate authorises.
+- [x] ₹5 UPI AutoPay mandate authorises. *(2026-11-14 — payment captured. Cancel the throwaway test subscription + delete the ₹5 plan: step 7.4.)*
 - [ ] Real Growth checkout → client ACTIVE, PAID invoice with GSTIN + GS TECHNO.
 - [ ] Cancel + pro-rated refund executed and recorded.
 
