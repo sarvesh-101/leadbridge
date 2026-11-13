@@ -1,138 +1,221 @@
-# Razorpay cutover — YOUR steps, in order
+# Razorpay cutover — YOUR steps, one by one
 
-**Who this is for:** you, at the dashboards. Every step below is something this machine
-cannot do (no Render API key, and Razorpay has no merchant-webhook API).
+Everything here is a **dashboard action by you**. Nothing in this doc can be done from the
+dev machine: there is no Render API key in this repo, and Razorpay has no API for creating
+merchant webhooks.
 
-**Already done, verified live 2026-11-14 — do not redo:**
-- New business account KYC + new company bank account: **active**.
-- Live keys authenticate (`rzp_live_TzZts…`).
-- All six plans created and drift-checked (`--verify` exit 0):
-
-| Tier | Monthly incl. GST | Plan ID | Annual incl. GST | Plan ID |
-|---|---|---|---|---|
-| Starter | ₹17,699 | `plan_TzZx6AnyZg1COc` | ₹1,76,988 | `plan_TzZx6S5zR1aDI8` |
-| Growth | ₹41,299 | `plan_TzZx6i9gxjn14t` | ₹4,12,988 | `plan_TzZx74cmsBPy79` |
-| Pro | ₹70,799 | `plan_TzZx7HGbGReXSR` | ₹7,07,988 | `plan_TzZx7U919rjaVt` |
-
-Production is still on the OLD account (`/health/razorpay` → `rzp_live_Ti0DZ`). That is what
-steps 2–4 fix.
+Work top to bottom. Part A moves production to the new account, Part B proves money actually
+moves, Part C closes the old account out. Total ~35 minutes, but **do not start Part B in the
+same sitting as Part A** unless you have an hour — a failed payment needs a clear head.
 
 ---
 
-## ⚠️ Read this before step 7 — one documented limit
+## Step 0 — Do I have to create the plans in the Razorpay dashboard?
+
+**No. Do not create any plan by hand.** All six plans (3 monthly + 3 annual) already exist on
+the new account. Verified live against Razorpay on **2026-11-14**, read-only:
+
+```bash
+cd server && npx tsx --env-file=.env scripts/sync-razorpay-plans.ts --verify
+```
+
+```
+✓ STARTER/monthly → plan_TzZx6AnyZg1COc (₹17699, monthly)
+✓ STARTER/annual  → plan_TzZx6S5zR1aDI8 (₹176988, yearly)
+✓ GROWTH/monthly  → plan_TzZx6i9gxjn14t (₹41299, monthly)
+✓ GROWTH/annual   → plan_TzZx74cmsBPy79 (₹412988, yearly)
+✓ PRO/monthly     → plan_TzZx7HGbGReXSR (₹70799, monthly)
+✓ PRO/annual      → plan_TzZx7U919rjaVt (₹707988, yearly)
+
+All plan amounts verified ✓      (exit 0)
+```
+
+These are the plans checkout will use. Your only job is to **copy the three monthly IDs into
+Render** (step 3). You will *see* them in the dashboard under **Subscriptions → Plans** — that
+is for confidence only, no action.
+
+| Tier | Charged (incl. 18% GST) | Monthly plan ID | Annual plan ID |
+|---|---|---|---|
+| Starter | ₹17,699 | `plan_TzZx6AnyZg1COc` | `plan_TzZx6S5zR1aDI8` |
+| Growth | ₹41,299 | `plan_TzZx6i9gxjn14t` | `plan_TzZx74cmsBPy79` |
+| Pro | ₹70,799 | `plan_TzZx7HGbGReXSR` | `plan_TzZx7U919rjaVt` |
+
+### Why hand-creating a plan breaks things
+
+- **Amounts must be GST-inclusive and exact.** ₹14,999 ex-GST is charged as **₹17,699**
+  (`server/src/config/plans.ts` → `monthlyCharged()`). A dashboard plan typed as ₹14,999
+  under-bills every customer and makes invoice totals (total ÷ 1.18) come out wrong.
+- **The verifier matches on plan `notes`, not on the ID.** `--verify` looks for
+  `notes.planTier` / `notes.billingCycle` / `item.amount`. A hand-made plan has no notes, so it
+  is reported **missing** even though it exists — and you would end up with duplicates.
+- **Checkout reads the ID from Render env.** A new dashboard plan is dead weight until its ID
+  is pasted into `RAZORPAY_PLAN_*`, which is exactly the manual step this script removes.
+
+### The only case where you create a plan yourself
+
+If `--verify` ever prints `✗ missing/mismatched: TIER/cycle`, do **not** use the dashboard.
+Run the sync tool, which creates it with the correct amount **and** the notes the verifier needs:
+
+```bash
+cd server && npx tsx --env-file=.env scripts/sync-razorpay-plans.ts --live
+```
+
+It prints the new IDs and rewrites `server/razorpay.plan-map.json`. Then paste the printed
+`RAZORPAY_PLAN_*` lines into Render and redeploy. `--live` is a human gate: it creates real,
+billable objects, so only run it when you mean to.
+
+**Separate, unrelated plan:** the ₹5 plan in step 7 is a throwaway for one UPI mandate test.
+Create that one in the dashboard — it is not part of the product pricing.
+
+---
+
+## ⚠️ One documented limit — read before Part B
 
 Razorpay's [Subscriptions Settings](https://razorpay.com/docs/payments/subscriptions/settings/)
-page currently states:
+page states:
 
 > "Cards and UPI currently support recurring payments up to ₹15,000. Charges of higher value
 > would automatically fail for domestic cards."
 
-Every Converza tier charges **more** than ₹15,000 incl. GST (₹17,699 / ₹41,299 / ₹70,799). So:
+Every tier charges **more** than ₹15,000 (₹17,699 / ₹41,299 / ₹70,799), so:
 
-- **UPI AutoPay is fine for proving the mandate** (the ₹5 test in step 7) but is not a usable
-  method for a real tier charge.
-- **Domestic cards will fail** for a real tier charge.
-- **eMandate (NetBanking)** is the documented path for higher recurring amounts — in the
-  Razorpay payment sheet, pick NetBanking/eMandate if UPI and card aren't offered or fail.
+- **UPI AutoPay only proves the mandate** (₹5, step 7). It is not a usable method for a real
+  tier charge.
+- **Domestic cards will fail** on a real tier charge.
+- **eMandate / NetBanking** is the documented route for higher recurring amounts.
 
-If the sheet offers no working method for Growth, **that is the cause — not a code bug.** Do
-not change plan amounts or code to chase it; record the exact error and raise it with the
-Razorpay account manager ("are Cards/UPI/eMandate enabled for my account, and what is my
-per-debit recurring ceiling?"). This may become a pricing/packaging decision (quarterly or
-annual billing, or raising the tier price into eMandate-only territory) — separate from the
-technical cutover.
+If the payment sheet offers no method that works for Growth, **that is the cause — not a code
+bug.** Do not change amounts or code to chase it. Record the exact error and ask your Razorpay
+account manager two questions: *"Are Cards, UPI and eMandate enabled on my account?"* and
+*"What is my per-debit recurring ceiling?"* This may turn into a packaging decision (quarterly
+or annual billing) — separate from the technical cutover.
 
 ---
 
-## Step 1 — Enable the subscription payment methods (2 min)
+# Part A — Move production to the new account
 
-1. Razorpay dashboard (Live mode, not Test) → left menu → **Subscriptions** (under
-   *Payment Products*).
-2. **Settings**.
-3. Enable **Card**, **UPI**, and **eMandate**.
-   - This is the check that failed on the old personal account. If any method cannot be
-     enabled here, stop — the rest of the cutover cannot pass.
+## Step 1 — Enable the subscription payment methods
 
-**Done when:** all three toggles read enabled.
+**Where:** Razorpay dashboard → top-left mode selector shows **Live** (not Test) → left sidebar
+→ **Subscriptions** (under *Payment Products*) → **Settings** tab.
+
+**Do this:** switch on **Card**, **UPI**, and **eMandate**. If a method shows an "Enable" or
+"Activate" button, click it and complete any prompt.
+
+**Done when:** all three read enabled/active.
+
+**If it doesn't:** if any method cannot be enabled, **stop here** — this is precisely what was
+broken on the old personal account, and no later step can pass without it. Escalate to Razorpay
+support with your MID before continuing.
 
 ---
 
-## Step 2 — Copy the three secrets (1 min)
+## Step 2 — Get the three secrets into your clipboard
 
-They are at the bottom of `server/.env` on this machine. Print them **in your own terminal**
-so they never appear in chat:
+**Where:** this machine, a terminal in `server/`.
+
+**Do this:** print them in *your* terminal (never in chat), then copy one at a time:
 
 ```bash
 cd server && node -e "const e=require('dotenv').config().parsed;for(const k of ['RAZORPAY_KEY_ID','RAZORPAY_KEY_SECRET','RAZORPAY_WEBHOOK_SECRET'])console.log(k+'='+e[k])"
 ```
 
-You should see `RAZORPAY_KEY_ID=rzp_live_TzZts…`. Keep this terminal open — steps 3 and 4 need
-these values.
+Copy-to-clipboard variant (nothing printed to screen):
 
-> The key pair was pasted into chat during the migration, so step 8 rotates it. Don't skip that.
+```bash
+cd server && node -e "process.stdout.write(require('dotenv').config().parsed.RAZORPAY_KEY_ID)" | clip
+```
+
+**You should see:** `RAZORPAY_KEY_ID=rzp_live_TzZt…` (23 chars), a 24-char key secret, and a
+48-char hex webhook secret.
+
+**Done when:** you have all three values and can paste them.
+
+**Note:** the webhook secret is **not issued by Razorpay** — it is a string you choose, and the
+one in `server/.env` is already the one Render uses. Nothing to regenerate. Keep this terminal
+open; steps 3, 5 and 6 need these values.
+
+**Note:** this key pair was pasted into chat during the migration, so step 10 rotates it. Do not
+skip step 10.
 
 ---
 
-## Step 3 — Set Render environment variables (5 min)
+## Step 3 — Change six variables on Render, in one save
 
-Render → **leadbridge-api** → **Environment**. Change **all six together** — a key pair and its
-plan IDs belong to one account, and mixing them bills the wrong account or rejects checkout
-with `Invalid plan id`.
+**Where:** <https://dashboard.render.com> → **leadbridge-api** (Web Service, Node, rootDir
+`server`) → **Environment** in the left menu.
+
+**Do this:** edit these six, then click **Save Changes** once. A key pair and its plan IDs belong
+to one account — a mixed set bills the wrong account or rejects checkout with `Invalid plan id`.
 
 | Variable | Value |
 |---|---|
-| `RAZORPAY_KEY_ID` | from step 2 (`rzp_live_TzZts…`) |
+| `RAZORPAY_KEY_ID` | from step 2 (`rzp_live_TzZt…`) |
 | `RAZORPAY_KEY_SECRET` | from step 2 |
-| `RAZORPAY_WEBHOOK_SECRET` | from step 2 |
+| `RAZORPAY_WEBHOOK_SECRET` | from step 2 (already correct — re-paste to be sure) |
 | `RAZORPAY_PLAN_STARTER` | `plan_TzZx6AnyZg1COc` |
 | `RAZORPAY_PLAN_GROWTH` | `plan_TzZx6i9gxjn14t` |
 | `RAZORPAY_PLAN_PRO` | `plan_TzZx7HGbGReXSR` |
 
-Then **delete `RAZORPAY_PLAN_LAUNCH`** (trash icon on its row). It still holds the old
-account's ₹7,999 plan ID, which does not exist on the new account — leaving it means a Launch
-checkout fails with `Invalid plan id`. No Launch plan exists by design, and the Billing UI has
-no Launch card.
+Then **delete `RAZORPAY_PLAN_LAUNCH`** — click the trash icon on its row. It still holds the old
+account's ₹7,999 plan ID, which does not exist on the new account; left in place, a legacy Launch
+checkout fails with `Invalid plan id`. There is no Launch card in the Billing UI any more.
 
-**Done when:** six Razorpay variables (three keys + three plans), no `RAZORPAY_PLAN_LAUNCH`.
+**Done when:** exactly six `RAZORPAY_*` rows remain (3 keys + 3 plans), no `RAZORPAY_PLAN_LAUNCH`,
+and the save succeeded.
+
+**Saving does not restart the service** — step 4 is the deploy.
 
 ---
 
-## Step 4 — Deploy and confirm the new account is live (3 min)
+## Step 4 — Deploy, then confirm the account actually swapped
 
-1. Render → **leadbridge-api** → **Manual Deploy** → wait for **Live**.
-2. Check the credential actually swapped:
+**Where:** Render → **leadbridge-api** → **Manual Deploy** → **Deploy latest commit** (or
+**Clear build cache & deploy** if you want a clean build). Wait for status **Live**.
+
+**Do this:** run the health check from any terminal:
 
 ```bash
 curl -s https://leadbridge-zy4o.onrender.com/health/razorpay
 ```
 
-**Expect:** `{"razorpayAuth":{"ok":true,"keyIdPrefix":"rzp_live_TzZts"}}`
+**You should see:**
 
-Still `rzp_live_Ti0DZ` = the env vars were not saved, or the service did not restart. Fix that
-before going further.
+```json
+{"razorpayAuth":{"ok":true,"keyIdPrefix":"rzp_live_TzZts"}}
+```
 
-> **Ignore one line in the next check.** `curl -s …/health/integrations` will still list
-> `RAZORPAY_PLAN_LAUNCH` as missing, because production runs the older T8 build whose health
-> check still requires it. That single entry is expected until the `converza-v2` branch
-> deploys. Any *other* Razorpay var in that list is a real gap.
+**Done when:** `keyIdPrefix` is `rzp_live_TzZts`.
+
+**If you still see `rzp_live_Ti0DZ`:** the env vars were not saved, or the service did not
+restart. Render → **Events** tab shows whether a deploy actually ran; fix that before going on.
+
+> **Ignore one line in the next check.** `curl -s https://leadbridge-zy4o.onrender.com/health/integrations`
+> will still list `RAZORPAY_PLAN_LAUNCH` as missing: production runs the older T8 build, whose
+> health check still requires it. That single entry is expected until the `converza-v2` branch
+> deploys. Any *other* Razorpay variable in that list is a real gap — fix it in step 3.
 
 ---
 
-## Step 5 — Create the webhook (3 min)
+## Step 5 — Create the webhook
 
-1. Razorpay dashboard → **Accounts & Settings** → **Webhooks** (under *Website and app
-   settings*) → **+ Add New Webhook**.
-2. Fill in:
+**Where:** Razorpay dashboard → **Accounts & Settings** → **Webhooks** (under *Website and app
+settings*) → **+ Add New Webhook**.
+
+> Note: this is **not** under a plain "Settings → Webhooks" menu item, and not inside the
+> Subscriptions product — the Subscriptions settings page (step 1) is a different screen.
+
+**Do this:** fill the form exactly:
 
 | Field | Value |
 |---|---|
 | Webhook URL | `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay` |
-| Secret | the `RAZORPAY_WEBHOOK_SECRET` from step 2 — must be **identical** to Render's |
-| Alert Email | your email (notifications on webhook failure) |
-| Active Events | all seven below |
+| Secret | the 48-char `RAZORPAY_WEBHOOK_SECRET` from step 2 — **byte-identical** to Render's |
+| Alert Email | your email (you get notified when deliveries fail) |
+| Active Events | the seven below, nothing else |
 
-Events (all seven are handled by the route; omitting `halted`/`completed` leaves a
-halted/unpaid client ACTIVE in our DB and still calling):
+Tick all seven (omitting `halted`/`completed` leaves a halted or finished client ACTIVE in our
+database and still being called and billed for):
 
 - `subscription.charged`
 - `subscription.cancelled`
@@ -142,104 +225,161 @@ halted/unpaid client ACTIVE in our DB and still calling):
 - `payment.failed`
 - `invoice.paid`
 
-3. **Create Webhook**. It shows as Active.
+Click **Create Webhook**.
 
-**Done when:** URL has no trailing slash, exactly seven events, secret matches Render.
+**Done when:** the webhook shows as **Active**, the URL has **no trailing slash**, exactly seven
+events are ticked, and the secret matches Render's.
+
+**If it doesn't:** a wrong or trailing-slash URL still "succeeds" in the dashboard and every real
+event 404s. That failure only shows up in Razorpay → Webhooks → the webhook → **Logs**.
 
 ---
 
-## Step 6 — Tell me, or run the four checks yourself (2 min)
+## Step 6 — Prove the webhook verifies (2 minutes)
 
-Paste this in chat and I'll run them: **"cutover deployed, run C1–C4"**.
+**Where:** repo root, any terminal.
 
-Or do it yourself from the repo root:
+**Do this:** paste this message in chat — **"cutover deployed, run C1–C4"** — and I run all four.
+Or run them yourself:
 
 ```bash
-# 1) new account is live
+# C1 — new account is live
 curl -s https://leadbridge-zy4o.onrender.com/health/razorpay
-# expect: "keyIdPrefix":"rzp_live_TzZts"
+#   expect "keyIdPrefix":"rzp_live_TzZts"
 
-# 2) nothing genuinely missing (RAZORPAY_PLAN_LAUNCH expected on the T8 build)
+# C2 — nothing genuinely missing (RAZORPAY_PLAN_LAUNCH is expected on the T8 build)
 curl -s https://leadbridge-zy4o.onrender.com/health/integrations
 
-# 3) a correctly signed webhook is accepted  → expect HTTP 200 + PASS, exit 0
+# C3 — correctly signed webhook is accepted → expect HTTP 200 + PASS + exit 0
 RAZORPAY_WEBHOOK_SECRET=<from step 2> node scripts/send-test-webhook.cjs
 
-# 4) a WRONG signature is rejected           → expect HTTP 401 + PASS, exit 0
+# C4 — wrong signature is rejected → expect HTTP 401 + PASS + exit 0
 RAZORPAY_WEBHOOK_SECRET=<from step 2> node scripts/send-test-webhook.cjs subscription.cancelled --bad-signature
 ```
 
-Then Render → leadbridge-api → **Logs**, search `Razorpay webhook received` (logs can lag ~30s).
-A `200` with no log line means the URL is hitting something else.
+**You should see:** `PASS` **and** `EXIT=0` on both C3 and C4. The scripts exit non-zero when the
+result is wrong, so a printed `200` with a non-zero exit is a fail, not a pass.
 
-> These scripts exit non-zero when the result is wrong, so `PASS` and `EXIT=0` must both
-> appear. A `200` on check 4 means signature checking is broken — stop before any real payment.
+**Done when:** C1 shows the new prefix, C2 lists no Razorpay gap other than `RAZORPAY_PLAN_LAUNCH`,
+C3 is 200/exit 0, C4 is 401/exit 0.
 
----
+**Also check the server side:** Render → **leadbridge-api** → **Logs**, search
+`Razorpay webhook received`. Logs can lag ~30 s. A 200 from C3 with no log line means the request
+is hitting something other than this service.
 
-## Step 7 — Prove UPI AutoPay works with ₹5 (5 min, no app data touched)
-
-This is the exact action that failed on the old account, so do it before a real tier charge.
-
-1. Razorpay → **Subscriptions → Plans → + Create Plan**: amount **₹5**, period **monthly**,
-   interval 1, INR.
-2. Create a subscription against that plan (Subscriptions → + Create Subscription), customer =
-   yourself, and pay the authorisation charge via **UPI**.
-3. **Pass** = the mandate authorises and the ₹5 is captured. **Fail** with "Payment is not
-   allowed for this account" = the payment methods are not actually enabled — go back to
-   step 1.
-
-Cancel that ₹5 test subscription afterwards so it never bills again.
+**If C4 returns 200:** signature verification is not running — stop, do not take a real payment,
+and tell me.
 
 ---
 
-## Step 8 — The real app loop (10 min)
+# Part B — Prove money actually moves
 
-1. **Fresh incognito window** (old Razorpay checkout state interferes) → log in → **Billing**.
-2. **Upgrade Growth (₹41,299/mo)** — it charges immediately, unlike Starter which defers 30
-   days and therefore cannot produce a PAID invoice today.
-3. In the Razorpay sheet: pay. Per the warning above, use **eMandate/NetBanking** if UPI/card
-   are unavailable or fail at this amount.
-4. The client must flip to **ACTIVE** within ~30 s (the webhook does that). If it stays
-   `PAST_DUE`, check Render logs for a webhook 401 (secret mismatch) before anything else.
-5. Verify the money loop:
+## Step 7 — ₹5 UPI AutoPay mandate test
+
+Purpose: this is the exact action that failed on the old account. It costs ₹5 and touches no app
+data.
+
+**Where:** Razorpay dashboard → **Subscriptions** → **Plans** → **+ Create Plan**.
+
+**Do this:**
+
+1. Create a plan: amount **₹5**, period **monthly**, interval **1**, currency **INR**. Name it
+   something obvious like `UPI mandate test — delete me`.
+2. **Subscriptions** → **+ Create Subscription** → pick that plan → customer = yourself →
+   create it and open the payment link / short URL it produces.
+3. Pay the authorisation charge with **UPI**.
+4. Afterwards, cancel that test subscription so it never bills again.
+
+**Done when:** the mandate authorises and the ₹5 is captured (subscription moves to `active`,
+payment shows `captured`).
+
+**If it fails** with *"Payment is not allowed for this account"*: payment methods were not really
+enabled — go back to step 1. If it fails with a mandate/amount error, note the code and skip to
+step 8's eMandate path; the old account failed here too.
+
+---
+
+## Step 8 — The real app loop (Growth)
+
+Why Growth and not Starter: Starter defers the first charge 30 days by design, so it cannot
+produce a PAID invoice today. Growth charges immediately.
+
+**Where:** <https://leadbridge-seven.vercel.app> in a **fresh incognito window** (old Razorpay
+checkout state in a normal window causes confusing failures).
+
+**Do this:**
+
+1. Log in → **Billing**.
+2. Click **Upgrade** on **Growth — ₹41,299/mo**.
+3. In the Razorpay sheet, pay using **eMandate / NetBanking** (see the cap warning above). If UPI
+   or card is offered, expect it to fail at this amount.
+4. Watch the Billing page and Render logs. The client should flip to **ACTIVE** within ~30 s, and
+   the log should show `subscription.charged` handled.
+5. Cancel + refund: **Billing → Cancel**. A pro-rated refund is executed through Razorpay and the
+   Payment row is marked REFUNDED with a `refundId`.
+6. Erase the test account from the admin panel (DPDP hygiene).
+
+**Optional automated check — currently expected to fail:**
 
 ```bash
 node scripts/verify-money-loop.cjs --latest
 ```
 
-> **This command fails until the V2 migrations are applied** — production's DB is five
-> migrations behind and the script reads `Client.prepaidLeads`
-> (`The column Client.prepaidLeads does not exist`). That is schema drift, not a broken
-> verifier. Until `converza-v2` deploys, verify from the Razorpay dashboard + Render logs:
-> `subscription.charged` received, invoice marked PAID, Payment row recorded.
-> After the v2 deploy, re-run the script — it should show ACTIVE, a subscription row, a PAID
-> invoice with GSTIN + "GS TECHNO", a Payment row with `providerPaymentId`, revenue
-> incremented, and a generated PDF.
-6. **Cancel + refund:** Billing → Cancel. Expect a pro-rated refund executed via Razorpay and
-   the Payment row marked REFUNDED with a `refundId`. A `502` means Razorpay refused and the
-   local sub deliberately stays ACTIVE — retry rather than assume success.
-7. Erase the test account from the admin panel (DPDP).
+> This errors with `The column Client.prepaidLeads does not exist in the current database`.
+> Production's database is **five migrations behind** `converza-v2`, so this is schema drift, not
+> a broken verifier. Until the v2 branch deploys, verify from the Razorpay dashboard + Render logs
+> instead: `subscription.charged` received, invoice **PAID**, a Payment row with
+> `providerPaymentId`, revenue incremented. Re-run the script after the v2 deploy — it should then
+> print ACTIVE, the subscription row, a PAID invoice carrying GSTIN + "GS TECHNO", the Payment
+> row, and a generated PDF.
+
+**Done when:** client ACTIVE, PAID invoice with GSTIN + "GS TECHNO", refund recorded, test account
+erased.
+
+**If the client stays `PAST_DUE` after a successful payment:** the webhook never arrived or
+returned 401. Check Render logs first, then re-check the step-5 secret.
+
+**If the cancel returns `502`:** Razorpay refused the refund and the local subscription
+deliberately stays ACTIVE. Retry — do not assume the cancellation succeeded.
 
 ---
 
-## Step 9 — Retire the old account (5 min, only after step 8 passes)
+# Part C — Close out
 
-1. Old Razorpay account → **Subscriptions** → cancel/expire **every** subscription so nothing
-   double-charges later.
-2. **Do not delete the old account yet** — it is the rollback path until a second real
-   checkout on the new account succeeds.
-3. One more real checkout on the new account to confirm stability, then it can stay dormant.
+## Step 9 — Retire the old account (only after step 8 passes)
+
+**Where:** the OLD Razorpay account → **Subscriptions**.
+
+**Do this:**
+
+1. Cancel or expire **every** subscription there, so nothing double-charges a customer later.
+2. **Do not delete the old account yet.** It is the rollback path until a second real checkout on
+   the new account succeeds.
+3. After that second checkout, it can stay dormant; delete it only once you are confident.
+
+**Done when:** the old account's subscription list is empty of live/active entries.
 
 ---
 
-## Step 10 — Rotate the key pair (3 min, last)
+## Step 10 — Rotate the live key pair (last)
 
-The current live key pair was pasted into chat during the migration.
+The current live key pair was pasted into chat during the migration, so treat it as public.
 
-1. Razorpay → **Accounts & Settings → API Keys → Regenerate** (Live).
-2. Update `RAZORPAY_KEY_ID` + `RAZORPAY_KEY_SECRET` on Render, and in `server/.env`.
-3. Manual Deploy → re-run the step 4 health check. The prefix will change; that's expected.
+**Where:** Razorpay → **Accounts & Settings** → **API Keys** → **Regenerate** (Live mode).
+
+**Do this:**
+
+1. Regenerate and copy both values immediately (the secret is shown once).
+2. Update `RAZORPAY_KEY_ID` + `RAZORPAY_KEY_SECRET` on Render (step 3 screen) **and** in
+   `server/.env` on this machine.
+3. Render → **Manual Deploy**.
+4. Re-run the step 4 health check.
+
+**Done when:** `/health/razorpay` is `ok:true` with a **new** `keyIdPrefix` (the prefix changing
+is expected and correct), and one small real charge still succeeds.
+
+**Note:** the webhook secret is independent of the API key pair — regenerating keys does not
+require touching the webhook.
 
 ---
 
@@ -247,26 +387,34 @@ The current live key pair was pasted into chat during the migration.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `/health/razorpay` still `Ti0DZ` | env not saved, or no restart | save + Manual Deploy |
-| `missingVars` lists STARTER/GROWTH/PRO | that plan ID empty or typo'd | paste from the step-3 table |
-| Checkout banner shows `Invalid plan id` | old-account plan ID still set | use the three plan IDs from the step-3 table, nothing else |
-| Checkout says "payment required manually" | that tier's plan ID is unset | set it; the tier degrades silently by design |
-| Signed webhook 200 but real events 401 | dashboard secret ≠ Render secret | re-paste in both, redeploy |
-| Real charge fails, sheet shows no method | the ₹15,000 recurring cap (top of this doc) | use eMandate/NetBanking; confirm enabled methods with Razorpay |
-| Client stays `PAST_DUE` after paying | webhook never arrived or 401'd | Render logs, then step 5 secret |
-| `verify-money-loop.cjs` says a column doesn't exist | prod DB is behind the branch | expected until `converza-v2` deploys |
+| `/health/razorpay` still `Ti0DZ` | env not saved, or no restart | save on Render, then Manual Deploy (step 4) |
+| `missingVars` lists STARTER/GROWTH/PRO | that plan ID empty or mistyped | paste from the step-3 table |
+| Checkout banner `Invalid plan id` | an old-account plan ID is still set | use only the three monthly IDs from step 0/3 |
+| Checkout says "payment required manually" | that tier's plan ID is unset | set it — the tier degrades silently by design |
+| C3 passes but real events 401 | dashboard secret ≠ Render secret | re-paste in both places, redeploy, retry |
+| C4 returns 200 | signature verification not active | stop; report it before taking money |
+| Real charge fails, sheet shows no method | the ₹15,000 recurring cap | use eMandate/NetBanking; confirm enabled methods with Razorpay |
+| Client stays `PAST_DUE` after paying | webhook never arrived or 401'd | Render logs → step 5 secret |
+| `verify-money-loop.cjs` says a column doesn't exist | prod DB behind the branch | expected until `converza-v2` deploys |
+| `--verify` reports a plan missing | plan deleted, or a hand-made plan without notes | re-run sync with `--live`, then update Render |
 
 ---
 
 ## Done when all true
 
+**Part A — cutover**
 - [ ] Card / UPI / eMandate enabled under Subscriptions → Settings.
-- [ ] Six Razorpay vars on Render, `RAZORPAY_PLAN_LAUNCH` deleted.
+- [ ] Six `RAZORPAY_*` vars on Render, `RAZORPAY_PLAN_LAUNCH` deleted.
 - [ ] `/health/razorpay` → `keyIdPrefix: rzp_live_TzZts`.
-- [ ] Webhook active with seven events and the matching secret.
-- [ ] Signed webhook 200; bad signature 401.
+- [ ] Webhook Active, seven events, no trailing slash, secret matches Render.
+- [ ] C1 new prefix, C3 200 + exit 0, C4 401 + exit 0.
+
+**Part B — money**
 - [ ] ₹5 UPI AutoPay mandate authorises.
 - [ ] Real Growth checkout → client ACTIVE, PAID invoice with GSTIN + GS TECHNO.
-- [ ] Cancel + refund executed and recorded.
+- [ ] Cancel + pro-rated refund executed and recorded.
+
+**Part C — close-out**
 - [ ] Old account's subscriptions all cancelled (account not deleted).
-- [ ] Live key pair rotated and redeployed.
+- [ ] Live key pair rotated, redeployed, `ok:true` with a new prefix.
+- [ ] Six plans still verify: `cd server && npx tsx --env-file=.env scripts/sync-razorpay-plans.ts --verify`.

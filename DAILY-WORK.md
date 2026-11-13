@@ -183,6 +183,8 @@ From `docs/GO-LIVE-RUNBOOK.md`:
 
 **→ Click-level walkthrough of all of the above: `docs/razorpay-cutover-steps.md`.** It also records the documented ₹15,000 recurring cap (Cards/UPI) — every tier charges above it, so a real tier charge needs eMandate/NetBanking, not UPI AutoPay.
 
+**Plans on the new account: already created — do NOT hand-create them in the dashboard.** Re-verified live 2026-11-14: `cd server && npx tsx --env-file=.env scripts/sync-razorpay-plans.ts --verify` → 6/6 ✓ (₹17,699 / ₹41,299 / ₹70,799 monthly + the three annual), exit 0. The only human action is pasting the three monthly IDs into Render. If `--verify` ever reports one missing, fix it with `--live` (which writes the `notes` the verifier matches on), never by typing a plan into the dashboard — a hand-made plan has no notes, is reported missing anyway, and its amount will not be the GST-inclusive figure.
+
 ---
 
 ## REMAINING — step-by-step guide (start here each day)
