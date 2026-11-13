@@ -83,9 +83,6 @@ export default function FeaturesPage() {
         </div>
 
         <div className="mt-14 flex flex-wrap gap-3">
-          <Link href="/demo" className="rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] font-bold px-6 py-3 text-[14px]">
-            Get a test call
-          </Link>
           <Link href="/auth/register" className="rounded-lg border border-white/15 px-6 py-3 text-[14px] text-[#F0F7F3]">
             Start free trial
           </Link>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-const GlobeCanvas = dynamic(() => import("@/components/canvas/GlobeCanvas"), {
+const LeadPulseCanvas = dynamic(() => import("@/components/canvas/LeadPulseCanvas"), {
   ssr: false,
   loading: () => <div className="w-full h-full" />,
 });
@@ -118,11 +118,11 @@ export default function HeroSection() {
               className="flex flex-col sm:flex-row items-start sm:items-center gap-4 opacity-0"
             >
               <Link
-                href="/demo"
+                href="/features"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[16px] font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-[0_0_48px_rgba(52,211,153,0.55)] active:scale-[0.98]"
                 style={{ boxShadow: "0 0 32px rgba(52, 211, 153, 0.35)" }}
               >
-                Get a test call in 30 seconds
+                See how it works
                 <svg
                   width="16"
                   height="16"
@@ -131,7 +131,7 @@ export default function HeroSection() {
                   className="ml-1"
                 >
                   <path
-                    d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+                    d="M3.333 8.667h9.334M8 4.667l4 4-4 4"
                     stroke="currentColor"
                     strokeWidth="1.5"
                     strokeLinecap="round"
@@ -151,7 +151,7 @@ export default function HeroSection() {
           {/* Right: Globe */}
           <div className="flex-1 relative flex items-center justify-center h-[300px] sm:h-[400px] lg:h-[600px]">
             <div className="globe-container absolute inset-0 opacity-0">
-              <GlobeCanvas scale={1.25} />
+              <LeadPulseCanvas scale={1.25} />
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useLandingData } from "@/hooks/useLandingData";
 
-const GlobeCanvas = dynamic(() => import("@/components/canvas/GlobeCanvas"), {
+const LeadPulseCanvas = dynamic(() => import("@/components/canvas/LeadPulseCanvas"), {
   ssr: false,
   loading: () => <div className="w-full h-full" />,
 });
@@ -30,7 +30,7 @@ export default function CTASection() {
 
       {/* Globe - bottom center, half cropped */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-70 pointer-events-none">
-        <GlobeCanvas scale={1.4} />
+        <LeadPulseCanvas scale={1.4} />
       </div>
 
       {/* Content */}
