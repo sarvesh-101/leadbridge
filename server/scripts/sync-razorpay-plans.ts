@@ -43,12 +43,14 @@ function planMatrix() {
     monthly: {
       chargedInclGst: monthlyCharged(tier),
       amountPaise: asPaise(monthlyCharged(tier)),
-      period: "month" as const,
+      // Razorpay plan API enum is daily|weekly|monthly|yearly (NOT "month").
+      // "month" is rejected with "Invalid argument for period passed".
+      period: "monthly" as const,
     },
     annual: {
       chargedInclGst: annualCharged(tier),
       amountPaise: asPaise(annualCharged(tier)),
-      period: "year" as const,
+      period: "yearly" as const,
     },
     leadsPerMonth: PLANS[tier].leadsPerMonth,
     teamUsers: PLANS[tier].teamUsers,

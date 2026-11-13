@@ -33,10 +33,12 @@ The webhook **only verifies** if the secret you put in the Razorpay dashboard **
 2. **Settings** (top-right gear icon) → **Webhooks** → **Add Webhook**.
 3. Fill in:
    - **URL:** `https://leadbridge-zy4o.onrender.com/api/v1/webhooks/razorpay`
-   - **Events** — select these five (all):
+   - **Events** — select these seven (all of them are handled by the route):
      - `subscription.charged`
      - `subscription.cancelled`
      - `subscription.pending`
+     - `subscription.halted`
+     - `subscription.completed`
      - `payment.failed`
      - `invoice.paid`
    - **Secret** — paste the same value that's in Render env as `RAZORPAY_WEBHOOK_SECRET` (default: `8e994f4cb5677d2097ea3dfe66c29b3c47d2637c5d66025f`, unless you generated a fresh one in 2a).

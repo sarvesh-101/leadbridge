@@ -64,16 +64,25 @@ services:
         sync: false
       - key: RAZORPAY_WEBHOOK_SECRET
         sync: false
-      # REQUIRED for the Launch plan to reach Razorpay checkout. Unset = checkout
-      # silently degrades to "payment required manually" (no payment page).
+      # Plan IDs are NOT hardcoded here. They belong to a specific Razorpay
+      # account: the values previously committed (plan_TLa2…) were created on
+      # the OLD personal account. Hardcoding them meant a blueprint sync could
+      # point production back at old-account plans after the move to the new
+      # business account — checkout would then bill on the wrong account (or
+      # fail). They now live only in the dashboard, set from the output of
+      # `server/scripts/sync-razorpay-plans.ts --live` (amounts come from
+      # server/src/config/plans.ts).
+      #
+      # Unset values do NOT error: the tier silently degrades to "manual payment"
+      # (no payment page), which is why /health/integrations lists them.
       - key: RAZORPAY_PLAN_LAUNCH
         sync: false
       - key: RAZORPAY_PLAN_STARTER
-        value: plan_TLa2O5pEwG46mP
+        sync: false
       - key: RAZORPAY_PLAN_GROWTH
-        value: plan_TLa2OL7fmEXbnz
+        sync: false
       - key: RAZORPAY_PLAN_PRO
-        value: plan_TLa2OaHr2MHxTe
+        sync: false
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

@@ -1,0 +1,29 @@
+{
+  "syncedAt": "2026-11-13T07:34:30.017Z",
+  "plans": {
+    "STARTER.monthly": {
+      "planId": "plan_TzZx6AnyZg1COc",
+      "created": true
+    },
+    "STARTER.annual": {
+      "planId": "plan_TzZx6S5zR1aDI8",
+      "created": true
+    },
+    "GROWTH.monthly": {
+      "planId": "plan_TzZx6i9gxjn14t",
+      "created": true
+    },
+    "GROWTH.annual": {
+      "planId": "plan_TzZx74cmsBPy79",
+      "created": true
+    },
+    "PRO.monthly": {
+      "planId": "plan_TzZx7HGbGReXSR",
+      "created": true
+    },
+    "PRO.annual": {
+      "planId": "plan_TzZx7U919rjaVt",
+      "created": true
+    }
+  }
+}

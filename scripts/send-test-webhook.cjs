@@ -22,10 +22,10 @@
  * so the handler's updateMany({ where: { razorpaySubId } }) matches zero rows and
  * no database state changes. Verify by checking the logs, not the DB.
  *
- * IMPORTANT: the payload is sent as compact JSON (no whitespace). The server
- * re-serializes the parsed body with JSON.stringify before computing the HMAC,
- * which only matches for compact JSON — exactly what Razorpay sends. Do not
- * pretty-print this payload or you will get a false 401.
+ * IMPORTANT: the payload is sent as the exact bytes that were signed. The server
+ * HMACs the raw request bytes (T8 — request.rawBody), which is what Razorpay
+ * signs, so this matches for any formatting. Older builds that re-serialized
+ * parsed JSON only matched compact JSON, so keep it compact anyway.
  */
 
 const https = require("https");
@@ -159,16 +159,27 @@ function post(url, rawBody, signature) {
     console.log(`HTTP ${res.status} in ${ms} ms`);
     console.log(`body: ${res.body}`);
     console.log("");
-    if (res.status === 200) {
+    if (res.status === 200 && !BAD_SIGNATURE) {
       console.log("PASS — the endpoint accepted the signature and ran the handler.");
       console.log("Now check Render → leadbridge-api → Logs for:");
       console.log(`  { eventType: '${EVENT}' }  Razorpay webhook received`);
+    } else if (res.status === 401 && BAD_SIGNATURE) {
+      console.log("PASS — signature enforcement is ON (a wrong signature is rejected).");
     } else if (res.status === 401) {
       console.log("FAIL — signature rejected. The secret here does not match Render's");
       console.log("RAZORPAY_WEBHOOK_SECRET (or Render is running old code without it).");
+    } else if (res.status === 200 && BAD_SIGNATURE) {
+      console.log("FAIL — a WRONG signature was accepted. Signature checking is broken;");
+      console.log("stop and escalate — do not run a real payment against this endpoint.");
     } else {
       console.log("FAIL — unexpected status. Check the URL and the Render logs.");
     }
+
+    // Exit code must reflect the RESULT, not merely that the request completed.
+    // It previously always exited 0, so `… && …` chains (and anyone reading
+    // "EXIT=0") treated a rejected signature as success — exactly the check
+    // that guards real money.
+    process.exitCode = res.status === (BAD_SIGNATURE ? 401 : 200) ? 0 : 1;
   } catch (e) {
     console.error("Request error:", e.message);
     process.exit(1);

@@ -316,13 +316,21 @@ export async function buildServer() {
         config.RAZORPAY_KEY_SECRET &&
           config.RAZORPAY_PLAN_STARTER
         ),
-        // Every tier is listed individually: a plan missing its Razorpay plan ID
-        // does not error, it silently downgrades that tier to "manual payment"
-        // (no payment page), so this list is the only place the gap is visible.
+        // Every SELLABLE tier is listed individually: a plan missing its Razorpay
+        // plan ID does not error, it silently downgrades that tier to "manual
+        // payment" (no payment page), so this list is the only place the gap is
+        // visible.
+        //
+        // RAZORPAY_PLAN_LAUNCH is deliberately NOT listed. Launch is retired and
+        // the current Razorpay account has no plan for it (see
+        // docs/step3-new-razorpay-account.md, A3/B6), so requiring it kept
+        // missingVars permanently non-empty — which hid a real gap on the three
+        // tiers that are actually sold and made the go-live check impossible to
+        // satisfy. A legacy LAUNCH checkout instead fails loudly with 400
+        // "plan not configured" (billing.ts /billing/upgrade).
         missingVars: buildMissingList([
           ["RAZORPAY_KEY_ID", config.RAZORPAY_KEY_ID],
           ["RAZORPAY_KEY_SECRET", config.RAZORPAY_KEY_SECRET],
-          ["RAZORPAY_PLAN_LAUNCH", config.RAZORPAY_PLAN_LAUNCH],
           ["RAZORPAY_PLAN_STARTER", config.RAZORPAY_PLAN_STARTER],
           ["RAZORPAY_PLAN_GROWTH", config.RAZORPAY_PLAN_GROWTH],
           ["RAZORPAY_PLAN_PRO", config.RAZORPAY_PLAN_PRO],
