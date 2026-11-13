@@ -181,6 +181,8 @@ From `docs/GO-LIVE-RUNBOOK.md`:
 7. **C6–C8 + D** need you at the keyboard: real charge (Growth ₹41,299 charges immediately; Starter defers 30 days and cannot produce a PAID invoice on day 0) → `node scripts/verify-money-loop.cjs --latest` → cancel + refund → neutralise the old account (cancel its subs, do not delete).
 8. **D6** rotate the key pair once the loop passes — it was pasted into chat during the migration.
 
+**→ Click-level walkthrough of all of the above: `docs/razorpay-cutover-steps.md`.** It also records the documented ₹15,000 recurring cap (Cards/UPI) — every tier charges above it, so a real tier charge needs eMandate/NetBanking, not UPI AutoPay.
+
 ---
 
 ## REMAINING — step-by-step guide (start here each day)
