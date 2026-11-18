@@ -365,7 +365,7 @@ export default function LeadForwardingPage() {
       const [smsStatus, emailStatus, recentLeads] = await Promise.all([
         api.get<{ configured: boolean; forwardingNumber: string }>("/webhooks/sms/status").catch(() => null),
         api.get<{ configured: boolean; forwardingEmail: string }>("/webhooks/email/status").catch(() => null),
-        api.get<{ leads: ForwardingStatus["recentLeads"] }>("/leads?source=sms_forward,email_forward_99acres,email_forward_magicbricks,email_forward_justdial&limit=10&sort=-createdAt").catch(() => null),
+        api.get<{ leads: ForwardingStatus["recentLeads"] }>("/leads?source=sms_forward,email_forward,email_forward_99acres,email_forward_magicbricks,email_forward_justdial&limit=10&sort=-createdAt").catch(() => null),
       ]);
 
       setStatus({

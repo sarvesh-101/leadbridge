@@ -27,6 +27,7 @@ export async function runImapEmailPull(): Promise<{
   errors: number;
 }> {
   if (!config.IMAP_HOST || !config.IMAP_USER || !config.IMAP_PASS) {
+    logger.warn("IMAP email pull skipped — IMAP_HOST/IMAP_USER/IMAP_PASS not all set");
     return { configured: false, processed: 0, created: 0, skipped: 0, errors: 0 };
   }
 
@@ -48,6 +49,7 @@ export async function runImapEmailPull(): Promise<{
     await client.mailboxOpen(config.IMAP_FOLDER);
     const searchResult = await client.search({ seen: false }, { uid: true }); // seen:false = unseen
     const uids = searchResult === false ? [] : searchResult;
+    logger.info({ unseenCount: uids.length, folder: config.IMAP_FOLDER, user: config.IMAP_USER }, "IMAP: mailbox scanned");
     const batch = uids.slice(-MAX_MESSAGES_PER_CYCLE);
 
     const { prisma } = await import("../utils/prisma-shared");
@@ -57,12 +59,19 @@ export async function runImapEmailPull(): Promise<{
 
     for (const uid of batch) {
       try {
-        const message = await client.fetchOne(uid, { source: true, envelope: true });
-        if (!message || !message.source) continue;
+        const message = await client.fetchOne(uid, { source: true, envelope: true }, { uid: true });
+        if (!message || !message.source) {
+          logger.warn({ uid }, "IMAP: fetchOne returned no message — skipping");
+          continue;
+        }
         const parsed = await simpleParser(message.source);
-        const fromEmail = parsed.from?.value?.[0]?.address?.toLowerCase() || "";
+        const fromEmail =
+          (parsed.from?.value?.[0]?.address || "").toLowerCase() ||
+          (typeof parsed.from?.text === "string" ? parsed.from.text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]?.toLowerCase() : "") ||
+          "";
         const text = parsed.text || parsed.textAsHtml?.replace(/<[^>]+>/g, "") || "";
 
+        logger.info({ uid, fromEmail, subject: parsed.subject?.substring(0, 80) }, "IMAP: processing message");
         const result = await processForwardedEmail(ctx, {
           from: fromEmail,
           subject: parsed.subject || undefined,
@@ -73,9 +82,10 @@ export async function runImapEmailPull(): Promise<{
         processed++;
         if (result.status === "created") created++;
         else skipped++;
+        logger.info({ uid, fromEmail, result: result.status }, "IMAP: message result");
 
         // Handled → mark seen so we never reprocess (dedup + seen flag).
-        await client.messageFlagsAdd(uid, ["\\Seen"]);
+        await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true });
       } catch (err: any) {
         errors++;
         logger.warn({ uid, err: err.message }, "IMAP email processing failed — leaving unread for retry");

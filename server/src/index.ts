@@ -76,6 +76,7 @@ import whatsappWebhookRoutes from "./routes/webhooks/whatsapp";
 import webhookSourcesRoutes from "./routes/webhooks/sources";
 import adminAuditLogRoutes from "./routes/admin/audit-logs";
 import adminQueueRoutes from "./routes/admin/queues";
+import adminImapTriggerRoutes from "./routes/admin/imap-trigger";
 import adminWebhookRoutes from "./routes/admin/webhooks";
 import customerRoutes from "./routes/customer";
 import metricsRoutes from "./routes/metrics";
@@ -344,14 +345,27 @@ export async function buildServer() {
           ["FORWARDING_SMS_NUMBER", config.FORWARDING_SMS_NUMBER],
         ]),
       },
-      email_forwarding: {
-        configured: false,
-        forwardingEmail: config.FORWARDING_EMAIL || null,
-        setupGuide: "Set up SendGrid Inbound Parse or Mailgun Routes → POST to /api/v1/webhooks/email/incoming",
-        missingVars: buildMissingList([
-          ["FORWARDING_EMAIL", config.FORWARDING_EMAIL],
-        ]),
-      },
+      email_forwarding: (() => {
+        // `configured` means there is an AUTOMATED inbound path the server can
+        // actually run: the IMAP poller. A FORWARDING_EMAIL on its own is just
+        // the address shown to brokers — it only works if an external provider
+        // (SendGrid/Mailgun) posts to /webhooks/email/incoming. Reporting that
+        // as "configured" hid a silently-dead channel (mail forwarded to the
+        // mailbox was never read), so it is reported separately as `mode`.
+        const imapConfigured = !!(config.IMAP_HOST && config.IMAP_USER && config.IMAP_PASS);
+        return {
+          configured: imapConfigured,
+          mode: imapConfigured
+            ? "imap"
+            : config.FORWARDING_EMAIL
+              ? "webhook-only"
+              : "none",
+          imapConfigured,
+          forwardingEmail: config.IMAP_USER || config.FORWARDING_EMAIL || null,
+          setupGuide: "Automatic polling needs IMAP_HOST/IMAP_PORT/IMAP_USER/IMAP_PASS (Gmail: imap.gmail.com:993 + Gmail App Password). Without IMAP, an external inbound-email provider must POST to /api/v1/webhooks/email/incoming.",
+          missingVars: imapConfigured ? [] : ["IMAP_HOST", "IMAP_USER", "IMAP_PASS"],
+        };
+      })(),
       redis: {
         available: isRedisAvailable(),
       },
@@ -411,6 +425,7 @@ export async function buildServer() {
   await server.register(adminTerritoryRoutes, { prefix: apiPrefix });
   await server.register(adminAuditLogRoutes, { prefix: apiPrefix });
   await server.register(adminQueueRoutes, { prefix: apiPrefix });
+  await server.register(adminImapTriggerRoutes, { prefix: apiPrefix });
   await server.register(adminWebhookRoutes, { prefix: apiPrefix });
   await server.register(adminCreditRoutes, { prefix: apiPrefix });
   await server.register(adminRevenueRoutes, { prefix: apiPrefix });
@@ -657,7 +672,7 @@ async function validateEnvironment(): Promise<void> {
     { key: "RAZORPAY_KEY_ID", label: "Razorpay payments", configured: !!(config.RAZORPAY_KEY_ID && config.RAZORPAY_KEY_SECRET && config.RAZORPAY_PLAN_STARTER) },
     { key: "OPENROUTER_API_KEY", label: "AI transcript analysis / scripts / chatbot (OpenRouter)", configured: !!config.OPENROUTER_API_KEY || !!config.DEEPSEEK_API_KEY },
     { key: "FORWARDING_SMS_NUMBER", label: "SMS lead forwarding", configured: !!config.FORWARDING_SMS_NUMBER },
-    { key: "FORWARDING_EMAIL", label: "Email lead forwarding", configured: !!config.FORWARDING_EMAIL },
+    { key: "IMAP_USER", label: "Email lead forwarding (IMAP poller)", configured: !!(config.IMAP_HOST && config.IMAP_USER && config.IMAP_PASS) },
     { key: "SUPABASE_URL", label: "Call recording storage", configured: !!(config.SUPABASE_URL && config.SUPABASE_SERVICE_KEY) },
     { key: "MESSAGEBIRD_API_KEY", label: "SMS fallback", configured: !!config.MESSAGEBIRD_API_KEY },
     { key: "ENCRYPTION_KEY", label: "Credential encryption at rest", configured: !!config.ENCRYPTION_KEY },
@@ -681,6 +696,17 @@ async function validateEnvironment(): Promise<void> {
   }
 
   logger.info("✅ Environment validation passed");
+
+  // A forwarding address with no IMAP creds means the server never reads that
+  // mailbox: brokers forward enquiries and nothing happens. Say so explicitly
+  // instead of letting the channel look healthy.
+  if (config.FORWARDING_EMAIL && !(config.IMAP_HOST && config.IMAP_USER && config.IMAP_PASS)) {
+    logger.warn("");
+    logger.warn(`⚠️  Email forwarding is NOT configured: FORWARDING_EMAIL=${config.FORWARDING_EMAIL} is set,`);
+    logger.warn("   but no IMAP poller is configured, so mail sent to that address is never read.");
+    logger.warn("   Set IMAP_HOST, IMAP_USER and IMAP_PASS (Gmail App Password) to enable automatic polling.");
+    logger.warn("");
+  }
 
   // Warn if Redis is not available — this is CRITICAL for core automation
   if (!isRedisAvailable()) {
