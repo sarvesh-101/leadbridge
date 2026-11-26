@@ -131,8 +131,50 @@ Configure one to POST parsed emails to `https://<your-domain>/api/v1/webhooks/em
 | **SendGrid Inbound Parse** | Create an Inbound Parse webhook on a subdomain → POST to the webhook above |
 | **Mailgun Routes** | Create a route on your domain → forward to the webhook above |
 
-> The broker's forwarding email must match their account email (the platform matches
-> broker by sender email). `FORWARDING_EMAIL` env var is already `forward@converza.tech`.
+**Secure the endpoint first.** The URL is public, and a forged POST creates leads —
+each of which triggers a billable AI call. Set `EMAIL_WEBHOOK_SECRET` on the server and
+configure the same value at the provider:
+
+- **CloudMailin** → address settings → **Basic auth** (password = the secret), or a
+  custom header `X-Webhook-Secret`.
+- **Mailgun / SendGrid** → a custom header if the plan allows it, otherwise
+  `?secret=<value>` on the target URL (least preferred — URLs end up in dashboards
+  and proxy logs).
+
+With the secret set, a request that does not present it gets `401`. With
+`EMAIL_WEBHOOK_SECRET` unset the route accepts unauthenticated posts, which is why it
+is safe to deploy before choosing a provider. `GET /webhooks/email/status` reports
+`secured: true/false`.
+
+### Per-broker addresses — what makes auto-forward work
+
+Every broker gets their own address, `<mailbox>+<token>@<domain>`, from
+`GET /api/v1/forwarding/address` (shown on the Forwarding page with a copy button).
+`<mailbox>` is the local part of the mailbox the IMAP poller reads (`IMAP_USER`,
+falling back to `FORWARDING_EMAIL`), so the address is a plus-address on an inbox
+that really exists — e.g. a Gmail poller hands out `you+<token>@gmail.com`.
+Ingestion resolves the broker by **recipient first, sender second**.
+
+Why: an auto-forward rule (Gmail, portal, Outlook) keeps the *portal's* `From`
+header, so sender-only matching rejects exactly the mail brokers actually forward.
+The recipient address always survives — in `To`/`Cc`, or in `Delivered-To` /
+`X-Forwarded-To` — so one rule per broker is enough. Sender matching is kept for
+manual forwards and the shared `FORWARDING_EMAIL` mailbox.
+
+- `FORWARDING_DOMAIN` (optional) sets the address domain; unset = the domain of
+  the polled mailbox (plus-addressing, no DNS work). For a dedicated catch-all
+  use e.g. `forward.converza.tech` and route its catch-all into the IMAP mailbox.
+
+> ⚠️ **Domain rule — never use the root domain for inbound parsing.**
+> `support@converza.tech` is the business/support mailbox and owns the MX record for
+> `converza.tech`. Pointing that MX at an inbound provider (CloudMailin, SendGrid, …)
+> would stop real support mail from arriving. Always use a **subdomain** such as
+> `forward.converza.tech` for the forwarding catch-all; the root domain's mail stays
+> exactly where it is.
+- One mailbox serves every broker: the token in `To`/`Delivered-To` is what says
+  whose mail it is, so a new broker needs no Render change — only a forward rule
+  in their own mailbox.
+- Tokens are allocated lazily on first view, so existing clients need no backfill.
 
 ---
 

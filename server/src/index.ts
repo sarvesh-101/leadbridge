@@ -34,6 +34,7 @@ import clientCallRoutes from "./routes/client/calls";
 import clientBookingRoutes from "./routes/client/bookings";
 import clientDashboardRoutes from "./routes/client/dashboard";
 import clientSettingsRoutes from "./routes/client/settings";
+import clientForwardingAddressRoutes from "./routes/client/forwarding-address";
 import clientBillingRoutes from "./routes/client/billing";
 import clientCampaignRoutes from "./routes/client/campaigns";
 import clientIntegrationRoutes from "./routes/client/integrations";
@@ -447,6 +448,8 @@ export async function buildServer() {
   await server.register(clientProofRoutes, { prefix: apiPrefix });
   await server.register(onboardingTestRoutes, { prefix: apiPrefix });
   await server.register(clientSettingsRoutes, { prefix: apiPrefix });
+  // Per-broker `leads+<token>@<domain>` forwarding address (routing by recipient).
+  await server.register(clientForwardingAddressRoutes, { prefix: apiPrefix });
   await server.register(clientBillingRoutes, { prefix: apiPrefix });
   await server.register(clientCampaignRoutes, { prefix: apiPrefix });
   await server.register(clientIntegrationRoutes, { prefix: apiPrefix });

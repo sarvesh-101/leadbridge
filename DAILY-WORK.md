@@ -304,3 +304,79 @@ Full human runbook: **`docs/step3-new-razorpay-account.md` (A1–D6)**. Canonica
 - Plan pricing (canonical, `server/src/config/plans.ts`): Starter ₹17,699/mo (200 leads), Growth ₹41,299/mo (600 leads), Pro ₹70,799/mo (1,200 leads), all incl. 18% GST (ex-GST 14,999 / 34,999 / 59,999). Launch is retired at its legacy ₹7,999 and gets no plan on the new account. Only STARTER requests a 30-day trial, expressed as a future `start_at` — never `trial_period_days`.
 - Razorpay plan IDs live only in the Render dashboard (`render.yaml` is `sync: false` for all four). New-account IDs are recorded in `server/razorpay.plan-map.json`. `scripts/setup-razorpay.cjs` is disabled — it would create plans at the retired prices.
 - The local machine CAN reach the live Razorpay API with the new account keys (verified 2026-11-13). The old `rzp_live_Ti0DZ…` pair still 401s. Pass keys inline on the command line; never commit them.
+
+---
+
+## 2026-11-27 — Per-broker email forwarding is end-to-end (Phase 3 closed)
+
+**Why it was broken:** an auto-forward rule (Gmail/Outlook/portal) keeps the *portal's* `From`
+header, so sender-only matching silently dropped exactly the mail brokers forward. The recipient
+address does survive — in `To`/`Cc`, or in `Delivered-To`/`X-Forwarded-To`.
+
+**What now exists:**
+- `GET /api/v1/forwarding/address` → this broker's `forward+<token>@converza.tech` (10-char token, no 0/o/1/l), allocated lazily on first view (`utils/inbound-address.ts`). The Forwarding page shows it with a copy button and passes it to the portal wizard.
+- Routing is **recipient first, sender second** (`services/email-ingestion.service.ts`), and the lead's `rawPayload` records `matchedBy` (`recipient`/`sender`) plus the token, so a mis-route is diagnosable from the lead record.
+- Both ingestion paths pass recipient-side data: the IMAP poller sends `To`/`Cc` plus the raw header block (`Delivered-To`, `X-Forwarded-To`); the `/webhooks/email/incoming` route sends `to`, `delivered-to`, `x-forwarded-to`, `x-original-to`, `recipient`, `envelope` and `headers`.
+- Provider shapes normalised: extraction flattens arrays and objects, so SendGrid's object `envelope` and CloudMailin's raw `headers` string both work (previously a non-string candidate would have thrown).
+- Shared mailbox + manual forwards still work: sender matching is untouched, and legacy `leads+` addresses handed out by earlier builds still resolve.
+- One mailbox serves every broker — a new broker needs only a forward rule, no Render change. `FORWARDING_DOMAIN` (optional) is now in `render.yaml` + `.env.example`.
+
+**Verified:** server `tsc --noEmit` clean; `webhook-secret.test.ts` 8 passed; `inbound-address.test.ts` 9 passed; new
+`forwarding-routing.test.ts` 6 passed (portal sender + token → right broker; two brokers on one
+mailbox; SendGrid object envelope; sender fallback; unmatched portal mail ignored; unknown token
+then sender fallback).
+
+**Webhook hardened:** `POST /webhooks/email/incoming` was public and unauthenticated — a
+forged POST created a lead, and every lead is a billable AI call (plus the 30-day phone
+dedupe could mask the real enquiry). It now verifies `EMAIL_WEBHOOK_SECRET` from
+`X-Webhook-Secret`, `Authorization: Bearer`, HTTP Basic (CloudMailin style) or `?secret=…`
+(constant-time compare), returning `401` otherwise; unset secret keeps the previous open
+behaviour so the deploy is safe before a provider is configured. `GET /webhooks/email/status`
+now reports `secured`.
+
+**Domain note:** `support@converza.tech` is the business mailbox and owns the root MX.
+The forwarding catch-all must live on a subdomain (`forward.converza.tech`) — moving the
+root MX to an inbound provider would break support mail.
+
+**Still human (not code):** point a real portal enquiry at a broker's address and confirm the lead
+appears — needs `IMAP_*` (or a webhook provider) configured on the deployed build, which is still
+the T8 stack until `converza-v2` ships.
+
+---
+
+## 2026-11-27 (later) — Brand palette sweep finished; a silent Tailwind bug fixed
+
+**What was half-done:** the marketing/landing components had been moved to the Obsidian + Burnt Orange
+palette, but the dashboard, admin, customer, auth and setup pages still used the old green system
+(`#101713` surfaces, `#E4E7DF`/`#F1F3EE` light cards, `#7C8781` muted text, plus `emerald`/`green`/
+`red`/`amber` Tailwind palettes). The working tree was mid-sweep.
+
+**The bug that made the earlier pass look finished when it was not:** every tint written as
+`bg-[var(--semantic-success)]/10` (660 occurrences) produced **no CSS at all**. Tailwind 3.4 cannot
+apply an opacity modifier to an arbitrary `var()` value and drops the rule silently — so all the
+tinted badges, rows and borders created by the first pass were invisible. Same for
+`border-[var(--x)]/30` and `text-[var(--x)]/70`.
+
+**Fix — tokens are now real Tailwind colors backed by rgb channels:**
+- `globals.css` keeps the hex vars (inline styles/SVG use them) and adds `--*-rgb` channel mirrors.
+- `tailwind.config.ts` maps `canvas`, `surface`/`surface-raised`, `ink`/`ink-soft`/`ink-muted`,
+  `line`/`line-subtle`, `brand`/`brand-soft`/`brand-deep`/`brand-copper`, `success`, `warning`,
+  `danger` and `neutral-soft` through `rgb(var(--x-rgb) / <alpha-value>)`, so `/10`, `/30`, `/70`
+  compile correctly.
+- All arbitrary token utilities were rewritten to the named tokens
+  (`bg-[var(--semantic-success)]/10` → `bg-success/10`), and the remaining legacy hex, gray,
+  red, amber and emerald classes were converted across the frontend (92 files touched).
+- The old light-theme cards in `setup`, `customer/*` and `admin/*` now use the dark surfaces with
+  light text, matching the rest of the app.
+
+**Also cleaned:** ~48 files had been rewritten with CRLF line endings by an editor, producing
+whole-file diffs. Those are back to LF, so the commit diff contains only real changes.
+
+**Verified:** frontend `next build` exit 0; built stylesheet contains
+`rgb(var(--semantic-success-rgb)/.1)` and friends (proving the tints now emit); frontend
+`tsc --noEmit` clean; server `tsc --noEmit` clean; forwarding/webhook suite 23 passed.
+
+**Not verified:** the converted pages were not opened in a browser — contrast, hover states and
+spacing on the formerly light-theme screens (`/setup`, `/customer/*`, `/admin/*`) still need a
+visual pass at desktop and 390px before this branch ships.
+

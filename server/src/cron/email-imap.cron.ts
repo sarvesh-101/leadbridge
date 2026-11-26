@@ -71,11 +71,23 @@ export async function runImapEmailPull(): Promise<{
           "";
         const text = parsed.text || parsed.textAsHtml?.replace(/<[^>]+>/g, "") || "";
 
+        // An auto-forwarded message keeps the PORTAL's From header, so the
+        // broker is resolved from the recipient side: our per-broker address
+        // lives in To/Cc, and for rules that rewrite the envelope it survives
+        // in Delivered-To / X-Forwarded-To — hence the raw header block.
+        const addressText = (field: typeof parsed.to) =>
+          (Array.isArray(field) ? field : field ? [field] : [])
+            .map((entry) => entry.text || "")
+            .join(" ");
+        const headerText = (parsed.headerLines || []).map((line) => line.line).join("\n");
+        const recipients = [addressText(parsed.to), addressText(parsed.cc), headerText];
+
         logger.info({ uid, fromEmail, subject: parsed.subject?.substring(0, 80) }, "IMAP: processing message");
         const result = await processForwardedEmail(ctx, {
           from: fromEmail,
           subject: parsed.subject || undefined,
           text: text.slice(0, 10000),
+          recipients,
           meta: { provider: "imap", messageId: parsed.messageId || undefined, folder: config.IMAP_FOLDER },
         });
 
