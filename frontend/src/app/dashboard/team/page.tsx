@@ -32,7 +32,7 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 const ROLE_COLORS: Record<string, string> = {
   ADMIN: "bg-purple-500/10 text-purple-400 border-purple-500/30",
   AGENT: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-  VIEWER: "bg-gray-500/10 text-[#9FB0A6] border-gray-500/30",
+  VIEWER: "bg-neutral-soft/10 text-ink-soft border-line/30",
 };
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
@@ -143,18 +143,18 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Team</h1>
-          <p className="text-[#9FB0A6] mt-1">Manage your team members and permissions</p>
+          <h1 className="text-2xl font-bold text-ink">Team</h1>
+          <p className="text-ink-soft mt-1">Manage your team members and permissions</p>
         </div>
         <div className="flex flex-col sm:items-end gap-1.5">
           <button onClick={() => setShowInvite(true)} disabled={atSeatLimit}
             title={atSeatLimit ? "All seats are in use — remove a member or upgrade" : "Invite a team member"}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" /> Invite Member
           </button>
           {seatLimit !== null && (
-            <p className="text-[11px] text-[#9FB0A6]">
+            <p className="text-[11px] text-ink-soft">
               {seatsUsed} of {seatLimit} seats used · {planConfig?.name} plan
             </p>
           )}
@@ -164,7 +164,7 @@ export default function TeamPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { icon: Users, label: "Active Members", value: loading ? "—" : activeMembers.length, color: "text-green-400" },
+          { icon: Users, label: "Active Members", value: loading ? "—" : activeMembers.length, color: "text-success" },
           { icon: Mail, label: "Pending Invites", value: loading ? "—" : pendingInvites.length, color: "text-yellow-400" },
           { icon: Shield, label: "Roles", value: loading ? "—" : "ADMIN · AGENT · VIEWER", color: "text-purple-400" },
         ].map((s) => (
@@ -174,8 +174,8 @@ export default function TeamPage() {
             ) : (
               <>
                 <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                <div className="text-xl font-bold text-ink">{s.value}</div>
+                <div className="text-xs text-ink-soft">{s.label}</div>
               </>
             )}
           </div>
@@ -184,13 +184,13 @@ export default function TeamPage() {
 
       {/* Seat limit reached (T3) */}
       {atSeatLimit && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
-          <p className="flex-1 text-sm text-amber-200">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
+          <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
+          <p className="flex-1 text-sm text-warning">
             All {seatLimit} seats on the {planConfig?.name} plan are in use. Remove a member or upgrade to add more.
           </p>
           <Link href="/dashboard/billing"
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-all"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-warning/20 text-warning text-xs font-medium hover:bg-warning/30 transition-all"
           >
             Upgrade plan
           </Link>
@@ -219,11 +219,11 @@ export default function TeamPage() {
         </div>
       ) : members.length === 0 ? (
         <div className="text-center py-16 rounded-xl app-card">
-          <Users className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No team members yet</h3>
-          <p className="text-sm text-[#9FB0A6] mb-6">Invite your first team member to get started</p>
+          <Users className="w-12 h-12 mx-auto mb-4 text-ink-soft" />
+          <h3 className="text-lg font-medium text-ink mb-2">No team members yet</h3>
+          <p className="text-sm text-ink-soft mb-6">Invite your first team member to get started</p>
           <button onClick={() => setShowInvite(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium"
           >
             <Plus className="w-4 h-4" /> Invite Member
           </button>
@@ -234,12 +234,12 @@ export default function TeamPage() {
             <motion.div key={member.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
               className="flex items-center gap-4 p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-[#2D6A4F]">{member.name[0]?.toUpperCase()}</span>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-line-subtle/20 to-brand-deep/20 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-brand-deep">{member.name[0]?.toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-[#F0F7F3]">{member.name}</span>
+                  <span className="text-sm font-medium text-ink">{member.name}</span>
                   <div className="flex items-center gap-1.5">
                     {/* Role selector */}
                     <div className="relative group">
@@ -258,27 +258,27 @@ export default function TeamPage() {
                     </div>
                     <span className={cn(
                       "text-xs px-1.5 py-0.5 rounded",
-                      member.status === "ACTIVE" ? "bg-green-500/10 text-green-400" :
+                      member.status === "ACTIVE" ? "bg-success/10 text-success" :
                       member.status === "PENDING" ? "bg-yellow-500/10 text-yellow-400" :
-                      "bg-red-500/10 text-red-400"
+                      "bg-danger/10 text-danger"
                     )}>
                       {member.status}
                     </span>
                   </div>
                 </div>
-                <p className="text-xs text-[#9FB0A6] mt-0.5">{member.email}</p>
+                <p className="text-xs text-ink-soft mt-0.5">{member.email}</p>
               </div>
               <div className="shrink-0">
                 {member.status === "PENDING" ? (
                   <button onClick={() => setDeleteConfirmId(member.id)}
-                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    className="p-2 rounded-lg text-ink-soft hover:text-danger hover:bg-danger/10 transition-all"
                     title="Cancel invitation"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 ) : (
                   <button onClick={() => setDeleteConfirmId(member.id)}
-                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    className="p-2 rounded-lg text-ink-soft hover:text-danger hover:bg-danger/10 transition-all"
                     title="Remove member"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -300,31 +300,31 @@ export default function TeamPage() {
               className="w-full max-w-md mx-4 p-6 rounded-2xl app-card"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-[#F0F7F3]">Invite Team Member</h2>
-                <button onClick={() => setShowInvite(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
+                <h2 className="text-lg font-semibold text-ink">Invite Team Member</h2>
+                <button onClick={() => setShowInvite(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Name</label>
+                  <label className="block text-sm text-ink-soft mb-1.5">Name</label>
                   <input value={inviteName} onChange={(e) => setInviteName(e.target.value)}
                     placeholder="e.g., Priya Sharma"
-                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Email</label>
+                  <label className="block text-sm text-ink-soft mb-1.5">Email</label>
                   <input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)}
                     type="email"
                     placeholder="priya@example.com"
-                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Role</label>
+                  <label className="block text-sm text-ink-soft mb-1.5">Role</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(["ADMIN", "AGENT", "VIEWER"] as const).map((role) => (
                       <button key={role} onClick={() => setInviteRole(role)}
@@ -332,7 +332,7 @@ export default function TeamPage() {
                           "p-3 rounded-xl border text-xs text-center transition-all",
                           inviteRole === role
                             ? ROLE_COLORS[role]
-                            : "border-white/10 text-[#9FB0A6] hover:bg-white/[0.06]"
+                            : "border-line text-ink-soft hover:bg-white/[0.06]"
                         )}
                       >
                         <div className="flex justify-center mb-1">{ROLE_ICONS[role]}</div>
@@ -340,28 +340,28 @@ export default function TeamPage() {
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-[#9FB0A6] mt-2">{ROLE_DESCRIPTIONS[inviteRole]}</p>
+                  <p className="text-xs text-ink-soft mt-2">{ROLE_DESCRIPTIONS[inviteRole]}</p>
                 </div>
               </div>
 
               {/* Honest invite result — shown only when the email couldn't be sent */}
               {inviteResult && !inviteResult.emailSent && (
-                <div className="mt-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <div className="mt-5 p-3 rounded-xl bg-warning/10 border border-warning/20">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-amber-300 mb-1">
+                      <p className="text-xs font-medium text-warning mb-1">
                         The invite email couldn&apos;t be sent (email provider issue).
                       </p>
-                      <p className="text-[11px] text-[#9FB0A6] mb-2">
+                      <p className="text-[11px] text-ink-soft mb-2">
                         Share this invite link with {inviteResult.email} manually:
                       </p>
-                      <code className="block text-[11px] text-amber-200 bg-black/30 px-2.5 py-2 rounded-lg break-all font-mono">
+                      <code className="block text-[11px] text-warning bg-black/30 px-2.5 py-2 rounded-lg break-all font-mono">
                         {inviteResult.inviteUrl}
                       </code>
                       <button
                         onClick={() => { navigator.clipboard.writeText(inviteResult.inviteUrl); toast.success("Invite link copied!"); }}
-                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-[11px] font-medium hover:bg-amber-500/30"
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/20 text-warning text-[11px] font-medium hover:bg-warning/30"
                       >
                         <Copy className="w-3 h-3" /> Copy Invite Link
                       </button>
@@ -372,13 +372,13 @@ export default function TeamPage() {
 
               <div className="flex items-center gap-3 mt-6">
                 <button onClick={() => { setShowInvite(false); setInviteResult(null); }}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Close
                 </button>
                 {!inviteResult ? (
                   <button onClick={handleInvite} disabled={!inviteEmail.trim() || !inviteName.trim() || actionLoading === "invite"}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
                   >
                     {actionLoading === "invite" ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
@@ -388,7 +388,7 @@ export default function TeamPage() {
                   </button>
                 ) : (
                   <button onClick={() => { setShowInvite(false); setInviteResult(null); setInviteEmail(""); setInviteName(""); setInviteRole("AGENT"); }}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90"
                   >
                     Done
                   </button>
@@ -410,17 +410,17 @@ export default function TeamPage() {
               className="w-full max-w-sm mx-4 p-6 rounded-2xl app-card"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-2">Remove Team Member?</h3>
-              <p className="text-xs text-[#9FB0A6] mb-6">They will lose access to this account immediately.</p>
+              <h3 className="text-sm font-semibold text-ink mb-2">Remove Team Member?</h3>
+              <p className="text-xs text-ink-soft mb-6">They will lose access to this account immediately.</p>
               <div className="flex items-center gap-3">
                 <button onClick={() => setDeleteConfirmId(null)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
                 <button onClick={() => handleRemove(deleteConfirmId)}
                   disabled={actionLoading === `remove-${deleteConfirmId}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-danger text-white text-sm font-medium hover:bg-danger disabled:opacity-50"
                 >
                   {actionLoading === `remove-${deleteConfirmId}` ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Removing...</>

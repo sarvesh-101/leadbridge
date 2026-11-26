@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
 
 @tailwind base;
@@ -6,55 +6,108 @@
 @tailwind utilities;
 
 @layer base {
-  /* Deep forest aurora theme — near-black green canvas, emerald + gold glows */
+  /* Converza — Obsidian + Burnt Orange design system */
   :root {
-    --background: 150 25% 4%;
-    --foreground: 120 25% 95%;
-    --card: 152 20% 8%;
-    --card-foreground: 120 25% 95%;
-    --popover: 152 20% 8%;
-    --popover-foreground: 120 25% 95%;
-    --primary: 155 60% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 152 18% 12%;
-    --secondary-foreground: 120 25% 95%;
-    --muted: 152 18% 12%;
-    --muted-foreground: 150 10% 60%;
-    --accent: 155 60% 45%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 56%;
+    /* Core backgrounds — 75% dark surfaces */
+    --bg-primary: #111315;
+    --bg-secondary: #181B1D;
+    --bg-elevated: #1C2022;
+    --bg-footer: #0C0E0F;
+    --bg-featured: #24201C;
+
+    /* Brand accent — 10% orange highlights */
+    --accent-primary: #F28C45;
+    --accent-secondary: #D9793E;
+    --accent-copper: #B96A38;
+    --accent-deep: #8B593D;
+
+    /* Text — 15% neutral typography */
+    --text-primary: #F4F1EA;
+    --text-secondary: #A5AAA9;
+    --text-muted: #777F80;
+
+    /* Borders */
+    --border-default: #303335;
+    --border-subtle: #25292B;
+
+    /* Semantic colours (NOT replaced by brand orange) */
+    --semantic-success: #4A9D6E;
+    --semantic-warning: #C4922A;
+    --semantic-error: #A34B4B;
+    --semantic-neutral: #5A6063;
+
+    /* ── Channel mirrors ─────────────────────────────────────────────
+       Tailwind needs raw channels to apply an opacity modifier
+       (`bg-success/10` -> rgb(var(--semantic-success-rgb) / .1)).
+       Arbitrary values like `bg-[var(--semantic-success)]/10` are
+       silently dropped by Tailwind, so every tinted utility must use
+       the named token instead. Keep these in sync with the hex values. */
+    --bg-primary-rgb: 17 19 21;
+    --bg-secondary-rgb: 24 27 29;
+    --bg-elevated-rgb: 28 32 34;
+    --bg-footer-rgb: 12 14 15;
+    --text-primary-rgb: 244 241 234;
+    --text-secondary-rgb: 165 170 169;
+    --text-muted-rgb: 119 127 128;
+    --border-default-rgb: 48 51 53;
+    --border-subtle-rgb: 37 41 43;
+    --accent-primary-rgb: 242 140 69;
+    --accent-secondary-rgb: 217 121 62;
+    --accent-deep-rgb: 139 89 61;
+    --accent-copper-rgb: 185 106 56;
+    --semantic-success-rgb: 74 157 110;
+    --semantic-warning-rgb: 196 146 42;
+    --semantic-error-rgb: 163 75 75;
+    --semantic-neutral-rgb: 90 96 99;
+
+    /* Tailwind-style HSL aliases for components still using hsl() */
+    --background: 220 20% 6%;
+    --foreground: 45 25% 93%;
+    --card: 220 15% 11%;
+    --card-foreground: 45 25% 93%;
+    --popover: 220 15% 11%;
+    --popover-foreground: 45 25% 93%;
+    --primary: 30 85% 55%;
+    --primary-foreground: 30 15% 10%;
+    --secondary: 220 15% 11%;
+    --secondary-foreground: 45 25% 93%;
+    --muted: 220 12% 16%;
+    --muted-foreground: 220 8% 58%;
+    --accent: 30 85% 55%;
+    --accent-foreground: 30 15% 10%;
+    --destructive: 0 50% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 152 16% 14%;
-    --input: 152 16% 14%;
-    --ring: 155 60% 45%;
+    --border: 220 8% 19%;
+    --input: 220 8% 19%;
+    --ring: 30 85% 55%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 150 25% 4%;
-    --foreground: 120 25% 95%;
-    --card: 152 20% 8%;
-    --card-foreground: 120 25% 95%;
-    --popover: 152 20% 8%;
-    --popover-foreground: 120 25% 95%;
-    --primary: 155 60% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 152 18% 12%;
-    --secondary-foreground: 120 25% 95%;
-    --muted: 152 18% 12%;
-    --muted-foreground: 150 10% 60%;
-    --accent: 155 60% 45%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 56%;
+    --background: 220 20% 6%;
+    --foreground: 45 25% 93%;
+    --card: 220 15% 11%;
+    --card-foreground: 45 25% 93%;
+    --popover: 220 15% 11%;
+    --popover-foreground: 45 25% 93%;
+    --primary: 30 85% 55%;
+    --primary-foreground: 30 15% 10%;
+    --secondary: 220 15% 11%;
+    --secondary-foreground: 45 25% 93%;
+    --muted: 220 12% 16%;
+    --muted-foreground: 220 8% 58%;
+    --accent: 30 85% 55%;
+    --accent-foreground: 30 15% 10%;
+    --destructive: 0 50% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 152 16% 14%;
-    --input: 152 16% 14%;
-    --ring: 155 60% 45%;
+    --border: 220 8% 19%;
+    --input: 220 8% 19%;
+    --ring: 30 85% 55%;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #24332C transparent;
+    scrollbar-color: #303335 transparent;
   }
 
   *::-webkit-scrollbar {
@@ -67,19 +120,19 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: #24332C;
+    background-color: #303335;
     border-radius: 3px;
   }
 
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   ::selection {
-    background-color: rgba(52, 211, 153, 0.25);
-    color: hsl(var(--foreground));
+    background-color: rgba(242, 140, 69, 0.25);
+    color: var(--text-primary);
   }
 
   html {
@@ -88,57 +141,61 @@
 }
 
 @layer components {
+  /* ── Typography classes (Manrope / Inter) ── */
   .caption {
     font-family: Inter, system-ui, sans-serif;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #6FE3B0;
+    color: var(--text-secondary);
   }
 
   .hero-text {
-    font-family: 'Clash Display', Inter, system-ui, sans-serif;
-    font-weight: 700;
-    font-size: clamp(56px, 8vw, 96px);
+    font-family: Manrope, 'Clash Display', Inter, system-ui, sans-serif;
+    font-weight: 800;
+    font-size: clamp(56px, 8vw, 76px);
     letter-spacing: -0.04em;
-    color: #F0F7F3;
+    line-height: 1.05;
+    color: var(--text-primary);
   }
 
   .h1-text {
-    font-family: 'Clash Display', Inter, system-ui, sans-serif;
-    font-weight: 600;
-    font-size: clamp(36px, 5vw, 56px);
+    font-family: Manrope, 'Clash Display', Inter, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 52px);
     letter-spacing: -0.03em;
-    color: #F0F7F3;
+    color: var(--text-primary);
   }
 
   .h2-text {
-    font-family: 'Clash Display', Inter, system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 28px;
-    color: #F0F7F3;
+    font-family: Manrope, 'Clash Display', Inter, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(28px, 3.5vw, 42px);
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
   }
 
   .h3-text {
-    font-family: Inter, system-ui, sans-serif;
-    font-weight: 600;
+    font-family: Manrope, Inter, system-ui, sans-serif;
+    font-weight: 650;
     font-size: 20px;
-    color: #F0F7F3;
+    color: var(--text-primary);
   }
 
   .body-text {
-    font-family: Inter, system-ui, sans-serif;
+    font-family: Manrope, Inter, system-ui, sans-serif;
     font-weight: 400;
-    font-size: 15px;
-    color: #9FB0A6;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-secondary);
   }
 
   .small-text {
-    font-family: Inter, system-ui, sans-serif;
+    font-family: Manrope, Inter, system-ui, sans-serif;
     font-weight: 400;
     font-size: 13px;
-    color: #9FB0A6;
+    color: var(--text-secondary);
   }
 
   .mono-text {
@@ -147,32 +204,34 @@
     font-size: 13px;
   }
 
-  /* Glassmorphism card — translucent, blurred, glowing border */
-  .glass-card {
-    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0.75rem;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+  /* Accent text utility — for burnt orange highlighted words in headlines */
+  .text-accent {
+    color: var(--accent-primary);
   }
 
-  .surface-card {
-    background-color: #101713;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0.75rem;
+  /* Feature card — dark surface with subtle border */
+  .feature-card {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
   }
 
-  /* App card — glassy surface with a soft top-edge highlight.
-     Uses a gradient + inset highlight instead of backdrop-filter so the
-     ~400 dashboard cards stay cheap to render while still reading as glass. */
-  .app-card {
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.015) 45%, rgba(255, 255, 255, 0.02) 100%),
-      #101713;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  .feature-card:hover {
+    border-color: var(--accent-deep);
+    transform: translateY(-3px);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 10px 30px -18px rgba(0, 0, 0, 0.6);
+      0 12px 40px rgba(0, 0, 0, 0.25),
+      0 0 24px rgba(242, 140, 69, 0.04);
+  }
+
+  /* App card — dark surface for dashboard panels */
+  .app-card {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.6);
   }
 
   .app-card-hover {
@@ -180,73 +239,51 @@
   }
 
   .app-card-hover:hover {
-    border-color: rgba(52, 211, 153, 0.35);
+    border-color: var(--accent-copper);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 0 24px -6px rgba(52, 211, 153, 0.25),
+      0 0 24px -6px rgba(242, 140, 69, 0.12),
       0 12px 32px -16px rgba(0, 0, 0, 0.7);
   }
 
-  .brand-glow {
-    box-shadow: 0 8px 40px rgba(52, 211, 153, 0.25);
+  /* Glass card — kept minimal, no heavy backdrops */
+  .glass-card {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
-  .brand-border-glow {
-    border-color: rgba(52, 211, 153, 0.5);
-    box-shadow: 0 0 24px rgba(52, 211, 153, 0.2);
-  }
-}
-
-@layer utilities {
-  /* ─── Aurora / creative background helpers ─────────────────── */
-  .bg-grid-dark {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 56px 56px;
+  .surface-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
   }
 
-  .bg-grain {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  /* Featured pricing card */
+  .pricing-featured {
+    background: linear-gradient(145deg, #24201C 0%, #1C2022 65%, #181B1D 100%);
+    border: 1px solid var(--accent-primary);
+    box-shadow:
+      0 0 24px rgba(242, 140, 69, 0.06),
+      0 12px 40px rgba(0, 0, 0, 0.3);
   }
 
-  .text-gradient-emerald {
-    background: linear-gradient(100deg, #6FE3B0 0%, #34D399 45%, #B9E4C9 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* CTA button gradient */
+  .btn-accent {
+    background: linear-gradient(135deg, #F28C45 0%, #D9793E 100%);
+    color: #171310;
+    border-radius: 0.65rem;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .text-gradient-gold {
-    background: linear-gradient(100deg, #F2D27E 0%, #E8C468 50%, #B8860B 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .btn-accent:hover {
+    background: linear-gradient(135deg, #D9793E 0%, #B96A38 100%);
+    transform: translateY(-1px);
   }
 
-  .aurora-blob {
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(90px);
-    pointer-events: none;
-  }
-
-  /* Fixed aurora backdrop for app shells (dashboard/admin/customer) */
-  .aurora-backdrop {
-    background:
-      radial-gradient(900px 500px at 8% -10%, rgba(52, 211, 153, 0.07), transparent 60%),
-      radial-gradient(700px 420px at 95% 5%, rgba(232, 196, 104, 0.05), transparent 55%),
-      radial-gradient(800px 600px at 50% 115%, rgba(27, 67, 50, 0.35), transparent 65%);
-  }
-
-  @keyframes aurora-drift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(40px, -30px) scale(1.08); }
-    66% { transform: translate(-30px, 25px) scale(0.95); }
-  }
-
-  .animate-aurora {
-    animation: aurora-drift 18s ease-in-out infinite;
+  .btn-accent:active {
+    transform: translateY(0px);
   }
 }
 
@@ -267,5 +304,31 @@
 
   .animate-slide-in {
     animation: slide-in 0.2s ease-out;
+  }
+
+  /* Fade-up for section entrances */
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out both;
+  }
+
+  /* Slow continuous rotation for hero globe */
+  @keyframes globe-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-globe-rotate {
+    animation: globe-rotate 30s linear infinite;
   }
 }

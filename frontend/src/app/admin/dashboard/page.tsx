@@ -37,9 +37,9 @@ export default function AdminDashboardPage() {
   const statCards = [
     { icon: Users, label: "Total Tenants", value: analytics?.tenants?.total ?? "—", sub: `${analytics?.tenants?.active ?? 0} active`, color: "from-blue-500 to-blue-600" },
     { icon: Activity, label: "New This Month", value: analytics?.tenants?.newThisMonth ?? "—", sub: `${analytics?.tenants?.trial ?? 0} on trial`, color: "from-violet-500 to-violet-600" },
-    { icon: Phone, label: "Total Calls", value: analytics?.calls?.total ?? "—", sub: `${analytics?.calls?.today ?? 0} today`, color: "from-amber-500 to-amber-600" },
-    { icon: TrendingUp, label: "Conversion", value: analytics?.leads?.conversionRate ?? "—", sub: `${analytics?.leads?.total ?? 0} total leads`, color: "from-emerald-500 to-emerald-600", suffix: "%" },
-    { icon: DollarSign, label: "Monthly MRR", value: analytics?.revenue?.mrr ?? "—", sub: `${analytics?.revenue?.arr ?? 0} ARR`, color: "from-green-500 to-green-600", prefix: "₹" },
+    { icon: Phone, label: "Total Calls", value: analytics?.calls?.total ?? "—", sub: `${analytics?.calls?.today ?? 0} today`, color: "from-warning to-warning" },
+    { icon: TrendingUp, label: "Conversion", value: analytics?.leads?.conversionRate ?? "—", sub: `${analytics?.leads?.total ?? 0} total leads`, color: "from-success to-success", suffix: "%" },
+    { icon: DollarSign, label: "Monthly MRR", value: analytics?.revenue?.mrr ?? "—", sub: `${analytics?.revenue?.arr ?? 0} ARR`, color: "from-success to-success", prefix: "₹" },
     { icon: Globe, label: "Territories", value: analytics?.territories?.occupied ?? "—", sub: `${analytics?.territories?.available ?? 0} available`, color: "from-indigo-500 to-indigo-600" },
   ];
 
@@ -47,35 +47,35 @@ export default function AdminDashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#F0F7F3]">Admin Dashboard</h1>
-        <p className="text-[#9FB0A6] mt-1">Platform overview and system health</p>
+        <h1 className="text-2xl font-bold text-ink">Admin Dashboard</h1>
+        <p className="text-ink-soft mt-1">Platform overview and system health</p>
       </div>
 
       {/* System Health */}
       {!loading && health && (
         <div className={cn(
           "p-4 rounded-xl border flex items-center gap-3",
-          health.status === "healthy" ? "bg-green-500/10 border-green-500/20" :
-          health.status === "degraded" ? "bg-yellow-500/10 border-yellow-500/20" :
-          "bg-red-500/10 border-red-500/20"
+          health.status === "healthy" ? "bg-success/10 border-success/20" :
+          health.status === "degraded" ? "bg-warning/10 border-warning/20" :
+          "bg-danger/10 border-danger/20"
         )}>
           {health.status === "healthy" ? (
-            <Wifi className="w-5 h-5 text-green-400" />
+            <Wifi className="w-5 h-5 text-success" />
           ) : (
             <WifiOff className="w-5 h-5 text-yellow-400" />
           )}
           <div className="flex-1">
-            <p className="text-sm font-medium text-[#F0F7F3] capitalize">{health.status}</p>
-            <div className="flex items-center gap-4 text-xs text-[#9FB0A6] mt-1">
-              <span className={cn("flex items-center gap-1", health.checks?.postgres === "healthy" ? "text-green-400" : "text-red-400")}>
+            <p className="text-sm font-medium text-ink capitalize">{health.status}</p>
+            <div className="flex items-center gap-4 text-xs text-ink-soft mt-1">
+              <span className={cn("flex items-center gap-1", health.checks?.postgres === "healthy" ? "text-success" : "text-danger")}>
                 <span className="w-1.5 h-1.5 rounded-full bg-current" /> PostgreSQL
               </span>
-              <span className={cn("flex items-center gap-1", health.checks?.redis === "healthy" ? "text-green-400" : "text-red-400")}>
+              <span className={cn("flex items-center gap-1", health.checks?.redis === "healthy" ? "text-success" : "text-danger")}>
                 <span className="w-1.5 h-1.5 rounded-full bg-current" /> Redis
               </span>
             </div>
           </div>
-          <span className="text-xs text-[#9FB0A6]">v{health.version}</span>
+          <span className="text-xs text-ink-soft">v{health.version}</span>
         </div>
       )}
 
@@ -95,10 +95,10 @@ export default function AdminDashboardPage() {
                 <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", card.color)}>
                   <card.icon className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-xl font-bold text-[#F0F7F3]">
+                <div className="text-xl font-bold text-ink">
                   {card.prefix || ""}{card.value}{card.suffix || ""}
                 </div>
-                <div className="text-xs text-[#9FB0A6]">{card.sub}</div>
+                <div className="text-xs text-ink-soft">{card.sub}</div>
               </>
             )}
           </motion.div>
@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
       {!loading && analytics && (
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="p-6 rounded-xl app-card">
-            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Lead Overview</h2>
+            <h2 className="text-sm font-semibold text-ink mb-4">Lead Overview</h2>
             <div className="space-y-4">
               {[
                 { label: "Total Leads", value: analytics.leads?.total ?? 0, max: analytics.leads?.total || 1 },
@@ -119,11 +119,11 @@ export default function AdminDashboardPage() {
               ].map((item) => (
                 <div key={item.label}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-[#9FB0A6]">{item.label}</span>
-                    <span className="text-[#F0F7F3] font-medium">{item.value.toLocaleString()}</span>
+                    <span className="text-ink-soft">{item.label}</span>
+                    <span className="text-ink font-medium">{item.value.toLocaleString()}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#101713] overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-[#1B4332] to-[#2D6A4F]"
+                  <div className="h-2 rounded-full bg-canvas overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-line-subtle to-brand-deep"
                       style={{ width: `${Math.min(100, (item.value / item.max) * 100)}%` }} />
                   </div>
                 </div>
@@ -132,21 +132,21 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="p-6 rounded-xl app-card">
-            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Revenue</h2>
+            <h2 className="text-sm font-semibold text-ink mb-4">Revenue</h2>
             <div className="space-y-5">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-[#101713]">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-canvas">
                 <div>
-                  <p className="text-sm text-[#9FB0A6]">Monthly Recurring Revenue</p>
-                  <p className="text-2xl font-bold text-[#F0F7F3] mt-1">₹{analytics.revenue?.mrr?.toLocaleString() ?? 0}</p>
+                  <p className="text-sm text-ink-soft">Monthly Recurring Revenue</p>
+                  <p className="text-2xl font-bold text-ink mt-1">₹{analytics.revenue?.mrr?.toLocaleString() ?? 0}</p>
                 </div>
-                <ArrowUp className="w-8 h-8 text-green-400" />
+                <ArrowUp className="w-8 h-8 text-success" />
               </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-[#101713]">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-canvas">
                 <div>
-                  <p className="text-sm text-[#9FB0A6]">Annual Run Rate</p>
-                  <p className="text-2xl font-bold text-[#F0F7F3] mt-1">₹{analytics.revenue?.arr?.toLocaleString() ?? 0}</p>
+                  <p className="text-sm text-ink-soft">Annual Run Rate</p>
+                  <p className="text-2xl font-bold text-ink mt-1">₹{analytics.revenue?.arr?.toLocaleString() ?? 0}</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-[#2D6A4F]" />
+                <TrendingUp className="w-8 h-8 text-brand-deep" />
               </div>
             </div>
           </div>
@@ -156,19 +156,19 @@ export default function AdminDashboardPage() {
       {/* Usage & Engagement */}
       {!loading && usage && (
         <div className="p-6 rounded-xl app-card">
-          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Usage & Engagement</h2>
+          <h2 className="text-sm font-semibold text-ink mb-4">Usage & Engagement</h2>
           <div className="flex items-center gap-8">
             <div>
-              <p className="text-sm text-[#9FB0A6]">Total Users</p>
-              <p className="text-2xl font-bold text-[#F0F7F3]">{usage.totalUsers}</p>
+              <p className="text-sm text-ink-soft">Total Users</p>
+              <p className="text-2xl font-bold text-ink">{usage.totalUsers}</p>
             </div>
             <div>
-              <p className="text-sm text-[#9FB0A6]">Active Today</p>
-              <p className="text-2xl font-bold text-[#F0F7F3]">{usage.activeUsersToday}</p>
+              <p className="text-sm text-ink-soft">Active Today</p>
+              <p className="text-2xl font-bold text-ink">{usage.activeUsersToday}</p>
             </div>
             <div>
-              <p className="text-sm text-[#9FB0A6]">Engagement Rate</p>
-              <p className="text-2xl font-bold text-[#F0F7F3]">{usage.engagementRate}%</p>
+              <p className="text-sm text-ink-soft">Engagement Rate</p>
+              <p className="text-2xl font-bold text-ink">{usage.engagementRate}%</p>
             </div>
           </div>
         </div>

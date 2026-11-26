@@ -81,21 +81,21 @@ export function FeatureGate({
   const content = (
     <div className={cn(
       "relative group",
-      card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-white/10 hover:bg-white/[0.03] transition-all",
+      card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-line hover:bg-white/[0.03] transition-all",
       className
     )}>
       {/* Lock overlay */}
       <div className={cn(
         "flex flex-col items-center justify-center text-center py-8 px-4",
-        !card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-white/10"
+        !card && "p-6 rounded-2xl bg-white/[0.03] border border-dashed border-line"
       )}>
-        <div className="w-12 h-12 rounded-2xl bg-gray-500/10 border border-gray-500/20 flex items-center justify-center mb-4">
-          <Lock className="w-5 h-5 text-[#9FB0A6]" />
+        <div className="w-12 h-12 rounded-2xl bg-neutral-soft/10 border border-line/20 flex items-center justify-center mb-4">
+          <Lock className="w-5 h-5 text-ink-soft" />
         </div>
-        <h3 className="text-base font-semibold text-[#F0F7F3] mb-1">
+        <h3 className="text-base font-semibold text-ink mb-1">
           {upgradeMessage || `${featureName} is a ${requiredPlanName} feature`}
         </h3>
-        <p className="text-sm text-[#9FB0A6] mb-4 max-w-sm">
+        <p className="text-sm text-ink-soft mb-4 max-w-sm">
           {currentPlan === "STARTER"
             ? `Upgrade to ${requiredPlanName} (${requiredPrice}) or higher to unlock ${featureName}.`
             : currentPlan && PLAN_ORDER[currentPlan] < PLAN_ORDER[requiredPlan]
@@ -105,7 +105,7 @@ export function FeatureGate({
         </p>
         <Link
           href="/dashboard/billing"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all"
         >
           <Crown className="w-4 h-4" />
           Upgrade Now
@@ -145,24 +145,24 @@ export function FeatureGateCard({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between p-4 rounded-xl bg-amber-500/5 border border-amber-500/20"
+      className="flex items-center justify-between p-4 rounded-xl bg-warning/5 border border-warning/20"
     >
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
-          <Lock className="w-4 h-4 text-amber-400" />
+        <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center shrink-0 mt-0.5">
+          <Lock className="w-4 h-4 text-warning" />
         </div>
         <div>
-          <p className="text-sm font-medium text-amber-200">
+          <p className="text-sm font-medium text-warning">
             {description || `${featureName} locked`}
           </p>
-          <p className="text-xs text-amber-400/70 mt-0.5">
+          <p className="text-xs text-warning/70 mt-0.5">
             Available on {PLAN_NAMES[requiredPlan] || requiredPlan} plan ({PLAN_PRICES[requiredPlan] || ""})
           </p>
         </div>
       </div>
       <Link
         href="/dashboard/billing"
-        className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-all whitespace-nowrap"
+        className="shrink-0 px-3 py-1.5 rounded-lg bg-warning/20 text-warning text-xs font-medium hover:bg-warning/30 transition-all whitespace-nowrap"
       >
         Upgrade
       </Link>

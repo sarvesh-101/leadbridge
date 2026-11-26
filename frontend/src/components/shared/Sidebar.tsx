@@ -88,10 +88,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   return (
     <motion.aside
       animate={{ width: isOpen ? 240 : 64 }}
-      className="h-screen bg-[#101713]/85 backdrop-blur-xl border-r border-white/10 flex flex-col overflow-hidden shrink-0"
+      className="h-screen bg-surface/85 backdrop-blur-xl border-r border-line flex flex-col overflow-hidden shrink-0"
     >
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-white/10">
+      <div className="flex items-center justify-between px-4 h-14 border-b border-line">
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -100,22 +100,22 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               exit={{ opacity: 0 }}
               className="flex items-center gap-3"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_16px_rgba(52,211,153,0.35)]">
-                <Zap className="w-4 h-4 text-[#0A0F0C]" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-brand-deep flex items-center justify-center shadow-[0_0_16px_rgba(242,140,69,0.3)]">
+                <Zap className="w-4 h-4 text-canvas" />
               </div>
-              <span className="text-[16px] font-display font-bold text-[#F0F7F3]">Converza</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+              <span className="text-[16px] font-display font-bold text-ink">Converza</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
             </motion.div>
           )}
         </AnimatePresence>
         <button
           onClick={onToggle}
-          className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors"
+          className="p-1.5 rounded-lg hover:bg-canvas transition-colors"
         >
           {isOpen ? (
-            <ChevronLeft className="w-4 h-4 text-[#9FB0A6]" />
+            <ChevronLeft className="w-4 h-4 text-ink-soft" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-[#9FB0A6]" />
+            <ChevronRight className="w-4 h-4 text-ink-soft" />
           )}
         </button>
       </div>
@@ -132,10 +132,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 relative",
                 isActive
-                  ? "bg-[#34D399]/15 text-[#6FE3B0] shadow-[inset_0_0_0_1px_rgba(52,211,153,0.25),0_0_16px_-4px_rgba(52,211,153,0.3)]"
+                  ? "bg-brand/12 text-brand shadow-[inset_0_0_0_1px_rgba(242,140,69,0.2),0_0_16px_-4px_rgba(242,140,69,0.25)]"
                   : isLocked
-                  ? "text-[#9FB0A6] cursor-not-allowed"
-                  : "text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3]"
+                  ? "text-ink-soft cursor-not-allowed"
+                  : "text-ink-soft hover:bg-canvas hover:text-ink"
               )}
               onClick={(e) => isLocked ? e.preventDefault() : undefined}
               title={isLocked ? `Requires ${item.requiredPlan} plan` : item.label}
@@ -143,8 +143,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               <span className="shrink-0 relative">
                 {item.icon}
                 {isLocked && (
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#24332C] flex items-center justify-center">
-                    <Lock className="w-2.5 h-2.5 text-[#9FB0A6]" />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-canvas flex items-center justify-center">
+                    <Lock className="w-2.5 h-2.5 text-ink-soft" />
                   </span>
                 )}
               </span>
@@ -161,12 +161,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 )}
               </AnimatePresence>
               {isLocked && isOpen && (
-                <span className="ml-auto text-[10px] uppercase tracking-wider text-[#9FB0A6]">
+                <span className="ml-auto text-[10px] uppercase tracking-wider text-ink-soft">
                   {item.requiredPlan}
                 </span>
               )}
               {item.badge && isOpen && (
-                <span className="ml-auto bg-[#FB7185] text-white text-[11px] rounded-full px-1.5 py-0.5">
+                <span className="ml-auto bg-danger text-white text-[11px] rounded-full px-1.5 py-0.5">
                   {item.badge}
                 </span>
               )}
@@ -174,7 +174,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-[#34D399] rounded-r-full shadow-[0_0_8px_#34D399]"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 bg-brand rounded-r-full shadow-[0_0_8px_var(--accent-primary)]"
                 />
               )}
             </Link>
@@ -183,23 +183,23 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       </nav>
 
       {/* Bottom: User section */}
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t border-line p-3">
         {isOpen ? (
           <div className="space-y-2">
             <div className="flex items-center gap-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center flex-shrink-0 shadow-[0_0_16px_rgba(52,211,153,0.3)]">
-                <span className="text-[#0A0F0C] text-[13px] font-bold">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-brand-deep flex items-center justify-center flex-shrink-0 shadow-[0_0_16px_rgba(242,140,69,0.25)]">
+                <span className="text-canvas text-[13px] font-bold">
                   {(user?.name || user?.businessName || "U")[0].toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#F0F7F3] truncate">
+                <p className="text-[13px] font-medium text-ink truncate">
                   {user?.businessName || user?.name || "User"}
                 </p>
                 <span className={cn(
                   "text-[11px] font-medium",
-                  planBadge === "PRO" ? "text-[#E8C468]" :
-                  planBadge === "GROWTH" ? "text-[#6FE3B0]" : "text-[#9FB0A6]"
+                  planBadge === "PRO" ? "text-brand" :
+                  planBadge === "GROWTH" ? "text-brand" : "text-ink-soft"
                 )}>
                   {planBadge}
                 </span>
@@ -207,7 +207,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             </div>
             <button
               onClick={serverLogout}
-              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-[#9FB0A6] hover:text-[#FB7185] hover:bg-white/[0.06] transition-colors"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] text-ink-soft hover:text-danger hover:bg-canvas transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               Logout
@@ -216,7 +216,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         ) : (
           <button
             onClick={serverLogout}
-            className="flex items-center justify-center w-full p-2 rounded-lg text-[#9FB0A6] hover:text-[#FB7185] hover:bg-white/[0.06] transition-colors"
+            className="flex items-center justify-center w-full p-2 rounded-lg text-ink-soft hover:text-danger hover:bg-canvas transition-colors"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -225,10 +225,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Admin switch to broker view */}
       {isAdmin && isOpen && (
-        <div className="px-4 py-2 border-t border-white/10">
+        <div className="px-4 py-2 border-t border-line">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-[12px] text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors"
+            className="flex items-center gap-2 text-[12px] text-ink-soft hover:text-ink transition-colors"
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
             Switch to Broker View

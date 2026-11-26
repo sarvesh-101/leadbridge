@@ -201,18 +201,18 @@ export default function SystemStatus() {
 
               {/* Voice AI degraded state */}
               {voiceAIDegraded && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-red-500/5">
-                  <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
-                    <WifiOff className="w-4 h-4 text-red-400" />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-danger/5">
+                  <div className="w-8 h-8 rounded-lg bg-danger/10 flex items-center justify-center shrink-0">
+                    <WifiOff className="w-4 h-4 text-danger" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-red-200">AI Voice Service</span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">
+                      <span className="text-sm font-medium text-danger">AI Voice Service</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-danger/10 text-danger">
                         Circuit Open
                       </span>
                     </div>
-                    <p className="text-xs text-red-400/70 mt-1">
+                    <p className="text-xs text-danger/70 mt-1">
                       The AI calling API has failed {voiceAI?.circuitFailureCount ?? 0} times. 
                       New calls are being blocked to prevent cascading failures.
                       {voiceAI?.circuitCooldownRemainingMs && voiceAI.circuitCooldownRemainingMs > 0
@@ -231,15 +231,15 @@ export default function SystemStatus() {
                   const integration = health.integrations?.[name];
                   if (!integration?.configured && name !== "redis") return null;
                   return (
-                    <div key={name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-green-500/5">
-                      <Wifi className="w-3.5 h-3.5 text-green-400 shrink-0" />
-                      <span className="text-xs text-green-300">{meta.label}</span>
+                    <div key={name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-success/5">
+                      <Wifi className="w-3.5 h-3.5 text-success shrink-0" />
+                      <span className="text-xs text-success">{meta.label}</span>
                       {name === "voice_ai" && integration?.circuitState && (
                         <span className={cn(
                           "text-xs px-1.5 py-0.5 rounded",
-                          integration.circuitState === "CLOSED" ? "bg-green-500/10 text-green-400" :
+                          integration.circuitState === "CLOSED" ? "bg-success/10 text-success" :
                           integration.circuitState === "HALF_OPEN" ? "bg-yellow-500/10 text-yellow-400" :
-                          "bg-red-500/10 text-red-400"
+                          "bg-danger/10 text-danger"
                         )}>
                           {integration.circuitState}
                         </span>
@@ -247,7 +247,7 @@ export default function SystemStatus() {
                       {name === "redis" && (
                         <span className={cn(
                           "text-xs px-1.5 py-0.5 rounded",
-                          integration?.available ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
+                          integration?.available ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
                         )}>
                           {integration?.available ? "Available" : "Unavailable"}
                         </span>

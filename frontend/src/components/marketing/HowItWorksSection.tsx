@@ -46,11 +46,11 @@ const slides = [
 export default function HowItWorksSection() {
   return (
     <MotionConfig reducedMotion="user">
-    <section className="relative py-16 lg:py-24 bg-[#0A0F0C] overflow-hidden">
-      {/* Soft radial glow behind the section */}
+    <section className="relative py-16 lg:py-24 bg-canvas overflow-hidden">
+      {/* Subtle orange glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[420px] bg-[#34D399]/10 blur-[120px] rounded-full"
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[720px] h-[420px] bg-brand/8 blur-[120px] rounded-full"
       />
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
@@ -62,7 +62,7 @@ export default function HowItWorksSection() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <h2 className="h1-text px-4">How It Works</h2>
-          <p className="mt-4 text-[16px] text-[#9FB0A6] max-w-[560px] mx-auto px-4">
+          <p className="mt-4 text-[16px] text-ink-soft max-w-[560px] mx-auto px-4">
             Five steps. Zero missed leads. From enquiry to confirmed site visit — on autopilot.
           </p>
         </motion.div>
@@ -71,7 +71,7 @@ export default function HowItWorksSection() {
           {/* Vertical timeline line (desktop) */}
           <div
             aria-hidden
-            className="hidden md:block absolute left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-[#34D399]/50 via-[#1E2B24] to-transparent"
+            className="hidden md:block absolute left-[27px] top-4 bottom-4 w-px bg-gradient-to-b from-brand/50 via-surface to-transparent"
           />
 
           <div className="space-y-6 md:space-y-8">
@@ -84,24 +84,20 @@ export default function HowItWorksSection() {
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.55, delay: (i % 3) * 0.12, ease: "easeOut" }}
               >
-                {/* Number node on the timeline */}
-                <div
-                  aria-hidden
-                  className="hidden md:flex absolute left-0 top-6 w-14 h-14 rounded-2xl glass-card items-center justify-center shadow-[0_0_24px_rgba(52,211,153,0.15)]"
+                {/* Number node on the timeline */}                <div aria-hidden
+                  className="hidden md:flex absolute left-0 top-6 w-14 h-14 rounded-2xl surface-card items-center justify-center shadow-[0_0_24px_rgba(242,140,69,0.12)]"
                 >
-                  <span className="text-[20px] font-display font-bold text-gradient-emerald leading-none">
+                  <span className="text-[20px] font-bold text-accent leading-none" style={{ fontFamily: 'Manrope, sans-serif' }}>
                     {slide.number}
                   </span>
-                </div>
-
-                <div className="relative p-6 lg:p-8 rounded-2xl glass-card hover:border-[#34D399]/40 hover:shadow-[0_8px_40px_rgba(52,211,153,0.1)] transition-all duration-300">
-                  <span className="md:hidden block text-[40px] font-display font-bold text-[#34D399]/50 leading-none mb-3">
+                </div>                  <div className="relative p-6 lg:p-8 rounded-2xl surface-card hover:border-brand-copper hover:shadow-[0_8px_40px_rgba(242,140,69,0.06)] transition-all duration-300">
+                  <span className="md:hidden block text-[40px] font-bold text-brand/50 leading-none mb-3" style={{ fontFamily: 'Manrope, sans-serif' }}>
                     {slide.number}
                   </span>
-                  <h3 className="text-[20px] lg:text-[22px] font-display font-bold text-[#F0F7F3] mb-2">
+                  <h3 className="text-[20px] lg:text-[22px] font-bold text-ink mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>
                     {slide.title}
                   </h3>
-                  <p className="text-[14px] text-[#9FB0A6] mb-4">
+                  <p className="text-[14px] text-ink-soft mb-4">
                     {slide.body}
                   </p>
 
@@ -110,7 +106,7 @@ export default function HowItWorksSection() {
                       {slide.logos.map((logo) => (
                         <div
                           key={logo}
-                          className="px-3 py-1.5 rounded border border-white/10 bg-white/[0.04] text-[12px] text-[#9FB0A6]"
+                          className="px-3 py-1.5 rounded border border-line bg-white/[0.02] text-[12px] text-ink-soft"
                         >
                           {logo}
                         </div>
@@ -123,7 +119,7 @@ export default function HowItWorksSection() {
                       {Array.from({ length: 20 }).map((_, j) => (
                         <div
                           key={j}
-                          className="w-[2px] bg-[#34D399] rounded-full animate-waveform"
+                          className="w-[2px] bg-brand rounded-full animate-waveform"
                           style={{
                             height: `${Math.random() * 80 + 20}%`,
                             animationDelay: `${j * 0.05}s`,
@@ -140,13 +136,13 @@ export default function HowItWorksSection() {
                           <span
                             className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                               msg.speaker === "AI"
-                                ? "bg-[#34D399]/15 text-[#6FE3B0]"
-                                : "bg-[#34D399]/5 text-[#9FB0A6]"
+                                ? "bg-brand/15 text-brand"
+                                : "bg-brand/5 text-ink-soft"
                             }`}
                           >
                             {msg.speaker}
                           </span>
-                          <span className="text-[12px] text-[#D5E0D9]">
+                          <span className="text-[12px] text-ink">
                             {msg.text}
                           </span>
                         </div>
@@ -155,14 +151,14 @@ export default function HowItWorksSection() {
                   )}
 
                   {slide.typewriterText && (
-                    <div className="p-3 rounded-lg bg-white/[0.04] border border-white/10 max-w-[280px] mt-3">
-                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/10">
-                        <div className="w-6 h-6 rounded-full bg-[#34D399]/20 flex items-center justify-center">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="#34D399">
+                    <div className="p-3 rounded-lg bg-white/[0.04] border border-line max-w-[280px] mt-3">
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-line">
+                        <div className="w-6 h-6 rounded-full bg-brand/20 flex items-center justify-center">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--accent-primary)">
                             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
                           </svg>
                         </div>
-                        <span className="text-[12px] font-semibold text-[#F0F7F3]">
+                        <span className="text-[12px] font-semibold text-ink">
                           WhatsApp
                         </span>
                       </div>
@@ -172,8 +168,8 @@ export default function HowItWorksSection() {
                         .map((line, j) => (
                           <p
                             key={j}
-                            className="text-[12px] text-[#D5E0D9]"
-                            style={{ fontWeight: line.includes(":") ? 400 : 600 }}
+                            className="text-[12px] text-ink"
+                            style={{ fontWeight: line.includes(":") ? 500 : 650 }}
                           >
                             {line}
                           </p>
@@ -183,11 +179,11 @@ export default function HowItWorksSection() {
 
                   {slide.hasMap && (
                     <div className="flex items-center gap-2 mt-3">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                         <circle cx="12" cy="10" r="3" />
                       </svg>
-                      <span className="text-[12px] text-[#6FE3B0]">
+                      <span className="text-[12px] text-brand">
                         Exclusively yours — one broker per territory
                       </span>
                     </div>

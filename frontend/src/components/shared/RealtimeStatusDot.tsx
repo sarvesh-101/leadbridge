@@ -29,10 +29,10 @@ export function RealtimeStatusDot() {
       <span
         className={cn(
           "h-2 w-2 rounded-full",
-          connected ? "bg-green-500" : "bg-gray-400"
+          connected ? "bg-success" : "bg-neutral-soft"
         )}
       />
-      <span className="text-xs text-[#9FB0A6] dark:text-[#9FB0A6]">
+      <span className="text-xs text-ink-soft dark:text-ink-soft">
         {connected ? "Live" : "Offline"}
       </span>
     </div>

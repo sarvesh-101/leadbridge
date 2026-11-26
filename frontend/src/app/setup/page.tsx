@@ -255,16 +255,16 @@ export default function SetupPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-lg mx-auto space-y-6"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-[#1B4332] to-[#1B4332]/60 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-line-subtle to-line-subtle/60 flex items-center justify-center">
               <Zap className="w-10 h-10 text-white" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-ink">Welcome to Converza! 🎉</h2>
-              <p className="text-[#5C6B62] mt-3 leading-relaxed">
+              <p className="text-ink-muted mt-3 leading-relaxed">
                 This 7-step setup will get your AI calling system running in under 5 minutes.
               </p>
             </div>
-            <div className="space-y-3 text-left bg-[#F7F8F4] rounded-xl p-5 border border-[#E4E7DF]">
+            <div className="space-y-3 text-left bg-surface rounded-xl p-5 border border-line">
               {[
                 { icon: Bot, title: "Create AI Agent", desc: "Configure your voice agent's language and knowledge" },
                 { icon: MapPin, title: "Set Territory", desc: "Define your exclusive city/zone" },
@@ -274,18 +274,18 @@ export default function SetupPage() {
                 { icon: Play, title: "Test Call", desc: "Verify everything works" },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#1B4332]/10 flex items-center justify-center shrink-0">
-                    <item.icon className="w-4 h-4 text-[#1B4332]" />
+                  <div className="w-8 h-8 rounded-lg bg-line-subtle/10 flex items-center justify-center shrink-0">
+                    <item.icon className="w-4 h-4 text-line-subtle" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-ink">{item.title}</p>
-                    <p className="text-xs text-[#5C6B62]">{item.desc}</p>
+                    <p className="text-xs text-ink-muted">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
             <button onClick={() => setCurrentStep(2)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1B4332] to-[#1B4332]/80 text-white font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-line-subtle to-line-subtle/80 text-white font-medium hover:opacity-90 transition-opacity"
             >
               Get Started <ArrowRight className="w-4 h-4" />
             </button>
@@ -300,41 +300,41 @@ export default function SetupPage() {
             className="max-w-lg mx-auto space-y-5"
           >
             <div className="text-center mb-2">
-              <Bot className="w-10 h-10 text-[#1B4332] mx-auto mb-2" />
+              <Bot className="w-10 h-10 text-line-subtle mx-auto mb-2" />
               <h2 className="text-xl font-bold text-ink">Configure AI Agent</h2>
-              <p className="text-sm text-[#5C6B62] mt-1">Create your voice agent that will call leads automatically.</p>
+              <p className="text-sm text-ink-muted mt-1">Create your voice agent that will call leads automatically.</p>
             </div>
             <div>
-              <label className="block text-sm text-[#8A948C] mb-1.5">Agent Name</label>
+              <label className="block text-sm text-ink-muted mb-1.5">Agent Name</label>
               <input value={agentName} onChange={(e) => setAgentName(e.target.value)}
                 placeholder="My Real Estate AI Agent"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-[#1B4332]/50 placeholder:text-[#8A948C]" />
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-raised border border-line text-ink text-sm focus:outline-none focus:border-line-subtle/50 placeholder:text-ink-muted" />
             </div>
             <div>
-              <label className="block text-sm text-[#8A948C] mb-1.5">Language</label>
+              <label className="block text-sm text-ink-muted mb-1.5">Language</label>
               <select value={agentLanguage} onChange={(e) => setAgentLanguage(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-[#1B4332]/50">
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-raised border border-line text-ink text-sm focus:outline-none focus:border-line-subtle/50">
                 <option value="hinglish">Hinglish (Hindi + English)</option>
                 <option value="hindi">Hindi</option>
                 <option value="english">English</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm text-[#8A948C] mb-1.5">Knowledge Base <span className="text-[#8A948C]">(optional)</span></label>
+              <label className="block text-sm text-ink-muted mb-1.5">Knowledge Base <span className="text-ink-muted">(optional)</span></label>
               <textarea value={knowledgeBase} onChange={(e) => setKnowledgeBase(e.target.value)}
                 placeholder="Describe your properties, areas you cover, and any special offers..."
                 rows={4}
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-[#1B4332]/50 placeholder:text-[#8A948C] resize-none" />
-              <p className="text-xs text-[#5C6B62] mt-1.5">The AI uses this info to answer prospect questions naturally.</p>
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-raised border border-line text-ink text-sm focus:outline-none focus:border-line-subtle/50 placeholder:text-ink-muted resize-none" />
+              <p className="text-xs text-ink-muted mt-1.5">The AI uses this info to answer prospect questions naturally.</p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setCurrentStep(3)}
-                className="flex-1 px-4 py-3 rounded-xl bg-white border border-[#E4E7DF] text-sm text-[#5C6B62] hover:bg-[#E9ECE5]">
+                className="flex-1 px-4 py-3 rounded-xl bg-surface-raised border border-line text-sm text-ink-muted hover:bg-surface-raised">
                 Skip
               </button>
               <button onClick={handleCreateAgent}
                 disabled={loading === "create-agent" || !agentName.trim()}
-                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1B4332] to-[#1B4332]/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
+                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-line-subtle to-line-subtle/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
                 {loading === "create-agent" ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Creating Agent...</>
                 ) : (
@@ -353,31 +353,31 @@ export default function SetupPage() {
             className="max-w-lg mx-auto space-y-5"
           >
             <div className="text-center mb-2">
-              <MapPin className="w-10 h-10 text-[#1B4332] mx-auto mb-2" />
+              <MapPin className="w-10 h-10 text-line-subtle mx-auto mb-2" />
               <h2 className="text-xl font-bold text-ink">Set Your Territory</h2>
-              <p className="text-sm text-[#5C6B62] mt-1">Define your exclusive service area. One broker per territory.</p>
+              <p className="text-sm text-ink-muted mt-1">Define your exclusive service area. One broker per territory.</p>
             </div>
             <div>
-              <label className="block text-sm text-[#8A948C] mb-1.5">City *</label>
+              <label className="block text-sm text-ink-muted mb-1.5">City *</label>
               <input value={city} onChange={(e) => setCity(e.target.value)}
                 placeholder="e.g., Mumbai, Delhi, Bangalore"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-[#1B4332]/50 placeholder:text-[#8A948C]" />
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-raised border border-line text-ink text-sm focus:outline-none focus:border-line-subtle/50 placeholder:text-ink-muted" />
             </div>
             <div>
-              <label className="block text-sm text-[#8A948C] mb-1.5">Zone / Area <span className="text-[#8A948C]">(optional)</span></label>
+              <label className="block text-sm text-ink-muted mb-1.5">Zone / Area <span className="text-ink-muted">(optional)</span></label>
               <input value={zone} onChange={(e) => setZone(e.target.value)}
                 placeholder="e.g., Andheri West, Whitefield"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-[#1B4332]/50 placeholder:text-[#8A948C]" />
-              <p className="text-xs text-[#5C6B62] mt-1.5">Leads from your territory are exclusively routed to you.</p>
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-raised border border-line text-ink text-sm focus:outline-none focus:border-line-subtle/50 placeholder:text-ink-muted" />
+              <p className="text-xs text-ink-muted mt-1.5">Leads from your territory are exclusively routed to you.</p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setCurrentStep(4)}
-                className="flex-1 px-4 py-3 rounded-xl bg-white border border-[#E4E7DF] text-sm text-[#5C6B62] hover:bg-[#E9ECE5]">
+                className="flex-1 px-4 py-3 rounded-xl bg-surface-raised border border-line text-sm text-ink-muted hover:bg-surface-raised">
                 Skip
               </button>
               <button onClick={handleSaveTerritory}
                 disabled={loading === "save-territory"}
-                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1B4332] to-[#1B4332]/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
+                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-line-subtle to-line-subtle/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
                 {loading === "save-territory" ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
                 ) : (
@@ -396,27 +396,27 @@ export default function SetupPage() {
             className="max-w-lg mx-auto space-y-5"
           >
             <div className="text-center mb-2">
-              <MessageSquare className="w-10 h-10 text-[#047857] mx-auto mb-2" />
+              <MessageSquare className="w-10 h-10 text-success mx-auto mb-2" />
               <h2 className="text-xl font-bold text-ink">Connect WhatsApp</h2>
-              <p className="text-sm text-[#5C6B62] mt-1">Receive real-time notifications about new leads, bookings, and alerts.</p>
+              <p className="text-sm text-ink-muted mt-1">Receive real-time notifications about new leads, bookings, and alerts.</p>
             </div>
             <div>
-              <label className="block text-sm text-[#8A948C] mb-1.5">Your WhatsApp Number *</label>
+              <label className="block text-sm text-ink-muted mb-1.5">Your WhatsApp Number *</label>
               <input value={ownerWhatsapp} onChange={(e) => setOwnerWhatsapp(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full px-4 py-2.5 rounded-xl bg-white border border-[#E4E7DF] text-ink text-sm focus:outline-none focus:border-[#1B4332]/50 placeholder:text-[#8A948C]" />
-              <p className="text-xs text-[#5C6B62] mt-1.5">
+                className="w-full px-4 py-2.5 rounded-xl bg-surface-raised border border-line text-ink text-sm focus:outline-none focus:border-line-subtle/50 placeholder:text-ink-muted" />
+              <p className="text-xs text-ink-muted mt-1.5">
                 You'll get instant alerts for new leads, booking confirmations, no-shows, and deal conversions.
               </p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setCurrentStep(5)}
-                className="flex-1 px-4 py-3 rounded-xl bg-white border border-[#E4E7DF] text-sm text-[#5C6B62] hover:bg-[#E9ECE5]">
+                className="flex-1 px-4 py-3 rounded-xl bg-surface-raised border border-line text-sm text-ink-muted hover:bg-surface-raised">
                 Skip
               </button>
               <button onClick={handleSaveWhatsApp}
                 disabled={loading === "save-whatsapp" || !ownerWhatsapp.trim()}
-                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#047857] text-white font-medium disabled:opacity-50 hover:bg-[#065F46] transition-colors">
+                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-success text-white font-medium disabled:opacity-50 hover:bg-success transition-colors">
                 {loading === "save-whatsapp" ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
                 ) : (
@@ -435,9 +435,9 @@ export default function SetupPage() {
             className="max-w-lg mx-auto space-y-5"
           >
             <div className="text-center mb-2">
-              <ListChecks className="w-10 h-10 text-[#B45309] mx-auto mb-2" />
+              <ListChecks className="w-10 h-10 text-warning mx-auto mb-2" />
               <h2 className="text-xl font-bold text-ink">Lead Sources</h2>
-              <p className="text-sm text-[#5C6B62] mt-1">Select where your leads come from so we can set up the right integrations.</p>
+              <p className="text-sm text-ink-muted mt-1">Select where your leads come from so we can set up the right integrations.</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {ALL_SOURCES.map((src) => {
@@ -451,11 +451,11 @@ export default function SetupPage() {
                     className={cn(
                       "flex items-center gap-2 px-4 py-3 rounded-xl border text-sm text-left transition-all",
                       isSelected
-                        ? "bg-[#B45309]/10 border-[#B45309]/30 text-white"
-                        : "bg-white border-[#E4E7DF] text-[#8A948C] hover:bg-[#E9ECE5]"
+                        ? "bg-warning/10 border-warning/30 text-white"
+                        : "bg-surface-raised border-line text-ink-muted hover:bg-surface-raised"
                     )}>
                     <div className={cn("w-5 h-5 rounded border-2 flex items-center justify-center",
-                      isSelected ? "border-[#B45309] bg-[#B45309]" : "border-[#8A948C]"
+                      isSelected ? "border-warning bg-warning" : "border-line"
                     )}>
                       {isSelected && <Check className="w-3 h-3 text-ink" />}
                     </div>
@@ -464,17 +464,17 @@ export default function SetupPage() {
                 );
               })}
             </div>
-            <p className="text-xs text-[#5C6B62] text-center">
+            <p className="text-xs text-ink-muted text-center">
               Saved as your preference. You'll connect each source for real in Integrations — IndiaMART uses its official API, and JustDial/99acres/etc. use SMS/email forwarding.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setCurrentStep(6)}
-                className="flex-1 px-4 py-3 rounded-xl bg-white border border-[#E4E7DF] text-sm text-[#5C6B62] hover:bg-[#E9ECE5]">
+                className="flex-1 px-4 py-3 rounded-xl bg-surface-raised border border-line text-sm text-ink-muted hover:bg-surface-raised">
                 Skip
               </button>
               <button onClick={handleSaveSources}
                 disabled={loading === "save-sources" || selectedSources.length === 0}
-                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#B45309] to-[#B45309]/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
+                className="flex-[2] flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-warning to-warning/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
                 {loading === "save-sources" ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
                 ) : (
@@ -493,19 +493,19 @@ export default function SetupPage() {
             className="max-w-lg mx-auto space-y-5"
           >
             <div className="text-center mb-2">
-              <Smartphone className="w-10 h-10 text-[#1B4332] mx-auto mb-2" />
+              <Smartphone className="w-10 h-10 text-line-subtle mx-auto mb-2" />
               <h2 className="text-xl font-bold text-ink">Connect Phone Number</h2>
-              <p className="text-sm text-[#5C6B62] mt-1">Attach a phone number to your AI agent so it can call leads.</p>
+              <p className="text-sm text-ink-muted mt-1">Attach a phone number to your AI agent so it can call leads.</p>
             </div>
             {phoneNumbers.length === 0 ? (
-              <div className="bg-[#F7F8F4] rounded-xl p-6 border border-[#E4E7DF] text-center space-y-4">
-                <Globe className="w-12 h-12 text-[#8A948C] mx-auto" />
+              <div className="bg-surface rounded-xl p-6 border border-line text-center space-y-4">
+                <Globe className="w-12 h-12 text-ink-muted mx-auto" />
                 <div>
                   <p className="text-sm text-ink font-medium">No phone numbers available</p>
-                  <p className="text-xs text-[#5C6B62] mt-1">Purchase a number from your provider dashboard, then refresh here.</p>
+                  <p className="text-xs text-ink-muted mt-1">Purchase a number from your provider dashboard, then refresh here.</p>
                 </div>
                 <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-[#E4E7DF] text-sm text-ink hover:bg-[#E9ECE5]">
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-raised border border-line text-sm text-ink hover:bg-surface-raised">
                   Open Provider Dashboard <ExternalLink className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -516,15 +516,15 @@ export default function SetupPage() {
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all",
                       selectedPhoneId === pn.id
-                        ? "bg-[#1B4332]/10 border-[#1B4332]/30 text-white"
-                        : "bg-white border-[#E4E7DF] text-[#8A948C] hover:bg-[#E9ECE5]"
+                        ? "bg-line-subtle/10 border-line-subtle/30 text-white"
+                        : "bg-surface-raised border-line text-ink-muted hover:bg-surface-raised"
                     )}>
-                    <Radio className={cn("w-5 h-5", selectedPhoneId === pn.id ? "text-[#1B4332]" : "text-[#5C6B62]")} />
+                    <Radio className={cn("w-5 h-5", selectedPhoneId === pn.id ? "text-line-subtle" : "text-ink-muted")} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{pn.phone_number}</p>
-                      <p className="text-xs text-[#5C6B62]">{pn.name || "Unnamed"}</p>
+                      <p className="text-xs text-ink-muted">{pn.name || "Unnamed"}</p>
                     </div>
-                    {selectedPhoneId === pn.id && <Check className="w-4 h-4 text-[#1B4332]" />}
+                    {selectedPhoneId === pn.id && <Check className="w-4 h-4 text-line-subtle" />}
                   </button>
                 ))}
               </div>
@@ -533,7 +533,7 @@ export default function SetupPage() {
               {phoneNumbers.length > 0 && (
                 <button onClick={handleSelectPhone}
                   disabled={loading === "attach-phone" || !selectedPhoneId}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1B4332] to-[#1B4332]/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-line-subtle to-line-subtle/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
                   {loading === "attach-phone" ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Connecting...</>
                   ) : (
@@ -542,7 +542,7 @@ export default function SetupPage() {
                 </button>
               )}
               <button onClick={handleSkipPhone}
-                className="px-4 py-3 rounded-xl bg-white border border-[#E4E7DF] text-sm text-[#5C6B62] hover:bg-[#E9ECE5]">
+                className="px-4 py-3 rounded-xl bg-surface-raised border border-line text-sm text-ink-muted hover:bg-surface-raised">
                 Skip
               </button>
             </div>
@@ -557,29 +557,29 @@ export default function SetupPage() {
             className="max-w-lg mx-auto space-y-5"
           >
             <div className="text-center mb-2">
-              <Play className="w-10 h-10 text-[#047857] mx-auto mb-2" />
+              <Play className="w-10 h-10 text-success mx-auto mb-2" />
               <h2 className="text-xl font-bold text-ink">Test Your Setup</h2>
-              <p className="text-sm text-[#5C6B62] mt-1">We'll call your phone so you can hear how the AI sounds.</p>
+              <p className="text-sm text-ink-muted mt-1">We'll call your phone so you can hear how the AI sounds.</p>
             </div>
-            <div className="bg-[#F7F8F4] rounded-xl p-6 border border-[#E4E7DF] text-center space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-[#047857]/20 to-[#047857]/5 flex items-center justify-center">
-                <Phone className="w-8 h-8 text-[#047857]" />
+            <div className="bg-surface rounded-xl p-6 border border-line text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-success/20 to-success/5 flex items-center justify-center">
+                <Phone className="w-8 h-8 text-success" />
               </div>
-              <p className="text-sm text-[#5C6B62]">
+              <p className="text-sm text-ink-muted">
                 When you click "Test Call", your registered phone number will ring within 30 seconds.
               </p>
               <button onClick={handleTestCall} disabled={testCallLoading}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-[#047857] text-white font-medium disabled:opacity-50 hover:bg-[#065F46] transition-colors">
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-success text-white font-medium disabled:opacity-50 hover:bg-success transition-colors">
                 {testCallLoading ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Calling...</>
                 ) : (
                   <><Phone className="w-4 h-4" /> Test Call</>
                 )}
               </button>
-              {testCallResult && <p className="text-sm text-[#047857]">✅ Test call initiated! Check your phone.</p>}
+              {testCallResult && <p className="text-sm text-success">✅ Test call initiated! Check your phone.</p>}
             </div>
             <button onClick={handleFinish} disabled={loading === "finish"}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1B4332] to-[#1B4332]/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-line-subtle to-line-subtle/80 text-white font-medium disabled:opacity-50 hover:opacity-90 transition-opacity">
               {loading === "finish" ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Completing Setup...</>
               ) : (
@@ -592,10 +592,10 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] flex flex-col">
-      <header className="flex items-center justify-between px-6 h-14 border-b border-[#E4E7DF]">
+    <div className="min-h-screen bg-surface flex flex-col">
+      <header className="flex items-center justify-between px-6 h-14 border-b border-line">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#1B4332] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-line-subtle flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" />
           </div>
           <span className="text-[16px] font-bold text-ink">Converza Setup</span>
@@ -603,7 +603,7 @@ export default function SetupPage() {
       </header>
 
       {/* Progress Steps */}
-      <div className="flex items-center justify-center gap-1 px-4 sm:px-6 py-5 border-b border-[#E4E7DF] overflow-x-auto">
+      <div className="flex items-center justify-center gap-1 px-4 sm:px-6 py-5 border-b border-line overflow-x-auto">
         {STEPS.map((step, i) => {
           const isActive = currentStep === step.id;
           const isComplete = currentStep > step.id;
@@ -612,21 +612,21 @@ export default function SetupPage() {
               <div className="flex items-center gap-1 sm:gap-2">
                 <div className={cn(
                   "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all shrink-0",
-                  isComplete && "bg-[#047857] text-white",
-                  isActive && "bg-[#1B4332] text-white ring-2 ring-[#1B4332]/20",
-                  !isActive && !isComplete && "bg-white text-[#5C6B62] border border-[#E4E7DF]",
+                  isComplete && "bg-success text-white",
+                  isActive && "bg-line-subtle text-white ring-2 ring-line-subtle/20",
+                  !isActive && !isComplete && "bg-surface-raised text-ink-muted border border-line",
                 )}>
                   {isComplete ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <step.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                 </div>
                 <span className={cn("text-[10px] sm:text-xs font-medium hidden sm:inline",
-                  isActive ? "text-ink" : "text-[#5C6B62]"
+                  isActive ? "text-ink" : "text-ink-muted"
                 )}>
                   {step.label}
                 </span>
               </div>
               {i < STEPS.length - 1 && (
                 <div className={cn("w-4 sm:w-10 h-[2px] mx-1 sm:mx-2",
-                  currentStep > step.id ? "bg-[#047857]" : "bg-[#F1F3EE]"
+                  currentStep > step.id ? "bg-success" : "bg-surface"
                 )} />
               )}
             </div>
@@ -640,8 +640,8 @@ export default function SetupPage() {
         </AnimatePresence>
       </main>
 
-      <footer className="px-6 py-3 border-t border-[#E4E7DF] text-center">
-        <p className="text-xs text-[#5C6B62]">Step {currentStep} of 7</p>
+      <footer className="px-6 py-3 border-t border-line text-center">
+        <p className="text-xs text-ink-muted">Step {currentStep} of 7</p>
       </footer>
     </div>
   );

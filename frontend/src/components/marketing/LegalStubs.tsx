@@ -13,9 +13,9 @@
  */
 export default function LegalStubs() {
   return (
-    <section className="py-16 bg-[#0A0F0C] border-t border-white/[0.06]">
+    <section className="py-16 bg-canvas border-t border-line">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p className="caption text-[#6B7C73] mb-6">Legal pages — draft stubs</p>
+        <p className="caption text-ink-muted mb-6">Legal pages — draft stubs</p>
         <div className="grid md:grid-cols-3 gap-4">
           {[
             {
@@ -36,18 +36,18 @@ export default function LegalStubs() {
           ].map((page) => (
             <div
               key={page.href}
-              className="p-6 rounded-xl bg-white/[0.03] border border-white/[0.08] text-left"
+              className="p-6 rounded-xl bg-surface border border-line text-left"
             >
-              <h3 className="text-[14px] font-semibold text-[#F0F7F3] mb-3">{page.title}</h3>
-              <ul className="space-y-1.5 text-[12px] text-[#9FB0A6]">
+              <h3 className="text-[14px] font-semibold text-ink mb-3">{page.title}</h3>
+              <ul className="space-y-1.5 text-[12px] text-ink-soft">
                 {page.headings.map((h) => (
                   <li key={h} className="flex items-start gap-2">
-                    <span className="text-[#6B7C73] shrink-0 mt-0.5">·</span>
+                    <span className="text-ink-muted shrink-0 mt-0.5">·</span>
                     <span>{h}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/25 text-[#F59E0B] text-[11px] font-medium">
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning/10 border border-warning/25 text-warning text-[11px] font-medium">
                 [LEGAL REVIEW REQUIRED]
               </div>
             </div>

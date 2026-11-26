@@ -22,7 +22,10 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
     let scene: any = null;
     let camera: any = null;
     let renderer: any = null;
-    let objects: any[] = [];
+    let globe: any = null;
+    let innerGlobe: any = null;
+    let particles: any = null;
+    let rings: any[] = [];
     let isMounted = true;
 
     const init = async () => {
@@ -50,31 +53,29 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);
 
-      // Globe - Wireframe Sphere
+      // Globe - copper network wireframe
       const geometry = new THREE.SphereGeometry(2, 32, 32);
       const material = new THREE.MeshBasicMaterial({
-        color: 0x34d399,
+        color: 0xB96A38,
         wireframe: true,
         transparent: true,
         opacity: 0.16,
       });
-      const globe = new THREE.Mesh(geometry, material);
+      globe = new THREE.Mesh(geometry, material);
       scene.add(globe);
-      objects.push(globe, geometry, material);
 
-      // Inner wireframe
+      // Inner wireframe (deep copper, softer)
       const innerGeo = new THREE.SphereGeometry(1.95, 24, 24);
       const innerMat = new THREE.MeshBasicMaterial({
-        color: 0x34d399,
+        color: 0x8B593D,
         wireframe: true,
         transparent: true,
         opacity: 0.09,
       });
-      const innerGlobe = new THREE.Mesh(innerGeo, innerMat);
+      innerGlobe = new THREE.Mesh(innerGeo, innerMat);
       scene.add(innerGlobe);
-      objects.push(innerGlobe, innerGeo, innerMat);
 
-      // Particles
+      // Particles — burnt-orange/copper nodes, select few bright
       const particlePositions: number[] = [];
       const particleColors: number[] = [];
       const pos = geometry.attributes.position;
@@ -82,26 +83,46 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
         if (i % 2 === 0) {
           particlePositions.push(pos.getX(i), pos.getY(i), pos.getZ(i));
           const brightness = 0.4 + Math.random() * 0.6;
-          particleColors.push(0.2 * brightness, 0.83 * brightness, 0.6 * brightness);
+          const bright = Math.random() < 0.22;
+          if (bright) {
+            // brighter burnt-orange nodes
+            particleColors.push(
+              1.0 * brightness,
+              0.55 * brightness,
+              0.27 * brightness
+            );
+          } else {
+            // darker copper
+            particleColors.push(
+              0.75 * brightness,
+              0.46 * brightness,
+              0.24 * brightness
+            );
+          }
         }
       }
       const particleGeo = new THREE.BufferGeometry();
-      particleGeo.setAttribute("position", new THREE.Float32BufferAttribute(particlePositions, 3));
-      particleGeo.setAttribute("color", new THREE.Float32BufferAttribute(particleColors, 3));
+      particleGeo.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(particlePositions, 3)
+      );
+      particleGeo.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(particleColors, 3)
+      );
       const particleMat = new THREE.PointsMaterial({
-        size: 0.04,
+        size: 0.045,
         vertexColors: true,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.85,
         sizeAttenuation: true,
       });
-      const particles = new THREE.Points(particleGeo, particleMat);
+      particles = new THREE.Points(particleGeo, particleMat);
       scene.add(particles);
-      objects.push(particles, particleGeo, particleMat);
 
-      // Lat/Long rings
+      // Lat/Long rings (dark copper)
       const ringMaterial = new THREE.LineBasicMaterial({
-        color: 0x34d399,
+        color: 0x8B593D,
         transparent: true,
         opacity: 0.12,
       });
@@ -117,10 +138,13 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
           ringPoints.push(x, y, z);
         }
         const ringGeo = new THREE.BufferGeometry();
-        ringGeo.setAttribute("position", new THREE.Float32BufferAttribute(ringPoints, 3));
+        ringGeo.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(ringPoints, 3)
+        );
         const ringLine = new THREE.Line(ringGeo, ringMaterial);
         scene.add(ringLine);
-        objects.push(ringLine, ringGeo, ringMaterial);
+        rings.push(ringLine, ringGeo, ringMaterial);
       }
 
       // Event listeners
@@ -167,11 +191,23 @@ export default function GlobeCanvas({ scale = 1 }: { scale?: number }) {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
       if (animationId !== null) cancelAnimationFrame(animationId);
-      if (renderer && container.contains(renderer.domElement)) {
+      if (renderer && container && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
       // Dispose all objects
-      objects.forEach((obj) => {
+      if (globe) {
+        globe.geometry?.dispose();
+        globe.material?.dispose();
+      }
+      if (innerGlobe) {
+        innerGlobe.geometry?.dispose();
+        innerGlobe.material?.dispose();
+      }
+      if (particles) {
+        particles.geometry?.dispose();
+        particles.material?.dispose();
+      }
+      rings.forEach((obj) => {
         if (obj?.dispose) obj.dispose();
       });
       if (renderer?.dispose) renderer.dispose();

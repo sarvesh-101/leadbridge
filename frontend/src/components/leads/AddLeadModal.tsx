@@ -73,19 +73,19 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-md rounded-xl border border-white/10 bg-[#101713] shadow-2xl animate-slide-in">
+      <div className="relative w-full max-w-md rounded-xl border border-line bg-canvas shadow-2xl animate-slide-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-line">
           <div>
-            <h2 className="text-lg font-semibold text-[#F0F7F3]">Add Lead</h2>
-            <p className="text-xs text-[#9FB0A6] mt-0.5 flex items-center gap-1.5">
-              <Phone className="w-3 h-3 text-[#6FE3B0]" />
+            <h2 className="text-lg font-semibold text-ink">Add Lead</h2>
+            <p className="text-xs text-ink-soft mt-0.5 flex items-center gap-1.5">
+              <Phone className="w-3 h-3 text-brand" />
               AI agent will call this lead within 60 seconds
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft transition-colors"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -95,8 +95,8 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-5 py-4 space-y-3.5">
           <div>
-            <label htmlFor="lead-name" className="block text-xs font-medium text-[#9FB0A6] mb-1.5">
-              Full Name <span className="text-[#6FE3B0]">*</span>
+            <label htmlFor="lead-name" className="block text-xs font-medium text-ink-soft mb-1.5">
+              Full Name <span className="text-brand">*</span>
             </label>
             <input
               id="lead-name"
@@ -105,13 +105,13 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Rohan Sharma"
               autoFocus
-              className="w-full px-3 py-2 rounded-lg bg-[#0A0F0C] border border-white/10 text-[#F0F7F3] text-sm placeholder:text-[#5B6B61] focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#34D399]/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-ink text-sm placeholder:text-ink-muted focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/30 transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="lead-phone" className="block text-xs font-medium text-[#9FB0A6] mb-1.5">
-              Phone Number <span className="text-[#6FE3B0]">*</span>
+            <label htmlFor="lead-phone" className="block text-xs font-medium text-ink-soft mb-1.5">
+              Phone Number <span className="text-brand">*</span>
             </label>
             <input
               id="lead-phone"
@@ -119,13 +119,13 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. +91 98765 43210"
-              className="w-full px-3 py-2 rounded-lg bg-[#0A0F0C] border border-white/10 text-[#F0F7F3] text-sm placeholder:text-[#5B6B61] focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#34D399]/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-ink text-sm placeholder:text-ink-muted focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/30 transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="lead-email" className="block text-xs font-medium text-[#9FB0A6] mb-1.5">
-              Email <span className="text-[#5B6B61]">(optional)</span>
+            <label htmlFor="lead-email" className="block text-xs font-medium text-ink-soft mb-1.5">
+              Email <span className="text-ink-muted">(optional)</span>
             </label>
             <input
               id="lead-email"
@@ -133,13 +133,13 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="e.g. rohan@gmail.com"
-              className="w-full px-3 py-2 rounded-lg bg-[#0A0F0C] border border-white/10 text-[#F0F7F3] text-sm placeholder:text-[#5B6B61] focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#34D399]/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-ink text-sm placeholder:text-ink-muted focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/30 transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="lead-source" className="block text-xs font-medium text-[#9FB0A6] mb-1.5">
-              Source <span className="text-[#5B6B61]">(optional)</span>
+            <label htmlFor="lead-source" className="block text-xs font-medium text-ink-soft mb-1.5">
+              Source <span className="text-ink-muted">(optional)</span>
             </label>
             <input
               id="lead-source"
@@ -147,7 +147,7 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
               value={property}
               onChange={(e) => setProperty(e.target.value)}
               placeholder="e.g. Walk-in, Reference, 99acres"
-              className="w-full px-3 py-2 rounded-lg bg-[#0A0F0C] border border-white/10 text-[#F0F7F3] text-sm placeholder:text-[#5B6B61] focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#34D399]/30 transition-colors"
+              className="w-full px-3 py-2 rounded-lg bg-canvas border border-line text-ink text-sm placeholder:text-ink-muted focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-brand/30 transition-colors"
             />
           </div>
 
@@ -155,14 +155,14 @@ export function AddLeadModal({ open, onClose, onCreated }: AddLeadModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.04] transition-all"
+              className="flex-1 px-4 py-2.5 rounded-lg border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.04] transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>

@@ -25,21 +25,32 @@ export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
 };
 
 export const LEAD_STATUS_COLORS: Record<LeadStatus, string> = {
-  PENDING: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-[#5C6B62]",
-  CALLING: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 animate-pulse",
-  CALL_FAILED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  NO_ANSWER: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-  FAQ_ONLY: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  BOOKED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  REMINDED: "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
-  VISITED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
-  NO_SHOW: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  FOLLOWUP_D1: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-  FOLLOWUP_D2: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-  FOLLOWUP_D3: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-  REBOOKED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  COLD: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-[#5C6B62]",
-  CONVERTED: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
+  PENDING: "bg-white/[0.06] text-ink-soft border border-line",
+  CALLING: "bg-brand/15 text-brand border border-brand/30 animate-pulse",
+  CALL_FAILED: "bg-danger/15 text-danger border border-danger/30",
+  NO_ANSWER: "bg-warning/15 text-warning border border-warning/30",
+  FAQ_ONLY: "bg-neutral-soft/15 text-neutral-soft border border-neutral-soft/30",
+  BOOKED: "bg-brand/15 text-brand border border-brand/30",
+  REMINDED: "bg-brand-soft/15 text-brand-soft border border-brand-soft/30",
+  VISITED: "bg-success/15 text-success border border-success/30",
+  NO_SHOW: "bg-danger/15 text-danger border border-danger/30",
+  FOLLOWUP_D1: "bg-warning/15 text-warning border border-warning/30",
+  FOLLOWUP_D2: "bg-warning/15 text-warning border border-warning/30",
+  FOLLOWUP_D3: "bg-warning/15 text-warning border border-warning/30",
+  REBOOKED: "bg-success/15 text-success border border-success/30",
+  COLD: "bg-white/[0.06] text-ink-muted border border-line",
+  CONVERTED: "bg-success/15 text-success border border-success/30",
+};
+
+/** Single-source semantic status tokens for dashboard badges and Kanban pills. 
+ * Kept in the same file so every consumer uses the same muted greens/ambers/reds 
+ * instead of re-deriving their own. 
+ */
+export const SEMANTIC_STATUS_CLASSES: Record<string, string> = {
+  success: "bg-success/15 text-success border border-success/30",
+  warning: "bg-warning/15 text-warning border border-warning/30",
+  error: "bg-danger/15 text-danger border border-danger/30",
+  neutral: "bg-white/[0.06] text-ink-soft border border-line",
 };
 
 export type CampaignStatus = "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "ARCHIVED";

@@ -59,11 +59,11 @@ export default function ReferralsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Referral Tracking</h1>
-          <p className="text-[#9FB0A6] mt-1">Track leads that come from customer referrals</p>
+          <h1 className="text-2xl font-bold text-ink">Referral Tracking</h1>
+          <p className="text-ink-soft mt-1">Track leads that come from customer referrals</p>
         </div>
         <button onClick={() => setShowRecordModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all"
         >
           <UserPlus className="w-4 h-4" />
           Record Referral
@@ -77,16 +77,16 @@ export default function ReferralsPage() {
         ) : (
           [
             { icon: Users, label: "Total Referrals", value: stats?.totalReferrals || 0, color: "from-blue-500 to-blue-600" },
-            { icon: Award, label: "Converted", value: stats?.convertedReferrals || 0, color: "from-green-500 to-green-600" },
+            { icon: Award, label: "Converted", value: stats?.convertedReferrals || 0, color: "from-success to-success" },
             { icon: TrendingUp, label: "Conversion Rate", value: `${stats?.conversionRate || 0}%`, color: "from-purple-500 to-purple-600" },
-            { icon: Star, label: "Top Referrer", value: stats?.topReferrers?.[0]?.name || "—", color: "from-amber-500 to-amber-600" },
+            { icon: Star, label: "Top Referrer", value: stats?.topReferrers?.[0]?.name || "—", color: "from-warning to-warning" },
           ].map((s) => (
             <div key={s.label} className="p-4 rounded-xl app-card">
               <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", s.color)}>
                 <s.icon className="w-4 h-4 text-white" />
               </div>
-              <div className="text-lg font-bold text-[#F0F7F3]">{s.value}</div>
-              <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+              <div className="text-lg font-bold text-ink">{s.value}</div>
+              <div className="text-xs text-ink-soft">{s.label}</div>
             </div>
           ))
         )}
@@ -94,41 +94,41 @@ export default function ReferralsPage() {
 
       {/* Top Referrers */}
       <div className="p-5 rounded-xl app-card">
-        <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4 flex items-center gap-2">
-          <Award className="w-4 h-4 text-amber-400" />
+        <h3 className="text-sm font-semibold text-ink mb-4 flex items-center gap-2">
+          <Award className="w-4 h-4 text-warning" />
           Top Referrers
         </h3>
         {loading ? (
-          <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-10 bg-[#101713] rounded-lg animate-pulse" />)}</div>
+          <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-10 bg-canvas rounded-lg animate-pulse" />)}</div>
         ) : stats?.topReferrers?.length > 0 ? (
           <div className="space-y-2">
             {stats.topReferrers.map((r: any, i: number) => (
-              <div key={r.name} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-white/10">
+              <div key={r.name} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-line">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0",
-                  i === 0 ? "bg-amber-500/20 text-amber-400" :
-                  i === 1 ? "bg-gray-300/20 text-[#9FB0A6]" :
+                  i === 0 ? "bg-warning/20 text-warning" :
+                  i === 1 ? "bg-surface-raised/20 text-ink-soft" :
                   i === 2 ? "bg-orange-600/20 text-orange-500" :
-                  "bg-white/[0.06] text-[#9FB0A6]"
+                  "bg-white/[0.06] text-ink-soft"
                 )}>
                   {i + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-[#F0F7F3]">{r.name}</p>
+                  <p className="text-sm font-medium text-ink">{r.name}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-24 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                    <div className="h-full rounded-full bg-amber-500" style={{ width: `${(r.count / maxReferrals) * 100}%` }} />
+                    <div className="h-full rounded-full bg-warning" style={{ width: `${(r.count / maxReferrals) * 100}%` }} />
                   </div>
-                  <span className="text-sm font-mono text-[#F0F7F3] font-bold">{r.count}</span>
+                  <span className="text-sm font-mono text-ink font-bold">{r.count}</span>
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-8">
-            <Users className="w-8 h-8 text-[#9FB0A6] mx-auto mb-2" />
-            <p className="text-sm text-[#9FB0A6]">No referrals recorded yet</p>
+            <Users className="w-8 h-8 text-ink-soft mx-auto mb-2" />
+            <p className="text-sm text-ink-soft">No referrals recorded yet</p>
           </div>
         )}
       </div>
@@ -136,8 +136,8 @@ export default function ReferralsPage() {
       {/* Monthly Trend */}
       {stats?.monthlyTrend?.length > 0 && (
         <div className="p-5 rounded-xl app-card">
-          <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4 flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#6FE3B0]" />
+          <h3 className="text-sm font-semibold text-ink mb-4 flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-brand" />
             Monthly Referral Trend
           </h3>
           <div className="flex items-end gap-2 h-24">
@@ -147,12 +147,12 @@ export default function ReferralsPage() {
               return (
                 <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
                   <div
-                    className="w-full rounded-t-md bg-gradient-to-t from-[#1B4332] to-[#2D6A4F] transition-all"
+                    className="w-full rounded-t-md bg-gradient-to-t from-line-subtle to-brand-deep transition-all"
                     style={{ height: `${height}%` }}
                   >
-                    <div className="text-[9px] text-[#F0F7F3] text-center font-mono pt-1">{m.count}</div>
+                    <div className="text-[9px] text-ink text-center font-mono pt-1">{m.count}</div>
                   </div>
-                  <span className="text-[9px] text-[#9FB0A6]">{m.month.slice(5)}</span>
+                  <span className="text-[9px] text-ink-soft">{m.month.slice(5)}</span>
                 </div>
               );
             })}
@@ -168,27 +168,27 @@ export default function ReferralsPage() {
           <div className="w-full max-w-md rounded-2xl app-card p-6"
             onClick={e => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-[#F0F7F3] mb-4">Record Referral</h3>
+            <h3 className="text-lg font-semibold text-ink mb-4">Record Referral</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs text-[#9FB0A6] mb-1.5">Lead ID</label>
+                <label className="block text-xs text-ink-soft mb-1.5">Lead ID</label>
                 <input value={leadId} onChange={e => setLeadId(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm"
+                  className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm"
                   placeholder="Enter the lead ID" />
               </div>
               <div>
-                <label className="block text-xs text-[#9FB0A6] mb-1.5">Referred By</label>
+                <label className="block text-xs text-ink-soft mb-1.5">Referred By</label>
                 <input value={referredBy} onChange={e => setReferredBy(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm"
+                  className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm"
                   placeholder="Customer name or phone" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowRecordModal(false)}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
+                className="flex-1 px-4 py-2.5 rounded-lg border border-line text-ink-soft text-sm hover:bg-white/[0.06]"
               >Cancel</button>
               <button onClick={handleRecordReferral} disabled={saving || !leadId.trim() || !referredBy.trim()}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                 Record Referral

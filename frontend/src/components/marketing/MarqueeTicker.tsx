@@ -23,24 +23,24 @@ export default function MarqueeTicker() {
   const items = [...facts, ...facts];
 
   return (
-    <div className="relative w-full overflow-hidden border-y border-white/[0.08] bg-[#0D1511]/80 backdrop-blur-sm">
-      {/* subtle emerald sheen */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#34D399]/[0.05] to-transparent pointer-events-none" />
+    <div className="relative w-full overflow-hidden border-y border-line bg-canvas/90 backdrop-blur-sm">
+      {/* subtle orange sheen */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/[0.04] to-transparent pointer-events-none" />
       <div className="relative flex overflow-x-hidden h-[80px] items-center">
         <div className="animate-marquee-scroll flex items-center gap-8 whitespace-nowrap hover:[animation-play-state:paused] min-w-max">
           {items.map((event, i) => (
-            <span key={i} className="text-[13px] text-[#9FB0A6] font-mono flex-shrink-0">
+            <span key={i} className="text-[13px] text-ink-soft font-mono flex-shrink-0">
               {event}
-              <span className="mx-6 text-[#34D399]/60">·</span>
+              <span className="mx-6 text-brand/50">·</span>
             </span>
           ))}
         </div>
         {/* Duplicate for seamless loop */}
         <div className="animate-marquee-scroll flex items-center gap-8 whitespace-nowrap hover:[animation-play-state:paused] min-w-max absolute top-0 left-[100%]">
           {items.map((event, i) => (
-            <span key={i} className="text-[13px] text-[#9FB0A6] font-mono flex-shrink-0">
+            <span key={i} className="text-[13px] text-ink-soft font-mono flex-shrink-0">
               {event}
-              <span className="mx-6 text-[#34D399]/60">·</span>
+              <span className="mx-6 text-brand/50">·</span>
             </span>
           ))}
         </div>

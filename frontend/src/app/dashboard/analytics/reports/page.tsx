@@ -78,39 +78,39 @@ export default function ReportsPage() {
     }
   }
 
-  const chartColors = ["#1B4332", "#047857", "#B45309", "#DC2626", "#8B5CF6", "#EC4899", "#06B6D4"];
+  const chartColors = ["var(--border-subtle)", "var(--semantic-success)", "#B45309", "#DC2626", "#8B5CF6", "#EC4899", "#06B6D4"];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#F0F7F3]">Custom Reports</h1>
-        <p className="text-[#9FB0A6] mt-1">Build custom analytics reports with filters and grouping</p>
+        <h1 className="text-2xl font-bold text-ink">Custom Reports</h1>
+        <p className="text-ink-soft mt-1">Build custom analytics reports with filters and grouping</p>
       </div>
 
       {/* Filters */}
       <div className="p-6 rounded-xl app-card">
-        <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4 flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#2D6A4F]" /> Report Filters
+        <h2 className="text-sm font-semibold text-ink mb-4 flex items-center gap-2">
+          <Filter className="w-4 h-4 text-brand-deep" /> Report Filters
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div>
-            <label className="block text-xs text-[#9FB0A6] mb-1">Date From</label>
+            <label className="block text-xs text-ink-soft mb-1">Date From</label>
             <input type="date" value={filters.dateFrom}
               onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+              className="w-full px-3 py-2 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
             />
           </div>
           <div>
-            <label className="block text-xs text-[#9FB0A6] mb-1">Date To</label>
+            <label className="block text-xs text-ink-soft mb-1">Date To</label>
             <input type="date" value={filters.dateTo}
               onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+              className="w-full px-3 py-2 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
             />
           </div>
           <div>
-            <label className="block text-xs text-[#9FB0A6] mb-1">Group By</label>
+            <label className="block text-xs text-ink-soft mb-1">Group By</label>
             <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+              className="w-full px-3 py-2 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
             >
               {GROUP_OPTIONS.map((g) => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -122,7 +122,7 @@ export default function ReportsPage() {
         {/* Source & Status multi-select */}
         <div className="grid sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-xs text-[#9FB0A6] mb-1">Sources</label>
+            <label className="block text-xs text-ink-soft mb-1">Sources</label>
             <div className="flex flex-wrap gap-1.5">
               {SOURCES.map((s) => (
                 <button key={s} onClick={() => setFilters({
@@ -134,8 +134,8 @@ export default function ReportsPage() {
                   className={cn(
                     "px-2.5 py-1 rounded-lg text-xs border transition-all",
                     filters.source.includes(s)
-                      ? "bg-[#34D399]/25 border-[#34D399]/40 text-[#2D6A4F]"
-                      : "bg-[#101713] border-white/10 text-[#9FB0A6] hover:bg-white/[0.06]"
+                      ? "bg-brand/25 border-brand/40 text-brand-deep"
+                      : "bg-canvas border-line text-ink-soft hover:bg-white/[0.06]"
                   )}
                 >
                   {s}
@@ -144,7 +144,7 @@ export default function ReportsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs text-[#9FB0A6] mb-1">Statuses</label>
+            <label className="block text-xs text-ink-soft mb-1">Statuses</label>
             <div className="flex flex-wrap gap-1.5">
               {STATUSES.map((s) => (
                 <button key={s} onClick={() => setFilters({
@@ -156,8 +156,8 @@ export default function ReportsPage() {
                   className={cn(
                     "px-2.5 py-1 rounded-lg text-xs border transition-all",
                     filters.status.includes(s)
-                      ? "bg-[#34D399]/25 border-[#34D399]/40 text-[#2D6A4F]"
-                      : "bg-[#101713] border-white/10 text-[#9FB0A6] hover:bg-white/[0.06]"
+                      ? "bg-brand/25 border-brand/40 text-brand-deep"
+                      : "bg-canvas border-line text-ink-soft hover:bg-white/[0.06]"
                   )}
                 >
                   {s.replace(/_/g, " ")}
@@ -169,14 +169,14 @@ export default function ReportsPage() {
 
         <div className="flex items-center gap-3">
           <button onClick={generateReport} disabled={loading}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart3 className="w-4 h-4" />}
             {loading ? "Generating..." : "Generate Report"}
           </button>
           {report && (
             <button onClick={exportCSV}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
             >
               <Download className="w-4 h-4" /> Export CSV
             </button>
@@ -190,12 +190,12 @@ export default function ReportsPage() {
           className="p-6 rounded-xl app-card"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-semibold text-[#F0F7F3] flex items-center gap-2">
-              <FileBarChart className="w-4 h-4 text-[#2D6A4F]" /> Report Results
+            <h2 className="text-sm font-semibold text-ink flex items-center gap-2">
+              <FileBarChart className="w-4 h-4 text-brand-deep" /> Report Results
             </h2>
-            <div className="flex items-center gap-4 text-xs text-[#9FB0A6]">
+            <div className="flex items-center gap-4 text-xs text-ink-soft">
               {Object.entries(report.summary || {}).map(([key, val]) => (
-                <span key={key} className="capitalize">{key.replace(/([A-Z])/g, " $1")}: <strong className="text-[#F0F7F3]">{String(val)}</strong></span>
+                <span key={key} className="capitalize">{key.replace(/([A-Z])/g, " $1")}: <strong className="text-ink">{String(val)}</strong></span>
               ))}
             </div>
           </div>
@@ -209,10 +209,10 @@ export default function ReportsPage() {
               return (
                 <div key={label}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="text-[#9FB0A6]">{label}</span>
-                    <span className="text-[#F0F7F3] font-medium">{val}{secondary != null ? ` / ${secondary}` : ""}</span>
+                    <span className="text-ink-soft">{label}</span>
+                    <span className="text-ink font-medium">{val}{secondary != null ? ` / ${secondary}` : ""}</span>
                   </div>
-                  <div className="h-6 rounded-lg bg-[#101713] overflow-hidden flex">
+                  <div className="h-6 rounded-lg bg-canvas overflow-hidden flex">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(val / maxVal) * 100}%` }}
@@ -239,19 +239,19 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-2 px-2 text-[#9FB0A6] font-medium">Label</th>
+                <tr className="border-b border-line">
+                  <th className="text-left py-2 px-2 text-ink-soft font-medium">Label</th>
                   {report.datasets?.map((ds: any) => (
-                    <th key={ds.label} className="text-right py-2 px-2 text-[#9FB0A6] font-medium">{ds.label}</th>
+                    <th key={ds.label} className="text-right py-2 px-2 text-ink-soft font-medium">{ds.label}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {report.labels?.map((label: string, i: number) => (
-                  <tr key={label} className="border-b border-white/10 hover:bg-white/[0.06]">
-                    <td className="py-2 px-2 text-[#9FB0A6]">{label}</td>
+                  <tr key={label} className="border-b border-line hover:bg-white/[0.06]">
+                    <td className="py-2 px-2 text-ink-soft">{label}</td>
                     {report.datasets?.map((ds: any) => (
-                      <td key={ds.label} className="text-right py-2 px-2 text-[#F0F7F3]">{ds.data[i] || 0}</td>
+                      <td key={ds.label} className="text-right py-2 px-2 text-ink">{ds.data[i] || 0}</td>
                     ))}
                   </tr>
                 ))}
@@ -264,9 +264,9 @@ export default function ReportsPage() {
       {/* Empty state */}
       {!report && !loading && (
         <div className="text-center py-16 rounded-xl app-card">
-          <Table2 className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No report generated yet</h3>
-          <p className="text-sm text-[#9FB0A6]">Set your filters and click "Generate Report"</p>
+          <Table2 className="w-12 h-12 mx-auto mb-4 text-ink-soft" />
+          <h3 className="text-lg font-medium text-ink mb-2">No report generated yet</h3>
+          <p className="text-sm text-ink-soft">Set your filters and click "Generate Report"</p>
         </div>
       )}
     </div>

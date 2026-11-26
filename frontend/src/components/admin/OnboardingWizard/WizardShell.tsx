@@ -41,16 +41,16 @@ export default function WizardShell() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5]">
+    <div className="min-h-screen bg-surface">
       {/* Header */}
-      <div className="border-b border-[#E4E7DF] bg-[#FFFFFF]">
+      <div className="border-b border-line bg-surface-raised">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Link href="/admin/dashboard" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-[#1B4332] flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-line-subtle flex items-center justify-center">
               <Zap className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-[15px] font-display font-bold text-[#1E2B24]">Converza</span>
-            <span className="text-[12px] text-[#5C6B62]">· Admin</span>
+            <span className="text-[15px] font-display font-bold text-ink">Converza</span>
+            <span className="text-[12px] text-ink-muted">· Admin</span>
           </Link>
 
           {/* Stepper */}
@@ -61,10 +61,10 @@ export default function WizardShell() {
                   <div className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold border-2 transition-all duration-300",
                     step.id < currentStep
-                      ? "bg-[#047857] border-[#047857] text-white"
+                      ? "bg-success border-success text-white"
                       : step.id === currentStep
-                      ? "bg-[#1B4332] border-[#1B4332] text-white"
-                      : "bg-transparent border-[#E4E7DF] text-[#5C6B62]"
+                      ? "bg-line-subtle border-line-subtle text-white"
+                      : "bg-transparent border-line text-ink-muted"
                   )}>
                     {step.id < currentStep ? (
                       <Check className="w-4 h-4" />
@@ -74,7 +74,7 @@ export default function WizardShell() {
                   </div>
                   <span className={cn(
                     "text-[10px] mt-1 font-medium hidden sm:block",
-                    step.id === currentStep ? "text-[#1E2B24]" : "text-[#5C6B62]"
+                    step.id === currentStep ? "text-ink" : "text-ink-muted"
                   )}>
                     {step.label}
                   </span>
@@ -82,7 +82,7 @@ export default function WizardShell() {
                 {i < STEPS.length - 1 && (
                   <div className={cn(
                     "flex-1 h-[2px] mx-2 transition-colors duration-300",
-                    step.id < currentStep ? "bg-[#047857]" : "bg-[#E4E7DF]"
+                    step.id < currentStep ? "bg-success" : "bg-surface-raised"
                   )} />
                 )}
               </div>
@@ -115,11 +115,11 @@ export default function WizardShell() {
         </div>
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#E4E7DF]">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-line">
           <button
             onClick={goBack}
             disabled={currentStep === 1}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E4E7DF] text-[13px] text-[#5C6B62] hover:bg-[#F1F3EE] hover:text-[#1E2B24] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-[13px] text-ink-muted hover:bg-surface hover:text-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -128,13 +128,13 @@ export default function WizardShell() {
           {currentStep < 6 ? (
             <button
               onClick={goNext}
-              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#1B4332] text-white text-[13px] font-semibold hover:brightness-110 transition-all"
+              className="flex items-center gap-2 px-6 py-2 rounded-lg bg-line-subtle text-white text-[13px] font-semibold hover:brightness-110 transition-all"
             >
               Continue
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
-            <button className="flex items-center gap-2 px-6 py-2 rounded-lg bg-[#047857] text-black text-[13px] font-semibold hover:brightness-110 transition-all">
+            <button className="flex items-center gap-2 px-6 py-2 rounded-lg bg-success text-canvas text-[13px] font-semibold hover:brightness-110 transition-all">
               <Check className="w-4 h-4" />
               Create Client
             </button>
@@ -150,8 +150,8 @@ export default function WizardShell() {
 function Step1() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Business Information</h2>
-      <p className="text-[14px] text-[#5C6B62]">Enter the broker&apos;s business details.</p>
+      <h2 className="text-[22px] font-display font-bold text-ink">Business Information</h2>
+      <p className="text-[14px] text-ink-muted">Enter the broker&apos;s business details.</p>
       <div className="grid grid-cols-2 gap-4">
         <InputField label="Business Name" placeholder="e.g. Sharma Realty" />
         <InputField label="Owner Name" placeholder="e.g. Rajesh Sharma" />
@@ -165,8 +165,8 @@ function Step1() {
 function Step2() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Territory Selection</h2>
-      <p className="text-[14px] text-[#5C6B62]">Assign the exclusive territory for this broker.</p>
+      <h2 className="text-[22px] font-display font-bold text-ink">Territory Selection</h2>
+      <p className="text-[14px] text-ink-muted">Assign the exclusive territory for this broker.</p>
       <div className="grid grid-cols-2 gap-4">
         <InputField label="City" placeholder="e.g. Mumbai" />
         <InputField label="Zone / Area" placeholder="e.g. Andheri West" />
@@ -178,8 +178,8 @@ function Step2() {
 function Step3() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Contact Settings</h2>
-      <p className="text-[14px] text-[#5C6B62]">Set up WhatsApp and calling preferences.</p>
+      <h2 className="text-[22px] font-display font-bold text-ink">Contact Settings</h2>
+      <p className="text-[14px] text-ink-muted">Set up WhatsApp and calling preferences.</p>
       <div className="grid grid-cols-2 gap-4">
         <InputField label="WhatsApp Number" placeholder="+91 98765 43210" />
         <InputField label="Calling Language" placeholder="e.g. Hindi, English" />
@@ -228,21 +228,21 @@ Kya main aapki site visit book kar doon?`);
 
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Script Configuration</h2>
-      <p className="text-[14px] text-[#5C6B62]">Configure the AI calling script. Hover over lines to highlight.</p>
+      <h2 className="text-[22px] font-display font-bold text-ink">Script Configuration</h2>
+      <p className="text-[14px] text-ink-muted">Configure the AI calling script. Hover over lines to highlight.</p>
 
       <div className="grid grid-cols-2 gap-6">
         {/* Left: Editor */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[12px] text-[#5C6B62]">Script Editor</span>
+            <span className="text-[12px] text-ink-muted">Script Editor</span>
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1B4332] text-white text-[12px] font-medium hover:brightness-110 disabled:opacity-60 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-line-subtle text-white text-[12px] font-medium hover:brightness-110 disabled:opacity-60 transition-all"
             >
               {generating ? (
-                <div className="w-3.5 h-3.5 border-2 border-[#D8DDD3] border-t-white rounded-full animate-spin" />
+                <div className="w-3.5 h-3.5 border-2 border-line border-t-white rounded-full animate-spin" />
               ) : (
                 <Zap className="w-3.5 h-3.5" />
               )}
@@ -252,30 +252,30 @@ Kya main aapki site visit book kar doon?`);
           <textarea
             value={script}
             onChange={(e) => setScript(e.target.value)}
-            className="w-full h-[300px] px-4 py-3 rounded-lg bg-[#F1F3EE] border border-[#E4E7DF] text-[13px] text-[#1E2B24] font-mono leading-relaxed focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] resize-none transition-colors"
+            className="w-full h-[300px] px-4 py-3 rounded-lg bg-surface border border-line text-[13px] text-ink font-mono leading-relaxed focus:outline-none focus:border-line-subtle focus:ring-1 focus:ring-line-subtle resize-none transition-colors"
             placeholder="Enter the AI calling script..."
           />
         </div>
 
         {/* Right: Phone Preview */}
         <div>
-          <span className="text-[12px] text-[#5C6B62] mb-2 block">Live Preview</span>
-          <div className="rounded-lg bg-[#FAF9F5] border border-[#E4E7DF] p-4 h-[300px] flex flex-col">
+          <span className="text-[12px] text-ink-muted mb-2 block">Live Preview</span>
+          <div className="rounded-lg bg-surface border border-line p-4 h-[300px] flex flex-col">
             {/* Phone frame */}
             <div className="flex-1 flex flex-col">
-              <div className="flex items-center gap-3 mb-3 pb-3 border-b border-[#E4E7DF]">
-                <div className="w-8 h-8 rounded-full bg-[#047857]/20 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-[#047857]" />
+              <div className="flex items-center gap-3 mb-3 pb-3 border-b border-line">
+                <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-success" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-medium text-[#1E2B24]">Converza AI</p>
-                  <p className="text-[11px] text-[#047857]">Calling...</p>
+                  <p className="text-[13px] font-medium text-ink">Converza AI</p>
+                  <p className="text-[11px] text-success">Calling...</p>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto space-y-3">
                 {script.split("\n").filter(Boolean).map((line, i) => (
                   <div key={i} className="flex justify-end">
-                    <div className="max-w-[85%] px-3 py-2 rounded-lg bg-[#F1F3EE] text-[13px] text-[#1E2B24] rounded-br-sm leading-relaxed">
+                    <div className="max-w-[85%] px-3 py-2 rounded-lg bg-surface text-[13px] text-ink rounded-br-sm leading-relaxed">
                       {line}
                     </div>
                   </div>
@@ -283,7 +283,7 @@ Kya main aapki site visit book kar doon?`);
               </div>
             </div>
             <div className="mt-2 text-center">
-              <button className="px-4 py-1.5 rounded-full bg-[#047857] text-black text-[11px] font-semibold hover:brightness-110 transition-all">
+              <button className="px-4 py-1.5 rounded-full bg-success text-canvas text-[11px] font-semibold hover:brightness-110 transition-all">
                 Preview Audio
               </button>
             </div>
@@ -297,8 +297,8 @@ Kya main aapki site visit book kar doon?`);
 function Step5() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Pricing Plan</h2>
-      <p className="text-[14px] text-[#5C6B62]">Select the plan and set call limits.</p>
+      <h2 className="text-[22px] font-display font-bold text-ink">Pricing Plan</h2>
+      <p className="text-[14px] text-ink-muted">Select the plan and set call limits.</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {PLAN_PAYLOAD.plans.map((plan) => ({
           name: plan.name,
@@ -311,16 +311,16 @@ function Step5() {
             className={cn(
               "p-5 rounded-lg border cursor-pointer transition-all hover:translate-y-[-2px]",
               plan.popular
-                ? "border-[#1B4332] bg-[#1B4332]/5"
-                : "border-[#E4E7DF] bg-[#FFFFFF] hover:border-[#1B4332]/50"
+                ? "border-line-subtle bg-line-subtle/5"
+                : "border-line bg-surface-raised hover:border-line-subtle/50"
             )}
           >
             {plan.popular && (
-              <span className="text-[10px] font-semibold text-[#B8860B] uppercase tracking-wider">Recommended</span>
+              <span className="text-[10px] font-semibold text-warning uppercase tracking-wider">Recommended</span>
             )}
-            <h3 className="text-[18px] font-display font-bold text-[#1E2B24] mt-1">{plan.name}</h3>
-            <p className="text-[24px] font-display font-bold text-[#1E2B24] mt-2">{plan.price}<span className="text-[12px] text-[#5C6B62]">/mo</span></p>
-            <p className="text-[13px] text-[#5C6B62] mt-1">Up to {plan.leads} leads/mo</p>
+            <h3 className="text-[18px] font-display font-bold text-ink mt-1">{plan.name}</h3>
+            <p className="text-[24px] font-display font-bold text-ink mt-2">{plan.price}<span className="text-[12px] text-ink-muted">/mo</span></p>
+            <p className="text-[13px] text-ink-muted mt-1">Up to {plan.leads} leads/mo</p>
           </div>
         ))}
       </div>
@@ -331,9 +331,9 @@ function Step5() {
 function Step6() {
   return (
     <div className="space-y-4">
-      <h2 className="text-[22px] font-display font-bold text-[#1E2B24]">Review & Confirm</h2>
-      <p className="text-[14px] text-[#5C6B62]">Review the client details before creating the account.</p>
-      <div className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-6 space-y-3">
+      <h2 className="text-[22px] font-display font-bold text-ink">Review & Confirm</h2>
+      <p className="text-[14px] text-ink-muted">Review the client details before creating the account.</p>
+      <div className="rounded-lg bg-surface-raised border border-line p-6 space-y-3">
         {[
           ["Business", "Sharma Realty"],
           ["Owner", "Rajesh Sharma"],
@@ -345,9 +345,9 @@ function Step6() {
           ["Script", "4 lines configured"],
           ["Status", "Active immediately"],
         ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between py-2 border-b border-[#E4E7DF] last:border-0">
-            <span className="text-[13px] text-[#5C6B62]">{label}</span>
-            <span className="text-[13px] text-[#1E2B24] font-medium">{value}</span>
+          <div key={label} className="flex items-center justify-between py-2 border-b border-line last:border-0">
+            <span className="text-[13px] text-ink-muted">{label}</span>
+            <span className="text-[13px] text-ink font-medium">{value}</span>
           </div>
         ))}
       </div>
@@ -359,11 +359,11 @@ function Step6() {
 function InputField({ label, placeholder, type = "text" }: { label: string; placeholder: string; type?: string }) {
   return (
     <div>
-      <label className="block text-[12px] text-[#5C6B62] mb-1.5">{label}</label>
+      <label className="block text-[12px] text-ink-muted mb-1.5">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full px-3 py-2.5 rounded-lg bg-[#F1F3EE] border border-[#E4E7DF] text-[13px] text-[#1E2B24] placeholder-[#8A948C] focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors"
+        className="w-full px-3 py-2.5 rounded-lg bg-surface border border-line text-[13px] text-ink placeholder-ink-muted focus:outline-none focus:border-line-subtle focus:ring-1 focus:ring-line-subtle transition-colors"
       />
     </div>
   );

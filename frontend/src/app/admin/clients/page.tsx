@@ -87,11 +87,11 @@ export default function AdminClientsPage() {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case "ACTIVE": return "bg-green-500/10 text-green-400";
+      case "ACTIVE": return "bg-success/10 text-success";
       case "TRIAL": return "bg-blue-500/10 text-blue-400";
       case "PAST_DUE": return "bg-yellow-500/10 text-yellow-400";
-      case "CANCELLED": return "bg-red-500/10 text-red-400";
-      default: return "bg-gray-500/10 text-[#9FB0A6]";
+      case "CANCELLED": return "bg-danger/10 text-danger";
+      default: return "bg-neutral-soft/10 text-ink-soft";
     }
   };
 
@@ -102,11 +102,11 @@ export default function AdminClientsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Clients</h1>
-          <p className="text-[#9FB0A6] mt-1">{total} total clients</p>
+          <h1 className="text-2xl font-bold text-ink">Clients</h1>
+          <p className="text-ink-soft mt-1">{total} total clients</p>
         </div>
         <Link href="/admin/clients/new"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90"
         >
           <Plus className="w-4 h-4" /> Add Client
         </Link>
@@ -114,10 +114,10 @@ export default function AdminClientsPage() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
         <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="Search by name, email, or business..."
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
         />
       </div>
 
@@ -130,14 +130,14 @@ export default function AdminClientsPage() {
         </div>
       ) : clients.length === 0 ? (
         <div className="text-center py-16 rounded-xl app-card">
-          <Users className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No clients found</h3>
-          <p className="text-sm text-[#9FB0A6] mb-6">
+          <Users className="w-12 h-12 mx-auto mb-4 text-ink-soft" />
+          <h3 className="text-lg font-medium text-ink mb-2">No clients found</h3>
+          <p className="text-sm text-ink-soft mb-6">
             {search ? "Try a different search term" : "Start by adding your first client"}
           </p>
           {!search && (
             <Link href="/admin/clients/new"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium"
             >
               <Plus className="w-4 h-4" /> Add Client
             </Link>
@@ -150,18 +150,18 @@ export default function AdminClientsPage() {
               className="flex items-center gap-4 p-4 rounded-xl app-card app-card-hover app-card-hover hover:bg-white/[0.06] transition-all relative cursor-pointer"
               onClick={() => router.push(`/admin/clients/${client.id}`)}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
-                <Building2 className="w-5 h-5 text-[#2D6A4F]" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-line-subtle/20 to-brand-deep/20 flex items-center justify-center shrink-0">
+                <Building2 className="w-5 h-5 text-brand-deep" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-[#F0F7F3]">{client.businessName}</span>
+                  <span className="text-sm font-medium text-ink">{client.businessName}</span>
                   <span className={cn("text-xs px-1.5 py-0.5 rounded", statusColor(client.planStatus))}>
                     {client.planStatus}
                   </span>
-                  <span className="text-xs text-[#9FB0A6]">{client.plan}</span>
+                  <span className="text-xs text-ink-soft">{client.plan}</span>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-[#9FB0A6] mt-1">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-ink-soft mt-1">
                   <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {client.email}</span>
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {client.city}{client.zone ? ` - ${client.zone}` : ""}</span>
                   <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {client.callsThisMonth}/{client.callsLimit}</span>
@@ -175,7 +175,7 @@ export default function AdminClientsPage() {
               </div>
               <div className="relative shrink-0">
                 <button onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === client.id ? null : client.id); }}
-                  className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
+                  className="p-2 rounded-lg hover:bg-white/[0.06] text-ink-soft"
                 >
                   {actionLoading === `${client.id}-status` || actionLoading === `${client.id}-pwd` ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -186,18 +186,18 @@ export default function AdminClientsPage() {
                 {openMenu === client.id && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
-                    <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl bg-white/[0.06] border border-white/10 shadow-xl overflow-hidden">
+                    <div className="absolute right-0 top-full mt-1 z-20 w-44 rounded-xl bg-white/[0.06] border border-line shadow-xl overflow-hidden">
                       <div className="py-1">
                         {["ACTIVE", "TRIAL", "PAST_DUE", "CANCELLED"].map((status) => (
                           <button key={status} onClick={(e) => { e.stopPropagation(); handleStatusChange(client.id, status); }}
-                            className="w-full text-left px-3 py-2 text-xs text-[#9FB0A6] hover:bg-white/[0.06]"
+                            className="w-full text-left px-3 py-2 text-xs text-ink-soft hover:bg-white/[0.06]"
                           >
                             Set {status}
                           </button>
                         ))}
-                        <hr className="border-white/10 my-1" />
+                        <hr className="border-line my-1" />
                         <button onClick={(e) => { e.stopPropagation(); handleResetPassword(client.id); }}
-                          className="w-full text-left px-3 py-2 text-xs text-[#9FB0A6] hover:bg-white/[0.06]"
+                          className="w-full text-left px-3 py-2 text-xs text-ink-soft hover:bg-white/[0.06]"
                         >
                           Reset Password
                         </button>

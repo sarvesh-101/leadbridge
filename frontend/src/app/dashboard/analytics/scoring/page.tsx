@@ -85,9 +85,9 @@ export default function ScoringAnalyticsPage() {
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-white/[0.06] rounded" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-[#101713] rounded-xl" />)}
+            {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-canvas rounded-xl" />)}
           </div>
-          <div className="h-64 bg-[#101713] rounded-xl" />
+          <div className="h-64 bg-canvas rounded-xl" />
         </div>
       </div>
     );
@@ -98,13 +98,13 @@ export default function ScoringAnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Scoring Analytics</h1>
-          <p className="text-[#9FB0A6] mt-1">
+          <h1 className="text-2xl font-bold text-ink">Scoring Analytics</h1>
+          <p className="text-ink-soft mt-1">
             Monitor scoring accuracy and refine lead prediction weights
           </p>
         </div>
         <button onClick={loadData}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm hover:bg-white/[0.06] transition-all"
         >
           <RefreshCw className="w-4 h-4" /> Refresh
         </button>
@@ -116,16 +116,16 @@ export default function ScoringAnalyticsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: "Scored Leads", value: accuracyData.totalLeads, icon: BrainCircuit, color: "text-blue-400" },
-              { label: "High Score", value: accuracyData.highScoreCount, icon: TrendingUp, color: "text-green-400" },
-              { label: "Predicted Correctly", value: accuracyData.convertedFromHighScore, icon: CheckCircle2, color: "text-emerald-400" },
-              { label: "Precision", value: `${accuracyData.precision}%`, icon: Target, color: accuracyData.precision >= 70 ? "text-green-400" : "text-amber-400" },
+              { label: "High Score", value: accuracyData.highScoreCount, icon: TrendingUp, color: "text-success" },
+              { label: "Predicted Correctly", value: accuracyData.convertedFromHighScore, icon: CheckCircle2, color: "text-success" },
+              { label: "Precision", value: `${accuracyData.precision}%`, icon: Target, color: accuracyData.precision >= 70 ? "text-success" : "text-warning" },
             ].map((s, i) => (
               <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 className="p-4 rounded-xl app-card"
               >
                 <s.icon className={cn("w-5 h-5 mb-1", s.color)} />
-                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                <div className="text-xl font-bold text-ink">{s.value}</div>
+                <div className="text-xs text-ink-soft">{s.label}</div>
               </motion.div>
             ))}
           </div>
@@ -134,32 +134,32 @@ export default function ScoringAnalyticsPage() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="p-6 rounded-xl app-card"
           >
-            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Score Calibration</h2>
-            <p className="text-xs text-[#9FB0A6] mb-4">
+            <h2 className="text-sm font-semibold text-ink mb-4">Score Calibration</h2>
+            <p className="text-xs text-ink-soft mb-4">
               Higher score bands should have higher conversion rates. A well-calibrated model shows a clear upward staircase.
             </p>
             <div className="space-y-3">
               {accuracyData.calibration.map((band) => (
                 <div key={band.scoreBand}>
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-[#9FB0A6]">Score {band.scoreBand}</span>
-                    <span className="text-[#9FB0A6]">{band.leads} leads · {band.converted} converted</span>
+                    <span className="text-ink-soft">Score {band.scoreBand}</span>
+                    <span className="text-ink-soft">{band.leads} leads · {band.converted} converted</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 h-5 rounded-full bg-[#101713] overflow-hidden">
+                    <div className="flex-1 h-5 rounded-full bg-canvas overflow-hidden">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all duration-500",
-                          band.rate >= 60 ? "bg-green-500" :
-                          band.rate >= 30 ? "bg-amber-500" : "bg-red-500"
+                          band.rate >= 60 ? "bg-success" :
+                          band.rate >= 30 ? "bg-warning" : "bg-danger"
                         )}
                         style={{ width: `${band.rate}%` }}
                       />
                     </div>
                     <span className={cn(
                       "text-xs font-mono w-12 text-right",
-                      band.rate >= 60 ? "text-green-400" :
-                      band.rate >= 30 ? "text-amber-400" : "text-red-400"
+                      band.rate >= 60 ? "text-success" :
+                      band.rate >= 30 ? "text-warning" : "text-danger"
                     )}>
                       {band.rate}%
                     </span>
@@ -173,8 +173,8 @@ export default function ScoringAnalyticsPage() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="p-6 rounded-xl app-card"
           >
-            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Factor Performance Analysis</h2>
-            <p className="text-xs text-[#9FB0A6] mb-4">
+            <h2 className="text-sm font-semibold text-ink mb-4">Factor Performance Analysis</h2>
+            <p className="text-xs text-ink-soft mb-4">
               How each scoring factor correlates with actual conversion rates.
             </p>
             <div className="space-y-2">
@@ -183,13 +183,13 @@ export default function ScoringAnalyticsPage() {
                   className="flex items-center justify-between p-3 rounded-lg app-card"
                 >
                   <div className="flex-1">
-                    <div className="text-sm text-[#F0F7F3]">{FACTOR_LABELS[fp.factor] || fp.factor}</div>
-                    <div className="text-xs text-[#9FB0A6]">Avg score: {fp.avgScore}</div>
+                    <div className="text-sm text-ink">{FACTOR_LABELS[fp.factor] || fp.factor}</div>
+                    <div className="text-xs text-ink-soft">Avg score: {fp.avgScore}</div>
                   </div>
                   <div className={cn(
                     "text-sm font-mono font-medium",
-                    fp.conversionRate >= 40 ? "text-green-400" :
-                    fp.conversionRate >= 20 ? "text-amber-400" : "text-red-400"
+                    fp.conversionRate >= 40 ? "text-success" :
+                    fp.conversionRate >= 20 ? "text-warning" : "text-danger"
                   )}>
                     {fp.conversionRate}% conv.
                   </div>
@@ -207,8 +207,8 @@ export default function ScoringAnalyticsPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-[#F0F7F3]">Weight Optimization</h2>
-              <p className="text-xs text-[#9FB0A6] mt-1">
+              <h2 className="text-sm font-semibold text-ink">Weight Optimization</h2>
+              <p className="text-xs text-ink-soft mt-1">
                 {recalibration.requiresMoreData
                   ? "Need at least 20 scored leads with outcomes before recalibrating."
                   : `Recalibration confidence: ${recalibration.confidence}`}
@@ -216,8 +216,7 @@ export default function ScoringAnalyticsPage() {
             </div>
             {recalibration.confidence !== "low" && !recalibration.requiresMoreData && (
               <span className={cn(
-                "text-xs px-2 py-1 rounded-full",
-                recalibration.confidence === "high" ? "bg-green-500/10 text-green-400" : "bg-amber-500/10 text-amber-400"
+                "text-xs px-2 py-1 rounded-full",                  recalibration.confidence === "high" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
               )}>
                 {recalibration.confidence} confidence
               </span>
@@ -225,10 +224,10 @@ export default function ScoringAnalyticsPage() {
           </div>
 
           {recalibration.requiresMoreData ? (
-            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <div className="p-4 rounded-lg bg-warning/10 border border-warning/20">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <p className="text-sm text-amber-300">Not enough data yet. Continue scoring leads to enable weight optimization.</p>
+                <AlertTriangle className="w-4 h-4 text-warning" />
+                <p className="text-sm text-warning">Not enough data yet. Continue scoring leads to enable weight optimization.</p>
               </div>
             </div>
           ) : (
@@ -242,28 +241,28 @@ export default function ScoringAnalyticsPage() {
                   <div key={factor}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-lg border",
-                      changed ? "bg-[#34D399]/10 border-[#34D399]/30" : "bg-[#101713] border-white/10"
+                      changed ? "bg-brand/10 border-brand/30" : "bg-canvas border-line"
                     )}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-[#F0F7F3]">{FACTOR_LABELS[factor] || factor}</span>
+                        <span className="text-sm text-ink">{FACTOR_LABELS[factor] || factor}</span>
                         {changed && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-[#34D399]/15 text-[#6FE3B0]">
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-brand/15 text-brand">
                             Recommended change
                           </span>
                         )}
                       </div>
                       {change && (
-                        <p className="text-xs text-[#9FB0A6] mt-0.5">{change.reason}</p>
+                        <p className="text-xs text-ink-soft mt-0.5">{change.reason}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-sm font-mono">
-                      <span className="text-[#9FB0A6]">{Math.round(currentWeight * 100)}%</span>
+                      <span className="text-ink-soft">{Math.round(currentWeight * 100)}%</span>
                       {changed && (
                         <>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#6FE3B0]" />
-                          <span className="text-[#6FE3B0] font-semibold">{Math.round(recommended * 100)}%</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-brand" />
+                          <span className="text-brand font-semibold">{Math.round(recommended * 100)}%</span>
                         </>
                       )}
                     </div>

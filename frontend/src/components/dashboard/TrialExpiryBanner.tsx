@@ -44,9 +44,9 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
         className={cn(
           "relative overflow-hidden rounded-xl border p-4",
           isUrgent
-            ? "bg-red-500/10 border-red-500/30"
+            ? "bg-danger/10 border-danger/30"
             : isWarning
-            ? "bg-amber-500/10 border-amber-500/30"
+            ? "bg-warning/10 border-warning/30"
             : "bg-blue-500/10 border-blue-500/30",
           className
         )}
@@ -55,12 +55,12 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
           {/* Icon */}
           <div className={cn(
             "shrink-0 w-9 h-9 rounded-lg flex items-center justify-center",
-            isUrgent ? "bg-red-500/20" : isWarning ? "bg-amber-500/20" : "bg-blue-500/20"
+            isUrgent ? "bg-danger/20" : isWarning ? "bg-warning/20" : "bg-blue-500/20"
           )}>
             {isUrgent ? (
-              <Zap className="w-4 h-4 text-red-400" />
+              <Zap className="w-4 h-4 text-danger" />
             ) : (
-              <Clock className="w-4 h-4 text-amber-400" />
+              <Clock className="w-4 h-4 text-warning" />
             )}
           </div>
 
@@ -68,14 +68,14 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
           <div className="flex-1 min-w-0">
             <p className={cn(
               "text-sm font-semibold",
-              isUrgent ? "text-red-300" : isWarning ? "text-amber-300" : "text-blue-300"
+              isUrgent ? "text-danger" : isWarning ? "text-warning" : "text-blue-300"
             )}>
               {isUrgent
                 ? `Your trial ends in ${daysRemaining} day${daysRemaining === 1 ? "" : "s"}!`
                 : `You're on a free trial — ${daysRemaining} day${daysRemaining === 1 ? "" : "s"} remaining`
               }
             </p>
-            <p className="text-xs text-[#7C8781] mt-1">
+            <p className="text-xs text-ink-muted mt-1">
               {isUrgent
                 ? "Upgrade now to keep your leads, calls, and campaigns running without interruption."
                 : "Upgrade to a paid plan for more AI calls, advanced campaigns, and priority support."
@@ -87,15 +87,15 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
                 className={cn(
                   "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all",
                   isUrgent
-                    ? "bg-red-500/20 text-red-300 hover:bg-red-500/30"
-                    : "bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] text-white hover:opacity-90"
+                    ? "bg-danger/20 text-danger hover:bg-danger/30"
+                    : "bg-gradient-to-r from-line-subtle to-brand-soft text-canvas-deep hover:opacity-90"
                 )}
               >
                 {isUrgent ? "Upgrade Now" : "View Plans"}
                 <ArrowRight className="w-3 h-3" />
               </Link>
               {!isUrgent && (
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-ink-soft">
                   No credit card required
                 </span>
               )}
@@ -105,7 +105,7 @@ export function TrialExpiryBanner({ trialEndsAt, planStatus, className }: TrialE
           {/* Dismiss */}
           <button
             onClick={() => setDismissed(true)}
-            className="shrink-0 p-1 rounded-md hover:bg-[#F1F3EE] text-[#7C8781] hover:text-[#5C6B62] transition-colors"
+            className="shrink-0 p-1 rounded-md hover:bg-surface text-ink-muted hover:text-ink-muted transition-colors"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />

@@ -124,10 +124,10 @@ export default function DocumentsPage() {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case "VERIFIED": return "bg-green-500/10 text-green-400";
-      case "UPLOADED": return "bg-amber-500/10 text-amber-400";
-      case "REJECTED": return "bg-red-500/10 text-red-400";
-      default: return "bg-gray-500/10 text-[#9FB0A6]";
+      case "VERIFIED": return "bg-success/10 text-success";
+      case "UPLOADED": return "bg-warning/10 text-warning";
+      case "REJECTED": return "bg-danger/10 text-danger";
+      default: return "bg-neutral-soft/10 text-ink-soft";
     }
   };
 
@@ -135,7 +135,7 @@ export default function DocumentsPage() {
     switch (type) {
       case "aadhar": case "pan": case "passport": case "voter_id": case "driving_license":
         return <FileType className="w-4 h-4 text-blue-400" />;
-      default: return <FileText className="w-4 h-4 text-[#9FB0A6]" />;
+      default: return <FileText className="w-4 h-4 text-ink-soft" />;
     }
   };
 
@@ -144,8 +144,8 @@ export default function DocumentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Lead Documents</h1>
-          <p className="text-[#9FB0A6] mt-1">Manage KYC documents uploaded by leads</p>
+          <h1 className="text-2xl font-bold text-ink">Lead Documents</h1>
+          <p className="text-ink-soft mt-1">Manage KYC documents uploaded by leads</p>
         </div>
       </div>
 
@@ -153,8 +153,8 @@ export default function DocumentsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Total Documents", value: documents.length, icon: FileText, color: "text-blue-400" },
-          { label: "Verified", value: verifiedCount, icon: CheckCircle2, color: "text-green-400" },
-          { label: "Pending Review", value: pendingCount, icon: Clock, color: "text-amber-400" },
+          { label: "Verified", value: verifiedCount, icon: CheckCircle2, color: "text-success" },
+          { label: "Pending Review", value: pendingCount, icon: Clock, color: "text-warning" },
           { label: "Leads with Docs", value: new Set(documents.map(d => d.lead?.name)).size, icon: FileText, color: "text-purple-400" },
         ].map((s) => (
           <div key={s.label} className="p-4 rounded-xl app-card">
@@ -163,8 +163,8 @@ export default function DocumentsPage() {
             ) : (
               <>
                 <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                <div className="text-xl font-bold text-ink">{s.value}</div>
+                <div className="text-xs text-ink-soft">{s.label}</div>
               </>
             )}
           </div>
@@ -174,14 +174,14 @@ export default function DocumentsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by file name or lead name..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
           />
         </div>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm"
+          className="px-4 py-2.5 rounded-xl app-card text-ink-soft text-sm"
         >
           <option value="all">All Status</option>
           <option value="UPLOADED">Pending</option>
@@ -192,7 +192,7 @@ export default function DocumentsPage() {
 
       {/* Document List */}
       {loading ? (
-        <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-20 bg-[#101713] rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-20 bg-canvas rounded-xl animate-pulse" />)}</div>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={FileText}
@@ -211,41 +211,41 @@ export default function DocumentsPage() {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-[#F0F7F3] truncate">{doc.fileName}</span>
+                  <span className="text-sm font-medium text-ink truncate">{doc.fileName}</span>
                   <span className={cn("text-[11px] px-1.5 py-0.5 rounded-full", statusColor(doc.status))}>
                     {doc.status}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-[#9FB0A6] mt-0.5">
+                <div className="flex items-center gap-3 text-xs text-ink-soft mt-0.5">
                   <span>{DOC_TYPE_LABELS[doc.type] || doc.type}</span>
                   {doc.lead?.name && <span>• {doc.lead.name}</span>}
                   <span>• {(doc.fileSize / 1024).toFixed(0)} KB</span>
                   <span>• {formatDate(doc.uploadedAt)}</span>
                 </div>
-                {doc.notes && <p className="text-xs text-gray-600 mt-1">{doc.notes}</p>}
+                {doc.notes && <p className="text-xs text-ink-soft mt-1">{doc.notes}</p>}
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
                 {doc.status === "UPLOADED" && (
                   <>
                     <button onClick={() => handleVerify(doc.id, doc.leadId, true)}
-                      className="p-2 rounded-lg text-green-400 hover:bg-green-500/10 transition-colors" title="Verify">
+                      className="p-2 rounded-lg text-success hover:bg-success/10 transition-colors" title="Verify">
                       <CheckCircle2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => handleVerify(doc.id, doc.leadId, false)}
-                      className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors" title="Reject">
+                      className="p-2 rounded-lg text-danger hover:bg-danger/10 transition-colors" title="Reject">
                       <XCircle className="w-4 h-4" />
                     </button>
                   </>
                 )}
                 {doc.url && (
                   <a href={doc.url} target="_blank" rel="noopener noreferrer"
-                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-[#F0F7F3] hover:bg-white/[0.06] transition-colors" title="View">
+                    className="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-white/[0.06] transition-colors" title="View">
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
                 <button onClick={() => handleDelete(doc.id, doc.leadId)}
-                  className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Delete">
+                  className="p-2 rounded-lg text-ink-soft hover:text-danger hover:bg-danger/10 transition-colors" title="Delete">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

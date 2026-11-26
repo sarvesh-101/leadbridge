@@ -141,11 +141,11 @@ export default function ImportLeadsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Import Leads</h1>
-          <p className="text-[#9FB0A6] mt-1">Bulk upload leads from a CSV file</p>
+          <h1 className="text-2xl font-bold text-ink">Import Leads</h1>
+          <p className="text-ink-soft mt-1">Bulk upload leads from a CSV file</p>
         </div>
         <button onClick={handleDownloadSample}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm hover:bg-white/[0.06] transition-all"
         >
           <Download className="w-4 h-4" />
           Download Sample CSV
@@ -153,24 +153,24 @@ export default function ImportLeadsPage() {
       </div>
 
       {/* Instructions */}
-      <div className="p-4 rounded-xl bg-[#34D399]/10 border border-[#34D399]/50/10">
+      <div className="p-4 rounded-xl bg-brand/10 border border-brand/50/10">
         <div className="flex items-start gap-3">
-          <FileSpreadsheet className="w-5 h-5 text-[#6FE3B0] mt-0.5" />
+          <FileSpreadsheet className="w-5 h-5 text-brand mt-0.5" />
           <div>
-            <h3 className="text-sm font-medium text-[#F0F7F3] mb-1">CSV Format</h3>
-            <p className="text-xs text-[#9FB0A6]">
-              Columns: <code className="text-[#6FE3B0]">name</code> (required),{" "}
-              <code className="text-[#6FE3B0]">phone</code> (required),{" "}
-              <code className="text-[#9FB0A6]">email</code>,{" "}
-              <code className="text-[#9FB0A6]">source</code>,{" "}
-              <code className="text-[#9FB0A6]">budget</code>,{" "}
-              <code className="text-[#9FB0A6]">location</code>,{" "}
-              <code className="text-[#9FB0A6]">timeline</code>,{" "}
-              <code className="text-[#9FB0A6]">propertyType</code>,{" "}
-              <code className="text-[#9FB0A6]">bedrooms</code>,{" "}
-              <code className="text-[#9FB0A6]">notes</code>
+            <h3 className="text-sm font-medium text-ink mb-1">CSV Format</h3>
+            <p className="text-xs text-ink-soft">
+              Columns: <code className="text-brand">name</code> (required),{" "}
+              <code className="text-brand">phone</code> (required),{" "}
+              <code className="text-ink-soft">email</code>,{" "}
+              <code className="text-ink-soft">source</code>,{" "}
+              <code className="text-ink-soft">budget</code>,{" "}
+              <code className="text-ink-soft">location</code>,{" "}
+              <code className="text-ink-soft">timeline</code>,{" "}
+              <code className="text-ink-soft">propertyType</code>,{" "}
+              <code className="text-ink-soft">bedrooms</code>,{" "}
+              <code className="text-ink-soft">notes</code>
             </p>
-            <p className="text-xs text-gray-600 mt-2">
+            <p className="text-xs text-ink-soft mt-2">
               Max 500 leads per import. Duplicates (same phone in last 30 days) are auto-skipped.
             </p>
           </div>
@@ -187,8 +187,8 @@ export default function ImportLeadsPage() {
           className={cn(
             "relative p-12 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all",
             dragOver
-              ? "border-[#34D399]/50 bg-[#34D399]/10"
-              : "border-white/10 bg-[#101713] hover:border-[#34D399]/40 hover:bg-white/[0.06]"
+              ? "border-brand/50 bg-brand/10"
+              : "border-line bg-canvas hover:border-brand/40 hover:bg-white/[0.06]"
           )}
         >
           <input
@@ -199,15 +199,15 @@ export default function ImportLeadsPage() {
             className="hidden"
           />
           {loading ? (
-            <Loader2 className="w-12 h-12 text-[#6FE3B0] mx-auto mb-4 animate-spin" />
+            <Loader2 className="w-12 h-12 text-brand mx-auto mb-4 animate-spin" />
           ) : (
             <>
-              <Upload className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-[#F0F7F3] mb-1">
+              <Upload className="w-12 h-12 text-ink-soft mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-ink mb-1">
                 Drop your CSV here
               </h3>
-              <p className="text-sm text-[#9FB0A6]">or click to browse files</p>
-              <p className="text-xs text-gray-600 mt-2">Supports .csv files up to 10MB</p>
+              <p className="text-sm text-ink-soft">or click to browse files</p>
+              <p className="text-xs text-ink-soft mt-2">Supports .csv files up to 10MB</p>
             </>
           )}
         </div>
@@ -223,31 +223,31 @@ export default function ImportLeadsPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { label: "Total Rows", value: preview.total, icon: ListChecks, color: "text-blue-400" },
-                { label: "Valid to Import", value: preview.valid, icon: CheckCircle2, color: "text-green-400" },
-                { label: "Duplicates", value: preview.duplicates, icon: AlertTriangle, color: preview.duplicates > 0 ? "text-amber-400" : "text-[#9FB0A6]" },
-                { label: "Errors", value: preview.errors, icon: XCircle, color: preview.errors > 0 ? "text-red-400" : "text-[#9FB0A6]" },
+                { label: "Valid to Import", value: preview.valid, icon: CheckCircle2, color: "text-success" },
+                { label: "Duplicates", value: preview.duplicates, icon: AlertTriangle, color: preview.duplicates > 0 ? "text-warning" : "text-ink-soft" },
+                { label: "Errors", value: preview.errors, icon: XCircle, color: preview.errors > 0 ? "text-danger" : "text-ink-soft" },
               ].map((s, i) => (
                 <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                   className="p-4 rounded-xl app-card"
                 >
                   <s.icon className={cn("w-5 h-5 mb-1", s.color)} />
-                  <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                  <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                  <div className="text-xl font-bold text-ink">{s.value}</div>
+                  <div className="text-xs text-ink-soft">{s.label}</div>
                 </motion.div>
               ))}
             </div>
 
             {/* Errors */}
             {preview.errorDetails.length > 0 && (
-              <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10">
+              <div className="p-4 rounded-xl bg-danger/5 border border-danger/10">
                 <button onClick={() => setShowErrors(!showErrors)} className="flex items-center justify-between w-full">
-                  <span className="text-sm text-red-400 font-medium">{preview.errorDetails.length} rows with errors</span>
-                  {showErrors ? <ChevronUp className="w-4 h-4 text-red-400" /> : <ChevronDown className="w-4 h-4 text-red-400" />}
+                  <span className="text-sm text-danger font-medium">{preview.errorDetails.length} rows with errors</span>
+                  {showErrors ? <ChevronUp className="w-4 h-4 text-danger" /> : <ChevronDown className="w-4 h-4 text-danger" />}
                 </button>
                 {showErrors && (
                   <div className="mt-3 space-y-1 max-h-32 overflow-y-auto">
                     {preview.errorDetails.map((err, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-red-300">
+                      <div key={i} className="flex items-center gap-2 text-xs text-danger">
                         <XCircle className="w-3 h-3 shrink-0" />
                         <span>Row {err.row}: {err.message}</span>
                       </div>
@@ -259,13 +259,13 @@ export default function ImportLeadsPage() {
 
             {/* Duplicates */}
             {preview.duplicateDetails.length > 0 && (
-              <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                <p className="text-sm text-amber-400 font-medium mb-2">
+              <div className="p-4 rounded-xl bg-warning/5 border border-warning/10">
+                <p className="text-sm text-warning font-medium mb-2">
                   {preview.duplicateDetails.length} existing leads (skipped)
                 </p>
                 <div className="space-y-1 max-h-20 overflow-y-auto">
                   {preview.duplicateDetails.map((d, i) => (
-                    <div key={i} className="text-xs text-amber-300 flex items-center gap-2">
+                    <div key={i} className="text-xs text-warning flex items-center gap-2">
                       <AlertTriangle className="w-3 h-3 shrink-0" />
                       {d.name} — {d.phone}
                     </div>
@@ -277,13 +277,13 @@ export default function ImportLeadsPage() {
             {/* Preview Table */}
             {preview.preview.length > 0 && (
               <div className="p-4 rounded-xl app-card">
-                <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">
+                <h3 className="text-sm font-semibold text-ink mb-3">
                   Preview ({preview.preview.length} of {preview.valid} rows)
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-white/10 text-[#9FB0A6]">
+                      <tr className="border-b border-line text-ink-soft">
                         <th className="text-left py-2 pr-4">Name</th>
                         <th className="text-left py-2 pr-4">Phone</th>
                         <th className="text-left py-2 pr-4">Email</th>
@@ -292,29 +292,29 @@ export default function ImportLeadsPage() {
                     </thead>
                     <tbody>
                       {preview.preview.map((row, i) => (
-                        <tr key={i} className="border-b border-white/10 text-[#9FB0A6]">
+                        <tr key={i} className="border-b border-line text-ink-soft">
                           <td className="py-2 pr-4">{row.name}</td>
                           <td className="py-2 pr-4">{row.phone}</td>
-                          <td className="py-2 pr-4 text-[#9FB0A6]">{row.email || "—"}</td>
-                          <td className="py-2 text-[#9FB0A6]">{row.source}</td>
+                          <td className="py-2 pr-4 text-ink-soft">{row.email || "—"}</td>
+                          <td className="py-2 text-ink-soft">{row.source}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                <p className="text-xs text-gray-600 mt-2">All leads will be called by AI agent within 60 seconds</p>
+                <p className="text-xs text-ink-soft mt-2">All leads will be called by AI agent within 60 seconds</p>
               </div>
             )}
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-3">
               <button onClick={reset}
-                className="px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
+                className="px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm hover:bg-white/[0.06] transition-all"
               >
                 Choose Different File
               </button>
               <button onClick={handleImport} disabled={importing || preview.valid === 0}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40"
               >
                 {importing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -334,33 +334,33 @@ export default function ImportLeadsPage() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="p-8 rounded-2xl app-card text-center"
           >
-            <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-400" />
+            <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-success" />
             </div>
-            <h2 className="text-xl font-bold text-[#F0F7F3] mb-2">Import Complete!</h2>
-            <p className="text-[#9FB0A6] mb-6">{importResult.message}</p>
+            <h2 className="text-xl font-bold text-ink mb-2">Import Complete!</h2>
+            <p className="text-ink-soft mb-6">{importResult.message}</p>
             <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-6">
-              <div className="p-3 rounded-xl bg-[#101713]">
-                <div className="text-lg font-bold text-green-400">{importResult.imported}</div>
-                <div className="text-xs text-[#9FB0A6]">Imported</div>
+              <div className="p-3 rounded-xl bg-canvas">
+                <div className="text-lg font-bold text-success">{importResult.imported}</div>
+                <div className="text-xs text-ink-soft">Imported</div>
               </div>
-              <div className="p-3 rounded-xl bg-[#101713]">
-                <div className="text-lg font-bold text-[#9FB0A6]">{importResult.skipped}</div>
-                <div className="text-xs text-[#9FB0A6]">Skipped</div>
+              <div className="p-3 rounded-xl bg-canvas">
+                <div className="text-lg font-bold text-ink-soft">{importResult.skipped}</div>
+                <div className="text-xs text-ink-soft">Skipped</div>
               </div>
-              <div className="p-3 rounded-xl bg-[#101713]">
-                <div className="text-lg font-bold text-[#F0F7F3]">{importResult.total}</div>
-                <div className="text-xs text-[#9FB0A6]">Total</div>
+              <div className="p-3 rounded-xl bg-canvas">
+                <div className="text-lg font-bold text-ink">{importResult.total}</div>
+                <div className="text-xs text-ink-soft">Total</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <button onClick={reset}
-                className="px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
+                className="px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm hover:bg-white/[0.06] transition-all"
               >
                 Import Another File
               </button>
               <a href="/dashboard/leads"
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all"
               >
                 View Leads
               </a>

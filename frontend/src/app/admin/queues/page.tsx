@@ -109,31 +109,31 @@ export default function AdminQueuesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-[#F0F7F3]">Queue Monitor</h1>
-            <p className="text-[#9FB0A6] mt-1">BullMQ job queues and worker health</p>
+            <h1 className="text-2xl font-bold text-ink">Queue Monitor</h1>
+            <p className="text-ink-soft mt-1">BullMQ job queues and worker health</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {/* Auto-refresh toggle */}
-          <label className="flex items-center gap-2 text-xs text-[#9FB0A6] cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-xs text-ink-soft cursor-pointer select-none">
             <button onClick={() => setAutoRefresh(!autoRefresh)}
               className={cn(
                 "w-8 h-4 rounded-full transition-colors relative",
-                autoRefresh ? "bg-[#1B4332]" : "bg-white/[0.06]"
+                autoRefresh ? "bg-line-subtle" : "bg-white/[0.06]"
               )}
             >
               <span className={cn(
-                "absolute top-0.5 w-3 h-3 rounded-full bg-[#101713] transition-transform",
+                "absolute top-0.5 w-3 h-3 rounded-full bg-canvas transition-transform",
                 autoRefresh ? "translate-x-4" : "translate-x-0.5"
               )} />
             </button>
             Auto-refresh
           </label>
-          <span className="text-xs text-[#9FB0A6]">
+          <span className="text-xs text-ink-soft">
             {lastRefresh.toLocaleTimeString()}
           </span>
           <button onClick={loadData}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl app-card app-card-hover text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl app-card app-card-hover text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
           >
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} /> Refresh
           </button>
@@ -145,20 +145,20 @@ export default function AdminQueuesPage() {
         <div className="flex items-center gap-3">
           <div className={cn(
             "p-3 rounded-xl border flex items-center gap-2",
-            data.available ? "bg-green-500/10 border-green-500/20" : "bg-yellow-500/10 border-yellow-500/20"
+            data.available ? "bg-success/10 border-success/20" : "bg-warning/10 border-warning/20"
           )}>
             {data.available ? (
-              <Wifi className="w-4 h-4 text-green-400" />
+              <Wifi className="w-4 h-4 text-success" />
             ) : (
               <WifiOff className="w-4 h-4 text-yellow-400" />
             )}
-            <span className={cn("text-xs font-medium", data.available ? "text-green-300" : "text-yellow-300")}>
+            <span className={cn("text-xs font-medium", data.available ? "text-success" : "text-warning")}>
               Redis
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-[#9FB0A6]">
+          <div className="flex items-center gap-2 text-xs text-ink-soft">
             <span className="flex items-center gap-1">
-              <span className={cn("w-2 h-2 rounded-full", data.available ? "bg-green-400" : "bg-yellow-400")} />
+              <span className={cn("w-2 h-2 rounded-full", data.available ? "bg-success" : "bg-yellow-400")} />
               Queue Worker
             </span>
             <span>·</span>
@@ -172,9 +172,9 @@ export default function AdminQueuesPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Total Jobs", value: data.totalJobs, icon: Activity, color: "from-blue-500 to-blue-600" },
-            { label: "Active Now", value: totalActive, icon: Play, color: "from-amber-500 to-amber-600" },
+            { label: "Active Now", value: totalActive, icon: Play, color: "from-warning to-warning" },
             { label: "Waiting", value: totalWaiting, icon: Clock, color: "from-violet-500 to-violet-600" },
-            { label: "Failed", value: totalFailed, icon: AlertCircle, color: "from-red-500 to-red-600" },
+            { label: "Failed", value: totalFailed, icon: AlertCircle, color: "from-danger to-danger" },
           ].map((card) => (
             <motion.div key={card.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               className="p-4 rounded-xl app-card"
@@ -182,8 +182,8 @@ export default function AdminQueuesPage() {
               <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", card.color)}>
                 <card.icon className="w-4 h-4 text-white" />
               </div>
-              <div className="text-xl font-bold text-[#F0F7F3]">{card.value.toLocaleString()}</div>
-              <div className="text-xs text-[#9FB0A6]">{card.label}</div>
+              <div className="text-xl font-bold text-ink">{card.value.toLocaleString()}</div>
+              <div className="text-xs text-ink-soft">{card.label}</div>
             </motion.div>
           ))}
         </div>
@@ -201,11 +201,10 @@ export default function AdminQueuesPage() {
       {/* Error State */}
       {error && !loading && (
         <div className="text-center py-16 rounded-xl app-card">
-          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">Failed to load queue stats</h3>
-          <p className="text-sm text-[#9FB0A6] mb-6">{error}</p>
-          <button onClick={loadData}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
+          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-danger" />
+          <h3 className="text-lg font-medium text-ink mb-2">Failed to load queue stats</h3>
+          <p className="text-sm text-ink-soft mb-6">{error}</p>
+          <button onClick={loadData}              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium"
           >
             <RefreshCw className="w-4 h-4" /> Retry
           </button>
@@ -215,9 +214,9 @@ export default function AdminQueuesPage() {
       {/* Redis Unavailable */}
       {!loading && data && !data.available && (
         <div className="text-center py-16 rounded-xl app-card">
-          <Server className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">Redis Disconnected</h3>
-          <p className="text-sm text-[#9FB0A6]">
+          <Server className="w-12 h-12 mx-auto mb-4 text-ink-soft" />
+          <h3 className="text-lg font-medium text-ink mb-2">Redis Disconnected</h3>
+          <p className="text-sm text-ink-soft">
             Queue monitoring requires Redis to be running. <br />
             Start Redis and restart the server to see queue metrics.
           </p>
@@ -227,7 +226,7 @@ export default function AdminQueuesPage() {
       {/* Queue Details */}
       {!loading && data?.available && data.queues && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-[#F0F7F3]">Queue Details</h2>
+          <h2 className="text-sm font-semibold text-ink">Queue Details</h2>
 
           {data.queues.map((queue, i) => {
             const maxVal = Math.max(queue.waiting, queue.active, 1);
@@ -237,26 +236,26 @@ export default function AdminQueuesPage() {
               <motion.div key={queue.name} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
                 className={cn(
                   "p-5 rounded-xl border transition-all",
-                  hasFailed ? "bg-red-500/5 border-red-500/20" :
+                  hasFailed ? "bg-danger/5 border-danger/20" :
                   queue.paused ? "bg-yellow-500/5 border-yellow-500/20" :
-                  "bg-[#101713] border-white/10 hover:bg-white/[0.06]"
+                  "bg-canvas border-line hover:bg-white/[0.06]"
                 )}
               >
                 {/* Header Row */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[#F0F7F3] capitalize">{queue.name}</span>
+                      <span className="text-sm font-medium text-ink capitalize">{queue.name}</span>
                       {queue.paused && (
                         <span className="text-xs px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400">PAUSED</span>
                       )}
                       {hasFailed && (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-400">
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-danger/10 text-danger">
                           {queue.failed} failed
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[#9FB0A6] mt-0.5">
+                    <p className="text-xs text-ink-soft mt-0.5">
                       {queue.total} total · {queue.completed.toLocaleString()} completed today
                     </p>
                   </div>
@@ -265,7 +264,7 @@ export default function AdminQueuesPage() {
                     {hasFailed && (
                       <button onClick={() => handleRetry(queue.name)}
                         disabled={actionLoading === `retry-${queue.name}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-medium hover:bg-red-500/20 disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-danger/10 text-danger text-xs font-medium hover:bg-danger/20 disabled:opacity-50"
                       >
                         {actionLoading === `retry-${queue.name}` ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -278,7 +277,7 @@ export default function AdminQueuesPage() {
                     {queue.completed > 500 && (
                       <button onClick={() => handleFlush(queue.name)}
                         disabled={actionLoading === `flush-${queue.name}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.06] disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-canvas text-ink-soft text-xs font-medium hover:bg-white/[0.06] disabled:opacity-50"
                       >
                         {actionLoading === `flush-${queue.name}` ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -292,7 +291,7 @@ export default function AdminQueuesPage() {
                 </div>
 
                 {/* Bar Chart */}
-                <div className="h-2.5 rounded-full bg-[#101713] overflow-hidden flex">
+                <div className="h-2.5 rounded-full bg-canvas overflow-hidden flex">
                   {queue.waiting > 0 && (
                     <div
                       className="h-full bg-violet-500 transition-all"
@@ -302,7 +301,7 @@ export default function AdminQueuesPage() {
                   )}
                   {queue.active > 0 && (
                     <div
-                      className="h-full bg-amber-500 transition-all"
+                      className="h-full bg-warning transition-all"
                       style={{ width: `${(queue.active / maxVal) * 100}%` }}
                       title={`Active: ${queue.active}`}
                     />
@@ -313,14 +312,14 @@ export default function AdminQueuesPage() {
                 <div className="grid grid-cols-4 gap-4 mt-3">
                   {[
                     { label: "Waiting", value: queue.waiting, icon: Clock, color: "text-violet-400" },
-                    { label: "Active", value: queue.active, icon: Play, color: "text-amber-400" },
+                    { label: "Active", value: queue.active, icon: Play, color: "text-warning" },
                     { label: "Delayed", value: queue.delayed, icon: ArrowDown, color: "text-blue-400" },
-                    { label: "Failed", value: queue.failed, icon: AlertCircle, color: hasFailed ? "text-red-400" : "text-[#9FB0A6]" },
+                    { label: "Failed", value: queue.failed, icon: AlertCircle, color: hasFailed ? "text-danger" : "text-ink-soft" },
                   ].map((s) => (
                     <div key={s.label}>
                       <div className="flex items-center gap-1">
                         <s.icon className={cn("w-3 h-3", s.color)} />
-                        <span className="text-xs text-[#9FB0A6]">{s.label}</span>
+                        <span className="text-xs text-ink-soft">{s.label}</span>
                       </div>
                       <p className={cn("text-sm font-semibold mt-0.5", s.color)}>
                         {s.value.toLocaleString()}
@@ -331,9 +330,9 @@ export default function AdminQueuesPage() {
 
                 {/* Latest Error */}
                 {queue.latestError && (
-                  <div className="mt-3 p-3 rounded-lg bg-red-500/5 border border-red-500/10">
-                    <p className="text-xs font-medium text-red-400 mb-1">Latest Error</p>
-                    <p className="text-xs text-red-300/80 font-mono break-all">{queue.latestError}</p>
+                  <div className="mt-3 p-3 rounded-lg bg-danger/5 border border-danger/10">
+                    <p className="text-xs font-medium text-danger mb-1">Latest Error</p>
+                    <p className="text-xs text-danger/80 font-mono break-all">{queue.latestError}</p>
                   </div>
                 )}
               </motion.div>

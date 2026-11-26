@@ -194,10 +194,10 @@ export default function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="caption flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#34D399]" />
+              <Zap className="w-4 h-4 text-brand" />
               Hot Leads
             </h3>
-            <Link href="/dashboard/leads" className="text-[11px] text-[#6FE3B0] hover:text-[#6FE3B0]/80 font-medium transition-colors">
+            <Link href="/dashboard/leads" className="text-[11px] text-brand hover:text-brand/80 font-medium transition-colors">
               View all
             </Link>
           </div>
@@ -211,37 +211,37 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {hotLeads.map((lead: any, i: number) => (
                 <Link key={lead.id} href={`/dashboard/leads/${lead.id}`}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:bg-white/[0.06]/80 transition-all group"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-line hover:bg-white/[0.06]/80 transition-all group"
                 >
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono",
-                    lead.score >= 80 ? "bg-[#34D399]/25 text-[#34D399]" :
-                    lead.score >= 70 ? "bg-[#34D399]/15 text-[#34D399]" :
-                    "bg-[#E8C468]/15 text-[#E8C468]"
+                    lead.score >= 80 ? "bg-brand/25 text-brand" :
+                    lead.score >= 70 ? "bg-brand/15 text-brand" :
+                    "bg-brand/15 text-brand"
                   )}>
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[#F0F7F3] truncate">{lead.name}</p>
-                    <p className="text-[11px] text-[#9FB0A6]">{lead.source} · Score: {lead.score}</p>
+                    <p className="text-[13px] font-medium text-ink truncate">{lead.name}</p>
+                    <p className="text-[11px] text-ink-soft">{lead.source} · Score: {lead.score}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={cn(
                       "w-1.5 h-1.5 rounded-full",
-                      lead.score >= 80 ? "bg-[#34D399]" :
-                      lead.score >= 70 ? "bg-[#34D399]/70" :
-                      "bg-[#B45309]"
+                      lead.score >= 80 ? "bg-brand" :
+                      lead.score >= 70 ? "bg-brand/70" :
+                      "bg-warning"
                     )} />
-                    <ChevronRight className="w-3.5 h-3.5 text-[#6B7C73] group-hover:text-[#9FB0A6] transition-colors" />
+                    <ChevronRight className="w-3.5 h-3.5 text-ink-muted group-hover:text-ink-soft transition-colors" />
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <BrainCircuit className="w-8 h-8 text-[#6B7C73] mx-auto mb-2" />
-              <p className="text-[13px] text-[#9FB0A6]">No scored leads yet</p>
-              <p className="text-[11px] text-[#6B7C73] mt-1">Scores appear after AI calls complete</p>
+              <BrainCircuit className="w-8 h-8 text-ink-muted mx-auto mb-2" />
+              <p className="text-[13px] text-ink-soft">No scored leads yet</p>
+              <p className="text-[11px] text-ink-muted mt-1">Scores appear after AI calls complete</p>
             </div>
           )}
         </motion.div>
@@ -257,20 +257,20 @@ export default function DashboardPage() {
           {todayBookings.length > 0 ? (
             <div className="space-y-2">
               {todayBookings.map((booking: BookingItem, i: number) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-white/10">
-                  <div className="w-2 h-2 rounded-full bg-[#34D399]" />
+                <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.06] border border-line">
+                  <div className="w-2 h-2 rounded-full bg-brand" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-[#F0F7F3] truncate">
+                    <p className="text-[13px] font-medium text-ink truncate">
                       {booking.lead?.name || "Unknown"}
                     </p>
-                    <p className="text-[12px] text-[#9FB0A6]">{booking.visitTime} · {booking.lead?.source || ""}</p>
+                    <p className="text-[12px] text-ink-soft">{booking.visitTime} · {booking.lead?.source || ""}</p>
                   </div>
-                  <span className="text-[11px] text-[#34D399] font-mono">{booking.visitTime}</span>
+                  <span className="text-[11px] text-brand font-mono">{booking.visitTime}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[13px] text-[#9FB0A6] text-center py-8">
+            <p className="text-[13px] text-ink-soft text-center py-8">
               No visits scheduled today
             </p>
           )}

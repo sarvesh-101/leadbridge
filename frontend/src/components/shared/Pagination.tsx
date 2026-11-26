@@ -56,14 +56,14 @@ export function Pagination({
 
   return (
     <div className="flex items-center justify-between">
-      <p className="text-[13px] text-[#9FB0A6]">
+      <p className="text-[13px] text-ink-soft">
         Showing {start}–{end} of {total}
       </p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] border border-white/10 bg-[#101713] text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] border border-line bg-canvas text-ink-soft hover:bg-white/[0.06] hover:text-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
           Previous
@@ -71,7 +71,7 @@ export function Pagination({
 
         {getPageNumbers().map((page, i) =>
           page === "..." ? (
-            <span key={`ellipsis-${i}`} className="px-2 text-[13px] text-[#6B7C73]">
+            <span key={`ellipsis-${i}`} className="px-2 text-[13px] text-ink-muted">
               ...
             </span>
           ) : (
@@ -81,8 +81,8 @@ export function Pagination({
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[13px] border transition-colors min-w-[32px]",
                 page === currentPage
-                  ? "border-[#34D399]/50 bg-[#34D399]/15 text-[#6FE3B0]"
-                  : "border-white/10 bg-[#101713] text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3]"
+                  ? "border-brand/50 bg-brand/15 text-brand"
+                  : "border-line bg-canvas text-ink-soft hover:bg-white/[0.06] hover:text-ink"
               )}
             >
               {page}
@@ -93,7 +93,7 @@ export function Pagination({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] border border-white/10 bg-[#101713] text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[13px] border border-line bg-canvas text-ink-soft hover:bg-white/[0.06] hover:text-ink disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next
           <ChevronRight className="w-3.5 h-3.5" />

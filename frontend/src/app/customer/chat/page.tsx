@@ -98,21 +98,21 @@ export default function CustomerChatPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#0A0F0C] aurora-backdrop">
+    <div className="min-h-screen bg-canvas aurora-backdrop">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0F0C]/80 backdrop-blur-lg border-b border-white/10">
+      <header className="sticky top-0 z-10 bg-canvas/80 backdrop-blur-lg border-b border-line">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
+          <button onClick={() => router.push("/customer/dashboard")} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34D399] to-[#34D399] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-brand flex items-center justify-center">
             <MessageSquare className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-sm font-semibold text-[#F0F7F3]">WhatsApp Chat</h1>
-            <p className="text-[10px] text-green-400">AI Assistant</p>
+            <h1 className="text-sm font-semibold text-ink">WhatsApp Chat</h1>
+            <p className="text-[10px] text-success">AI Assistant</p>
           </div>
-          <button onClick={loadChat} className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
+          <button onClick={loadChat} className="p-2 rounded-lg hover:bg-white/[0.06] text-ink-soft transition-colors">
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
           </button>
         </div>
@@ -121,10 +121,10 @@ export default function CustomerChatPage() {
       <main className="max-w-2xl mx-auto px-4 py-4">
         {/* Chat Messages */}
         <ErrorBoundary fallback={
-          <div className="p-8 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
-            <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-            <p className="text-sm text-red-400">Failed to load chat history.</p>
-            <p className="text-xs text-[#9FB0A6] mt-1">You can still contact your broker via WhatsApp.</p>
+          <div className="p-8 rounded-2xl bg-danger/5 border border-danger/20 text-center">
+            <AlertTriangle className="w-8 h-8 text-danger mx-auto mb-2" />
+            <p className="text-sm text-danger">Failed to load chat history.</p>
+            <p className="text-xs text-ink-soft mt-1">You can still contact your broker via WhatsApp.</p>
           </div>
         }>
         <div className="space-y-4 mb-4">
@@ -132,7 +132,7 @@ export default function CustomerChatPage() {
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex gap-3 animate-pulse" style={{ justifyContent: i % 2 === 0 ? "flex-end" : "flex-start" }}>
-                  <div className={cn("w-3/4 h-12 rounded-2xl bg-[#101713]")} />
+                  <div className={cn("w-3/4 h-12 rounded-2xl bg-canvas")} />
                 </div>
               ))}
             </div>
@@ -141,9 +141,9 @@ export default function CustomerChatPage() {
               <div key={gi}>
                 {/* Date separator */}
                 <div className="flex items-center gap-3 mb-4 mt-2">
-                  <div className="flex-1 h-px bg-[#101713]" />
-                  <span className="text-[10px] text-gray-600 font-medium">{group.date}</span>
-                  <div className="flex-1 h-px bg-[#101713]" />
+                  <div className="flex-1 h-px bg-canvas" />
+                  <span className="text-[10px] text-ink-soft font-medium">{group.date}</span>
+                  <div className="flex-1 h-px bg-canvas" />
                 </div>
 
                 <div className="space-y-3">
@@ -166,15 +166,15 @@ export default function CustomerChatPage() {
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-1",
                           isBot
-                            ? "bg-gradient-to-br from-[#34D399] to-[#34D399]"
+                            ? "bg-gradient-to-br from-brand to-brand"
                             : isIncoming
-                              ? "bg-[#34D399]/25"
+                              ? "bg-brand/25"
                               : "bg-white/[0.06]"
                         )}>
                           {isBot ? (
-                            <Bot className="w-3.5 h-3.5 text-[#F0F7F3]" />
+                            <Bot className="w-3.5 h-3.5 text-ink" />
                           ) : (
-                            <User className="w-3.5 h-3.5 text-[#9FB0A6]" />
+                            <User className="w-3.5 h-3.5 text-ink-soft" />
                           )}
                         </div>
 
@@ -183,10 +183,10 @@ export default function CustomerChatPage() {
                           <div className={cn(
                             "px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed",
                             isBot
-                              ? "bg-[#34D399]/15 border border-[#34D399]/50/15 text-[#9FB0A6] rounded-tl-sm"
+                              ? "bg-brand/15 border border-brand/50/15 text-ink-soft rounded-tl-sm"
                               : isIncoming
-                                ? "bg-[#34D399]/15 border border-[#34D399]/50/15 text-[#9FB0A6]"
-                                : "bg-[#1B4332] text-white rounded-tr-sm"
+                                ? "bg-brand/15 border border-brand/50/15 text-ink-soft"
+                                : "bg-line-subtle text-white rounded-tr-sm"
                           )}>
                             {msg.type === "OTP_SENT" ? (
                               <div className="flex items-center gap-1.5">
@@ -200,9 +200,9 @@ export default function CustomerChatPage() {
                             "flex items-center gap-1 mt-0.5",
                             isBot || isIncoming ? "" : "justify-end"
                           )}>
-                            <span className="text-[9px] text-gray-600">{formatTime(msg.sentAt)}</span>
+                            <span className="text-[9px] text-ink-soft">{formatTime(msg.sentAt)}</span>
                             {msg.status === "sent" && !isIncoming && (
-                              <span className="text-[9px] text-gray-600">✓</span>
+                              <span className="text-[9px] text-ink-soft">✓</span>
                             )}
                           </div>
                         </div>
@@ -216,9 +216,9 @@ export default function CustomerChatPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <MessageSquare className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-              <h2 className="text-sm font-semibold text-[#F0F7F3] mb-1">No Messages Yet</h2>
-              <p className="text-xs text-[#9FB0A6] mb-4">
+              <MessageSquare className="w-10 h-10 text-ink-soft mx-auto mb-3" />
+              <h2 className="text-sm font-semibold text-ink mb-1">No Messages Yet</h2>
+              <p className="text-xs text-ink-soft mb-4">
                 Start a conversation with the AI assistant on WhatsApp
               </p>
             </motion.div>
@@ -231,15 +231,15 @@ export default function CustomerChatPage() {
         <div className="sticky bottom-4 app-card rounded-2xl p-3">
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <p className="text-xs text-[#F0F7F3] font-medium">Chat with AI Assistant</p>
-              <p className="text-[10px] text-[#9FB0A6]">Reply on WhatsApp for quick help</p>
+              <p className="text-xs text-ink font-medium">Chat with AI Assistant</p>
+              <p className="text-[10px] text-ink-soft">Reply on WhatsApp for quick help</p>
             </div>
             {waLink ? (
               <a
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#34D399] text-white text-xs font-medium hover:bg-[#065F46] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand text-white text-xs font-medium hover:bg-success transition-colors"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 Open WhatsApp
@@ -248,7 +248,7 @@ export default function CustomerChatPage() {
             ) : (
               <a
                 href={`tel:${customer?.clientContact}`}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1B4332] text-white text-xs font-medium hover:opacity-90 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-line-subtle text-white text-xs font-medium hover:opacity-90 transition-colors"
               >
                 <Phone className="w-3.5 h-3.5" />
                 Call Broker

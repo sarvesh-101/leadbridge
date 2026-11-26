@@ -113,8 +113,8 @@ function LeadsPageContent() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-[#F0F7F3]">Leads</h1>
-          <p className="text-sm text-[#9FB0A6] dark:text-[#9FB0A6]">
+          <h1 className="text-2xl font-bold text-ink dark:text-ink">Leads</h1>
+          <p className="text-sm text-ink-soft dark:text-ink-soft">
             {total} total leads
           </p>
         </div>
@@ -122,7 +122,7 @@ function LeadsPageContent() {
           <button
             onClick={handleExportCSV}
             disabled={leads.length === 0 || exporting}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-600 text-[#9FB0A6] text-xs sm:text-sm font-medium hover:bg-gray-800 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg border border-line text-ink-soft text-xs sm:text-sm font-medium hover:bg-surface-raised transition-all disabled:opacity-50"
           >
             {exporting ? (
               <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
@@ -133,7 +133,7 @@ function LeadsPageContent() {
           </button>
           <button
             onClick={() => setAddLeadOpen(true)}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs sm:text-sm font-medium hover:opacity-90 transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-brand to-brand-soft text-canvas text-xs sm:text-sm font-medium hover:opacity-90 transition-all"
           >
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">Add Lead</span>
@@ -193,7 +193,7 @@ function LeadsPageContent() {
 
 export default function LeadsPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-[#6FE3B0] animate-spin" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center h-48"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>}>
       <LeadsPageContent />
     </Suspense>
   );
