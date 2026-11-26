@@ -380,3 +380,33 @@ whole-file diffs. Those are back to LF, so the commit diff contains only real ch
 spacing on the formerly light-theme screens (`/setup`, `/customer/*`, `/admin/*`) still need a
 visual pass at desktop and 390px before this branch ships.
 
+---
+
+## 2026-11-27 (final) — Per-broker forwarding closed the last gap in the broker's setup
+
+**What was still open:** the ingestion side routed by recipient, but the Forwarding page did not
+tell brokers to use that address. The "Forward Email from Your Inbox" steps printed the **shared**
+mailbox (`FORWARDING_EMAIL`), and the portal wizard carried a warning that Converza matches
+forwarded mail *by sender*. A broker following either would add a Gmail/Outlook auto-forward to
+the shared mailbox — the rule keeps the portal's `From`, so the enquiry matched no broker and was
+dropped, i.e. the exact failure the token was built to prevent.
+
+**Changes:**
+- Every email step on `/dashboard/forwarding` now uses the broker's own
+  `forward+<token>@…` address (`/forwarding/address`), both the manual steps and the wizard.
+- Removed the "same Gmail account you signed up with / matched by sender" warning; replaced it
+  with the real rule (any account works; the recipient address identifies the broker), and the
+  forwarding-service note now says explicitly never to point a rule at the shared mailbox.
+- Documented the one manual step left in Gmail: its forwarding-address confirmation lands in
+  Converza's mailbox, so support confirms it; manual Forward needs no confirmation.
+- `/webhooks/email/incoming` now also reads `cc`/`Cc`, so the provider path considers the same
+  recipient headers as the IMAP poller.
+
+**Verified:** frontend `tsc --noEmit` clean; server `tsc --noEmit` clean; forwarding suite 23
+passed. Separately ran the poller's parsing seam against a realistic auto-forwarded RFC822 message
+(mailparser): the token is found in `X-Forwarded-To`/`Delivered-To` even though `To` still names the
+broker, and HTML-only portal mail yields body text (so the phone is still parsed).
+
+**Not verified:** no live mailbox — delivery of `forward+<token>@…` still depends on the deployed
+mailbox accepting plus-addressing (or `FORWARDING_DOMAIN` pointing at the catch-all).
+

@@ -283,7 +283,7 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
               {/* ── Auto-forward Email tab ── */}
               {tab === "email" && (
                 <ol className="space-y-3 text-xs text-ink-soft">
-                  <li className="p-2.5 rounded-lg bg-warning/5 border border-warning/10"><span className="text-[11px] text-warning">⚠️ Do this from the <strong>same Gmail account you signed up with</strong> — Converza matches forwarded emails to your account by sender. Forwards from other addresses are ignored.</span></li>
+                  <li className="p-2.5 rounded-lg bg-success/5 border border-success/15"><span className="text-[11px] text-brand">✅ Any Gmail/Outlook account works — use the address in your inbox, not necessarily the one you signed up with. The address below is yours alone, so the portal enquiry is matched to your account by the <strong>recipient address</strong>, even when the auto-forward keeps the portal as the sender.</span></li>
                   <li className="flex gap-2">
                     <span className="text-brand shrink-0 font-bold">1.</span>
                     <span>Gmail on a computer → <strong className="text-ink">⚙ → See all settings → Forwarding and POP/IMAP</strong> → <strong className="text-ink">Add a forwarding address</strong> → paste:
@@ -291,7 +291,7 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
                         <strong className="text-[11px] text-ink font-mono break-all">{forwardingEmail}</strong>
                         <span className="ml-auto"><CopyBtn text={forwardingEmail} /></span>
                       </span>
-                      Gmail sends a confirmation to that mailbox — we help you confirm it during onboarding.
+                      Gmail emails a confirmation link to that address. It lands in Converza's mailbox (not yours) — contact support after adding it and we confirm it for you. Manual Forward works immediately, no confirmation needed.
                     </span>
                   </li>
                   <li className="flex gap-2">
@@ -707,7 +707,7 @@ export default function LeadForwardingPage() {
                       </li>
                       <li className="flex gap-2">
                         <span className="text-brand shrink-0">3.</span>
-                        Enter this email: <strong className="text-ink font-mono">{status?.forwardingEmail}</strong>
+                        Enter this email: <strong className="text-ink font-mono">{brokerEmail || status?.forwardingEmail}</strong>
                       </li>
                       <li className="flex gap-2">
                         <span className="text-brand shrink-0">4.</span>
@@ -719,13 +719,14 @@ export default function LeadForwardingPage() {
                   {/* Email forwarding services */}
                   <div className="p-4 rounded-xl bg-warning/5 border border-warning/10">
                     <h4 className="text-xs font-semibold text-warning mb-2 flex items-center gap-2">
-                      <AlertCircle className="w-3.5 h-3.5" /> Note for best results
+                      <AlertCircle className="w-3.5 h-3.5" /> Use your own address for auto-forward rules
                     </h4>
                     <p className="text-xs text-ink-soft">
-                      For automatic email forwarding, we recommend using an email forwarding service like
-                      SendGrid Inbound Parse, Mailgun Routes, or CloudMailin. Connect them to forward
-                      emails to our webhook at <strong className="text-ink font-mono">/api/v1/webhooks/email/incoming</strong>.
-                      Contact support for setup assistance.
+                      Point Gmail/Outlook auto-forward rules, and any email forwarding service
+                      (SendGrid Inbound Parse, Mailgun Routes, CloudMailin), at the address shown above —
+                      <strong className="text-ink"> never at the shared mailbox</strong>. An auto-forward keeps the
+                      portal as the sender, so only your personal address identifies you; mail sent to the
+                      shared mailbox is matched by sender and works for manual forwards only.
                     </p>
                   </div>
                 </motion.div>

@@ -21,6 +21,7 @@ import { isWebhookRequestAuthorized } from "../../utils/webhook-secret";
 interface EmailForwardPayload {
   from?: string;
   to?: string | string[];
+  cc?: string | string[];
   subject?: string;
   text?: string;
   html?: string;
@@ -31,6 +32,7 @@ interface EmailForwardPayload {
   // Mailgun specific
   From?: string;
   To?: string;
+  Cc?: string;
   Subject?: string;
   "body-plain"?: string;
   "stripped-text"?: string;
@@ -95,6 +97,8 @@ export default async function emailForwardingRoutes(fastify: FastifyInstance) {
     const recipients = [
       payload.to,
       payload.To,
+      payload.cc,
+      payload.Cc,
       payload.to_parsed,
       payload["delivered-to"],
       payload["x-forwarded-to"],
