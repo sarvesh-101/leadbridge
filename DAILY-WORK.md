@@ -1,6 +1,6 @@
 # DAILY-WORK.md — Converza go-live status
 
-> **Last updated:** 2026-11-14  
+> **Last updated:** 2026-11-27  
 > **Owner:** Chetan (platform) · AI agent (execution)  
 > **Source of truth:** this file + `docs/GO-LIVE-RUNBOOK.md` (steps) + `docs/plan-margins.md` (pricing)
 
@@ -409,4 +409,64 @@ broker, and HTML-only portal mail yields body text (so the phone is still parsed
 
 **Not verified:** no live mailbox — delivery of `forward+<token>@…` still depends on the deployed
 mailbox accepting plus-addressing (or `FORWARDING_DOMAIN` pointing at the catch-all).
+
+---
+
+## 2026-11-27 03:31 IST — Ship step: push + PR (DONE — PR #1 open)
+
+**Where the work stands.** Branch `converza-v2` is clean and **3 commits ahead of `origin/main`
+(`a30dd2c`)**:
+
+| commit | what |
+|---|---|
+| `a4fd1e8` | brand palette sweep (Obsidian + Burnt Orange) + the silent Tailwind tint bug fix |
+| `7e222d8` | per-broker inbound addresses (`forward+<token>@…`), recipient-first routing, secured `/webhooks/email/incoming` + tests |
+| `59edda2` | Forwarding page now hands the broker *their own* address; webhook also reads `cc`/`Cc` |
+
+Diff vs `main`: 141 files, +5,647 / −4,719. Branch has no upstream yet.
+
+**Conversation so far (in order):**
+1. Per-broker forwarding flow was finished end to end (recipient-token routing first, sender fallback),
+   unit-tested. That code work is done; nothing more to build there.
+2. Question raised: the Render test used the developer's own email typed in by hand — how does this
+   serve a *real* broker? Answer: one polled mailbox is by design, no Render change per broker; the
+   broker identity is the `+token` in `To`/`Cc`/`Delivered-To`, matched against `Client.inboundToken`.
+   A broker only adds a forward rule in their own mailbox.
+3. “What is the next step and why?” → deploy first, then a live smoke test. Logic is already tested;
+   the remaining risk is delivery/config, and production still runs the T8 build **without** token
+   routing. No new features before this ships.
+4. Next-step plan was accepted → **this session: push `converza-v2` and open the PR into `main`.**
+
+**Pre-flight checks run and green:** server ESLint `src/` → 0 errors (505 pre-existing warnings);
+`scripts/claims-lint.mjs` → 0 banned phrases; frontend `next lint` → 0 errors (6 warnings);
+forwarding suite 23/23 passing (`forwarding-routing`, `inbound-address`, `webhook-secret`).
+
+**Blocker that was hit — no GitHub credentials on this machine.** `git push -u origin converza-v2`
+failed with `could not read Username for 'https://github.com'`. Checked: no `gh` CLI
+(`gh: command not found`), no `~/.ssh` directory (no key at all), no
+`credential.helper` in git config, no `~/.gitconfig`, and no `GITHUB_TOKEN`/PAT in the environment.
+Remote is HTTPS (`https://github.com/sarvesh-101/leadbridge.git`); the repo is public
+(`api.github.com` returns 200 unauthenticated), so only push auth was missing.
+
+**How it was unblocked:** user chose **option 1** — supply a GitHub PAT (classic, `repo` scope,
+7-day expiry), agent pushes and opens the PR. Token was passed inline to the two commands only
+(base64 `AUTHORIZATION` header for `git push`, `Bearer` for the API); verified afterwards that
+nothing persisted: `remote.origin.url` is still the plain HTTPS URL, `credential.helper` is unset,
+no `~/.git-credentials` exists. **User must revoke the token at github.com/settings/tokens.**
+
+**Done at 03:35 IST:**
+- Push: `a30dd2c..59edda2  converza-v2 -> converza-v2`; branch now tracks `origin/converza-v2`.
+- PR opened via the API: **https://github.com/sarvesh-101/leadbridge/pull/1** — state `open`,
+  not draft, `mergeable: true`, head `sarvesh-101:converza-v2` @ `59edda2`, base `sarvesh-101:main`
+  @ `a30dd2c`, 3 commits / 141 files / +5,647 −4,719. Title:
+  *feat(forwarding): per-broker inbound email addresses with secured webhook*.
+
+**Next owner step:** review and merge PR #1 → Render deploys `main` (deploy job only runs when
+`vars.DEPLOY_ENABLED == 'true'`; otherwise use Manual Deploy). Then revoke the PAT.
+
+**Remaining after merge (unchanged):** Render env `IMAP_USER`, `IMAP_PASS`, `IMAP_HOST`,
+`IMAP_PORT`, `FORWARDING_DOMAIN`, `EMAIL_WEBHOOK_SECRET` → deploy → curl smoke test with a real
+broker token expecting `status: "created"` and `rawPayload.matchedBy: "recipient"` → one real Gmail
+auto-forward (needs a 2nd broker account; the Gmail confirmation link lands in Converza's inbox and
+must be clicked manually).
 
