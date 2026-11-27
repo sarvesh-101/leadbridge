@@ -461,7 +461,25 @@ no `~/.git-credentials` exists. **User must revoke the token at github.com/setti
   @ `a30dd2c`, 3 commits / 141 files / +5,647 −4,719. Title:
   *feat(forwarding): per-broker inbound email addresses with secured webhook*.
 
-**Next owner step:** review and merge PR #1 → Render deploys `main` (deploy job only runs when
+**CI caught a real bug — schema drift (fixed 03:45 IST).** The E2E job was red on this PR *and* on
+`main` (`a30dd2c`), so it was pre-existing. Root cause: `schema.prisma` declares `Client.languages`
+(`String[]`) and `Client.transferToNumber`, but **no migration ever created either column**. They
+exist in production because they were added out-of-band, so nobody noticed — but a fresh database
+(CI's `postgres:16-alpine` service container) fails `prisma.client.create()` with `P2022` and the
+remaining six lifecycle tests cascade into `P2025` / `P2003`.
+
+- New migration `server/prisma/migrations/20261128000000_add_missing_client_columns/migration.sql`,
+  both statements `ADD COLUMN IF NOT EXISTS` → a no-op on production.
+- I did **not** guess the set of missing columns. There is no `initdb`/Docker on this machine, so the
+  check was static: `prisma migrate diff --from-empty --to-schema-datamodel` (canonical DDL) versus a
+  replay of every `migration.sql` (`CREATE TABLE`, `ADD COLUMN`, `RENAME`, `DROP`). Result: **0 missing
+  columns** across all tables. (First pass over-reported five — the parser missed comma-separated
+  `ADD COLUMN` lists hanging off one `ALTER TABLE`; corrected before writing anything.)
+- Verified: `prisma validate` clean; CI on `acd8a09` → E2E **success**, Server Tests **success**,
+  Frontend Lint & Type Check **success**, Vercel **success** (Docker Build Check still running at
+  merge time — it only rebuilds the two images and passed on the previous commit).
+
+**Next owner step:** merge PR #1 → Render deploys `main` (deploy job only runs when
 `vars.DEPLOY_ENABLED == 'true'`; otherwise use Manual Deploy). Then revoke the PAT.
 
 **Remaining after merge (unchanged):** Render env `IMAP_USER`, `IMAP_PASS`, `IMAP_HOST`,
