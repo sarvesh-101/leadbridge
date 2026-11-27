@@ -15,36 +15,36 @@ export function CallCard({ call }: CallCardProps) {
   const isFailed = call.status === "FAILED" || call.status === "NO_ANSWER";
 
   return (
-    <div className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] overflow-hidden">
+    <div className="rounded-lg bg-surface-raised border border-line overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-[#F1F3EE] transition-colors text-left"
+        className="w-full flex items-center justify-between p-4 hover:bg-surface transition-colors text-left"
       >
         <div className="flex items-center gap-4">
           {/* Icon */}
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center",
-            isSuccess ? "bg-[#047857]/10" : isFailed ? "bg-[#E11D48]/10" : "bg-[#1B4332]/10"
+            isSuccess ? "bg-success/10" : isFailed ? "bg-danger/10" : "bg-line-subtle/10"
           )}>
             <Phone className={cn(
               "w-4 h-4",
-              isSuccess ? "text-[#047857]" : isFailed ? "text-[#E11D48]" : "text-[#1B4332]"
+              isSuccess ? "text-success" : isFailed ? "text-danger" : "text-line-subtle"
             )} />
           </div>
 
           <div>
             {/* Type badge + date */}
             <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[12px] px-2 py-0.5 rounded bg-[#F1F3EE] text-[#5C6B62] border border-[#E4E7DF] font-medium">
+              <span className="text-[12px] px-2 py-0.5 rounded bg-surface text-ink-muted border border-line font-medium">
                 {call.type}
               </span>
-              <span className="text-[12px] text-[#5C6B62]">{formatDate(call.createdAt)}</span>
+              <span className="text-[12px] text-ink-muted">{formatDate(call.createdAt)}</span>
             </div>
 
             {/* Outcome */}
             <span className={cn(
               "text-[13px] font-medium",
-              isSuccess ? "text-[#047857]" : isFailed ? "text-[#E11D48]" : "text-[#B45309]"
+              isSuccess ? "text-success" : isFailed ? "text-danger" : "text-warning"
             )}>
               {call.status}
             </span>
@@ -53,13 +53,13 @@ export function CallCard({ call }: CallCardProps) {
 
         <div className="flex items-center gap-3">
           {call.duration && (
-            <div className="flex items-center gap-1 text-[12px] text-[#5C6B62]">
+            <div className="flex items-center gap-1 text-[12px] text-ink-muted">
               <Clock className="w-3 h-3" />
               {call.duration}s
             </div>
           )}
           <ChevronDown className={cn(
-            "w-4 h-4 text-[#5C6B62] transition-transform duration-200",
+            "w-4 h-4 text-ink-muted transition-transform duration-200",
             expanded && "rotate-180"
           )} />
         </div>
@@ -67,20 +67,20 @@ export function CallCard({ call }: CallCardProps) {
 
       {/* Expanded: Summary + Transcript */}
       {expanded && (
-        <div className="border-t border-[#E4E7DF]">
+        <div className="border-t border-line">
           {call.summary && (
-            <div className="p-4 bg-[#F1F3EE] border-b border-[#E4E7DF]">
-              <p className="text-[12px] text-[#5C6B62] mb-1">Summary</p>
-              <p className="text-[13px] text-[#1E2B24]">{call.summary}</p>
+            <div className="p-4 bg-surface border-b border-line">
+              <p className="text-[12px] text-ink-muted mb-1">Summary</p>
+              <p className="text-[13px] text-ink">{call.summary}</p>
             </div>
           )}
           {call.transcript ? (
             <div className="p-4">
-              <p className="text-[12px] text-[#5C6B62] mb-3">Transcript</p>
+              <p className="text-[12px] text-ink-muted mb-3">Transcript</p>
               <TranscriptViewer transcript={call.transcript} />
             </div>
           ) : (
-            <div className="p-4 text-center text-[12px] text-[#5C6B62]">
+            <div className="p-4 text-center text-[12px] text-ink-muted">
               No transcript available
             </div>
           )}
@@ -94,7 +94,7 @@ export function CallCard({ call }: CallCardProps) {
 function TranscriptViewer({ transcript }: { transcript: string }) {
   const lines = transcript.split("\n").filter(Boolean);
   if (lines.length === 0) {
-    return <p className="text-[12px] text-[#5C6B62] text-center">No transcript lines</p>;
+    return <p className="text-[12px] text-ink-muted text-center">No transcript lines</p>;
   }
 
   return (
@@ -106,7 +106,7 @@ function TranscriptViewer({ transcript }: { transcript: string }) {
 
         if (!speaker) {
           return (
-            <p key={i} className="text-[12px] text-[#5C6B62] italic px-2">{line}</p>
+            <p key={i} className="text-[12px] text-ink-muted italic px-2">{line}</p>
           );
         }
 
@@ -124,13 +124,13 @@ function TranscriptViewer({ transcript }: { transcript: string }) {
               className={cn(
                 "max-w-[80%] px-3 py-2 rounded-lg text-[13px] leading-relaxed",
                 speaker === "AI"
-                  ? "bg-[#F1F3EE] text-[#1E2B24] rounded-br-sm"
-                  : "bg-[#1B433240] text-[#1E2B24] border border-[#1B4332] rounded-bl-sm"
+                  ? "bg-surface text-ink rounded-br-sm"
+                  : "bg-line-subtle/40 text-ink border border-line-subtle rounded-bl-sm"
               )}
             >
               <span className={cn(
                 "text-[10px] font-medium block mb-0.5",
-                speaker === "AI" ? "text-[#1B4332] text-right" : "text-[#047857]"
+                speaker === "AI" ? "text-line-subtle text-right" : "text-success"
               )}>
                 {speaker}
               </span>

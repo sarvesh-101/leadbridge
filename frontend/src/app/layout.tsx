@@ -5,20 +5,18 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Converza — AI Calling Agent for Real Estate Brokers",
+    default: "Converza — AI Lead Conversion",
     template: "%s | Converza",
   },
   description:
-    "Converza puts an AI agent on every inbound lead within 60 seconds — qualifying, booking, following up — while you focus on closing. One broker per city.",
-  keywords: [
-    "real estate CRM",
-    "AI calling agent",
-    "lead qualification",
-    "real estate broker",
-    "India real estate",
+    "Every enquiry called back in 60 seconds. AI-powered lead conversion infrastructure for international B2B.",
+  keywords:
+    ["AI lead conversion",
     "lead management",
-    "AI sales agent",
-    "property broker tool",
+    "AI calling",
+    "B2B SaaS",
+    "lead qualification",
+    "appointment booking",
   ],
   icons: {
     icon: "/favicon.svg",
@@ -35,17 +33,19 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_IN",
+    locale: "en_US",
     siteName: "Converza",
-    title: "Converza — Your leads call themselves back.",
+    title: "Converza — Intelligent Lead Conversion",
     description:
-      "AI calling agent for Indian real estate brokers. One broker per city. AI calls every lead within 60 seconds.",
+      "Every enquiry called back in 60 seconds. Your AI-powered lead conversion infrastructure.",
   },
   robots: {
     index: true,
     follow: true,
   },
 };
+
+
 
 export default function RootLayout({
   children,
@@ -54,7 +54,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body className="min-h-screen bg-[#0A0F0C] text-[#F0F7F3] antialiased">
+      <body className="min-h-screen bg-canvas text-ink antialiased">
         <QueryProvider>
           {children}
         </QueryProvider>

@@ -9,28 +9,28 @@ interface StatusDonutChartProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  BOOKED: "#047857",
-  CONVERTED: "#047857",
-  VISITED: "#047857",
-  CALLING: "#1B4332",
-  PENDING: "#5C6B62",
-  REMINDED: "#1B4332",
+  BOOKED: "var(--semantic-success)",
+  CONVERTED: "var(--semantic-success)",
+  VISITED: "var(--semantic-success)",
+  CALLING: "var(--border-subtle)",
+  PENDING: "var(--text-muted)",
+  REMINDED: "var(--border-subtle)",
   FOLLOWUP_D1: "#B45309",
   FOLLOWUP_D2: "#B45309",
   FOLLOWUP_D3: "#B45309",
-  REBOOKED: "#047857",
+  REBOOKED: "var(--semantic-success)",
   NO_ANSWER: "#B45309",
-  FAQ_ONLY: "#1B4332",
+  FAQ_ONLY: "var(--border-subtle)",
   NO_SHOW: "#E11D48",
   COLD: "#E11D48",
   CALL_FAILED: "#E11D48",
 };
 
-const FALLBACK_COLORS = ["#1B4332", "#047857", "#B45309", "#E11D48", "#5C6B62", "#B8860B"];
+const FALLBACK_COLORS = ["var(--border-subtle)", "var(--semantic-success)", "#B45309", "#E11D48", "var(--text-muted)", "#B8860B"];
 
 export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
   if (loading) {
-    return <div className="h-[320px] rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] animate-pulse" />;
+    return <div className="h-[320px] rounded-lg bg-surface-raised border border-line animate-pulse" />;
   }
 
   const chartData = data.map((d, i) => ({
@@ -41,8 +41,8 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="h-[320px] rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-5 flex items-center justify-center">
-        <p className="text-[13px] text-[#5C6B62]">No leads yet</p>
+      <div className="h-[320px] rounded-lg bg-surface-raised border border-line p-5 flex items-center justify-center">
+        <p className="text-[13px] text-ink-muted">No leads yet</p>
       </div>
     );
   }
@@ -51,7 +51,7 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg bg-[#FFFFFF] border border-[#E4E7DF] p-5"
+      className="rounded-lg bg-surface-raised border border-line p-5"
     >
       <h3 className="caption mb-4">Lead Status Distribution</h3>
       <ResponsiveContainer width="100%" height={260}>
@@ -82,7 +82,7 @@ export function StatusDonutChart({ data, loading }: StatusDonutChartProps) {
             verticalAlign="bottom"
             height={36}
             formatter={(value: string) => (
-              <span className="text-[12px] text-[#5C6B62]">{value}</span>
+              <span className="text-[12px] text-ink-muted">{value}</span>
             )}
           />
         </PieChart>

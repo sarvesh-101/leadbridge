@@ -67,27 +67,27 @@ export default function ComparisonSection() {
   }, [inView]);
 
   return (
-    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="comparison">
+    <section ref={ref} className="relative py-20 lg:py-32 bg-canvas overflow-hidden" id="comparison">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
-          <span className="caption text-gradient-gold mb-4 block">HEAD-TO-HEAD</span>
+          <span className="caption mb-4 block">HEAD-TO-HEAD</span>
           <h2 className="h1-text mb-4">Converza vs. Traditional Telecaller</h2>
-          <p className="text-[16px] text-[#9FB0A6] max-w-[520px] mx-auto">
+          <p className="body-text max-w-[520px] mx-auto">
             A capability comparison — what each approach offers. Results vary by broker and market.
           </p>
         </div>
 
-        <div ref={tableRef} className="rounded-2xl border border-white/10 overflow-hidden glass-card">
+        <div ref={tableRef} className="rounded-2xl border border-line overflow-hidden surface-card">
           {/* Header */}
-          <div className="grid grid-cols-3 gap-0 border-b border-white/10">
+          <div className="grid grid-cols-3 gap-0 border-b border-line">
             <div className="px-6 py-4">
-              <span className="text-[11px] font-semibold text-[#9FB0A6] uppercase tracking-[0.08em]">Metric</span>
+              <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-[0.08em]">Metric</span>
             </div>
-            <div className="px-6 py-4 bg-[#34D399]/[0.07] border-x border-white/10">
-              <span className="text-[11px] font-semibold text-[#6FE3B0] uppercase tracking-[0.08em]">Converza</span>
+            <div className="px-6 py-4 bg-brand/10 border-x border-line">
+              <span className="text-[11px] font-semibold text-brand uppercase tracking-[0.08em]">Converza</span>
             </div>
             <div className="px-6 py-4">
-              <span className="text-[11px] font-semibold text-[#FB7185] uppercase tracking-[0.08em]">Telecaller</span>
+              <span className="text-[11px] font-semibold text-danger uppercase tracking-[0.08em]">Telecaller</span>
             </div>
           </div>
 
@@ -95,35 +95,35 @@ export default function ComparisonSection() {
           {comparisons.map((row, i) => (
             <div
               key={i}
-              className="comparison-row grid grid-cols-3 gap-0 border-b border-white/[0.07] last:border-b-0 hover:bg-white/[0.04] transition-colors"
+              className="comparison-row grid grid-cols-3 gap-0 border-b border-line last:border-b-0 hover:bg-white/[0.02] transition-colors"
             >
               <div className="px-6 py-4 flex items-center">
-                <span className="text-[13px] text-[#D5E0D9]">{row.metric}</span>
+                <span className="text-[13px] text-ink">{row.metric}</span>
               </div>
-              <div className="px-6 py-4 flex items-center gap-2 bg-[#34D399]/[0.07] border-x border-white/10">
-                <Check className="w-3.5 h-3.5 text-[#34D399] shrink-0" />
-                <span className="text-[13px] text-[#6FE3B0] font-medium">
+              <div className="px-6 py-4 flex items-center gap-2 bg-brand/10 border-x border-line">
+                <Check className="w-3.5 h-3.5 text-brand shrink-0" />
+                <span className="text-[13px] text-brand font-medium">
                   {row.bridge}
-                  {row.note && <sup className="ml-0.5 text-[10px] text-[#6FE3B0]/70">*</sup>}
+                  {row.note && <sup className="ml-0.5 text-[10px] text-brand/70">*</sup>}
                 </span>
               </div>
               <div className="px-6 py-4 flex items-center gap-2">
-                <X className="w-3.5 h-3.5 text-[#FB7185] shrink-0" />
-                <span className="text-[13px] text-[#9FB0A6]">{row.traditional}</span>
+                <X className="w-3.5 h-3.5 text-danger shrink-0" />
+                <span className="text-[13px] text-ink-soft">{row.traditional}</span>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Phase 2.1: footnote for the capability claims above */}
-        <p className="mt-4 text-[12px] text-[#6B7C73] text-center leading-relaxed">
+        {/* Footnote */}
+        <p className="mt-4 text-[12px] text-ink-muted text-center leading-relaxed">
           * Platform capability and a worked cost example, not a promise of results. Actual outcomes vary by broker, market and lead flow.
         </p>
 
         {/* Savings Callout */}
-        <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-[#34D399]/10 to-[#1B4332]/20 border border-[#34D399]/20 text-center">
-          <p className="text-[15px] text-[#D5E0D9] font-medium">
-            💰 Example: 2 telecallers (₹50K/mo) vs Converza Growth (${PLAN_PAYLOAD.plans[1].monthlyInclGst.toLocaleString('en-IN')} incl. GST) — <span className="text-[#6FE3B0]">about ₹${SAVINGS_IN_RUPIAH}</span> in this scenario
+        <div className="mt-8 p-6 rounded-xl bg-brand/8 border border-brand/20 text-center">
+          <p className="text-[15px] text-ink font-medium">
+            💰 Example: 2 telecallers (₹50K/mo) vs Converza Growth (${PLAN_PAYLOAD.plans[1].monthlyInclGst.toLocaleString('en-IN')} incl. GST) — <span className="text-brand">about ₹${SAVINGS_IN_RUPIAH}</span> in this scenario
           </p>
         </div>
       </div>

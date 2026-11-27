@@ -30,14 +30,14 @@ export default function CompareVyoraPage() {
   if (!COMPARE_PAGE_ENABLED) notFound();
 
   return (
-    <div className="min-h-screen bg-[#0A0F0C]">
+    <div className="min-h-screen bg-canvas">
       <div className="max-w-5xl mx-auto px-4 py-16">
         <div className="mb-12">
-          <Link href="/" className="inline-flex items-center gap-2 text-[#9FB0A6] hover:text-[#F0F7F3] mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-ink-soft hover:text-ink mb-6">
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#F0F7F3]">Converza vs Vyora AI</h1>
-          <p className="text-[#9FB0A6] text-sm mt-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-ink">Converza vs Vyora AI</h1>
+          <p className="text-ink-soft text-sm mt-2">
             Feature comparison based on their public website, last verified {LAST_VERIFIED}.
           </p>
         </div>
@@ -45,38 +45,38 @@ export default function CompareVyoraPage() {
         <div className="space-y-6 mb-14">
           {ROWS.map((c) => (
             <div key={c.area} className="grid md:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+              <div className="p-5 rounded-xl bg-surface border border-line">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[#9FB0A6]">{c.icon}</span>
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">{c.area}</h3>
+                  <span className="text-ink-soft">{c.icon}</span>
+                  <h3 className="text-sm font-semibold text-ink">{c.area}</h3>
                 </div>
-                <p className="text-[13px] text-[#9FB0A6] leading-relaxed">
-                  <span className="font-medium text-[#C9D6CF]">Vyora: </span>{c.theirs}
+                <p className="text-[13px] text-ink-soft leading-relaxed">
+                  <span className="font-medium text-ink-soft">Vyora: </span>{c.theirs}
                 </p>
               </div>
-              <div className="p-5 rounded-xl bg-[#34D399]/[0.07] border border-[#34D399]/25">
+              <div className="p-5 rounded-xl bg-brand/[0.07] border border-brand/25">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[#6FE3B0]">{c.icon}</span>
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">{c.area}</h3>
+                  <span className="text-brand">{c.icon}</span>
+                  <h3 className="text-sm font-semibold text-ink">{c.area}</h3>
                 </div>
-                <p className="text-[13px] text-[#C9D6CF] leading-relaxed">
-                  <span className="font-medium text-[#6FE3B0]">Converza: </span>{c.ours}
+                <p className="text-[13px] text-ink-soft leading-relaxed">
+                  <span className="font-medium text-brand">Converza: </span>{c.ours}
                 </p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.08] mb-14">
-          <h3 className="text-sm font-semibold text-[#F0F7F3] mb-2">A fair word on pricing</h3>
-          <p className="text-[13px] text-[#9FB0A6] leading-relaxed">
+        <div className="p-5 rounded-xl bg-surface border border-line mb-14">
+          <h3 className="text-sm font-semibold text-ink mb-2">A fair word on pricing</h3>
+          <p className="text-[13px] text-ink-soft leading-relaxed">
             Vyora&apos;s credit plans may suit a workflow that is mainly uploading a list and calling it.
             Converza is built around portal ingestion, WhatsApp follow-ups and the CRM around the call, which is why the product scope is broader.
             If your need is only &ldquo;call this spreadsheet&rdquo;, a credits tool may be the better fit.
           </p>
         </div>
 
-        <p className="text-center text-[11px] text-[#6B7C73] mt-10">
+        <p className="text-center text-[11px] text-ink-muted mt-10">
           Vyora features and pricing referenced from their public website ({LAST_VERIFIED}) and belong to Vyora AI.
           Converza is operated by GS TECHNO · GSTIN 27AEGPH7840P1ZX.
         </p>

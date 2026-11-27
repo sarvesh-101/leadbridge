@@ -30,12 +30,12 @@ const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const ACTIVITY_BG: Record<string, string> = {
-  lead_new: "bg-[#1B4332]/10 text-[#1B4332]",
-  call_started: "bg-[#B45309]/10 text-[#B45309]",
-  call_completed: "bg-[#047857]/10 text-[#047857]",
-  booking_made: "bg-[#047857]/10 text-[#047857]",
-  status_change: "bg-[#1B4332]/10 text-[#1B4332]",
-  notification_sent: "bg-[#1B4332]/10 text-[#1B4332]",
+  lead_new: "bg-line-subtle/10 text-line-subtle",
+  call_started: "bg-warning/10 text-warning",
+  call_completed: "bg-success/10 text-success",
+  booking_made: "bg-success/10 text-success",
+  status_change: "bg-line-subtle/10 text-line-subtle",
+  notification_sent: "bg-line-subtle/10 text-line-subtle",
 };
 
 export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
@@ -43,7 +43,7 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
     return (
       <div className="space-y-3">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-[60px] rounded-lg bg-[#F1F3EE] animate-pulse" />
+          <div key={i} className="h-[60px] rounded-lg bg-surface animate-pulse" />
         ))}
       </div>
     );
@@ -59,27 +59,27 @@ export function ActivityFeed({ activities, loading }: ActivityFeedProps) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#F1F3EE] transition-colors"
+            className="flex items-start gap-3 p-3 rounded-lg hover:bg-surface transition-colors"
           >
-            <div className={cn("p-1.5 rounded-full", ACTIVITY_BG[activity.type] || "bg-[#F1F3EE] text-[#5C6B62]")}>
+            <div className={cn("p-1.5 rounded-full", ACTIVITY_BG[activity.type] || "bg-surface text-ink-muted")}>
               {ACTIVITY_ICONS[activity.type] || <Activity className="w-3.5 h-3.5" />}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-[#1E2B24] truncate">
+              <p className="text-[13px] font-medium text-ink truncate">
                 {activity.title}
               </p>
-              <p className="text-[12px] text-[#5C6B62] truncate">
+              <p className="text-[12px] text-ink-muted truncate">
                 {activity.description}
               </p>
             </div>
-            <p className="text-[11px] text-[#5C6B62] whitespace-nowrap flex-shrink-0">
+            <p className="text-[11px] text-ink-muted whitespace-nowrap flex-shrink-0">
               {formatDate(activity.timestamp)}
             </p>
           </motion.div>
         ))}
       </AnimatePresence>
       {activities.length === 0 && (
-        <p className="text-center text-[#5C6B62] text-[13px] py-8">
+        <p className="text-center text-ink-muted text-[13px] py-8">
           No recent activity
         </p>
       )}

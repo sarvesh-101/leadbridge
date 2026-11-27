@@ -10,7 +10,7 @@ interface LeadStatusBadgeProps {
 }
 
 export function LeadStatusBadge({ status, size = "md", pulse }: LeadStatusBadgeProps) {
-  const colorClass = LEAD_STATUS_COLORS[status] || "bg-gray-100 text-gray-800";
+  const colorClass = LEAD_STATUS_COLORS[status] || "bg-surface text-ink";
   const label = LEAD_STATUS_LABELS[status] || status;
 
   const sizeClasses = {

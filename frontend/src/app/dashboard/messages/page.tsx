@@ -165,22 +165,22 @@ export default function MessagesPage() {
 
   return (
     <div className="h-[calc(100vh-8rem)] -mx-4 sm:-mx-6 lg:-mx-8">
-      <div className="flex h-full bg-[#0A0F0C]">
+      <div className="flex h-full bg-canvas">
         {/* Conversation List */}
         <div className={cn(
-          "w-full sm:w-80 lg:w-96 border-r border-white/10 flex flex-col bg-[#101713]",
+          "w-full sm:w-80 lg:w-96 border-r border-line flex flex-col bg-canvas",
           !showMobileList && "hidden sm:flex"
         )}>
           {/* Header */}
-          <div className="p-4 border-b border-white/10">
-            <h2 className="text-sm font-semibold text-[#F0F7F3] mb-3">Messages</h2>
+          <div className="p-4 border-b border-line">
+            <h2 className="text-sm font-semibold text-ink mb-3">Messages</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9FB0A6]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search conversations..."
-                className="w-full pl-9 pr-4 py-2 rounded-lg app-card text-xs text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                className="w-full pl-9 pr-4 py-2 rounded-lg app-card text-xs text-ink placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
               />
             </div>
           </div>
@@ -191,10 +191,10 @@ export default function MessagesPage() {
               <div className="p-4 space-y-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="animate-pulse flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#101713]" />
+                    <div className="w-10 h-10 rounded-full bg-canvas" />
                     <div className="flex-1 space-y-1.5">
-                      <div className="h-3 bg-[#101713] rounded w-24" />
-                      <div className="h-2.5 bg-[#101713] rounded w-32" />
+                      <div className="h-3 bg-canvas rounded w-24" />
+                      <div className="h-2.5 bg-canvas rounded w-32" />
                     </div>
                   </div>
                 ))}
@@ -207,47 +207,46 @@ export default function MessagesPage() {
                     key={conv.leadId}
                     onClick={() => setSelectedLeadId(conv.leadId)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.06] transition-colors text-left border-b border-white/10",
-                      selectedLeadId === conv.leadId && "bg-[#34D399]/15"
+                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.06] transition-colors text-left border-b border-line",
+                      selectedLeadId === conv.leadId && "bg-brand/15"
                     )}
                   >
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center">
-                        <span className="text-sm font-medium text-[#6FE3B0]">{conv.name[0]}</span>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-line-subtle/20 to-brand-deep/20 flex items-center justify-center">
+                        <span className="text-sm font-medium text-brand">{conv.name[0]}</span>
                       </div>
                       {unread > 0 && (
-                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#34D399] border-2 border-[#0A0F0C]" />
+                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-brand border-2 border-canvas" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-[#F0F7F3] truncate">{conv.name}</span>
+                        <span className="text-sm font-medium text-ink truncate">{conv.name}</span>
                         {conv.lastMessage && (
-                          <span className="text-[10px] text-[#9FB0A6] shrink-0 ml-2">
+                          <span className="text-[10px] text-ink-soft shrink-0 ml-2">
                             {formatDate(conv.lastMessage.sentAt)}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-[#9FB0A6] truncate">
+                        <span className="text-xs text-ink-soft truncate">
                           {conv.lastMessage ? conv.lastMessage.message : "No messages yet"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={cn(
                           "text-[10px] px-1.5 py-0.5 rounded",
-                          conv.status === "BOOKED" ? "bg-green-500/10 text-green-400" :
-                          conv.status === "CONVERTED" ? "bg-emerald-500/10 text-emerald-400" :
-                          conv.status === "COLD" ? "bg-gray-500/10 text-[#9FB0A6]" :
-                          "bg-[#101713] text-[#9FB0A6]"
+                          conv.status === "BOOKED" ? "bg-success/10 text-success" :
+                          conv.status === "CONVERTED" ? "bg-success/10 text-success" :
+                          conv.status === "COLD" ? "bg-neutral-soft/10 text-ink-soft" :
+                          "bg-canvas text-ink-soft"
                         )}>
                           {STATUS_LABELS[conv.status] || conv.status}
                         </span>
                         {conv.score > 0 && (
                           <span className={cn(
-                            "text-[10px]",
-                            conv.score >= 70 ? "text-green-400" :
-                            conv.score >= 40 ? "text-amber-400" : "text-[#9FB0A6]"
+                            "text-[10px]",                              conv.score >= 70 ? "text-success" :
+                              conv.score >= 40 ? "text-warning" : "text-ink-soft"
                           )}>
                             {conv.score}
                           </span>
@@ -259,9 +258,9 @@ export default function MessagesPage() {
               })
             ) : (
               <div className="p-8 text-center">
-                <MessageSquare className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-[#9FB0A6]">No conversations yet</p>
-                <p className="text-xs text-gray-600 mt-1">Messages from leads will appear here</p>
+                <MessageSquare className="w-8 h-8 text-ink-soft mx-auto mb-2" />
+                <p className="text-sm text-ink-soft">No conversations yet</p>
+                <p className="text-xs text-ink-soft mt-1">Messages from leads will appear here</p>
               </div>
             )}
           </div>
@@ -269,42 +268,42 @@ export default function MessagesPage() {
 
         {/* Chat Pane */}
         <div className={cn(
-          "flex-1 flex flex-col bg-[#0A0F0C]",
+          "flex-1 flex flex-col bg-canvas",
           showMobileList && "hidden sm:flex"
         )}>
           {selectedLeadId && selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-[#101713]">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-line bg-canvas">
                 <button onClick={() => { setSelectedLeadId(null); setShowMobileList(true); }}
                   className="sm:hidden p-1 -ml-1 rounded-lg hover:bg-white/[0.06]"
                 >
-                  <ChevronLeft className="w-5 h-5 text-[#9FB0A6]" />
+                  <ChevronLeft className="w-5 h-5 text-ink-soft" />
                 </button>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-medium text-[#6FE3B0]">{selectedConversation.name[0]}</span>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-line-subtle/20 to-brand-deep/20 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-medium text-brand">{selectedConversation.name[0]}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-[#F0F7F3]">{selectedConversation.name}</span>
-                    <a href={`tel:${selectedConversation.phone}`} className="text-[10px] text-[#9FB0A6] hover:text-[#6FE3B0]">
+                    <span className="text-sm font-medium text-ink">{selectedConversation.name}</span>
+                    <a href={`tel:${selectedConversation.phone}`} className="text-[10px] text-ink-soft hover:text-brand">
                       {selectedConversation.phone}
                     </a>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-[#9FB0A6]">
+                  <div className="flex items-center gap-2 text-[10px] text-ink-soft">
                     <span>{selectedConversation.source}</span>
                     <span>·</span>
                     <span>{STATUS_LABELS[selectedConversation.status] || selectedConversation.status}</span>
                   </div>
                 </div>
                 <a href={`https://wa.me/${selectedConversation.phone.replace(/\D/g, "")}`} target="_blank"
-                  className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
+                  className="p-2 rounded-lg hover:bg-white/[0.06] text-ink-soft"
                   title="Open in WhatsApp"
                 >
                   <MessageSquare className="w-4 h-4" />
                 </a>
                 <a href={`tel:${selectedConversation.phone}`}
-                  className="p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]"
+                  className="p-2 rounded-lg hover:bg-white/[0.06] text-ink-soft"
                   title="Call"
                 >
                   <Phone className="w-4 h-4" />
@@ -315,8 +314,8 @@ export default function MessagesPage() {
               <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                 {messages.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-sm text-[#9FB0A6]">No messages yet</p>
-                    <p className="text-xs text-gray-600 mt-1">Send a message to start the conversation</p>
+                    <p className="text-sm text-ink-soft">No messages yet</p>
+                    <p className="text-xs text-ink-soft mt-1">Send a message to start the conversation</p>
                   </div>
                 ) : (
                   messages.map((msg, i) => {
@@ -336,10 +335,10 @@ export default function MessagesPage() {
                           "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-medium",
                           showAvatar ? "flex" : "invisible",
                           isLead
-                            ? "bg-[#34D399]/25 text-[#6FE3B0]"
+                            ? "bg-brand/25 text-brand"
                             : isBot
                             ? "bg-purple-500/20 text-purple-400"
-                            : "bg-green-500/20 text-green-400"
+                            : "bg-success/20 text-success"
                         )}>
                           {isLead ? selectedConversation.name[0] : isBot ? "AI" : "B"}
                         </div>
@@ -348,21 +347,21 @@ export default function MessagesPage() {
                         <div className={cn(
                           "max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed",
                           isLead
-                            ? "bg-white/[0.06] text-[#F0F7F3] rounded-tl-sm"
-                            : "bg-[#1B4332] text-white rounded-tr-sm"
+                            ? "bg-white/[0.06] text-ink rounded-tl-sm"
+                            : "bg-line-subtle text-white rounded-tr-sm"
                         )}>
                           <p className="whitespace-pre-wrap break-words">{msg.message}</p>
                           <div className={cn(
                             "flex items-center gap-1 mt-1",
                             isLead ? "justify-start" : "justify-end"
                           )}>
-                            <span className="text-[10px] text-[#F0F7F3]/50">
+                            <span className="text-[10px] text-ink/50">
                               {new Date(msg.sentAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                             {!isLead && (
-                              msg.status === "sent" ? <CheckCheck className="w-3 h-3 text-[#F0F7F3]/50" /> :
-                              msg.status === "failed" ? <AlertCircle className="w-3 h-3 text-red-300" /> :
-                              <Clock className="w-3 h-3 text-[#F0F7F3]/50" />
+                              msg.status === "sent" ? <CheckCheck className="w-3 h-3 text-ink/50" /> :
+                              msg.status === "failed" ? <AlertCircle className="w-3 h-3 text-danger" /> :
+                              <Clock className="w-3 h-3 text-ink/50" />
                             )}
                           </div>
                         </div>
@@ -374,7 +373,7 @@ export default function MessagesPage() {
               </div>
 
               {/* Input */}
-              <div className="p-4 border-t border-white/10 bg-[#101713]">
+              <div className="p-4 border-t border-line bg-canvas">
                 <div className="flex items-end gap-2">
                   <div className="flex-1 relative">
                     <textarea
@@ -384,7 +383,7 @@ export default function MessagesPage() {
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message... (Enter to send, Shift+Enter for new line)"
                       rows={1}
-                      className="w-full px-4 py-2.5 rounded-xl app-card text-sm text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50 resize-none min-h-[40px] max-h-[120px]"
+                      className="w-full px-4 py-2.5 rounded-xl app-card text-sm text-ink placeholder-ink-muted focus:outline-none focus:border-brand/50/50 resize-none min-h-[40px] max-h-[120px]"
                       style={{ height: "auto" }}
                       onInput={(e) => {
                         const target = e.currentTarget;
@@ -395,8 +394,7 @@ export default function MessagesPage() {
                   </div>
                   <button
                     onClick={handleSend}
-                    disabled={sending || !inputText.trim()}
-                    className="flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] hover:opacity-90 transition-all disabled:opacity-40 shrink-0"
+                    disabled={sending || !inputText.trim()}                      className="flex items-center justify-center p-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas hover:opacity-90 transition-all disabled:opacity-40 shrink-0"
                   >
                     {sending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -405,7 +403,7 @@ export default function MessagesPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-[10px] text-gray-600 mt-1.5 px-1">
+                <p className="text-[10px] text-ink-soft mt-1.5 px-1">
                   Messages sent via WhatsApp. Lead may receive SMS fallback if WhatsApp is unavailable.
                 </p>
               </div>
@@ -414,11 +412,11 @@ export default function MessagesPage() {
             /* Empty state */
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-[#101713] flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-gray-600" />
+                <div className="w-16 h-16 rounded-full bg-canvas flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-8 h-8 text-ink-soft" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#F0F7F3] mb-1">Select a conversation</h3>
-                <p className="text-sm text-[#9FB0A6]">Choose a lead from the list to start chatting</p>
+                <h3 className="text-lg font-semibold text-ink mb-1">Select a conversation</h3>
+                <p className="text-sm text-ink-soft">Choose a lead from the list to start chatting</p>
               </div>
             </div>
           )}

@@ -94,28 +94,28 @@ export default function TerritoriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#F0F7F3]">Territory Exclusivity</h1>
-        <p className="text-[#9FB0A6] mt-1">Purchase exclusive territories — only one business per area</p>
+        <h1 className="text-2xl font-bold text-ink">Territory Exclusivity</h1>
+        <p className="text-ink-soft mt-1">Purchase exclusive territories — only one business per area</p>
       </div>
 
       {/* My Territory Banner */}
       {!loading && myTerritory && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-[#1B4332]/10 to-[#2D6A4F]/5 border border-[#34D399]/40"
+          className="p-5 rounded-xl bg-gradient-to-r from-line-subtle/10 to-brand-deep/5 border border-brand/40"
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <CheckCircle className="w-6 h-6 text-[#2D6A4F]" />
+              <CheckCircle className="w-6 h-6 text-brand-deep" />
               <div>
-                <h3 className="text-sm font-semibold text-[#F0F7F3]">Your Territory</h3>
-                <p className="text-sm text-[#9FB0A6]">
+                <h3 className="text-sm font-semibold text-ink">Your Territory</h3>
+                <p className="text-sm text-ink-soft">
                   {myTerritory.city}{myTerritory.zone ? ` - ${myTerritory.zone}` : ""}
-                  <span className="text-[#9FB0A6] ml-2">Tier {myTerritory.tier} — {TIER_PRICING[myTerritory.tier]?.label}</span>
+                  <span className="text-ink-soft ml-2">Tier {myTerritory.tier} — {TIER_PRICING[myTerritory.tier]?.label}</span>
                 </p>
               </div>
             </div>
             <button onClick={handleRelease} disabled={actionLoading === "release"}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 text-xs hover:bg-red-500/10 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/30 text-danger text-xs hover:bg-danger/10 disabled:opacity-50"
             >
               {actionLoading === "release" ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
               Release
@@ -128,7 +128,7 @@ export default function TerritoriesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { icon: Globe, label: "Total Territories", value: loading ? "—" : totalCount, color: "from-blue-500 to-blue-600" },
-          { icon: Shield, label: "Available", value: loading ? "—" : availableCount, color: "from-green-500 to-green-600" },
+          { icon: Shield, label: "Available", value: loading ? "—" : availableCount, color: "from-success to-success" },
           { icon: TrendingUp, label: "My Territory", value: loading ? "—" : myTerritory ? 1 : 0, color: "from-purple-500 to-purple-600" },
           { icon: Users, label: "Occupied", value: loading ? "—" : occupiedCount, color: "from-orange-500 to-orange-600" },
         ].map((s) => (
@@ -140,8 +140,8 @@ export default function TerritoriesPage() {
                 <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2", s.color)}>
                   <s.icon className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                <div className="text-xl font-bold text-ink">{s.value}</div>
+                <div className="text-xs text-ink-soft">{s.label}</div>
               </>
             )}
           </div>
@@ -151,13 +151,13 @@ export default function TerritoriesPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search cities or zones..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
           />
         </div>
         <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm focus:outline-none focus:border-[#34D399]/60"
+          className="px-4 py-2.5 rounded-xl app-card text-ink-soft text-sm focus:outline-none focus:border-brand/60"
         >
           <option value="all">All Tiers</option>
           <option value="1">Tier 1 (Metro)</option>
@@ -165,7 +165,7 @@ export default function TerritoriesPage() {
           <option value="3">Tier 3 (Smaller)</option>
         </select>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm focus:outline-none focus:border-[#34D399]/60"
+          className="px-4 py-2.5 rounded-xl app-card text-ink-soft text-sm focus:outline-none focus:border-brand/60"
         >
           <option value="all">All Status</option>
           <option value="available">Available</option>
@@ -191,9 +191,9 @@ export default function TerritoriesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 rounded-xl app-card">
-          <MapPin className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No territories found</h3>
-          <p className="text-sm text-[#9FB0A6]">Try a different search or filter</p>
+          <MapPin className="w-12 h-12 mx-auto mb-4 text-ink-soft" />
+          <h3 className="text-lg font-medium text-ink mb-2">No territories found</h3>
+          <p className="text-sm text-ink-soft">Try a different search or filter</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -207,57 +207,57 @@ export default function TerritoriesPage() {
                 className={cn(
                   "p-5 rounded-xl border transition-all group",
                   isMine
-                    ? "bg-[#34D399]/15 border-[#34D399]/40"
+                    ? "bg-brand/15 border-brand/40"
                     : t.isAvailable
-                    ? "bg-[#101713] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
-                    : "bg-[#101713] border-white/10 opacity-60"
+                    ? "bg-canvas border-line hover:bg-white/[0.06] hover:border-line"
+                    : "bg-canvas border-line opacity-60"
                 )}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className={cn(
                     "flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full",
-                    isMine ? "bg-[#34D399]/25 text-[#2D6A4F]" :
-                    t.isAvailable ? "bg-green-500/10 text-green-400" :
-                    "bg-red-500/10 text-red-400"
+                    isMine ? "bg-brand/25 text-brand-deep" :
+                    t.isAvailable ? "bg-success/10 text-success" :
+                    "bg-danger/10 text-danger"
                   )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isMine ? "bg-[#2D6A4F]" : t.isAvailable ? "bg-green-500" : "bg-red-500")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isMine ? "bg-brand" : t.isAvailable ? "bg-success" : "bg-danger")} />
                     {isMine ? "Yours" : t.isAvailable ? "Available" : "Occupied"}
                   </span>
-                  <MapPin className="w-4 h-4 text-[#9FB0A6]" />
+                  <MapPin className="w-4 h-4 text-ink-soft" />
                 </div>
 
-                <h3 className="text-sm font-semibold text-[#F0F7F3]">{name}</h3>
-                <p className="text-xs text-[#9FB0A6] mt-1">{pricing.label}</p>
+                <h3 className="text-sm font-semibold text-ink">{name}</h3>
+                <p className="text-xs text-ink-soft mt-1">{pricing.label}</p>
 
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#9FB0A6]">Businesses (est.)</span>
-                    <span className="text-[#9FB0A6]">{pricing.businesses.toLocaleString()}+</span>
+                    <span className="text-ink-soft">Businesses (est.)</span>
+                    <span className="text-ink-soft">{pricing.businesses.toLocaleString()}+</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#9FB0A6]">Tier</span>
-                    <span className="text-[#2D6A4F]">{t.tier}</span>
+                    <span className="text-ink-soft">Tier</span>
+                    <span className="text-brand-deep">{t.tier}</span>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t border-line flex items-center justify-between">
                   <div>
-                    <span className="text-lg font-bold text-[#F0F7F3]">₹{pricing.price.toLocaleString()}</span>
-                    <span className="text-xs text-[#9FB0A6]">/mo</span>
+                    <span className="text-lg font-bold text-ink">₹{pricing.price.toLocaleString()}</span>
+                    <span className="text-xs text-ink-soft">/mo</span>
                   </div>
                   {isMine ? (
-                    <span className="text-xs text-[#2D6A4F] font-medium">Active</span>
+                    <span className="text-xs text-brand-deep font-medium">Active</span>
                   ) : t.isAvailable && !myTerritory ? (
                     <button onClick={() => handlePurchase(t.id)}
                       disabled={actionLoading === `purchase-${t.id}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand to-brand-soft text-canvas text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all"
                     >
                       {actionLoading === `purchase-${t.id}` ? (
                         <><Loader2 className="w-3 h-3 animate-spin" /> Claiming...</>
                       ) : "Claim"}
                     </button>
                   ) : (
-                    <span className="text-xs text-[#9FB0A6]">
+                    <span className="text-xs text-ink-soft">
                       {myTerritory ? "Already own one" : "Unavailable"}
                     </span>
                   )}

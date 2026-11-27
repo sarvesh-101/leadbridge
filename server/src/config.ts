@@ -187,6 +187,10 @@ const envSchema = z.object({
   FORWARDING_SMS_NUMBER: z.string().optional(),
   // The email address that brokers forward portal emails to
   FORWARDING_EMAIL: z.string().optional(),
+  // Catch-all domain for per-broker addresses (leads+<token>@<domain>). Defaults
+  // to the domain of FORWARDING_EMAIL, i.e. plus-addressing on the shared
+  // mailbox. Set this when the domain has a catch-all (forward.converza.tech).
+  FORWARDING_DOMAIN: z.string().optional(),
 
   // ─── IMAP email ingestion (alternative to an inbound-email webhook) ──
   // Polls a mailbox (e.g. forward@converza.tech or any Gmail with an app

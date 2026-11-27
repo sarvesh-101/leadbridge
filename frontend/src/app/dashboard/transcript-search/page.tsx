@@ -67,23 +67,23 @@ export default function TranscriptSearchPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#F0F7F3]">Transcript Search</h1>
-        <p className="text-[#9FB0A6] mt-1">Search across all AI call transcripts for keywords and insights</p>
+        <h1 className="text-2xl font-bold text-ink">Transcript Search</h1>
+        <p className="text-ink-soft mt-1">Search across all AI call transcripts for keywords and insights</p>
       </div>
 
       {/* Search Bar */}
       <div className="p-6 rounded-xl app-card">
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown}
               placeholder='Search transcripts — e.g., "budget", "Andheri", "ready to move"...'
-              className="w-full pl-10 pr-4 py-3 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+              className="w-full pl-10 pr-4 py-3 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
               autoFocus
             />
           </div>
           <button onClick={handleSearch} disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50 shrink-0"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             Search
@@ -92,15 +92,15 @@ export default function TranscriptSearchPage() {
 
         {/* Date filters */}
         <div className="flex items-center gap-3">
-          <Calendar className="w-4 h-4 text-[#9FB0A6]" />
+          <Calendar className="w-4 h-4 text-ink-soft" />
           <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-            className="px-3 py-1.5 rounded-lg app-card text-[#F0F7F3] text-xs"
+            className="px-3 py-1.5 rounded-lg app-card text-ink text-xs"
           />
-          <span className="text-[#9FB0A6] text-xs">to</span>
+          <span className="text-ink-soft text-xs">to</span>
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-            className="px-3 py-1.5 rounded-lg app-card text-[#F0F7F3] text-xs"
+            className="px-3 py-1.5 rounded-lg app-card text-ink text-xs"
           />
-          <button onClick={loadStats} className="ml-auto text-xs text-[#6FE3B0] hover:underline">Show stats</button>
+          <button onClick={loadStats} className="ml-auto text-xs text-brand hover:underline">Show stats</button>
         </div>
       </div>
 
@@ -115,10 +115,10 @@ export default function TranscriptSearchPage() {
           ].map((s) => (
             <div key={s.label} className="p-3 rounded-xl app-card">
               <div className="flex items-center gap-2">
-                <s.icon className="w-4 h-4 text-[#9FB0A6]" />
-                <span className="text-xs text-[#9FB0A6]">{s.label}</span>
+                <s.icon className="w-4 h-4 text-ink-soft" />
+                <span className="text-xs text-ink-soft">{s.label}</span>
               </div>
-              <div className="text-lg font-bold text-[#F0F7F3] mt-1">{s.value}</div>
+              <div className="text-lg font-bold text-ink mt-1">{s.value}</div>
             </div>
           ))}
         </div>
@@ -126,28 +126,28 @@ export default function TranscriptSearchPage() {
 
       {/* Results */}
       {loading ? (
-        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 bg-[#101713] rounded-xl animate-pulse" />)}</div>
+        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 bg-canvas rounded-xl animate-pulse" />)}</div>
       ) : searched && results.length === 0 ? (
         <EmptyState icon={Search} title="No results found" description={`No transcripts match "${query}". Try a different search term.`} />
       ) : results.length > 0 ? (
         <div className="space-y-3">
-          <p className="text-sm text-[#9FB0A6]">Found {total} result{total !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;</p>
+          <p className="text-sm text-ink-soft">Found {total} result{total !== 1 ? "s" : ""} for &ldquo;{query}&rdquo;</p>
           {results.map((r, i) => (
             <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}
               className="p-4 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all"
             >
               <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 flex items-center justify-center shrink-0">
-                    <Phone className="w-4 h-4 text-[#6FE3B0]" />
+                  <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
+                    <Phone className="w-4 h-4 text-brand" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#F0F7F3]">{r.lead?.name || "Unknown"}</p>
-                    <p className="text-xs text-[#9FB0A6]">{r.lead?.phone} • {r.type} • {formatDate(r.createdAt)}</p>
+                    <p className="text-sm font-medium text-ink">{r.lead?.name || "Unknown"}</p>
+                    <p className="text-xs text-ink-soft">{r.lead?.phone} • {r.type} • {formatDate(r.createdAt)}</p>
                   </div>
                 </div>
                 {r.duration && (
-                  <span className="text-xs text-[#9FB0A6] shrink-0 flex items-center gap-1">
+                  <span className="text-xs text-ink-soft shrink-0 flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {Math.round(r.duration / 60)}m
                   </span>
                 )}
@@ -155,16 +155,16 @@ export default function TranscriptSearchPage() {
 
               {r.summary && (
                 <div className="mb-2">
-                  <span className="text-xs text-[#9FB0A6] font-medium">Summary:</span>
-                  <p className="text-xs text-[#9FB0A6] mt-0.5 line-clamp-2">{r.summary}</p>
+                  <span className="text-xs text-ink-soft font-medium">Summary:</span>
+                  <p className="text-xs text-ink-soft mt-0.5 line-clamp-2">{r.summary}</p>
                 </div>
               )}
 
               {r.transcript && (
                 <details className="group">
-                  <summary className="text-xs text-[#6FE3B0] cursor-pointer hover:underline">View transcript</summary>
-                  <div className="mt-2 p-3 rounded-lg bg-black/20 border border-white/10 max-h-48 overflow-y-auto">
-                    <pre className="text-xs text-[#9FB0A6] whitespace-pre-wrap font-mono leading-relaxed">{r.transcript}</pre>
+                  <summary className="text-xs text-brand cursor-pointer hover:underline">View transcript</summary>
+                  <div className="mt-2 p-3 rounded-lg bg-black/20 border border-line max-h-48 overflow-y-auto">
+                    <pre className="text-xs text-ink-soft whitespace-pre-wrap font-mono leading-relaxed">{r.transcript}</pre>
                   </div>
                 </details>
               )}

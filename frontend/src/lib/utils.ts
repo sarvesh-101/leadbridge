@@ -58,13 +58,13 @@ export function formatAppointmentDate(dateStr: string | Date | undefined | null)
 export function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
     scheduled: "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30",
-    confirmed: "text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30",
-    visited: "text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30",
-    cancelled: "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30",
-    completed: "text-gray-600 bg-gray-50 dark:text-[#7C8781] dark:bg-gray-900/30",
+    confirmed: "text-success bg-success/10 dark:text-success dark:bg-success/20",
+    visited: "text-success bg-success/10 dark:text-success dark:bg-success/10",
+    cancelled: "text-danger bg-danger dark:text-danger dark:bg-danger/30",
+    completed: "text-ink-soft bg-surface dark:text-ink-muted dark:bg-gray-900/30",
     no_show: "text-rose-600 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/30",
   };
-  return colors[status] || "text-gray-600 bg-gray-50 dark:text-[#7C8781] dark:bg-gray-900/30";
+  return colors[status] || "text-ink-soft bg-surface dark:text-ink-muted dark:bg-gray-900/30";
 }
 
 export function formatPhone(phone: string | undefined | null): string {
@@ -115,13 +115,13 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 export function getScoreColor(score: number): string {
-  if (score >= 70) return "text-green-600 dark:text-green-400";
-  if (score >= 40) return "text-amber-600 dark:text-amber-400";
-  return "text-[#7C8781] dark:text-[#7C8781]";
+  if (score >= 70) return "text-success dark:text-success";
+  if (score >= 40) return "text-warning dark:text-warning";
+  return "text-ink-muted dark:text-ink-muted";
 }
 
 export function getScoreBarColor(score: number): string {
-  if (score >= 70) return "bg-green-500";
-  if (score >= 40) return "bg-amber-500";
-  return "bg-gray-400";
+  if (score >= 70) return "bg-success";
+  if (score >= 40) return "bg-warning";
+  return "bg-neutral-soft";
 }

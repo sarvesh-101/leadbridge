@@ -57,28 +57,28 @@ export default function CallsPage() {
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <div className="rounded-lg app-card p-4">
           <p className="caption mb-1">Total Calls</p>
-          <p className="text-[24px] font-display font-bold text-[#F0F7F3]">{total}</p>
+          <p className="text-[24px] font-display font-bold text-ink">{total}</p>
         </div>
         <div className="rounded-lg app-card p-4">
           <p className="caption mb-1">Total Duration</p>
-          <p className="text-[24px] font-display font-bold text-[#F0F7F3]">{Math.floor(totalDuration / 60)}m {totalDuration % 60}s</p>
+          <p className="text-[24px] font-display font-bold text-ink">{Math.floor(totalDuration / 60)}m {totalDuration % 60}s</p>
         </div>
         <div className="rounded-lg app-card p-4">
           <p className="caption mb-1">Success Rate</p>
-          <p className="text-[24px] font-display font-bold text-[#34D399]">{successRate}%</p>
+          <p className="text-[24px] font-display font-bold text-brand">{successRate}%</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
           <input
             type="text"
             placeholder="Search calls..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/[0.06] border border-white/10 text-[13px] text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#1B4332] transition-colors"
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/[0.06] border border-line text-[13px] text-ink placeholder-ink-muted focus:outline-none focus:border-brand/50 focus:ring-1 focus:ring-line-subtle transition-colors"
           />
         </div>
         <div className="flex gap-1">
@@ -89,8 +89,8 @@ export default function CallsPage() {
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-colors",
                 statusFilter === s
-                  ? "border-[#34D399]/50 bg-[#34D399]/15 text-[#6FE3B0]"
-                  : "border-white/10 text-[#9FB0A6] hover:bg-white/[0.06]"
+                  ? "border-brand/50 bg-brand/15 text-brand"
+                  : "border-line text-ink-soft hover:bg-white/[0.06]"
               )}
             >
               {s === "all" ? "All" : s}
@@ -141,14 +141,14 @@ export default function CallsPage() {
       {/* Recording player for selected call */}
       {selectedCall && selectedCall.recordingUrl && (
         <div className="sticky bottom-0">
-          <div className="rounded-lg bg-white/[0.06] border border-white/10 p-4">
+          <div className="rounded-lg bg-white/[0.06] border border-line p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[13px] font-medium text-[#F0F7F3]">
+              <span className="text-[13px] font-medium text-ink">
                 Recording — {selectedCall.type}
               </span>
               <button
                 onClick={() => setSelectedCall(null)}
-                className="text-[12px] text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors"
+                className="text-[12px] text-ink-soft hover:text-ink transition-colors"
               >
                 Close
               </button>

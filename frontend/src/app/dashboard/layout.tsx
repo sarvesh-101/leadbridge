@@ -72,15 +72,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Show sidebar with subtle loading state while checking profile
   if (!setupCheckDone && isAuthenticated && !pathname.startsWith("/setup") && !pathname.startsWith("/auth")) {
     return (
-      <div className="flex h-screen bg-[#0A0F0C] aurora-backdrop">
+      <div className="flex h-screen bg-canvas aurora-backdrop">
         <div className="hidden md:block">
           <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
         </div>
         <div className="flex-1 flex flex-col min-w-0">
           <TopBar onMenuToggle={() => setMobileMenuOpen(true)} />
           <main className="flex-1 flex items-center justify-center p-6">
-            <div className="flex items-center gap-3 text-[#9FB0A6]">
-              <Loader2 className="w-5 h-5 text-[#6FE3B0] animate-spin" />
+            <div className="flex items-center gap-3 text-ink-soft">
+              <Loader2 className="w-5 h-5 text-brand animate-spin" />
               <span className="text-sm">Loading your workspace…</span>
             </div>
           </main>
@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen bg-[#0A0F0C] aurora-backdrop">
+    <div className="flex h-screen bg-canvas aurora-backdrop">
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
@@ -126,7 +126,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           style: {
             background: "#101713",
             border: "1px solid rgba(255,255,255,0.1)",
-            color: "#F0F7F3",
+            color: "var(--text-primary)",
           },
         }}
       />
@@ -169,18 +169,18 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
         onClick={onClose}
       />
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 bottom-0 w-72 bg-[#101713]/90 backdrop-blur-xl border-r border-white/10 overflow-y-auto z-50 shadow-2xl animate-slide-in">
+      <div className="fixed left-0 top-0 bottom-0 w-72 bg-canvas/90 backdrop-blur-xl border-r border-line overflow-y-auto z-50 shadow-2xl animate-slide-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-line">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#1B4332] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-line-subtle flex items-center justify-center">
               <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-[16px] font-bold text-[#F0F7F3]">Converza</span>
+            <span className="text-[16px] font-bold text-ink">Converza</span>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -191,19 +191,19 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
           <Link
             href="/dashboard/billing"
             onClick={onClose}
-            className="mx-2 mt-3 flex items-center gap-3 rounded-xl border border-[#34D399]/25 bg-[#34D399]/10 px-3 py-3"
+            className="mx-2 mt-3 flex items-center gap-3 rounded-xl border border-brand/25 bg-brand/10 px-3 py-3"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#1B4332] flex items-center justify-center shrink-0">
-              <CreditCard className="w-4 h-4 text-[#6FE3B0]" />
+            <div className="w-9 h-9 rounded-lg bg-line-subtle flex items-center justify-center shrink-0">
+              <CreditCard className="w-4 h-4 text-brand" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-[#9FB0A6]">Your plan</p>
-              <p className="text-[13px] font-semibold text-[#F0F7F3] truncate">
+              <p className="text-[10px] uppercase tracking-wider text-ink-soft">Your plan</p>
+              <p className="text-[13px] font-semibold text-ink truncate">
                 {planUser?.plan || "TRIAL"}
-                <span className="font-normal text-[#9FB0A6]"> · {planUser?.planStatus || "TRIAL"}</span>
+                <span className="font-normal text-ink-soft"> · {planUser?.planStatus || "TRIAL"}</span>
               </p>
             </div>
-            <span className="text-[11px] font-medium text-[#6FE3B0] shrink-0">Billing</span>
+            <span className="text-[11px] font-medium text-brand shrink-0">Billing</span>
           </Link>
         )}
 
@@ -218,8 +218,8 @@ function MobileSidebarOverlay({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-[#34D399]/15 text-[#6FE3B0]"
-                    : "text-[#9FB0A6] hover:bg-white/[0.06] hover:text-[#F0F7F3]"
+                    ? "bg-brand/15 text-brand"
+                    : "text-ink-soft hover:bg-white/[0.06] hover:text-ink"
                 }`}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
@@ -250,7 +250,7 @@ function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#101713]/90 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 z-50">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-canvas/90 backdrop-blur-xl border-t border-line flex items-center justify-around px-2 z-50">
       {navItems.map((item) => {
         const active = isActive(item.href);
         return (
@@ -258,7 +258,7 @@ function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
             key={item.label}
             href={item.href}
             className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${
-              active ? "text-[#6FE3B0]" : "text-[#9FB0A6]"
+              active ? "text-brand" : "text-ink-soft"
             }`}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -270,7 +270,7 @@ function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
       })}
       <button
         onClick={onOpenMenu}
-        className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[#9FB0A6] transition-colors"
+        className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-ink-soft transition-colors"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="1" />

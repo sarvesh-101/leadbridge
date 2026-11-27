@@ -47,11 +47,11 @@ function AcceptInviteForm() {
   if (!token || !email) {
     return (
       <div className="w-full max-w-md p-8 rounded-2xl glass-card text-center">
-        <XCircle className="w-12 h-12 text-[#FB7185] mx-auto mb-4" />
-        <h1 className="text-lg font-semibold text-[#F0F7F3] mb-2">Invalid Invitation</h1>
-        <p className="text-sm text-[#9FB0A6] mb-6">This invitation link is invalid or has expired.</p>
+        <XCircle className="w-12 h-12 text-danger mx-auto mb-4" />
+        <h1 className="text-lg font-semibold text-ink mb-2">Invalid Invitation</h1>
+        <p className="text-sm text-ink-soft mb-6">This invitation link is invalid or has expired.</p>
         <Link href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-bold hover:shadow-[0_0_24px_rgba(52,211,153,0.4)]"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-bold hover:shadow-[0_0_24px_rgba(242,140,69,0.28)]"
         >
           Go to Login
         </Link>
@@ -64,11 +64,11 @@ function AcceptInviteForm() {
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md p-8 rounded-2xl glass-card text-center"
       >
-        <CheckCircle className="w-12 h-12 text-[#34D399] mx-auto mb-4" />
-        <h1 className="text-lg font-semibold text-[#F0F7F3] mb-2">Welcome to the Team!</h1>
-        <p className="text-sm text-[#9FB0A6] mb-6">Your account is set up. You can now log in with your email and password.</p>
+        <CheckCircle className="w-12 h-12 text-brand mx-auto mb-4" />
+        <h1 className="text-lg font-semibold text-ink mb-2">Welcome to the Team!</h1>
+        <p className="text-sm text-ink-soft mb-6">Your account is set up. You can now log in with your email and password.</p>
         <Link href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-bold hover:shadow-[0_0_24px_rgba(52,211,153,0.4)]"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-bold hover:shadow-[0_0_24px_rgba(242,140,69,0.28)]"
         >
           Go to Login
         </Link>
@@ -81,38 +81,38 @@ function AcceptInviteForm() {
       className="w-full max-w-md"
     >
       <div className="flex items-center justify-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
-          <Users className="w-5 h-5 text-[#0A0F0C]" />
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand to-line-subtle flex items-center justify-center shadow-[0_0_20px_rgba(242,140,69,0.25)]">
+          <Users className="w-5 h-5 text-canvas" />
         </div>
-        <span className="text-xl font-bold text-[#F0F7F3]">Converza</span>
+        <span className="text-xl font-bold text-ink">Converza</span>
       </div>
 
       <div className="p-8 rounded-2xl glass-card">
-        <h1 className="text-xl font-semibold text-[#F0F7F3] mb-2">You're Invited!</h1>
-        <p className="text-sm text-[#9FB0A6] mb-6">
-          Set up your account for <strong className="text-[#F0F7F3]">{email}</strong>
+        <h1 className="text-xl font-semibold text-ink mb-2">You're Invited!</h1>
+        <p className="text-sm text-ink-soft mb-6">
+          Set up your account for <strong className="text-ink">{email}</strong>
         </p>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-[#9FB0A6] mb-1.5">Password</label>
+            <label className="block text-sm text-ink-soft mb-1.5">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
-              className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+              className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-line text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
               autoFocus
             />
           </div>
           <div>
-            <label className="block text-sm text-[#9FB0A6] mb-1.5">Confirm Password</label>
+            <label className="block text-sm text-ink-soft mb-1.5">Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Repeat your password"
-              className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/10 text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+              className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-line text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
             />
           </div>
         </div>
@@ -120,7 +120,7 @@ function AcceptInviteForm() {
         <button
           onClick={handleAccept}
           disabled={!password || accepting}
-          className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-bold hover:shadow-[0_0_32px_rgba(52,211,153,0.4)] disabled:opacity-50 transition-all"
+          className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-bold hover:shadow-[0_0_32px_rgba(242,140,69,0.35)] disabled:opacity-50 transition-all"
         >
           {accepting ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Setting up...</>
@@ -135,10 +135,10 @@ function AcceptInviteForm() {
 
 export default function AcceptInvitePage() {
   return (
-    <div className="min-h-screen bg-[#0A0F0C] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
       <Suspense fallback={
         <div className="flex items-center justify-center">
-          <Loader2 className="w-6 h-6 text-[#34D399] animate-spin" />
+          <Loader2 className="w-6 h-6 text-brand animate-spin" />
         </div>
       }>
         <AcceptInviteForm />

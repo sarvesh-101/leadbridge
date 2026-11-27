@@ -27,22 +27,22 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const BADGE: Record<string, string> = {
-  LIVE: "bg-[#34D399]/15 border-[#34D399]/30 text-[#6FE3B0]",
-  SETUP_ASSISTED: "bg-[#E8C468]/10 border-[#E8C468]/25 text-[#E8C468]",
-  IN_SETUP: "bg-white/[0.06] border-white/15 text-[#9FB0A6]",
-  COMING_SOON: "bg-white/[0.03] border-white/10 text-[#6B7C73]",
+  LIVE: "bg-brand/15 border-brand/30 text-brand",
+  SETUP_ASSISTED: "bg-brand/10 border-brand/25 text-brand",
+  IN_SETUP: "bg-white/[0.06] border-line text-ink-soft",
+  COMING_SOON: "bg-white/[0.03] border-line text-ink-muted",
 };
 
 export default function IntegrationSection() {
   const { ref } = useInView({ threshold: 0.1, triggerOnce: true });
 
   return (
-    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="integrations">
+    <section ref={ref} className="relative py-20 lg:py-32 bg-canvas overflow-hidden" id="integrations">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
-          <span className="caption text-gradient-emerald mb-4 block">CONNECT EVERYTHING</span>
+          <span className="caption mb-4 block">CONNECT EVERYTHING</span>
           <h2 className="h1-text mb-4">Works with every lead source</h2>
-          <p className="text-[16px] text-[#9FB0A6] max-w-[560px] mx-auto">
+          <p className="body-text max-w-[560px] mx-auto">
             Every source below shows its real status. We never call a connection instant before it is live.
           </p>
         </div>
@@ -51,12 +51,12 @@ export default function IntegrationSection() {
           {INTEGRATIONS.sources.map((integration) => {
             const Icon = ICONS[integration.id] || Globe;
             return (
-              <div key={integration.id} className="relative p-5 rounded-xl glass-card hover:border-[#34D399]/40 transition-all duration-300">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#34D399]/20 to-[#1B4332]/30 flex items-center justify-center mb-3 border border-[#34D399]/20">
-                  <Icon className="w-5 h-5 text-[#6FE3B0]" />
+              <div key={integration.id} className="relative p-5 rounded-xl surface-card hover:border-brand-copper transition-all duration-300">
+                <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center mb-3 border border-brand/25">
+                  <Icon className="w-5 h-5 text-brand" />
                 </div>
-                <h3 className="text-[14px] font-semibold text-[#F0F7F3] mb-0.5">{integration.name}</h3>
-                <p className="text-[11px] text-[#6B7C73] leading-relaxed mb-3">{integration.note}</p>
+                <h3 className="text-[14px] font-semibold text-ink mb-0.5">{integration.name}</h3>
+                <p className="text-[11px] text-ink-muted leading-relaxed mb-3">{integration.note}</p>
                 <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border ${BADGE[integration.availability]}`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />
                   <span className="text-[9px] font-medium">{integration.label}</span>
@@ -67,8 +67,8 @@ export default function IntegrationSection() {
         </div>
 
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass-card">
-            <span className="text-[13px] text-[#9FB0A6]">
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full surface-card">
+            <span className="text-[13px] text-ink-soft">
               Any source → Converza AI → you get a WhatsApp summary
             </span>
           </div>

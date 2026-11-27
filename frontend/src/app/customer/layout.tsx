@@ -24,10 +24,10 @@ function OfflineDetector() {
   if (isOnline) return null;
 
   return (
-    <div className="sticky top-0 z-50 bg-red-500/90 backdrop-blur-md border-b border-red-400/30">
+    <div className="sticky top-0 z-50 bg-danger/90 backdrop-blur-md border-b border-danger/30">
       <div className="max-w-2xl mx-auto px-4 py-2 flex items-center justify-center gap-2">
-        <WifiOff className="w-4 h-4 text-[#F0F7F3]" />
-        <span className="text-xs text-[#F0F7F3] font-medium">
+        <WifiOff className="w-4 h-4 text-ink" />
+        <span className="text-xs text-ink font-medium">
           You&apos;re offline. Some features may be unavailable.
         </span>
       </div>
@@ -60,10 +60,10 @@ function OnlineBanner() {
   if (!showReconnected) return null;
 
   return (
-    <div className="sticky top-0 z-50 bg-green-500/90 backdrop-blur-md border-b border-green-400/30 animate-in slide-in-from-top">
+    <div className="sticky top-0 z-50 bg-success/90 backdrop-blur-md border-b border-success/30 animate-in slide-in-from-top">
       <div className="max-w-2xl mx-auto px-4 py-2 flex items-center justify-center gap-2">
-        <Wifi className="w-4 h-4 text-[#F0F7F3]" />
-        <span className="text-xs text-[#F0F7F3] font-medium">
+        <Wifi className="w-4 h-4 text-ink" />
+        <span className="text-xs text-ink font-medium">
           Back online! Your data is up to date.
         </span>
       </div>
@@ -88,7 +88,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           style: {
             background: "#101713",
             border: "1px solid rgba(255,255,255,0.1)",
-            color: "#F0F7F3",
+            color: "var(--text-primary)",
           },
         }}
       />

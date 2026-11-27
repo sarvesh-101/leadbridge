@@ -44,8 +44,8 @@ const PORTAL_SMS_EXAMPLES = [
   {
     portal: "JustDial",
     template: "JustDial Enquiry - Amit Singh, +91-9876543210, Interested in 2BHK rental in Andheri West. Budget: 50K/month",
-    color: "text-green-400",
-    bg: "bg-green-500/10",
+    color: "text-success",
+    bg: "bg-success/10",
   },
   {
     portal: "Manual",
@@ -59,12 +59,12 @@ function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     PENDING: "text-yellow-400 border-yellow-500/20 bg-yellow-500/10",
     CALLING: "text-blue-400 border-blue-500/20 bg-blue-500/10",
-    BOOKED: "text-green-400 border-green-500/20 bg-green-500/10",
-    CONVERTED: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
-    COLD: "text-[#9FB0A6] border-gray-500/20 bg-gray-500/10",
+    BOOKED: "text-success border-success/20 bg-success/10",
+    CONVERTED: "text-success border-success/20 bg-success/10",
+    COLD: "text-ink-soft border-line/20 bg-neutral-soft/10",
   };
   return (
-    <span className={cn("text-[10px] px-2 py-0.5 rounded-full border", colors[status] || "text-[#9FB0A6] border-gray-500/20 bg-gray-500/10")}>
+    <span className={cn("text-[10px] px-2 py-0.5 rounded-full border", colors[status] || "text-ink-soft border-line/20 bg-neutral-soft/10")}>
       {status}
     </span>
   );
@@ -89,7 +89,7 @@ function CopyButton({ text }: { text: string }) {
       className="p-2 rounded-lg hover:bg-white/[0.06] transition-colors shrink-0"
       title="Copy to clipboard"
     >
-      {copied ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-[#9FB0A6]" />}
+      {copied ? <CheckCircle2 className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4 text-ink-soft" />}
     </button>
   );
 }
@@ -98,7 +98,7 @@ function SkeletonCard() {
   return (
     <div className="p-5 rounded-2xl app-card animate-pulse space-y-3">
       <div className="h-5 w-40 bg-white/[0.06] rounded" />
-      <div className="h-3 w-64 bg-[#101713] rounded" />
+      <div className="h-3 w-64 bg-canvas rounded" />
       <div className="flex gap-2">
         <div className="h-8 w-32 bg-white/[0.06] rounded-lg" />
         <div className="h-8 w-32 bg-white/[0.06] rounded-lg" />
@@ -165,12 +165,12 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
     >
       <div className="flex items-start justify-between mb-1 gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-[#F0F7F3] flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#E8C468]" />
+          <h2 className="text-sm font-semibold text-ink flex items-center gap-2">
+            <Zap className="w-4 h-4 text-brand" />
             Zero-Touch Setup — connect each portal ONCE
           </h2>
-          <p className="text-xs text-[#9FB0A6] mt-1">
-            Do this once per portal. After that <strong className="text-[#6FE3B0]">every enquiry is AI-called automatically</strong> — you never forward a lead or upload a CSV again.
+          <p className="text-xs text-ink-soft mt-1">
+            Do this once per portal. After that <strong className="text-brand">every enquiry is AI-called automatically</strong> — you never forward a lead or upload a CSV again.
           </p>
         </div>
       </div>
@@ -181,19 +181,19 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
           <button key={p.id} onClick={() => openPortal(p.id)}
             className={cn(
               "p-3 rounded-xl border text-left transition-all",
-              selected === p.id ? "border-[#34D399]/50 bg-[#34D399]/5" : "border-white/10 bg-black/20 hover:border-[#34D399]/30"
+              selected === p.id ? "border-brand/50 bg-brand/5" : "border-line bg-black/20 hover:border-brand/30"
             )}
           >
             <div className="flex items-center justify-between">
               <span className="text-lg">{p.emoji}</span>
               {donePortals[p.id] && (
-                <span className="flex items-center gap-1 text-[10px] text-green-400 font-medium">
+                <span className="flex items-center gap-1 text-[10px] text-success font-medium">
                   <CheckCircle2 className="w-3 h-3" /> Live
                 </span>
               )}
             </div>
-            <p className="text-[12px] font-medium text-[#F0F7F3] mt-1">{p.name}</p>
-            <p className="text-[10px] text-[#9FB0A6]">
+            <p className="text-[12px] font-medium text-ink mt-1">{p.name}</p>
+            <p className="text-[10px] text-ink-soft">
               {p.hasDirectApi ? "Official API · best" : "Auto-forward"}
             </p>
           </button>
@@ -206,11 +206,11 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             className="mt-4 overflow-hidden"
           >
-            <div className="p-4 rounded-xl bg-black/30 border border-white/10">
+            <div className="p-4 rounded-xl bg-black/30 border border-line">
               <div className="flex items-center gap-2 mb-4">
                 <span>{portal.emoji}</span>
-                <span className="text-sm font-semibold text-[#F0F7F3]">{portal.name}</span>
-                <span className="text-[10px] text-green-400 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 ml-auto">
+                <span className="text-sm font-semibold text-ink">{portal.name}</span>
+                <span className="text-[10px] text-success px-2 py-0.5 rounded-full bg-success/10 border border-success/20 ml-auto">
                   one-time · ~{portal.hasDirectApi ? "10" : "15"} min
                 </span>
               </div>
@@ -226,8 +226,8 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
                     className={cn(
                       "px-3 py-1.5 rounded-lg text-[11px] border transition-colors",
                       tab === t.id
-                        ? "bg-[#34D399]/15 border-[#34D399]/50 text-[#34D399] font-medium"
-                        : "bg-white/[0.06] border-white/10 text-[#9FB0A6] hover:border-[#34D399]/30"
+                        ? "bg-brand/15 border-brand/50 text-brand font-medium"
+                        : "bg-white/[0.06] border-line text-ink-soft hover:border-brand/30"
                     )}
                   >{t.label}</button>
                 ))}
@@ -235,76 +235,76 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
 
               {/* ── Direct API tab (IndiaMART) ── */}
               {tab === "api" && (
-                <ol className="space-y-3 text-xs text-[#9FB0A6]">
+                <ol className="space-y-3 text-xs text-ink-soft">
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">1.</span>
-                    <span>Open <a href="https://seller.indiamart.com/leadmanager/crmapi" target="_blank" rel="noopener noreferrer" className="text-[#6FE3B0] hover:underline inline-flex items-center gap-1">seller.indiamart.com/leadmanager/crmapi <ExternalLink className="w-3 h-3" /></a> → tap <strong className="text-[#F0F7F3]">⋮ → CRM Integration → Generate Key</strong>. The key is emailed to your registered email.</span>
+                    <span className="text-brand shrink-0 font-bold">1.</span>
+                    <span>Open <a href="https://seller.indiamart.com/leadmanager/crmapi" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline inline-flex items-center gap-1">seller.indiamart.com/leadmanager/crmapi <ExternalLink className="w-3 h-3" /></a> → tap <strong className="text-ink">⋮ → CRM Integration → Generate Key</strong>. The key is emailed to your registered email.</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">2.</span>
-                    <span>In Converza, open <Link href="/dashboard/integrations" className="text-[#6FE3B0] hover:underline">Integrations → IndiaMART → Connect</Link> → enter your 10-digit IndiaMART mobile + paste the key → <strong className="text-[#F0F7F3]">Save &amp; Verify</strong>.</span>
+                    <span className="text-brand shrink-0 font-bold">2.</span>
+                    <span>In Converza, open <Link href="/dashboard/integrations" className="text-brand hover:underline">Integrations → IndiaMART → Connect</Link> → enter your 10-digit IndiaMART mobile + paste the key → <strong className="text-ink">Save &amp; Verify</strong>.</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">3.</span>
-                    <span>For real-time push: IndiaMART → <strong className="text-[#F0F7F3]">Lead Manager → Import/Export Leads → Push API</strong> → choose platform <strong className="text-[#F0F7F3]">"Other"</strong> → name it Converza → paste the webhook URL shown on our Integrations page → confirm the OTP on your phone.</span>
+                    <span className="text-brand shrink-0 font-bold">3.</span>
+                    <span>For real-time push: IndiaMART → <strong className="text-ink">Lead Manager → Import/Export Leads → Push API</strong> → choose platform <strong className="text-ink">"Other"</strong> → name it Converza → paste the webhook URL shown on our Integrations page → confirm the OTP on your phone.</span>
                   </li>
-                  <li className="p-2.5 rounded-lg bg-green-500/5 border border-green-500/15"><span className="text-[11px] text-[#6FE3B0]">✅ Done forever — every future IndiaMART enquiry reaches Converza in real time and gets AI-called. You never touch it again.</span></li>
-                  <li className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10"><span className="text-[11px] text-amber-400">⚠️ IndiaMART's Leads API is a paid IndiaMART add-on. If "Generate Key" doesn't work, ask your IndiaMART account manager — or use the Auto-forward SMS/Email tabs below (same result, ₹0).</span></li>
+                  <li className="p-2.5 rounded-lg bg-success/5 border border-success/15"><span className="text-[11px] text-brand">✅ Done forever — every future IndiaMART enquiry reaches Converza in real time and gets AI-called. You never touch it again.</span></li>
+                  <li className="p-2.5 rounded-lg bg-warning/5 border border-warning/10"><span className="text-[11px] text-warning">⚠️ IndiaMART's Leads API is a paid IndiaMART add-on. If "Generate Key" doesn't work, ask your IndiaMART account manager — or use the Auto-forward SMS/Email tabs below (same result, ₹0).</span></li>
                 </ol>
               )}
 
               {/* ── Auto-forward SMS tab ── */}
               {tab === "sms" && (
-                <ol className="space-y-3 text-xs text-[#9FB0A6]">
+                <ol className="space-y-3 text-xs text-ink-soft">
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">1.</span>
-                    <span>On your Android phone, install a free auto-forward app — <a href={playStoreSearch} target="_blank" rel="noopener noreferrer" className="text-[#6FE3B0] hover:underline inline-flex items-center gap-1">Play Store: "SMS Forwarder" <ExternalLink className="w-3 h-3" /></a> (any app with "auto forward + filter" works; iPhone users: use the Email tab or the manual forward steps below).</span>
+                    <span className="text-brand shrink-0 font-bold">1.</span>
+                    <span>On your Android phone, install a free auto-forward app — <a href={playStoreSearch} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline inline-flex items-center gap-1">Play Store: "SMS Forwarder" <ExternalLink className="w-3 h-3" /></a> (any app with "auto forward + filter" works; iPhone users: use the Email tab or the manual forward steps below).</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">2.</span>
-                    <span>Create a forwarding rule. <strong className="text-[#F0F7F3]">Forward TO this number:</strong>
-                      <span className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
-                        <strong className="text-[11px] text-[#F0F7F3] font-mono break-all">{forwardingNumber}</strong>
+                    <span className="text-brand shrink-0 font-bold">2.</span>
+                    <span>Create a forwarding rule. <strong className="text-ink">Forward TO this number:</strong>
+                      <span className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-line">
+                        <strong className="text-[11px] text-ink font-mono break-all">{forwardingNumber}</strong>
                         <span className="ml-auto"><CopyBtn text={forwardingNumber} /></span>
                       </span>
                     </span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">3.</span>
-                    <span>Set the match filter to <strong className="text-[#F0F7F3]">"text contains"</strong> →<br /><strong className="text-[11px] text-[#F0F7F3] font-mono">{portal.matchWord}</strong> — every SMS from {portal.name} matches, whatever sender ID they use.</span>
+                    <span className="text-brand shrink-0 font-bold">3.</span>
+                    <span>Set the match filter to <strong className="text-ink">"text contains"</strong> →<br /><strong className="text-[11px] text-ink font-mono">{portal.matchWord}</strong> — every SMS from {portal.name} matches, whatever sender ID they use.</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">4.</span>
-                    <span>Allow the app to run in background (accept the battery-optimisation prompt). Test with the <strong className="text-[#F0F7F3]">Test Forward</strong> section below, then tap <strong className="text-[#F0F7F3]">Mark as live</strong>. ✅ Every future {portal.name} SMS self-forwards — zero work per lead.</span>
+                    <span className="text-brand shrink-0 font-bold">4.</span>
+                    <span>Allow the app to run in background (accept the battery-optimisation prompt). Test with the <strong className="text-ink">Test Forward</strong> section below, then tap <strong className="text-ink">Mark as live</strong>. ✅ Every future {portal.name} SMS self-forwards — zero work per lead.</span>
                   </li>
                 </ol>
               )}
 
               {/* ── Auto-forward Email tab ── */}
               {tab === "email" && (
-                <ol className="space-y-3 text-xs text-[#9FB0A6]">
-                  <li className="p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/10"><span className="text-[11px] text-amber-400">⚠️ Do this from the <strong>same Gmail account you signed up with</strong> — Converza matches forwarded emails to your account by sender. Forwards from other addresses are ignored.</span></li>
+                <ol className="space-y-3 text-xs text-ink-soft">
+                  <li className="p-2.5 rounded-lg bg-success/5 border border-success/15"><span className="text-[11px] text-brand">✅ Any Gmail/Outlook account works — use the address in your inbox, not necessarily the one you signed up with. The address below is yours alone, so the portal enquiry is matched to your account by the <strong>recipient address</strong>, even when the auto-forward keeps the portal as the sender.</span></li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">1.</span>
-                    <span>Gmail on a computer → <strong className="text-[#F0F7F3]">⚙ → See all settings → Forwarding and POP/IMAP</strong> → <strong className="text-[#F0F7F3]">Add a forwarding address</strong> → paste:
-                      <span className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
-                        <strong className="text-[11px] text-[#F0F7F3] font-mono break-all">{forwardingEmail}</strong>
+                    <span className="text-brand shrink-0 font-bold">1.</span>
+                    <span>Gmail on a computer → <strong className="text-ink">⚙ → See all settings → Forwarding and POP/IMAP</strong> → <strong className="text-ink">Add a forwarding address</strong> → paste:
+                      <span className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-line">
+                        <strong className="text-[11px] text-ink font-mono break-all">{forwardingEmail}</strong>
                         <span className="ml-auto"><CopyBtn text={forwardingEmail} /></span>
                       </span>
-                      Gmail sends a confirmation to that mailbox — we help you confirm it during onboarding.
+                      Gmail emails a confirmation link to that address. It lands in Converza's mailbox (not yours) — contact support after adding it and we confirm it for you. Manual Forward works immediately, no confirmation needed.
                     </span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">2.</span>
-                    <span>In the Gmail search bar, click the <strong className="text-[#F0F7F3]">filter sliders icon</strong> → in <strong className="text-[#F0F7F3]">From</strong> enter: <strong className="text-[11px] text-[#F0F7F3] font-mono">{domainsOr}</strong> → <strong className="text-[#F0F7F3]">Create filter</strong>.</span>
+                    <span className="text-brand shrink-0 font-bold">2.</span>
+                    <span>In the Gmail search bar, click the <strong className="text-ink">filter sliders icon</strong> → in <strong className="text-ink">From</strong> enter: <strong className="text-[11px] text-ink font-mono">{domainsOr}</strong> → <strong className="text-ink">Create filter</strong>.</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">3.</span>
-                    <span>Tick <strong className="text-[#F0F7F3]">"Forward it to: {forwardingEmail}"</strong> → <strong className="text-[#F0F7F3]">Create filter</strong>. ✅ Every future {portal.name} enquiry email auto-forwards and gets AI-called — you never open it.</span>
+                    <span className="text-brand shrink-0 font-bold">3.</span>
+                    <span>Tick <strong className="text-ink">"Forward it to: {forwardingEmail}"</strong> → <strong className="text-ink">Create filter</strong>. ✅ Every future {portal.name} enquiry email auto-forwards and gets AI-called — you never open it.</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-[#34D399] shrink-0 font-bold">4.</span>
-                    <span>Test with a real enquiry email → check <strong className="text-[#F0F7F3]">Leads</strong> within ~5 minutes → <strong className="text-[#F0F7F3]">Mark as live</strong>.</span>
+                    <span className="text-brand shrink-0 font-bold">4.</span>
+                    <span>Test with a real enquiry email → check <strong className="text-ink">Leads</strong> within ~5 minutes → <strong className="text-ink">Mark as live</strong>.</span>
                   </li>
                 </ol>
               )}
@@ -314,8 +314,8 @@ function PortalWizard({ forwardingEmail, forwardingNumber }: { forwardingEmail: 
                 className={cn(
                   "mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors",
                   donePortals[portal.id]
-                    ? "bg-green-500/15 border border-green-500/30 text-green-400"
-                    : "bg-[#34D399] text-black hover:opacity-90"
+                    ? "bg-success/15 border border-success/30 text-success"
+                    : "bg-brand text-canvas hover:opacity-90"
                 )}
               >
                 {donePortals[portal.id] ? <><CheckCircle2 className="w-4 h-4" /> {portal.name} is LIVE — tap to undo</> : <><Zap className="w-4 h-4" /> Mark {portal.name} as live</>}
@@ -339,10 +339,10 @@ function CopyBtn({ text }: { text: string }) {
           setTimeout(() => setCopied(false), 2000);
         } catch { /* clipboard unavailable */ }
       }}
-      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors shrink-0"
+      className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft transition-colors shrink-0"
       title="Copy"
     >
-      {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+      {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
     </button>
   );
 }
@@ -354,6 +354,9 @@ export default function LeadForwardingPage() {
   const [sendingTest, setSendingTest] = useState(false);
   const [testPhone, setTestPhone] = useState("");
   const [testEmail, setTestEmail] = useState("");
+  // This broker's own `leads+<token>@<domain>` address — the one an auto-forward
+  // rule should point at (the shared mailbox only works for manual forwards).
+  const [brokerEmail, setBrokerEmail] = useState("");
 
   useEffect(() => {
     loadStatus();
@@ -362,9 +365,10 @@ export default function LeadForwardingPage() {
   async function loadStatus() {
     setLoading(true);
     try {
-      const [smsStatus, emailStatus, recentLeads] = await Promise.all([
+      const [smsStatus, emailStatus, addressStatus, recentLeads] = await Promise.all([
         api.get<{ configured: boolean; forwardingNumber: string }>("/webhooks/sms/status").catch(() => null),
         api.get<{ configured: boolean; forwardingEmail: string }>("/webhooks/email/status").catch(() => null),
+        api.get<{ address: string }>("/forwarding/address").catch(() => null),
         api.get<{ leads: ForwardingStatus["recentLeads"] }>("/leads?source=sms_forward,email_forward,email_forward_99acres,email_forward_magicbricks,email_forward_justdial&limit=10&sort=-createdAt").catch(() => null),
       ]);
 
@@ -375,6 +379,7 @@ export default function LeadForwardingPage() {
         forwardingEmail: emailStatus?.forwardingEmail || process.env.NEXT_PUBLIC_FORWARDING_EMAIL || "forward@converza.tech",
         recentLeads: (recentLeads as any)?.leads?.slice(0, 5) || [],
       });
+      setBrokerEmail(addressStatus?.address || "");
     } catch (err: any) {
       toast.error("Failed to load forwarding status");
     } finally {
@@ -412,13 +417,13 @@ export default function LeadForwardingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0F0C]">
-        <header className="sticky top-0 z-10 bg-[#0A0F0C]/80 backdrop-blur-lg border-b border-white/10">
+      <div className="min-h-screen bg-canvas">
+        <header className="sticky top-0 z-10 bg-canvas/80 backdrop-blur-lg border-b border-line">
           <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-white/[0.06] animate-pulse" />
             <div className="space-y-1">
               <div className="h-4 w-32 bg-white/[0.06] rounded" />
-              <div className="h-3 w-48 bg-[#101713] rounded" />
+              <div className="h-3 w-48 bg-canvas rounded" />
             </div>
           </div>
         </header>
@@ -432,18 +437,18 @@ export default function LeadForwardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F0C]">
+    <div className="min-h-screen bg-canvas">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0A0F0C]/80 backdrop-blur-lg border-b border-white/10">
+      <header className="sticky top-0 z-10 bg-canvas/80 backdrop-blur-lg border-b border-line">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1B4332] to-[#34D399] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-line-subtle to-brand flex items-center justify-center">
             <Send className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-[#F0F7F3]">Lead Forwarding</h1>
-            <p className="text-xs text-[#9FB0A6]">Forward portal SMS/emails to auto-create leads with AI calling</p>
+            <h1 className="text-lg font-semibold text-ink">Lead Forwarding</h1>
+            <p className="text-xs text-ink-soft">Forward portal SMS/emails to auto-create leads with AI calling</p>
           </div>
-          <button onClick={loadStatus} className="ml-auto p-2 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6] transition-colors" title="Refresh">
+          <button onClick={loadStatus} className="ml-auto p-2 rounded-lg hover:bg-white/[0.06] text-ink-soft transition-colors" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
@@ -456,31 +461,31 @@ export default function LeadForwardingPage() {
             className={cn(
               "p-5 rounded-2xl border transition-all",
               status?.smsConfigured
-                ? "bg-green-500/5 border-green-500/20"
-                : "bg-[#101713] border-white/10"
+                ? "bg-success/5 border-success/20"
+                : "bg-canvas border-line"
             )}
           >
             <div className="flex items-center gap-3 mb-3">
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center",
-                status?.smsConfigured ? "bg-green-500/20" : "bg-white/[0.06]"
+                status?.smsConfigured ? "bg-success/20" : "bg-white/[0.06]"
               )}>
-                <Smartphone className={cn("w-5 h-5", status?.smsConfigured ? "text-green-400" : "text-[#9FB0A6]")} />
+                <Smartphone className={cn("w-5 h-5", status?.smsConfigured ? "text-success" : "text-ink-soft")} />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-[#F0F7F3]">SMS Forwarding</h3>
-                <p className="text-xs text-[#9FB0A6]">Forward portal SMS to auto-create leads</p>
+                <h3 className="text-sm font-semibold text-ink">SMS Forwarding</h3>
+                <p className="text-xs text-ink-soft">Forward portal SMS to auto-create leads</p>
               </div>
               <div className="ml-auto">
                 {status?.smsConfigured
-                  ? <span className="flex items-center gap-1 text-[11px] text-green-400"><CheckCircle2 className="w-3 h-3" /> Active</span>
-                  : <span className="flex items-center gap-1 text-[11px] text-amber-400"><AlertCircle className="w-3 h-3" /> Not Set</span>
+                  ? <span className="flex items-center gap-1 text-[11px] text-success"><CheckCircle2 className="w-3 h-3" /> Active</span>
+                  : <span className="flex items-center gap-1 text-[11px] text-warning"><AlertCircle className="w-3 h-3" /> Not Set</span>
                 }
               </div>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/20">
-              <Phone className="w-3.5 h-3.5 text-[#6FE3B0]" />
-              <span className="text-sm font-mono text-[#F0F7F3] flex-1">{status?.forwardingNumber || "Set FORWARDING_SMS_NUMBER"}</span>
+              <Phone className="w-3.5 h-3.5 text-brand" />
+              <span className="text-sm font-mono text-ink flex-1">{status?.forwardingNumber || "Set FORWARDING_SMS_NUMBER"}</span>
               <CopyButton text={status?.forwardingNumber || ""} />
             </div>
           </motion.div>
@@ -489,33 +494,39 @@ export default function LeadForwardingPage() {
             className={cn(
               "p-5 rounded-2xl border transition-all",
               status?.emailConfigured
-                ? "bg-green-500/5 border-green-500/20"
-                : "bg-[#101713] border-white/10"
+                ? "bg-success/5 border-success/20"
+                : "bg-canvas border-line"
             )}
           >
             <div className="flex items-center gap-3 mb-3">
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center",
-                status?.emailConfigured ? "bg-green-500/20" : "bg-white/[0.06]"
+                status?.emailConfigured ? "bg-success/20" : "bg-white/[0.06]"
               )}>
-                <Mail className={cn("w-5 h-5", status?.emailConfigured ? "text-green-400" : "text-[#9FB0A6]")} />
+                <Mail className={cn("w-5 h-5", status?.emailConfigured ? "text-success" : "text-ink-soft")} />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-[#F0F7F3]">Email Forwarding</h3>
-                <p className="text-xs text-[#9FB0A6]">Forward portal emails to auto-create leads</p>
+                <h3 className="text-sm font-semibold text-ink">Email Forwarding</h3>
+                <p className="text-xs text-ink-soft">Forward portal emails to auto-create leads</p>
               </div>
               <div className="ml-auto">
                 {status?.emailConfigured
-                  ? <span className="flex items-center gap-1 text-[11px] text-green-400"><CheckCircle2 className="w-3 h-3" /> Active</span>
-                  : <span className="flex items-center gap-1 text-[11px] text-amber-400"><AlertCircle className="w-3 h-3" /> Not Set</span>
+                  ? <span className="flex items-center gap-1 text-[11px] text-success"><CheckCircle2 className="w-3 h-3" /> Active</span>
+                  : <span className="flex items-center gap-1 text-[11px] text-warning"><AlertCircle className="w-3 h-3" /> Not Set</span>
                 }
               </div>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-black/20">
-              <Inbox className="w-3.5 h-3.5 text-[#34D399]" />
-              <span className="text-sm font-mono text-[#F0F7F3] flex-1">{status?.forwardingEmail || "Set FORWARDING_EMAIL"}</span>
-              <CopyButton text={status?.forwardingEmail || ""} />
+              <Inbox className="w-3.5 h-3.5 text-brand" />
+              <span className="text-sm font-mono text-ink flex-1">{brokerEmail || status?.forwardingEmail || "Set FORWARDING_EMAIL"}</span>
+              <CopyButton text={brokerEmail || status?.forwardingEmail || ""} />
             </div>
+            {brokerEmail && (
+              <p className="mt-2 text-[11px] text-ink-soft">
+                Your personal address. Point the portal/Gmail auto-forward rule here — the portal stays the
+                sender, routing is done by this address.
+              </p>
+            )}
           </motion.div>
         </div>
 
@@ -523,32 +534,32 @@ export default function LeadForwardingPage() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
           className="p-5 rounded-2xl app-card"
         >
-          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">How It Works</h2>
+          <h2 className="text-sm font-semibold text-ink mb-4">How It Works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 flex items-center justify-center mb-2">
-                <span className="text-sm font-bold text-[#6FE3B0]">1</span>
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-line">
+              <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center mb-2">
+                <span className="text-sm font-bold text-brand">1</span>
               </div>
-              <p className="text-xs text-[#9FB0A6]">You receive a new enquiry SMS or email from 99acres, MagicBricks, or another portal</p>
+              <p className="text-xs text-ink-soft">You receive a new enquiry SMS or email from 99acres, MagicBricks, or another portal</p>
             </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 flex items-center justify-center mb-2">
-                <span className="text-sm font-bold text-[#34D399]">2</span>
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-line">
+              <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center mb-2">
+                <span className="text-sm font-bold text-brand">2</span>
               </div>
-              <p className="text-xs text-[#9FB0A6]">Forward that SMS/email to the Converza number/email above — don't change anything</p>
+              <p className="text-xs text-ink-soft">Forward that SMS/email to the Converza number/email above — don't change anything</p>
             </div>
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
-              <div className="w-8 h-8 rounded-lg bg-[#E8C468]/15 flex items-center justify-center mb-2">
-                <span className="text-sm font-bold text-[#E8C468]">3</span>
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-line">
+              <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center mb-2">
+                <span className="text-sm font-bold text-brand">3</span>
               </div>
-              <p className="text-xs text-[#9FB0A6]">Converza auto-extracts the lead, creates it, and starts the AI calling pipeline immediately</p>
+              <p className="text-xs text-ink-soft">Converza auto-extracts the lead, creates it, and starts the AI calling pipeline immediately</p>
             </div>
           </div>
         </motion.div>
 
         {/* ═══ Portal Auto-Forward Wizard — set each portal ONCE, then zero work ═══ */}
         <PortalWizard
-          forwardingEmail={status?.forwardingEmail || ""}
+          forwardingEmail={brokerEmail || status?.forwardingEmail || ""}
           forwardingNumber={status?.forwardingNumber || ""}
         />
 
@@ -556,22 +567,22 @@ export default function LeadForwardingPage() {
         <div className="space-y-3">
           {/* SMS Section */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-            className="rounded-2xl border border-white/10 bg-[#101713] overflow-hidden"
+            className="rounded-2xl border border-line bg-canvas overflow-hidden"
           >
             <button
               onClick={() => toggleSection("sms")}
               className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.03] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#34D399]/15 flex items-center justify-center">
-                  <Smartphone className="w-4.5 h-4.5 text-[#6FE3B0]" />
+                <div className="w-9 h-9 rounded-xl bg-brand/15 flex items-center justify-center">
+                  <Smartphone className="w-4.5 h-4.5 text-brand" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">Forward SMS from Your Phone</h3>
-                  <p className="text-xs text-[#9FB0A6]">iPhone & Android — works with all SMS apps</p>
+                  <h3 className="text-sm font-semibold text-ink">Forward SMS from Your Phone</h3>
+                  <p className="text-xs text-ink-soft">iPhone & Android — works with all SMS apps</p>
                 </div>
               </div>
-              {expandedSection === "sms" ? <ChevronUp className="w-4 h-4 text-[#9FB0A6]" /> : <ChevronDown className="w-4 h-4 text-[#9FB0A6]" />}
+              {expandedSection === "sms" ? <ChevronUp className="w-4 h-4 text-ink-soft" /> : <ChevronDown className="w-4 h-4 text-ink-soft" />}
             </button>
 
             <AnimatePresence>
@@ -580,71 +591,71 @@ export default function LeadForwardingPage() {
                   className="px-5 pb-5 space-y-4"
                 >
                   {/* Android instructions */}
-                  <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                    <h4 className="text-xs font-semibold text-[#F0F7F3] mb-2 flex items-center gap-2">
+                  <div className="p-4 rounded-xl bg-black/20 border border-line">
+                    <h4 className="text-xs font-semibold text-ink mb-2 flex items-center gap-2">
                       <Smartphone className="w-3.5 h-3.5" /> Android
                     </h4>
-                    <ol className="space-y-2 text-xs text-[#9FB0A6]">
+                    <ol className="space-y-2 text-xs text-ink-soft">
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">1.</span>
+                        <span className="text-brand shrink-0">1.</span>
                         Open the SMS from the portal (99acres, MagicBricks, etc.)
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">2.</span>
-                        Long-press the message and tap <strong className="text-[#F0F7F3]">Forward</strong>
+                        <span className="text-brand shrink-0">2.</span>
+                        Long-press the message and tap <strong className="text-ink">Forward</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">3.</span>
-                        Enter this number: <strong className="text-[#F0F7F3] font-mono">{status?.forwardingNumber}</strong>
+                        <span className="text-brand shrink-0">3.</span>
+                        Enter this number: <strong className="text-ink font-mono">{status?.forwardingNumber}</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">4.</span>
-                        Tap <strong className="text-[#F0F7F3]">Send</strong> — the lead is automatically created!
+                        <span className="text-brand shrink-0">4.</span>
+                        Tap <strong className="text-ink">Send</strong> — the lead is automatically created!
                       </li>
                     </ol>
                   </div>
 
                   {/* iPhone instructions */}
-                  <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                    <h4 className="text-xs font-semibold text-[#F0F7F3] mb-2 flex items-center gap-2">
+                  <div className="p-4 rounded-xl bg-black/20 border border-line">
+                    <h4 className="text-xs font-semibold text-ink mb-2 flex items-center gap-2">
                       <Smartphone className="w-3.5 h-3.5" /> iPhone (iOS)
                     </h4>
-                    <ol className="space-y-2 text-xs text-[#9FB0A6]">
+                    <ol className="space-y-2 text-xs text-ink-soft">
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">1.</span>
+                        <span className="text-brand shrink-0">1.</span>
                         Open the SMS from the portal
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">2.</span>
-                        Tap and hold the message bubble, tap <strong className="text-[#F0F7F3]">More...</strong>
+                        <span className="text-brand shrink-0">2.</span>
+                        Tap and hold the message bubble, tap <strong className="text-ink">More...</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">3.</span>
-                        Tap the forward arrow <strong className="text-[#F0F7F3]">→</strong> in bottom-right
+                        <span className="text-brand shrink-0">3.</span>
+                        Tap the forward arrow <strong className="text-ink">→</strong> in bottom-right
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">4.</span>
-                        Enter this number: <strong className="text-[#F0F7F3] font-mono">{status?.forwardingNumber}</strong>
+                        <span className="text-brand shrink-0">4.</span>
+                        Enter this number: <strong className="text-ink font-mono">{status?.forwardingNumber}</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#6FE3B0] shrink-0">5.</span>
-                        Tap <strong className="text-[#F0F7F3]">Send</strong>
+                        <span className="text-brand shrink-0">5.</span>
+                        Tap <strong className="text-ink">Send</strong>
                       </li>
                     </ol>
                   </div>
 
                   {/* Portal SMS examples */}
                   <div>
-                    <h4 className="text-xs font-semibold text-[#F0F7F3] mb-3">What portal SMS look like (they all work)</h4>
+                    <h4 className="text-xs font-semibold text-ink mb-3">What portal SMS look like (they all work)</h4>
                     <div className="space-y-2">
                       {PORTAL_SMS_EXAMPLES.map((example, i) => (
-                        <div key={i} className="p-3 rounded-xl bg-black/20 border border-white/10">
+                        <div key={i} className="p-3 rounded-xl bg-black/20 border border-line">
                           <div className="flex items-center gap-2 mb-1.5">
                             <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded", example.bg, example.color)}>
                               {example.portal}
                             </span>
                           </div>
-                          <p className="text-[11px] text-[#9FB0A6] font-mono leading-relaxed">
+                          <p className="text-[11px] text-ink-soft font-mono leading-relaxed">
                             {example.template}
                           </p>
                         </div>
@@ -658,22 +669,22 @@ export default function LeadForwardingPage() {
 
           {/* Email Section */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-            className="rounded-2xl border border-white/10 bg-[#101713] overflow-hidden"
+            className="rounded-2xl border border-line bg-canvas overflow-hidden"
           >
             <button
               onClick={() => toggleSection("email")}
               className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.03] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#34D399]/15 flex items-center justify-center">
-                  <Mail className="w-4.5 h-4.5 text-[#34D399]" />
+                <div className="w-9 h-9 rounded-xl bg-brand/15 flex items-center justify-center">
+                  <Mail className="w-4.5 h-4.5 text-brand" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">Forward Email from Your Inbox</h3>
-                  <p className="text-xs text-[#9FB0A6]">Gmail, Outlook, or any email app</p>
+                  <h3 className="text-sm font-semibold text-ink">Forward Email from Your Inbox</h3>
+                  <p className="text-xs text-ink-soft">Gmail, Outlook, or any email app</p>
                 </div>
               </div>
-              {expandedSection === "email" ? <ChevronUp className="w-4 h-4 text-[#9FB0A6]" /> : <ChevronDown className="w-4 h-4 text-[#9FB0A6]" />}
+              {expandedSection === "email" ? <ChevronUp className="w-4 h-4 text-ink-soft" /> : <ChevronDown className="w-4 h-4 text-ink-soft" />}
             </button>
 
             <AnimatePresence>
@@ -681,40 +692,41 @@ export default function LeadForwardingPage() {
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                   className="px-5 pb-5 space-y-4"
                 >
-                  <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                    <h4 className="text-xs font-semibold text-[#F0F7F3] mb-2 flex items-center gap-2">
+                  <div className="p-4 rounded-xl bg-black/20 border border-line">
+                    <h4 className="text-xs font-semibold text-ink mb-2 flex items-center gap-2">
                       <Mail className="w-3.5 h-3.5" /> Forwarding Email Setup
                     </h4>
-                    <ol className="space-y-2 text-xs text-[#9FB0A6]">
+                    <ol className="space-y-2 text-xs text-ink-soft">
                       <li className="flex gap-2">
-                        <span className="text-[#34D399] shrink-0">1.</span>
+                        <span className="text-brand shrink-0">1.</span>
                         Open the portal enquiry email in your inbox
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#34D399] shrink-0">2.</span>
-                        Click <strong className="text-[#F0F7F3]">Forward</strong>
+                        <span className="text-brand shrink-0">2.</span>
+                        Click <strong className="text-ink">Forward</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#34D399] shrink-0">3.</span>
-                        Enter this email: <strong className="text-[#F0F7F3] font-mono">{status?.forwardingEmail}</strong>
+                        <span className="text-brand shrink-0">3.</span>
+                        Enter this email: <strong className="text-ink font-mono">{brokerEmail || status?.forwardingEmail}</strong>
                       </li>
                       <li className="flex gap-2">
-                        <span className="text-[#34D399] shrink-0">4.</span>
+                        <span className="text-brand shrink-0">4.</span>
                         Send — Converza extracts the lead and starts the AI calling process
                       </li>
                     </ol>
                   </div>
 
                   {/* Email forwarding services */}
-                  <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                    <h4 className="text-xs font-semibold text-amber-400 mb-2 flex items-center gap-2">
-                      <AlertCircle className="w-3.5 h-3.5" /> Note for best results
+                  <div className="p-4 rounded-xl bg-warning/5 border border-warning/10">
+                    <h4 className="text-xs font-semibold text-warning mb-2 flex items-center gap-2">
+                      <AlertCircle className="w-3.5 h-3.5" /> Use your own address for auto-forward rules
                     </h4>
-                    <p className="text-xs text-[#9FB0A6]">
-                      For automatic email forwarding, we recommend using an email forwarding service like
-                      SendGrid Inbound Parse, Mailgun Routes, or CloudMailin. Connect them to forward
-                      emails to our webhook at <strong className="text-[#F0F7F3] font-mono">/api/v1/webhooks/email/incoming</strong>.
-                      Contact support for setup assistance.
+                    <p className="text-xs text-ink-soft">
+                      Point Gmail/Outlook auto-forward rules, and any email forwarding service
+                      (SendGrid Inbound Parse, Mailgun Routes, CloudMailin), at the address shown above —
+                      <strong className="text-ink"> never at the shared mailbox</strong>. An auto-forward keeps the
+                      portal as the sender, so only your personal address identifies you; mail sent to the
+                      shared mailbox is matched by sender and works for manual forwards only.
                     </p>
                   </div>
                 </motion.div>
@@ -727,36 +739,36 @@ export default function LeadForwardingPage() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
           className="p-5 rounded-2xl app-card"
         >
-          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-            <Send className="w-4 h-4 text-[#6FE3B0]" />
+          <h2 className="text-sm font-semibold text-ink mb-3 flex items-center gap-2">
+            <Send className="w-4 h-4 text-brand" />
             Test Lead Forwarding
           </h2>
-          <p className="text-xs text-[#9FB0A6] mb-4">Simulate forwarding a lead by entering a phone number below. We'll create a test lead and trigger the AI call pipeline.</p>
+          <p className="text-xs text-ink-soft mb-4">Simulate forwarding a lead by entering a phone number below. We'll create a test lead and trigger the AI call pipeline.</p>
 
           <div className="flex items-center gap-3">
             <div className="flex-1">
-              <label className="text-[11px] text-[#9FB0A6] mb-1 block">Lead's Phone Number</label>
+              <label className="text-[11px] text-ink-soft mb-1 block">Lead's Phone Number</label>
               <input
                 type="tel"
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
                 placeholder="9876543210"
-                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-[#F0F7F3] placeholder-[#5C6B62] focus:outline-none focus:border-[#34D399]/50 font-mono"
+                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-line text-sm text-ink placeholder-ink-muted focus:outline-none focus:border-brand/50 font-mono"
               />
             </div>
             <div className="flex-1">
-              <label className="text-[11px] text-[#9FB0A6] mb-1 block">Your Email (for email test)</label>
+              <label className="text-[11px] text-ink-soft mb-1 block">Your Email (for email test)</label>
               <input
                 type="email"
                 value={testEmail}
                 onChange={(e) => setTestEmail(e.target.value)}
                 placeholder="you@email.com"
-                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-white/10 text-sm text-[#F0F7F3] placeholder-[#5C6B62] focus:outline-none focus:border-[#34D399]/50"
+                className="w-full px-3 py-2 rounded-lg bg-black/20 border border-line text-sm text-ink placeholder-ink-muted focus:outline-none focus:border-brand/50"
               />
             </div>              <button
                 onClick={testForwarding}
                 disabled={sendingTest || !testPhone}
-                className="px-4 py-2 rounded-lg bg-[#1B4332] text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1.5 mt-5"
+                className="px-4 py-2 rounded-lg bg-line-subtle text-white text-xs font-medium hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1.5 mt-5"
               >
                 {sendingTest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 Test Forward
@@ -768,8 +780,8 @@ export default function LeadForwardingPage() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
           className="p-5 rounded-2xl app-card"
         >
-          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-            <History className="w-4 h-4 text-[#6FE3B0]" />
+          <h2 className="text-sm font-semibold text-ink mb-3 flex items-center gap-2">
+            <History className="w-4 h-4 text-brand" />
             Recently Forwarded Leads
           </h2>
 
@@ -781,51 +793,51 @@ export default function LeadForwardingPage() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.03 }}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-black/20 border border-white/10 hover:bg-black/30 transition-colors"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-black/20 border border-line hover:bg-black/30 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 flex items-center justify-center shrink-0">
-                    <Users className="w-4 h-4 text-[#6FE3B0]" />
+                  <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-brand" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[#F0F7F3] truncate">{lead.name}</span>
+                      <span className="text-sm font-medium text-ink truncate">{lead.name}</span>
                       <StatusBadge status={lead.status} />
                     </div>
-                    <p className="text-[11px] text-[#9FB0A6]">
+                    <p className="text-[11px] text-ink-soft">
                       {lead.phone} · Source: {lead.source}
                     </p>
                   </div>
-                  <span className="text-[10px] text-gray-600 shrink-0">
+                  <span className="text-[10px] text-ink-soft shrink-0">
                     {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="p-8 rounded-xl bg-black/20 border border-white/10 text-center">
-              <Send className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-[#9FB0A6]">No forwarded leads yet</p>
-              <p className="text-xs text-gray-600 mt-1">Forward an SMS or email to see leads here</p>
+            <div className="p-8 rounded-xl bg-black/20 border border-line text-center">
+              <Send className="w-8 h-8 text-ink-soft mx-auto mb-2" />
+              <p className="text-sm text-ink-soft">No forwarded leads yet</p>
+              <p className="text-xs text-ink-soft mt-1">Forward an SMS or email to see leads here</p>
             </div>
           )}
         </motion.div>        {/* Detailed Twilio SMS Setup Guide */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
-          className="rounded-2xl border border-white/10 bg-[#101713] overflow-hidden"
+          className="rounded-2xl border border-line bg-canvas overflow-hidden"
         >
           <button
             onClick={() => toggleSection("twilio-setup")}
             className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.03] transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FB7185]/15 flex items-center justify-center">
-                <Phone className="w-4.5 h-4.5 text-[#FB7185]" />
+              <div className="w-9 h-9 rounded-xl bg-danger/15 flex items-center justify-center">
+                <Phone className="w-4.5 h-4.5 text-danger" />
               </div>
               <div className="text-left">
-                <h3 className="text-sm font-semibold text-[#F0F7F3]">Twilio SMS Setup Guide</h3>
-                <p className="text-xs text-[#9FB0A6]">Set up a Twilio number to receive forwarded SMS from brokers</p>
+                <h3 className="text-sm font-semibold text-ink">Twilio SMS Setup Guide</h3>
+                <p className="text-xs text-ink-soft">Set up a Twilio number to receive forwarded SMS from brokers</p>
               </div>
             </div>
-            {expandedSection === "twilio-setup" ? <ChevronUp className="w-4 h-4 text-[#9FB0A6]" /> : <ChevronDown className="w-4 h-4 text-[#9FB0A6]" />}
+            {expandedSection === "twilio-setup" ? <ChevronUp className="w-4 h-4 text-ink-soft" /> : <ChevronDown className="w-4 h-4 text-ink-soft" />}
           </button>
 
           <AnimatePresence>
@@ -834,117 +846,117 @@ export default function LeadForwardingPage() {
                 className="px-5 pb-5 space-y-4"
               >
                 {/* Step 1: Buy a number */}
-                <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                  <h4 className="text-xs font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#34D399]/15 flex items-center justify-center text-[11px] font-bold text-[#6FE3B0]">1</span>
+                <div className="p-4 rounded-xl bg-black/20 border border-line">
+                  <h4 className="text-xs font-semibold text-ink mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-brand/15 flex items-center justify-center text-[11px] font-bold text-brand">1</span>
                     Buy a Twilio Phone Number with SMS capability
                   </h4>
-                  <ol className="space-y-2 text-xs text-[#9FB0A6] ml-8">
+                  <ol className="space-y-2 text-xs text-ink-soft ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">1.</span>
-                      Log in to <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-[#6FE3B0] hover:underline inline-flex items-center gap-1">Twilio Console <ExternalLink className="w-3 h-3" /></a>
+                      <span className="text-brand shrink-0">1.</span>
+                      Log in to <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline inline-flex items-center gap-1">Twilio Console <ExternalLink className="w-3 h-3" /></a>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">2.</span>
-                      Go to <strong className="text-[#F0F7F3]">Develop → Phone Numbers → Manage → Buy a number</strong>
+                      <span className="text-brand shrink-0">2.</span>
+                      Go to <strong className="text-ink">Develop → Phone Numbers → Manage → Buy a number</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">3.</span>
-                      Search for an Indian (+91) number and make sure <strong className="text-[#F0F7F3]">SMS capability</strong> is checked
+                      <span className="text-brand shrink-0">3.</span>
+                      Search for an Indian (+91) number and make sure <strong className="text-ink">SMS capability</strong> is checked
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">4.</span>
-                      Click <strong className="text-[#F0F7F3]">Buy</strong> — costs ~$1/month (₹85)
+                      <span className="text-brand shrink-0">4.</span>
+                      Click <strong className="text-ink">Buy</strong> — costs ~$1/month (₹85)
                     </li>
                   </ol>
                 </div>
 
                 {/* Step 2: Configure webhook */}
-                <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                  <h4 className="text-xs font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#34D399]/15 flex items-center justify-center text-[11px] font-bold text-[#6FE3B0]">2</span>
+                <div className="p-4 rounded-xl bg-black/20 border border-line">
+                  <h4 className="text-xs font-semibold text-ink mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-brand/15 flex items-center justify-center text-[11px] font-bold text-brand">2</span>
                     Configure the SMS Webhook URL
                   </h4>
-                  <ol className="space-y-2 text-xs text-[#9FB0A6] ml-8">
+                  <ol className="space-y-2 text-xs text-ink-soft ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">1.</span>
-                      Go to <strong className="text-[#F0F7F3]">Develop → Phone Numbers → Manage → Active Numbers</strong>
+                      <span className="text-brand shrink-0">1.</span>
+                      Go to <strong className="text-ink">Develop → Phone Numbers → Manage → Active Numbers</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">2.</span>
+                      <span className="text-brand shrink-0">2.</span>
                       Click on the number you just purchased
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">3.</span>
-                      Scroll to the <strong className="text-[#F0F7F3]">Messaging</strong> section
+                      <span className="text-brand shrink-0">3.</span>
+                      Scroll to the <strong className="text-ink">Messaging</strong> section
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">4.</span>
-                      Set <strong className="text-[#F0F7F3]">"A message comes in"</strong> to <strong className="text-[#F0F7F3]">Webhook</strong>
+                      <span className="text-brand shrink-0">4.</span>
+                      Set <strong className="text-ink">"A message comes in"</strong> to <strong className="text-ink">Webhook</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">5.</span>
+                      <span className="text-brand shrink-0">5.</span>
                       Enter this URL (replace with your domain):
-                      <div className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
-                        <code className="text-[11px] text-[#F0F7F3] font-mono break-all">{window.location.origin}/api/v1/webhooks/sms/incoming</code>
+                      <div className="mt-1 flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-line">
+                        <code className="text-[11px] text-ink font-mono break-all">{window.location.origin}/api/v1/webhooks/sms/incoming</code>
                         <CopyButton text={`${window.location.origin}/api/v1/webhooks/sms/incoming`} />
                       </div>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">6.</span>
-                      Set HTTP method to <strong className="text-[#F0F7F3]">POST</strong>
+                      <span className="text-brand shrink-0">6.</span>
+                      Set HTTP method to <strong className="text-ink">POST</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#6FE3B0] shrink-0">7.</span>
-                      Click <strong className="text-[#F0F7F3]">Save</strong>
+                      <span className="text-brand shrink-0">7.</span>
+                      Click <strong className="text-ink">Save</strong>
                     </li>
                   </ol>
                 </div>
 
                 {/* Step 3: Set env vars */}
-                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                  <h4 className="text-xs font-semibold text-amber-400 mb-3 flex items-center gap-2">
+                <div className="p-4 rounded-xl bg-warning/5 border border-warning/10">
+                  <h4 className="text-xs font-semibold text-warning mb-3 flex items-center gap-2">
                     <AlertCircle className="w-3.5 h-3.5" />
                     Required Environment Variables
                   </h4>
                   <div className="space-y-2 ml-2">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
-                      <code className="text-[11px] text-[#F0F7F3] font-mono">TWILIO_ACCOUNT_SID</code>
-                      <span className="text-[10px] text-[#9FB0A6]">— Your Twilio Account SID</span>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-line">
+                      <code className="text-[11px] text-ink font-mono">TWILIO_ACCOUNT_SID</code>
+                      <span className="text-[10px] text-ink-soft">— Your Twilio Account SID</span>
                     </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
-                      <code className="text-[11px] text-[#F0F7F3] font-mono">TWILIO_AUTH_TOKEN</code>
-                      <span className="text-[10px] text-[#9FB0A6]">— Used to verify SMS webhook signatures</span>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-line">
+                      <code className="text-[11px] text-ink font-mono">TWILIO_AUTH_TOKEN</code>
+                      <span className="text-[10px] text-ink-soft">— Used to verify SMS webhook signatures</span>
                     </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-white/10">
-                      <code className="text-[11px] text-[#F0F7F3] font-mono">FORWARDING_SMS_NUMBER</code>
-                      <span className="text-[10px] text-[#9FB0A6]">— The Twilio number (E.164 format, e.g. +919876543210)</span>
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-black/30 border border-line">
+                      <code className="text-[11px] text-ink font-mono">FORWARDING_SMS_NUMBER</code>
+                      <span className="text-[10px] text-ink-soft">— The Twilio number (E.164 format, e.g. +919876543210)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Tips */}
-                <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/10">
-                  <h4 className="text-xs font-semibold text-green-400 mb-2 flex items-center gap-2">
+                <div className="p-4 rounded-xl bg-success/5 border border-success/10">
+                  <h4 className="text-xs font-semibold text-success mb-2 flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Tips & Gotchas
                   </h4>
-                  <ul className="space-y-1.5 text-xs text-[#9FB0A6] ml-2">
+                  <ul className="space-y-1.5 text-xs text-ink-soft ml-2">
                     <li className="flex gap-2">
-                      <span className="text-green-400 shrink-0">→</span>
-                      <strong className="text-[#F0F7F3]">HTTPS required:</strong> Twilio won't send to non-HTTPS URLs. Your production URL is already HTTPS.
+                      <span className="text-success shrink-0">→</span>
+                      <strong className="text-ink">HTTPS required:</strong> Twilio won't send to non-HTTPS URLs. Your production URL is already HTTPS.
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-green-400 shrink-0">→</span>
-                      <strong className="text-[#F0F7F3]">Signature validation:</strong> We validate Twilio's X-Twilio-Signature header automatically
+                      <span className="text-success shrink-0">→</span>
+                      <strong className="text-ink">Signature validation:</strong> We validate Twilio's X-Twilio-Signature header automatically
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-green-400 shrink-0">→</span>
-                      The phone number <strong className="text-[#F0F7F3]">cannot</strong> be registered on any existing WhatsApp account
+                      <span className="text-success shrink-0">→</span>
+                      The phone number <strong className="text-ink">cannot</strong> be registered on any existing WhatsApp account
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-green-400 shrink-0">→</span>
-                      Only <strong className="text-[#F0F7F3]">FORWARDING_SMS_NUMBER</strong> is required for the frontend. TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN are needed for signature validation. MessageBird (<code className="text-[#6FE3B0]">MESSAGEBIRD_API_KEY</code>) is also supported — point the inbound callback to <code className="text-[#6FE3B0]">/api/v1/webhooks/sms/incoming-messagebird</code>
+                      <span className="text-success shrink-0">→</span>
+                      Only <strong className="text-ink">FORWARDING_SMS_NUMBER</strong> is required for the frontend. TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN are needed for signature validation. MessageBird (<code className="text-brand">MESSAGEBIRD_API_KEY</code>) is also supported — point the inbound callback to <code className="text-brand">/api/v1/webhooks/sms/incoming-messagebird</code>
                     </li>
                   </ul>
                 </div>
@@ -955,22 +967,22 @@ export default function LeadForwardingPage() {
 
         {/* Detailed Email Forwarding Setup Guide */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
-          className="rounded-2xl border border-white/10 bg-[#101713] overflow-hidden"
+          className="rounded-2xl border border-line bg-canvas overflow-hidden"
         >
           <button
             onClick={() => toggleSection("email-setup")}
             className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.03] transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#34D399]/15 flex items-center justify-center">
-                <Mail className="w-4.5 h-4.5 text-[#34D399]" />
+              <div className="w-9 h-9 rounded-xl bg-brand/15 flex items-center justify-center">
+                <Mail className="w-4.5 h-4.5 text-brand" />
               </div>
               <div className="text-left">
-                <h3 className="text-sm font-semibold text-[#F0F7F3]">Email Forwarding Setup Guide</h3>
-                <p className="text-xs text-[#9FB0A6]">Configure SendGrid Inbound Parse or Mailgun Routes to forward portal emails</p>
+                <h3 className="text-sm font-semibold text-ink">Email Forwarding Setup Guide</h3>
+                <p className="text-xs text-ink-soft">Configure SendGrid Inbound Parse or Mailgun Routes to forward portal emails</p>
               </div>
             </div>
-            {expandedSection === "email-setup" ? <ChevronUp className="w-4 h-4 text-[#9FB0A6]" /> : <ChevronDown className="w-4 h-4 text-[#9FB0A6]" />}
+            {expandedSection === "email-setup" ? <ChevronUp className="w-4 h-4 text-ink-soft" /> : <ChevronDown className="w-4 h-4 text-ink-soft" />}
           </button>
 
           <AnimatePresence>
@@ -979,62 +991,62 @@ export default function LeadForwardingPage() {
                 className="px-5 pb-5 space-y-4"
               >
                 {/* DNS Setup */}
-                <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                  <h4 className="text-xs font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#34D399]/15 flex items-center justify-center text-[11px] font-bold text-[#34D399]">1</span>
+                <div className="p-4 rounded-xl bg-black/20 border border-line">
+                  <h4 className="text-xs font-semibold text-ink mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-brand/15 flex items-center justify-center text-[11px] font-bold text-brand">1</span>
                     DNS Setup — Add MX Records
                   </h4>
-                  <p className="text-xs text-[#9FB0A6] mb-3 ml-8">
-                    Create a subdomain (e.g. <strong className="text-[#F0F7F3]">forward.yourdomain.com</strong>) and add MX records pointing to your email forwarding provider.
+                  <p className="text-xs text-ink-soft mb-3 ml-8">
+                    Create a subdomain (e.g. <strong className="text-ink">forward.yourdomain.com</strong>) and add MX records pointing to your email forwarding provider.
                     Do NOT use your primary domain's MX records.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 ml-8">
-                    <div className="p-3 rounded-lg bg-black/30 border border-white/10">
-                      <p className="text-xs font-semibold text-[#F0F7F3] mb-1">SendGrid</p>
-                      <p className="text-[10px] text-[#9FB0A6] font-mono">MX: <strong className="text-[#F0F7F3]">mx.sendgrid.net</strong></p>
-                      <p className="text-[10px] text-[#9FB0A6]">Priority: 10</p>
+                    <div className="p-3 rounded-lg bg-black/30 border border-line">
+                      <p className="text-xs font-semibold text-ink mb-1">SendGrid</p>
+                      <p className="text-[10px] text-ink-soft font-mono">MX: <strong className="text-ink">mx.sendgrid.net</strong></p>
+                      <p className="text-[10px] text-ink-soft">Priority: 10</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-black/30 border border-white/10">
-                      <p className="text-xs font-semibold text-[#F0F7F3] mb-1">Mailgun</p>
-                      <p className="text-[10px] text-[#9FB0A6] font-mono">MX: <strong className="text-[#F0F7F3]">mxa.mailgun.org</strong></p>
-                      <p className="text-[10px] text-[#9FB0A6] font-mono">MX: <strong className="text-[#F0F7F3]">mxb.mailgun.org</strong></p>
+                    <div className="p-3 rounded-lg bg-black/30 border border-line">
+                      <p className="text-xs font-semibold text-ink mb-1">Mailgun</p>
+                      <p className="text-[10px] text-ink-soft font-mono">MX: <strong className="text-ink">mxa.mailgun.org</strong></p>
+                      <p className="text-[10px] text-ink-soft font-mono">MX: <strong className="text-ink">mxb.mailgun.org</strong></p>
                     </div>
                   </div>
                 </div>
 
                 {/* SendGrid Setup */}
-                <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                  <h4 className="text-xs font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#34D399]/15 flex items-center justify-center text-[11px] font-bold text-[#34D399]">2</span>
+                <div className="p-4 rounded-xl bg-black/20 border border-line">
+                  <h4 className="text-xs font-semibold text-ink mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-brand/15 flex items-center justify-center text-[11px] font-bold text-brand">2</span>
                     Option A: SendGrid Inbound Parse
                   </h4>
-                  <ol className="space-y-2 text-xs text-[#9FB0A6] ml-8">
+                  <ol className="space-y-2 text-xs text-ink-soft ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">1.</span>
-                      Go to <strong className="text-[#F0F7F3]">Settings → Inbound Parse</strong> in SendGrid dashboard
+                      <span className="text-brand shrink-0">1.</span>
+                      Go to <strong className="text-ink">Settings → Inbound Parse</strong> in SendGrid dashboard
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">2.</span>
-                      Add your subdomain (e.g. <strong className="text-[#F0F7F3]">forward.yourdomain.com</strong>)
+                      <span className="text-brand shrink-0">2.</span>
+                      Add your subdomain (e.g. <strong className="text-ink">forward.yourdomain.com</strong>)
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">3.</span>
+                      <span className="text-brand shrink-0">3.</span>
                       Set Destination URL to:
-                      <div className="mt-1 p-2 rounded-lg bg-black/30 border border-white/10">
-                        <code className="text-[11px] text-[#F0F7F3] font-mono break-all">{window.location.origin}/api/v1/webhooks/email/incoming</code>
+                      <div className="mt-1 p-2 rounded-lg bg-black/30 border border-line">
+                        <code className="text-[11px] text-ink font-mono break-all">{window.location.origin}/api/v1/webhooks/email/incoming</code>
                       </div>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">4.</span>
+                      <span className="text-brand shrink-0">4.</span>
                       Disable "Automatic Security" for this subdomain (to avoid loop)
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">5.</span>
-                      Send a test email to <strong className="text-[#F0F7F3]">anything@forward.yourdomain.com</strong>
+                      <span className="text-brand shrink-0">5.</span>
+                      Send a test email to <strong className="text-ink">anything@forward.yourdomain.com</strong>
                     </li>
                   </ol>
-                  <div className="mt-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 ml-8">
-                    <p className="text-[11px] text-amber-400">
+                  <div className="mt-3 p-3 rounded-lg bg-warning/5 border border-warning/10 ml-8">
+                    <p className="text-[11px] text-warning">
                       <strong>Pricing:</strong> SendGrid Inbound Parse is included with paid plans (~$15-20/mo).
                       Check your plan for inbound parse limits.
                     </p>
@@ -1042,50 +1054,50 @@ export default function LeadForwardingPage() {
                 </div>
 
                 {/* Mailgun Setup */}
-                <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-                  <h4 className="text-xs font-semibold text-[#F0F7F3] mb-3 flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#34D399]/15 flex items-center justify-center text-[11px] font-bold text-[#34D399]">2</span>
+                <div className="p-4 rounded-xl bg-black/20 border border-line">
+                  <h4 className="text-xs font-semibold text-ink mb-3 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-brand/15 flex items-center justify-center text-[11px] font-bold text-brand">2</span>
                     Option B: Mailgun Routes
                   </h4>
-                  <ol className="space-y-2 text-xs text-[#9FB0A6] ml-8">
+                  <ol className="space-y-2 text-xs text-ink-soft ml-8">
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">1.</span>
-                      Go to <strong className="text-[#F0F7F3]">Sending → Receiving</strong> in Mailgun dashboard
+                      <span className="text-brand shrink-0">1.</span>
+                      Go to <strong className="text-ink">Sending → Receiving</strong> in Mailgun dashboard
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">2.</span>
-                      Click <strong className="text-[#F0F7F3]">Create Route</strong>
+                      <span className="text-brand shrink-0">2.</span>
+                      Click <strong className="text-ink">Create Route</strong>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">3.</span>
-                      Set Expression Type: <strong className="text-[#F0F7F3]">Match Recipient</strong> → <code className="text-[#F0F7F3] font-mono">forward@yourdomain.com</code>
+                      <span className="text-brand shrink-0">3.</span>
+                      Set Expression Type: <strong className="text-ink">Match Recipient</strong> → <code className="text-ink font-mono">forward@yourdomain.com</code>
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">4.</span>
-                      Action: <strong className="text-[#F0F7F3]">Forward</strong> to URL
+                      <span className="text-brand shrink-0">4.</span>
+                      Action: <strong className="text-ink">Forward</strong> to URL
                     </li>
                     <li className="flex gap-2">
-                      <span className="text-[#34D399] shrink-0">5.</span>
-                      Enter: <code className="text-[11px] text-[#F0F7F3] font-mono break-all">{window.location.origin}/api/v1/webhooks/email/incoming</code>
+                      <span className="text-brand shrink-0">5.</span>
+                      Enter: <code className="text-[11px] text-ink font-mono break-all">{window.location.origin}/api/v1/webhooks/email/incoming</code>
                     </li>
                   </ol>
-                  <div className="mt-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10 ml-8">
-                    <p className="text-[11px] text-amber-400">
+                  <div className="mt-3 p-3 rounded-lg bg-warning/5 border border-warning/10 ml-8">
+                    <p className="text-[11px] text-warning">
                       <strong>Pricing:</strong> Mailgun free tier includes 1 route. Paid plans start at $15/mo for more.
                     </p>
                   </div>
                 </div>
 
                 {/* Set ENV */}
-                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                  <h4 className="text-xs font-semibold text-amber-400 mb-2 flex items-center gap-2">
+                <div className="p-4 rounded-xl bg-warning/5 border border-warning/10">
+                  <h4 className="text-xs font-semibold text-warning mb-2 flex items-center gap-2">
                     <AlertCircle className="w-3.5 h-3.5" />
                     Required Environment Variable
                   </h4>
-                  <div className="p-2 rounded-lg bg-black/30 border border-white/10">
-                    <code className="text-[11px] text-[#F0F7F3] font-mono">FORWARDING_EMAIL=forward@converza.tech</code>
+                  <div className="p-2 rounded-lg bg-black/30 border border-line">
+                    <code className="text-[11px] text-ink font-mono">FORWARDING_EMAIL=forward@converza.tech</code>
                   </div>
-                  <p className="text-xs text-[#9FB0A6] mt-2">
+                  <p className="text-xs text-ink-soft mt-2">
                     Set this in your .env file so the frontend shows the correct forwarding email address.
                   </p>
                 </div>
@@ -1098,7 +1110,7 @@ export default function LeadForwardingPage() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
           className="p-5 rounded-2xl app-card"
         >
-          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-3">Compatible Portals & Formats</h2>
+          <h2 className="text-sm font-semibold text-ink mb-3">Compatible Portals & Formats</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { name: "99acres", icon: "🏠", desc: "All enquiry SMS" },
@@ -1110,14 +1122,14 @@ export default function LeadForwardingPage() {
               { name: "Facebook", icon: "👍", desc: "Lead ads SMS" },
               { name: "Manual Entry", icon: "✍️", desc: "Type any format" },
             ].map((portal, i) => (
-              <div key={i} className="p-3 rounded-xl bg-black/20 border border-white/10 text-center">
+              <div key={i} className="p-3 rounded-xl bg-black/20 border border-line text-center">
                 <span className="text-xl mb-1 block">{portal.icon}</span>
-                <p className="text-[12px] font-medium text-[#F0F7F3]">{portal.name}</p>
-                <p className="text-[10px] text-[#9FB0A6]">{portal.desc}</p>
+                <p className="text-[12px] font-medium text-ink">{portal.name}</p>
+                <p className="text-[10px] text-ink-soft">{portal.desc}</p>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-gray-600 mt-4 text-center">
+          <p className="text-[11px] text-ink-soft mt-4 text-center">
             Any SMS or email containing a phone number and name will be parsed automatically.
             Works even with non-standard formats.
           </p>

@@ -82,15 +82,15 @@ export default function FeatureShowcase() {
   }, [inView]);
 
   return (
-    <section ref={ref} className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="features">
-      {/* Background glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-[#34D399] opacity-[0.05] blur-[150px] pointer-events-none" />
+    <section ref={ref} className="relative py-20 lg:py-32 bg-canvas overflow-hidden" id="features">
+      {/* Subtle orange glow behind feature section */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-brand opacity-[0.04] blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
-          <span className="caption text-gradient-emerald mb-4 block">POWERED BY AI</span>
+          <span className="caption mb-4 block">POWERED BY AI</span>
           <h2 className="h1-text mb-4">What you actually get</h2>
-          <p className="text-[16px] text-[#9FB0A6] max-w-[600px] mx-auto">
+          <p className="body-text max-w-[600px] mx-auto">
             Six outcomes, measured on your own leads — no borrowed benchmarks.
           </p>
         </div>
@@ -101,24 +101,24 @@ export default function FeatureShowcase() {
             return (
               <div
                 key={i}
-                className="feature-card group relative p-6 rounded-xl glass-card hover:border-[#34D399]/40 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_40px_rgba(52,211,153,0.12)]"
+                className="feature-card group relative"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#34D399]/10 border border-[#34D399]/25 flex items-center justify-center shrink-0 shadow-[0_0_16px_rgba(52,211,153,0.15)]">
-                    <Icon className="w-5 h-5 text-[#34D399]" />
+                  <div className="w-10 h-10 rounded-lg bg-brand/10 border border-brand/25 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-brand" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[15px] font-semibold text-[#F0F7F3] mb-1.5 group-hover:text-white transition-colors">
+                    <h3 className="text-[15px] font-semibold text-ink mb-1.5 group-hover:text-white transition-colors">
                       {feature.title}
                     </h3>
-                    <p className="text-[13px] text-[#9FB0A6] leading-relaxed">
+                    <p className="text-[13px] text-ink-soft leading-relaxed">
                       {feature.description}
                     </p>
                   </div>
                 </div>
-                {/* Hover glow */}
+                {/* Hover glow — subtle orange */}
                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: "radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(52, 211, 153, 0.08), transparent 40%)" }}
+                  style={{ background: "radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(242, 140, 69, 0.06), transparent 40%)" }}
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.parentElement?.getBoundingClientRect();
                     if (rect) {
@@ -133,7 +133,7 @@ export default function FeatureShowcase() {
         </div>
 
         <div className="text-center mt-10">
-          <Link href="/features" className="inline-flex items-center gap-2 text-[14px] text-[#6FE3B0] hover:text-[#34D399] font-medium transition-colors">
+          <Link href="/features" className="inline-flex items-center gap-2 text-[14px] text-brand hover:text-brand-soft font-medium transition-colors">
             See every feature →
           </Link>
         </div>

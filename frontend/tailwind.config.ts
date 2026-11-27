@@ -21,18 +21,18 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#1B4332",
-          foreground: "#FFFFFF",
-          50: "#EDF5F0",
-          100: "#D6E8DC",
-          200: "#AED2BD",
-          300: "#7FB39A",
-          400: "#4F8F70",
-          500: "#2D6A4F",
-          600: "#1B4332",
-          700: "#14352A",
-          800: "#0F2A21",
-          900: "#0A1F18",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+          50: "hsl(30 85% 96%)",
+          100: "hsl(30 80% 88%)",
+          200: "hsl(30 70% 74%)",
+          300: "hsl(30 65% 62%)",
+          400: "hsl(30 75% 52%)",
+          500: "hsl(30 85% 55%)",
+          600: "hsl(30 85% 48%)",
+          700: "hsl(30 85% 40%)",
+          800: "hsl(30 85% 30%)",
+          900: "hsl(30 85% 18%)",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -47,8 +47,8 @@ const config: Config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#1B4332",
-          foreground: "#FFFFFF",
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -58,22 +58,41 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        brand: {
-          DEFAULT: "#1B4332",
-          glow: "rgba(27, 67, 50, 0.12)",
-        },
-        gold: {
-          DEFAULT: "#B8860B",
-          dim: "#C9A84C30",
-        },
+        /* ── Converza design tokens ──────────────────────────────────
+           These resolve through rgb() channels so opacity modifiers work:
+           `bg-success/10`, `border-line/40`, `text-ink-soft/70`. Never use
+           the arbitrary `bg-[var(--token)]/10` form — Tailwind drops it. */
+        canvas: "rgb(var(--bg-primary-rgb) / <alpha-value>)",
+        "canvas-deep": "rgb(var(--bg-footer-rgb) / <alpha-value>)",
         surface: {
-          DEFAULT: "#FFFFFF",
-          2: "#F2F4EF",
+          DEFAULT: "rgb(var(--bg-secondary-rgb) / <alpha-value>)",
+          raised: "rgb(var(--bg-elevated-rgb) / <alpha-value>)",
         },
-        ink: "#1E2B24",
-        "text-primary": "#1E2B24",
-        "text-muted": "#5C6B62",
-        "text-dim": "#98A29B",
+        ink: {
+          DEFAULT: "rgb(var(--text-primary-rgb) / <alpha-value>)",
+          soft: "rgb(var(--text-secondary-rgb) / <alpha-value>)",
+          muted: "rgb(var(--text-muted-rgb) / <alpha-value>)",
+        },
+        line: {
+          DEFAULT: "rgb(var(--border-default-rgb) / <alpha-value>)",
+          subtle: "rgb(var(--border-subtle-rgb) / <alpha-value>)",
+        },
+        brand: {
+          DEFAULT: "rgb(var(--accent-primary-rgb) / <alpha-value>)",
+          soft: "rgb(var(--accent-secondary-rgb) / <alpha-value>)",
+          deep: "rgb(var(--accent-deep-rgb) / <alpha-value>)",
+          copper: "rgb(var(--accent-copper-rgb) / <alpha-value>)",
+          glow: "rgba(242, 140, 69, 0.12)",
+        },
+        success: "rgb(var(--semantic-success-rgb) / <alpha-value>)",
+        warning: "rgb(var(--semantic-warning-rgb) / <alpha-value>)",
+        danger: "rgb(var(--semantic-error-rgb) / <alpha-value>)",
+        "neutral-soft": "rgb(var(--semantic-neutral-rgb) / <alpha-value>)",
+        gold: {
+          DEFAULT: "hsl(45 70% 55%)",
+          dim: "rgba(242, 140, 69, 0.19)",
+        },
+
       },
       borderRadius: {
         lg: "var(--radius)",

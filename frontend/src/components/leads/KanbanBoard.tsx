@@ -11,12 +11,12 @@ import type { Lead, LeadStatus } from "@/types";
 
 const PIPELINE_COLUMNS: { id: LeadStatus; label: string; color: string }[] = [
   { id: "PENDING", label: "New Leads", color: "bg-blue-500/20 border-blue-500/30" },
-  { id: "CALLING", label: "Calling", color: "bg-amber-500/20 border-amber-500/30" },
+  { id: "CALLING", label: "Calling", color: "bg-warning/20 border-warning/30" },
   { id: "FAQ_ONLY", label: "FAQ Only", color: "bg-purple-500/20 border-purple-500/30" },
-  { id: "BOOKED", label: "Visit Booked", color: "bg-green-500/20 border-green-500/30" },
-  { id: "VISITED", label: "Visited", color: "bg-emerald-500/20 border-emerald-500/30" },
-  { id: "CONVERTED", label: "Converted", color: "bg-emerald-400/20 border-emerald-400/30" },
-  { id: "COLD", label: "Cold", color: "bg-gray-500/20 border-gray-500/30" },
+  { id: "BOOKED", label: "Visit Booked", color: "bg-success/20 border-success/30" },
+  { id: "VISITED", label: "Visited", color: "bg-success/20 border-success/30" },
+  { id: "CONVERTED", label: "Converted", color: "bg-success/20 border-success/30" },
+  { id: "COLD", label: "Cold", color: "bg-neutral-soft/20 border-line/30" },
 ];
 
 interface KanbanBoardProps {
@@ -86,10 +86,10 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
   };
 
   const getLeadColor = (lead: Lead) => {
-    if (lead.score >= 80) return "border-l-[#047857]";
-    if (lead.score >= 60) return "border-l-[#1B4332]";
+    if (lead.score >= 80) return "border-l-[var(--semantic-success)]";
+    if (lead.score >= 60) return "border-l-[var(--border-subtle)]";
     if (lead.score >= 40) return "border-l-[#B45309]";
-    return "border-l-[#5C6B62]";
+    return "border-l-[var(--text-muted)]";
   };
 
   if (loading) {
@@ -97,9 +97,9 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
       <div className="flex gap-4 overflow-x-auto pb-4">
         {PIPELINE_COLUMNS.slice(0, 4).map((col) => (
           <div key={col.id} className="flex-shrink-0 w-72 space-y-3">
-            <div className="h-6 w-20 bg-[#F1F3EE] rounded animate-pulse" />
+            <div className="h-6 w-20 bg-surface rounded animate-pulse" />
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-white rounded-xl animate-pulse" />
+              <div key={i} className="h-24 bg-surface-raised rounded-xl animate-pulse" />
             ))}
           </div>
         ))}
@@ -124,7 +124,7 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
                 <div className={cn("w-2.5 h-2.5 rounded-full", column.color.split(" ")[0])} />
                 <h3 className="text-sm font-semibold text-ink">{column.label}</h3>
               </div>
-              <span className="text-xs text-[#5C6B62] font-mono bg-[#F1F3EE] px-2 py-0.5 rounded-full">
+              <span className="text-xs text-ink-muted font-mono bg-surface px-2 py-0.5 rounded-full">
                 {columnLeads.length}
               </span>
             </div>
@@ -141,13 +141,13 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
                   draggable
                   onDragStart={() => handleDragStart(lead.id)}
                   className={cn(
-                    "p-3 rounded-xl bg-[#FFFFFF] border border-[#E4E7DF] border-l-4 cursor-grab active:cursor-grabbing hover:border-[#1B4332]/50 transition-all",
+                    "p-3 rounded-xl bg-surface-raised border border-line border-l-4 cursor-grab active:cursor-grabbing hover:border-line-subtle/50 transition-all",
                     getLeadColor(lead)
                   )}
                 >
                   <Link href={`/dashboard/leads/${lead.id}`} className="block">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#1B4332] to-[#1B4332]/60 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-line-subtle to-line-subtle/60 flex items-center justify-center">
                         <span className="text-[10px] font-semibold text-white">
                           {lead.name[0].toUpperCase()}
                         </span>
@@ -156,15 +156,15 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
                       {lead.score > 0 && (
                         <span className={cn(
                           "text-[10px] font-mono font-bold px-1.5 py-0.5 rounded",
-                          lead.score >= 80 ? "bg-[#047857]/20 text-[#047857]" :
-                          lead.score >= 60 ? "bg-[#1B4332]/20 text-[#1B4332]" :
-                          "bg-[#B45309]/20 text-[#B45309]"
+                          lead.score >= 80 ? "bg-success/20 text-success" :
+                          lead.score >= 60 ? "bg-line-subtle/20 text-line-subtle" :
+                          "bg-warning/20 text-warning"
                         )}>
                           {lead.score}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] text-[#5C6B62]">
+                    <div className="flex items-center gap-3 text-[11px] text-ink-muted">
                       <span className="flex items-center gap-1">
                         <Phone className="w-3 h-3" />
                         {lead.phone.slice(-4)}
@@ -172,14 +172,14 @@ export function KanbanBoard({ leads, loading }: KanbanBoardProps) {
                       <span>{lead.source}</span>
                     </div>
                     {lead.budget && (
-                      <p className="text-[11px] text-[#5C6B62] mt-1">💰 {lead.budget}</p>
+                      <p className="text-[11px] text-ink-muted mt-1">💰 {lead.budget}</p>
                     )}
                   </Link>
                 </motion.div>
               ))}
               {columnLeads.length === 0 && (
-                <div className="p-4 rounded-xl border border-dashed border-[#E4E7DF] text-center">
-                  <p className="text-[11px] text-[#8A948C]">Drop leads here</p>
+                <div className="p-4 rounded-xl border border-dashed border-line text-center">
+                  <p className="text-[11px] text-ink-muted">Drop leads here</p>
                 </div>
               )}
             </div>

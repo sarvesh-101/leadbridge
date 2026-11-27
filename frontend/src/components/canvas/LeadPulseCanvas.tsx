@@ -108,14 +108,14 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
       container.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
-      // ─── Background glow ─────────────────────────────────────────────────
+      // ─── Background glow — subtle burnt orange radial ─────────────────────
       const bgCanvas = document.createElement("canvas");
       bgCanvas.width = 512;
       bgCanvas.height = 512;
       const bgCtx = bgCanvas.getContext("2d")!;
       const bgGrad = bgCtx.createRadialGradient(256, 256, 0, 256, 256, 256);
-      bgGrad.addColorStop(0, "rgba(52, 211, 153, 0.18)");
-      bgGrad.addColorStop(0.4, "rgba(52, 211, 153, 0.06)");
+      bgGrad.addColorStop(0, "rgba(242, 140, 69, 0.14)");
+      bgGrad.addColorStop(0.4, "rgba(242, 140, 69, 0.05)");
       bgGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
       bgCtx.fillStyle = bgGrad;
       bgCtx.fillRect(0, 0, 512, 512);
@@ -132,17 +132,17 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
       scene.add(bgSprite);
 
       // ─── Grid floor (subtle) ─────────────────────────────────────────────
-      const gridHelper = new T.GridHelper(6, 20, 0x34D399, 0x1B4332);
+      const gridHelper = new T.GridHelper(6, 20, 0xB96A38, 0x2A1A10);
       gridHelper.position.y = -1.2;
       gridHelper.material.transparent = true;
-      gridHelper.material.opacity = 0.15;
+      gridHelper.material.opacity = 0.12;
       scene.add(gridHelper);
 
       // ─── Ring material (for expanding rings) ─────────────────────────────
       const ringMat = new T.LineBasicMaterial({
-        color: 0x34D399,
+        color: 0xB96A38,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.25,
         depthWrite: false,
       });
 
@@ -161,9 +161,9 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
           r * Math.sin(phi) * Math.sin(theta),
         );
         const c = new T.Color().setHSL(
-          0.32 + Math.random() * 0.1,
-          0.7,
-          0.4 + Math.random() * 0.3,
+          0.07 + Math.random() * 0.06,
+          0.65,
+          0.35 + Math.random() * 0.3,
         );
         colors.push(c.r, c.g, c.b);
         sizes.push(0.02 + Math.random() * 0.04);
@@ -190,9 +190,9 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
       // ─── Central hub (the "AI brain" / call origin) ─────────────────────
       const hubGeo = new T.SphereGeometry(0.25, 24, 24);
       const hubMat = new T.MeshBasicMaterial({
-        color: 0x34D399,
+        color: 0xF28C45,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.35,
       });
       const hub = new T.Mesh(hubGeo, hubMat);
       hub.position.set(0, 0, 0);
@@ -200,9 +200,9 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
 
       const hubOuterGeo = new T.SphereGeometry(0.35, 16, 16);
       const hubOuterMat = new T.MeshBasicMaterial({
-        color: 0x34D399,
+        color: 0xD9793E,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.1,
         wireframe: true,
       });
       const hubOuter = new T.Mesh(hubOuterGeo, hubOuterMat);
@@ -244,9 +244,9 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
 
         // Bubble dot (glowing = a lead being called)
         const color = new T.Color().setHSL(
-          0.32 + Math.random() * 0.08,
-          0.8,
-          0.55 + Math.random() * 0.25,
+          0.07 + Math.random() * 0.05,
+          0.75,
+          0.5 + Math.random() * 0.25,
         );
         const dotGeo = new T.SphereGeometry(0.04, 8, 8);
         const dotMat = new T.MeshBasicMaterial({
@@ -262,7 +262,7 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
         // Phone ring around the dot
         const phoneRingGeo = new T.RingGeometry(0.05, 0.075, 24);
         const phoneRingMat = ringMat.clone();
-        phoneRingMat.opacity = 0.4;
+        phoneRingMat.opacity = 0.35;
         phoneRingMat.color.copy(color);
         const phoneRing = new T.Mesh(phoneRingGeo, phoneRingMat);
         phoneRing.position.copy(dot.position);
@@ -295,15 +295,15 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
         ctx.clearRect(0, 0, 256, 64);
 
         // Bubble background
-        ctx.fillStyle = "rgba(16, 23, 19, 0.85)";
-        ctx.strokeStyle = "#34D399";
+        ctx.fillStyle = "rgba(20, 24, 26, 0.88)";
+        ctx.strokeStyle = "#F28C45";
         ctx.lineWidth = 1.5;
         roundRect(ctx, 6, 6, 244, 52, 14);
         ctx.fill();
         ctx.stroke();
 
         // Tail
-        ctx.fillStyle = "rgba(16, 23, 19, 0.85)";
+        ctx.fillStyle = "rgba(20, 24, 26, 0.88)";
         ctx.beginPath();
         ctx.moveTo(6, 40);
         ctx.lineTo(0, 52);
@@ -312,8 +312,8 @@ export default function LeadPulseCanvas({ scale = 1 }: LeadPulseCanvasProps) {
         ctx.fill();
 
         // Text
-        ctx.fillStyle = "#F0F7F3";
-        ctx.font = "500 18px 'Inter', 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#F4F1EA";
+        ctx.font = "500 18px 'Manrope', 'Inter', sans-serif";
         ctx.textBaseline = "middle";
         ctx.fillText(line, 24, 32);
 

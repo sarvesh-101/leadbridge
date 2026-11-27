@@ -69,16 +69,10 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden bg-[#0A0F0C]"
+      className="relative min-h-screen flex items-center overflow-hidden bg-hero-glow"
     >
-      {/* Aurora glows */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#34D399] opacity-[0.08] blur-[120px]" />
-        <div className="absolute bottom-[-120px] left-[-80px] w-[500px] h-[500px] rounded-full bg-[#1B4332] opacity-40 blur-[120px]" />
-        <div className="absolute top-[-80px] left-1/3 w-[380px] h-[380px] rounded-full bg-[#E8C468] opacity-[0.05] blur-[100px]" />
-      </div>
       {/* Subtle grid + grain */}
-      <div className="absolute inset-0 bg-grid-dark pointer-events-none opacity-60" />
+      <div className="absolute inset-0 bg-grid-dark pointer-events-none opacity-50" />
       <div className="absolute inset-0 bg-grain pointer-events-none" />
 
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-0">
@@ -87,18 +81,18 @@ export default function HeroSection() {
           <div className="flex-1 lg:pr-12 z-10">
             <span
               ref={eyebrowRef}
-              className="caption text-gradient-gold mb-6 block opacity-0"
+              className="caption mb-6 block opacity-0"
             >
-              24/7 LEAD CAPTURE · CALLS 9 AM TO 9 PM IST
+              AI LEAD CONVERSION · CALLS WITHIN 60 SECONDS
             </span>
 
-            <h1 className="text-[clamp(32px,7vw,64px)] font-display font-bold leading-[0.98] text-[#F0F7F3] tracking-[-0.04em] mb-6">
+            <h1 className="hero-text mb-6">
               <span ref={line1Ref} className="block opacity-0">
                 Every enquiry
               </span>
               <span
                 ref={line2Ref}
-                className="block opacity-0 mt-2 text-gradient-emerald"
+                className="block opacity-0 mt-2 text-accent"
               >
                 called back in 60 seconds.
               </span>
@@ -106,11 +100,11 @@ export default function HeroSection() {
 
             <p
               ref={subheadRef}
-              className="text-[15px] sm:text-[18px] text-[#9FB0A6] max-w-[480px] leading-relaxed mb-10 opacity-0"
+              className="body-text max-w-[480px] mb-10 opacity-0"
             >
-              Converza&apos;s AI calls your new real estate leads in Hinglish,
-              qualifies them, books the site visit and sends you the summary on
-              WhatsApp. Calls run 9 AM to 9 PM IST.
+              Converza&apos;s AI calls your new leads within 60 seconds —
+              qualifying them, booking site visits and sending you the summary on
+              WhatsApp. Intelligent lead conversion for international B2B.
             </p>
 
             <div
@@ -119,13 +113,12 @@ export default function HeroSection() {
             >
               <Link
                 href="/features"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-[16px] font-bold transition-all duration-150 hover:scale-[1.02] hover:shadow-[0_0_48px_rgba(52,211,153,0.55)] active:scale-[0.98]"
-                style={{ boxShadow: "0 0 32px rgba(52, 211, 153, 0.35)" }}
+                className="btn-accent inline-flex items-center gap-2 px-8 py-4 text-[15px] font-semibold"
               >
                 See how it works
                 <svg
-                  width="16"
-                  height="16"
+                  width="15"
+                  height="15"
                   viewBox="0 0 16 16"
                   fill="none"
                   className="ml-1"
@@ -141,17 +134,17 @@ export default function HeroSection() {
               </Link>
               <Link
                 href="/auth/register"
-                className="inline-flex items-center gap-2 text-[#9FB0A6] text-[16px] font-medium hover:text-[#F0F7F3] hover:underline transition-colors"
+                className="inline-flex items-center gap-2 text-[16px] font-medium text-ink-soft hover:text-ink transition-colors"
               >
-                Start free trial (30 days, no card)
+                Start free trial
               </Link>
             </div>
           </div>
 
           {/* Right: Globe */}
-          <div className="flex-1 relative flex items-center justify-center h-[300px] sm:h-[400px] lg:h-[600px]">
+          <div className="flex-1 relative flex items-center justify-center h-[300px] sm:h-[400px] lg:h-[550px]">
             <div className="globe-container absolute inset-0 opacity-0">
-              <LeadPulseCanvas scale={1.25} />
+              <LeadPulseCanvas scale={1.2} />
             </div>
           </div>
         </div>
@@ -163,7 +156,7 @@ export default function HeroSection() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
       >
         <div className="flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-[11px] font-medium text-[#9FB0A6] tracking-[0.08em] uppercase">
+          <span className="text-[11px] font-medium text-ink-soft tracking-[0.08em] uppercase">
             Scroll
           </span>
           <svg
@@ -178,14 +171,14 @@ export default function HeroSection() {
               width="14"
               height="22"
               rx="7"
-              stroke="#9FB0A6"
+              stroke="var(--text-secondary)"
               strokeWidth="1.5"
             />
             <circle
               cx="8"
               cy="9"
               r="2"
-              fill="#34D399"
+              fill="var(--accent-primary)"
               className="animate-pulse"
             />
           </svg>

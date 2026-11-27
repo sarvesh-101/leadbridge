@@ -55,9 +55,9 @@ export default function AnalyticsPage() {
 
   const metrics = [
     { label: "Leads Received", value: stats?.monthLeads ?? 0, icon: Users, color: "bg-blue-500" },
-    { label: "Calls Made", value: stats?.monthCalls ?? 0, icon: Phone, color: "bg-amber-500" },
+    { label: "Calls Made", value: stats?.monthCalls ?? 0, icon: Phone, color: "bg-warning" },
     { label: "Qualification Rate", value: `${stats?.qualifiedRate ?? 0}%`, icon: Target, color: "bg-purple-500" },
-    { label: "Booking Rate", value: `${stats?.bookingRate ?? 0}%`, icon: Calendar, color: "bg-emerald-500" },
+    { label: "Booking Rate", value: `${stats?.bookingRate ?? 0}%`, icon: Calendar, color: "bg-brand-deep" },
     { label: "Show Rate", value: `${stats?.showRate ?? 0}%`, icon: TrendingUp, color: "bg-indigo-500" },
     { label: "Conversion Rate", value: `${stats?.conversionRate ?? 0}%`, icon: Target, color: "bg-rose-500" },
   ];
@@ -76,21 +76,21 @@ export default function AnalyticsPage() {
       stage: s.status,
       count: s._count?.id || 0,
       percentage: totalLeads > 0 ? Math.round(((s._count?.id || 0) / totalLeads) * 100) : 0,
-      color: s.status === "CONVERTED" ? "bg-emerald-500" :
-             s.status === "VISITED" || s.status === "BOOKED" ? "bg-green-500" :
-             s.status === "COLD" ? "bg-gray-500" :
-             s.status === "NO_ANSWER" || s.status === "CALL_FAILED" ? "bg-red-500" :
+      color: s.status === "CONVERTED" ? "bg-success" :
+             s.status === "VISITED" || s.status === "BOOKED" ? "bg-success" :
+             s.status === "COLD" ? "bg-neutral-soft" :
+             s.status === "NO_ANSWER" || s.status === "CALL_FAILED" ? "bg-danger" :
              s.status === "FOLLOWUP_D1" || s.status === "FOLLOWUP_D2" || s.status === "FOLLOWUP_D3" ? "bg-yellow-500" :
              "bg-blue-500",
     }));
 
-  const sourceColors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-cyan-500", "bg-emerald-500", "bg-orange-500", "bg-rose-500"];
+  const sourceColors = ["bg-brand", "bg-success", "bg-purple-500", "bg-cyan-500", "bg-orange-500", "bg-warning", "bg-danger"];
   const maxSourceCount = Math.max(...leadsBySource.map((s: SourceItem) => s._count?.id || 0), 1);
 
   return (
     <div className="space-y-6">
       {/* Sub-navigation */}
-      <div className="flex items-center border-b border-white/10 gap-0 overflow-x-auto">
+      <div className="flex items-center border-b border-line gap-0 overflow-x-auto">
         {ANALYTICS_TABS.map((tab) => {
           const isActive = pathname === tab.href;
           return (
@@ -100,8 +100,8 @@ export default function AnalyticsPage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
                 isActive
-                  ? "border-[#34D399]/50 text-[#6FE3B0]"
-                  : "border-transparent text-[#9FB0A6] hover:text-[#F0F7F3] hover:border-[#5C6B62]/30"
+                  ? "border-brand/50 text-brand"
+                  : "border-transparent text-ink-soft hover:text-ink hover:border-ink-muted/30"
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -125,11 +125,11 @@ export default function AnalyticsPage() {
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-2">
-                  <m.icon className="w-4 h-4 text-[#9FB0A6]" />
-                  <span className="text-xs text-[#9FB0A6]">{m.label}</span>
+                  <m.icon className="w-4 h-4 text-ink-soft" />
+                  <span className="text-xs text-ink-soft">{m.label}</span>
                 </div>
-                <div className="text-lg font-bold text-[#F0F7F3]">{m.value}</div>
-                <span className="text-xs text-[#9FB0A6] mt-1">
+                <div className="text-lg font-bold text-ink">{m.value}</div>
+                <span className="text-xs text-ink-soft mt-1">
                   {m.label.includes("Rate") ? "of total leads" : "this month"}
                 </span>
               </>
@@ -140,7 +140,7 @@ export default function AnalyticsPage() {
 
       {/* Conversion Funnel */}
       <div className="p-6 rounded-xl app-card">
-        <h2 className="text-lg font-semibold text-[#F0F7F3] mb-6">Lead Funnel</h2>
+        <h2 className="text-lg font-semibold text-ink mb-6">Lead Funnel</h2>
         {loading ? (
           <div className="animate-pulse space-y-4">
             {[1,2,3,4,5].map(i => <div key={i} className="h-8 bg-white/[0.06] rounded" />)}
@@ -150,10 +150,10 @@ export default function AnalyticsPage() {
             {funnelStages.map((stage) => (
               <div key={stage.stage}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-[#9FB0A6]">{stage.stage.replace(/_/g, " ")}</span>
-                  <span className="text-[#F0F7F3] font-medium">{stage.count}</span>
+                  <span className="text-ink-soft">{stage.stage.replace(/_/g, " ")}</span>
+                  <span className="text-ink font-medium">{stage.count}</span>
                 </div>
-                <div className="h-7 rounded-lg bg-[#101713] overflow-hidden">
+                <div className="h-7 rounded-lg bg-canvas overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${stage.percentage}%` }}
@@ -161,21 +161,21 @@ export default function AnalyticsPage() {
                     className={cn("h-full rounded-lg flex items-center justify-end pr-2", stage.color)}
                     style={{ minWidth: stage.percentage > 0 ? "20px" : "0" }}
                   >
-                    <span className="text-xs text-[#F0F7F3] font-medium">{stage.percentage}%</span>
+                    <span className="text-xs text-ink font-medium">{stage.percentage}%</span>
                   </motion.div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-[#9FB0A6] text-sm text-center py-8">No lead data available yet</p>
+          <p className="text-ink-soft text-sm text-center py-8">No lead data available yet</p>
         )}
       </div>
 
       {/* Sources & Performance */}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="p-6 rounded-xl app-card">
-          <h2 className="text-lg font-semibold text-[#F0F7F3] mb-4">Leads by Source</h2>
+          <h2 className="text-lg font-semibold text-ink mb-4">Leads by Source</h2>
           {loading ? (
             <div className="animate-pulse space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-5 bg-white/[0.06] rounded" />)}</div>
           ) : leadsBySource.length > 0 ? (
@@ -183,9 +183,9 @@ export default function AnalyticsPage() {
               {leadsBySource.map((s: SourceItem, i: number) => (
                 <div key={s.source} className="flex items-center gap-3">
                   <div className={cn("w-2 h-2 rounded-full", sourceColors[i % sourceColors.length])} />
-                  <span className="text-sm text-[#9FB0A6] flex-1 capitalize">{s.source}</span>
-                  <span className="text-sm text-[#F0F7F3] font-medium">{s._count?.id || 0}</span>
-                  <div className="w-24 h-1.5 rounded-full bg-[#101713] overflow-hidden">
+                  <span className="text-sm text-ink-soft flex-1 capitalize">{s.source}</span>
+                  <span className="text-sm text-ink font-medium">{s._count?.id || 0}</span>
+                  <div className="w-24 h-1.5 rounded-full bg-canvas overflow-hidden">
                     <div className={cn("h-full rounded-full", sourceColors[i % sourceColors.length])}
                       style={{ width: `${maxSourceCount > 0 ? ((s._count?.id || 0) / maxSourceCount) * 100 : 0}%` }} />
                   </div>
@@ -193,12 +193,12 @@ export default function AnalyticsPage() {
               ))}
             </div>
           ) : (
-            <p className="text-[#9FB0A6] text-sm text-center py-8">No source data yet</p>
+            <p className="text-ink-soft text-sm text-center py-8">No source data yet</p>
           )}
         </div>
 
         <div className="p-6 rounded-xl app-card">
-          <h2 className="text-lg font-semibold text-[#F0F7F3] mb-4">Key Rates</h2>
+          <h2 className="text-lg font-semibold text-ink mb-4">Key Rates</h2>
           {loading ? (
             <div className="animate-pulse space-y-4">{[1,2,3,4].map(i => <div key={i} className="h-16 bg-white/[0.06] rounded" />)}</div>
           ) : (
@@ -211,18 +211,18 @@ export default function AnalyticsPage() {
               ].map((rate) => (
                 <div key={rate.label}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-[#9FB0A6]">{rate.label}</span>
-                    <span className="text-[#F0F7F3] font-medium">{rate.value}%</span>
+                    <span className="text-ink-soft">{rate.label}</span>
+                    <span className="text-ink font-medium">{rate.value}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#101713] overflow-hidden">
+                  <div className="h-2 rounded-full bg-canvas overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${rate.value}%` }}
                       transition={{ duration: 0.6 }}
-                      className="h-full rounded-full bg-gradient-to-r from-[#1B4332] to-[#2D6A4F]"
+                      className="h-full rounded-full bg-gradient-to-r from-line-subtle to-brand-deep"
                     />
                   </div>
-                  <p className="text-xs text-[#9FB0A6] mt-1">{rate.desc}</p>
+                  <p className="text-xs text-ink-soft mt-1">{rate.desc}</p>
                 </div>
               ))}
             </div>

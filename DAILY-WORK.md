@@ -1,6 +1,6 @@
 # DAILY-WORK.md — Converza go-live status
 
-> **Last updated:** 2026-11-14  
+> **Last updated:** 2026-11-27  
 > **Owner:** Chetan (platform) · AI agent (execution)  
 > **Source of truth:** this file + `docs/GO-LIVE-RUNBOOK.md` (steps) + `docs/plan-margins.md` (pricing)
 
@@ -304,3 +304,187 @@ Full human runbook: **`docs/step3-new-razorpay-account.md` (A1–D6)**. Canonica
 - Plan pricing (canonical, `server/src/config/plans.ts`): Starter ₹17,699/mo (200 leads), Growth ₹41,299/mo (600 leads), Pro ₹70,799/mo (1,200 leads), all incl. 18% GST (ex-GST 14,999 / 34,999 / 59,999). Launch is retired at its legacy ₹7,999 and gets no plan on the new account. Only STARTER requests a 30-day trial, expressed as a future `start_at` — never `trial_period_days`.
 - Razorpay plan IDs live only in the Render dashboard (`render.yaml` is `sync: false` for all four). New-account IDs are recorded in `server/razorpay.plan-map.json`. `scripts/setup-razorpay.cjs` is disabled — it would create plans at the retired prices.
 - The local machine CAN reach the live Razorpay API with the new account keys (verified 2026-11-13). The old `rzp_live_Ti0DZ…` pair still 401s. Pass keys inline on the command line; never commit them.
+
+---
+
+## 2026-11-27 — Per-broker email forwarding is end-to-end (Phase 3 closed)
+
+**Why it was broken:** an auto-forward rule (Gmail/Outlook/portal) keeps the *portal's* `From`
+header, so sender-only matching silently dropped exactly the mail brokers forward. The recipient
+address does survive — in `To`/`Cc`, or in `Delivered-To`/`X-Forwarded-To`.
+
+**What now exists:**
+- `GET /api/v1/forwarding/address` → this broker's `forward+<token>@converza.tech` (10-char token, no 0/o/1/l), allocated lazily on first view (`utils/inbound-address.ts`). The Forwarding page shows it with a copy button and passes it to the portal wizard.
+- Routing is **recipient first, sender second** (`services/email-ingestion.service.ts`), and the lead's `rawPayload` records `matchedBy` (`recipient`/`sender`) plus the token, so a mis-route is diagnosable from the lead record.
+- Both ingestion paths pass recipient-side data: the IMAP poller sends `To`/`Cc` plus the raw header block (`Delivered-To`, `X-Forwarded-To`); the `/webhooks/email/incoming` route sends `to`, `delivered-to`, `x-forwarded-to`, `x-original-to`, `recipient`, `envelope` and `headers`.
+- Provider shapes normalised: extraction flattens arrays and objects, so SendGrid's object `envelope` and CloudMailin's raw `headers` string both work (previously a non-string candidate would have thrown).
+- Shared mailbox + manual forwards still work: sender matching is untouched, and legacy `leads+` addresses handed out by earlier builds still resolve.
+- One mailbox serves every broker — a new broker needs only a forward rule, no Render change. `FORWARDING_DOMAIN` (optional) is now in `render.yaml` + `.env.example`.
+
+**Verified:** server `tsc --noEmit` clean; `webhook-secret.test.ts` 8 passed; `inbound-address.test.ts` 9 passed; new
+`forwarding-routing.test.ts` 6 passed (portal sender + token → right broker; two brokers on one
+mailbox; SendGrid object envelope; sender fallback; unmatched portal mail ignored; unknown token
+then sender fallback).
+
+**Webhook hardened:** `POST /webhooks/email/incoming` was public and unauthenticated — a
+forged POST created a lead, and every lead is a billable AI call (plus the 30-day phone
+dedupe could mask the real enquiry). It now verifies `EMAIL_WEBHOOK_SECRET` from
+`X-Webhook-Secret`, `Authorization: Bearer`, HTTP Basic (CloudMailin style) or `?secret=…`
+(constant-time compare), returning `401` otherwise; unset secret keeps the previous open
+behaviour so the deploy is safe before a provider is configured. `GET /webhooks/email/status`
+now reports `secured`.
+
+**Domain note:** `support@converza.tech` is the business mailbox and owns the root MX.
+The forwarding catch-all must live on a subdomain (`forward.converza.tech`) — moving the
+root MX to an inbound provider would break support mail.
+
+**Still human (not code):** point a real portal enquiry at a broker's address and confirm the lead
+appears — needs `IMAP_*` (or a webhook provider) configured on the deployed build, which is still
+the T8 stack until `converza-v2` ships.
+
+---
+
+## 2026-11-27 (later) — Brand palette sweep finished; a silent Tailwind bug fixed
+
+**What was half-done:** the marketing/landing components had been moved to the Obsidian + Burnt Orange
+palette, but the dashboard, admin, customer, auth and setup pages still used the old green system
+(`#101713` surfaces, `#E4E7DF`/`#F1F3EE` light cards, `#7C8781` muted text, plus `emerald`/`green`/
+`red`/`amber` Tailwind palettes). The working tree was mid-sweep.
+
+**The bug that made the earlier pass look finished when it was not:** every tint written as
+`bg-[var(--semantic-success)]/10` (660 occurrences) produced **no CSS at all**. Tailwind 3.4 cannot
+apply an opacity modifier to an arbitrary `var()` value and drops the rule silently — so all the
+tinted badges, rows and borders created by the first pass were invisible. Same for
+`border-[var(--x)]/30` and `text-[var(--x)]/70`.
+
+**Fix — tokens are now real Tailwind colors backed by rgb channels:**
+- `globals.css` keeps the hex vars (inline styles/SVG use them) and adds `--*-rgb` channel mirrors.
+- `tailwind.config.ts` maps `canvas`, `surface`/`surface-raised`, `ink`/`ink-soft`/`ink-muted`,
+  `line`/`line-subtle`, `brand`/`brand-soft`/`brand-deep`/`brand-copper`, `success`, `warning`,
+  `danger` and `neutral-soft` through `rgb(var(--x-rgb) / <alpha-value>)`, so `/10`, `/30`, `/70`
+  compile correctly.
+- All arbitrary token utilities were rewritten to the named tokens
+  (`bg-[var(--semantic-success)]/10` → `bg-success/10`), and the remaining legacy hex, gray,
+  red, amber and emerald classes were converted across the frontend (92 files touched).
+- The old light-theme cards in `setup`, `customer/*` and `admin/*` now use the dark surfaces with
+  light text, matching the rest of the app.
+
+**Also cleaned:** ~48 files had been rewritten with CRLF line endings by an editor, producing
+whole-file diffs. Those are back to LF, so the commit diff contains only real changes.
+
+**Verified:** frontend `next build` exit 0; built stylesheet contains
+`rgb(var(--semantic-success-rgb)/.1)` and friends (proving the tints now emit); frontend
+`tsc --noEmit` clean; server `tsc --noEmit` clean; forwarding/webhook suite 23 passed.
+
+**Not verified:** the converted pages were not opened in a browser — contrast, hover states and
+spacing on the formerly light-theme screens (`/setup`, `/customer/*`, `/admin/*`) still need a
+visual pass at desktop and 390px before this branch ships.
+
+---
+
+## 2026-11-27 (final) — Per-broker forwarding closed the last gap in the broker's setup
+
+**What was still open:** the ingestion side routed by recipient, but the Forwarding page did not
+tell brokers to use that address. The "Forward Email from Your Inbox" steps printed the **shared**
+mailbox (`FORWARDING_EMAIL`), and the portal wizard carried a warning that Converza matches
+forwarded mail *by sender*. A broker following either would add a Gmail/Outlook auto-forward to
+the shared mailbox — the rule keeps the portal's `From`, so the enquiry matched no broker and was
+dropped, i.e. the exact failure the token was built to prevent.
+
+**Changes:**
+- Every email step on `/dashboard/forwarding` now uses the broker's own
+  `forward+<token>@…` address (`/forwarding/address`), both the manual steps and the wizard.
+- Removed the "same Gmail account you signed up with / matched by sender" warning; replaced it
+  with the real rule (any account works; the recipient address identifies the broker), and the
+  forwarding-service note now says explicitly never to point a rule at the shared mailbox.
+- Documented the one manual step left in Gmail: its forwarding-address confirmation lands in
+  Converza's mailbox, so support confirms it; manual Forward needs no confirmation.
+- `/webhooks/email/incoming` now also reads `cc`/`Cc`, so the provider path considers the same
+  recipient headers as the IMAP poller.
+
+**Verified:** frontend `tsc --noEmit` clean; server `tsc --noEmit` clean; forwarding suite 23
+passed. Separately ran the poller's parsing seam against a realistic auto-forwarded RFC822 message
+(mailparser): the token is found in `X-Forwarded-To`/`Delivered-To` even though `To` still names the
+broker, and HTML-only portal mail yields body text (so the phone is still parsed).
+
+**Not verified:** no live mailbox — delivery of `forward+<token>@…` still depends on the deployed
+mailbox accepting plus-addressing (or `FORWARDING_DOMAIN` pointing at the catch-all).
+
+---
+
+## 2026-11-27 03:31 IST — Ship step: push + PR (DONE — PR #1 open)
+
+**Where the work stands.** Branch `converza-v2` is clean and **3 commits ahead of `origin/main`
+(`a30dd2c`)**:
+
+| commit | what |
+|---|---|
+| `a4fd1e8` | brand palette sweep (Obsidian + Burnt Orange) + the silent Tailwind tint bug fix |
+| `7e222d8` | per-broker inbound addresses (`forward+<token>@…`), recipient-first routing, secured `/webhooks/email/incoming` + tests |
+| `59edda2` | Forwarding page now hands the broker *their own* address; webhook also reads `cc`/`Cc` |
+
+Diff vs `main`: 141 files, +5,647 / −4,719. Branch has no upstream yet.
+
+**Conversation so far (in order):**
+1. Per-broker forwarding flow was finished end to end (recipient-token routing first, sender fallback),
+   unit-tested. That code work is done; nothing more to build there.
+2. Question raised: the Render test used the developer's own email typed in by hand — how does this
+   serve a *real* broker? Answer: one polled mailbox is by design, no Render change per broker; the
+   broker identity is the `+token` in `To`/`Cc`/`Delivered-To`, matched against `Client.inboundToken`.
+   A broker only adds a forward rule in their own mailbox.
+3. “What is the next step and why?” → deploy first, then a live smoke test. Logic is already tested;
+   the remaining risk is delivery/config, and production still runs the T8 build **without** token
+   routing. No new features before this ships.
+4. Next-step plan was accepted → **this session: push `converza-v2` and open the PR into `main`.**
+
+**Pre-flight checks run and green:** server ESLint `src/` → 0 errors (505 pre-existing warnings);
+`scripts/claims-lint.mjs` → 0 banned phrases; frontend `next lint` → 0 errors (6 warnings);
+forwarding suite 23/23 passing (`forwarding-routing`, `inbound-address`, `webhook-secret`).
+
+**Blocker that was hit — no GitHub credentials on this machine.** `git push -u origin converza-v2`
+failed with `could not read Username for 'https://github.com'`. Checked: no `gh` CLI
+(`gh: command not found`), no `~/.ssh` directory (no key at all), no
+`credential.helper` in git config, no `~/.gitconfig`, and no `GITHUB_TOKEN`/PAT in the environment.
+Remote is HTTPS (`https://github.com/sarvesh-101/leadbridge.git`); the repo is public
+(`api.github.com` returns 200 unauthenticated), so only push auth was missing.
+
+**How it was unblocked:** user chose **option 1** — supply a GitHub PAT (classic, `repo` scope,
+7-day expiry), agent pushes and opens the PR. Token was passed inline to the two commands only
+(base64 `AUTHORIZATION` header for `git push`, `Bearer` for the API); verified afterwards that
+nothing persisted: `remote.origin.url` is still the plain HTTPS URL, `credential.helper` is unset,
+no `~/.git-credentials` exists. **User must revoke the token at github.com/settings/tokens.**
+
+**Done at 03:35 IST:**
+- Push: `a30dd2c..59edda2  converza-v2 -> converza-v2`; branch now tracks `origin/converza-v2`.
+- PR opened via the API: **https://github.com/sarvesh-101/leadbridge/pull/1** — state `open`,
+  not draft, `mergeable: true`, head `sarvesh-101:converza-v2` @ `59edda2`, base `sarvesh-101:main`
+  @ `a30dd2c`, 3 commits / 141 files / +5,647 −4,719. Title:
+  *feat(forwarding): per-broker inbound email addresses with secured webhook*.
+
+**CI caught a real bug — schema drift (fixed 03:45 IST).** The E2E job was red on this PR *and* on
+`main` (`a30dd2c`), so it was pre-existing. Root cause: `schema.prisma` declares `Client.languages`
+(`String[]`) and `Client.transferToNumber`, but **no migration ever created either column**. They
+exist in production because they were added out-of-band, so nobody noticed — but a fresh database
+(CI's `postgres:16-alpine` service container) fails `prisma.client.create()` with `P2022` and the
+remaining six lifecycle tests cascade into `P2025` / `P2003`.
+
+- New migration `server/prisma/migrations/20261128000000_add_missing_client_columns/migration.sql`,
+  both statements `ADD COLUMN IF NOT EXISTS` → a no-op on production.
+- I did **not** guess the set of missing columns. There is no `initdb`/Docker on this machine, so the
+  check was static: `prisma migrate diff --from-empty --to-schema-datamodel` (canonical DDL) versus a
+  replay of every `migration.sql` (`CREATE TABLE`, `ADD COLUMN`, `RENAME`, `DROP`). Result: **0 missing
+  columns** across all tables. (First pass over-reported five — the parser missed comma-separated
+  `ADD COLUMN` lists hanging off one `ALTER TABLE`; corrected before writing anything.)
+- Verified: `prisma validate` clean; CI on `acd8a09` → E2E **success**, Server Tests **success**,
+  Frontend Lint & Type Check **success**, Vercel **success** (Docker Build Check still running at
+  merge time — it only rebuilds the two images and passed on the previous commit).
+
+**Next owner step:** merge PR #1 → Render deploys `main` (deploy job only runs when
+`vars.DEPLOY_ENABLED == 'true'`; otherwise use Manual Deploy). Then revoke the PAT.
+
+**Remaining after merge (unchanged):** Render env `IMAP_USER`, `IMAP_PASS`, `IMAP_HOST`,
+`IMAP_PORT`, `FORWARDING_DOMAIN`, `EMAIL_WEBHOOK_SECRET` → deploy → curl smoke test with a real
+broker token expecting `status: "created"` and `rawPayload.matchedBy: "recipient"` → one real Gmail
+auto-forward (needs a 2nd broker account; the Gmail confirmation link lands in Converza's inbox and
+must be clicked manually).
+

@@ -76,21 +76,21 @@ export default function BookingsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Bookings</h1>
-          <p className="text-[#9FB0A6] mt-1">
+          <h1 className="text-2xl font-bold text-ink">Bookings</h1>
+          <p className="text-ink-soft mt-1">
             Manage and track all property visits
           </p>
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="flex items-center rounded-lg border border-white/10 overflow-hidden">
+          <div className="flex items-center rounded-lg border border-line overflow-hidden">
             <button
               onClick={() => setViewMode("calendar")}
               className={cn(
                 "flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors",
                 viewMode === "calendar"
-                  ? "bg-[#34D399]/25 text-[#2D6A4F]"
-                  : "text-[#9FB0A6] hover:text-[#F0F7F3] hover:bg-white/[0.06]"
+                  ? "bg-brand/25 text-brand-deep"
+                  : "text-ink-soft hover:text-ink hover:bg-white/[0.06]"
               )}
             >
               <Grid3X3 className="w-3.5 h-3.5" />
@@ -101,8 +101,8 @@ export default function BookingsPage() {
               className={cn(
                 "flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors",
                 viewMode === "list"
-                  ? "bg-[#34D399]/25 text-[#2D6A4F]"
-                  : "text-[#9FB0A6] hover:text-[#F0F7F3] hover:bg-white/[0.06]"
+                  ? "bg-brand/25 text-brand-deep"
+                  : "text-ink-soft hover:text-ink hover:bg-white/[0.06]"
               )}
             >
               <LayoutList className="w-3.5 h-3.5" />
@@ -120,7 +120,7 @@ export default function BookingsPage() {
               toast.success(`${bookings.length} bookings exported`);
             }}
             disabled={bookings.length === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06] disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06] disabled:opacity-50 transition-colors"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Export CSV</span>
@@ -132,16 +132,16 @@ export default function BookingsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Today", count: todayCount, color: "text-blue-400" },
-          { label: "Total", count: total, color: "text-green-400" },
+          { label: "Total", count: total, color: "text-success" },
           {
             label: "Visited",
             count: bookings.filter((b: Booking) => b.status === "VISITED").length,
-            color: "text-emerald-400",
+            color: "text-success",
           },
           {
             label: "No Shows",
             count: bookings.filter((b: Booking) => b.status === "NO_SHOW").length,
-            color: "text-red-400",
+            color: "text-danger",
           },
         ].map((s) => (
           <motion.div
@@ -156,10 +156,10 @@ export default function BookingsPage() {
               </div>
             ) : (
               <>
-                <div className={cn("text-2xl font-bold text-[#F0F7F3]", s.color)}>
+                <div className={cn("text-2xl font-bold text-ink", s.color)}>
                   {s.count}
                 </div>
-                <div className="text-xs text-[#9FB0A6] mt-1">{s.label}</div>
+                <div className="text-xs text-ink-soft mt-1">{s.label}</div>
               </>
             )}
           </motion.div>
@@ -169,7 +169,7 @@ export default function BookingsPage() {
       {/* Filters (shown in both views) */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
           <input
             value={searchInput}
             onChange={(e) => {
@@ -177,7 +177,7 @@ export default function BookingsPage() {
               debouncedSearchRef.current?.(e.target.value);
             }}
             placeholder="Search by name, phone, or address..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
           />
         </div>
         <select
@@ -186,7 +186,7 @@ export default function BookingsPage() {
             setFilter(e.target.value);
             setPage(1);
           }}
-          className="px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm"
+          className="px-4 py-2.5 rounded-xl app-card text-ink-soft text-sm"
         >
           <option value="all">All Status</option>
           <option value="CONFIRMED">Confirmed</option>
@@ -227,7 +227,7 @@ export default function BookingsPage() {
               {loading ? (
                 <div className="animate-pulse space-y-3">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="h-20 bg-[#101713] rounded-xl" />
+                    <div key={i} className="h-20 bg-canvas rounded-xl" />
                   ))}
                 </div>
               ) : filtered.length > 0 ? (
@@ -240,14 +240,14 @@ export default function BookingsPage() {
                     className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl app-card app-card-hover app-card-hover hover:bg-white/[0.06] transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center flex-shrink-0">
-                        <CalendarIcon className="w-5 h-5 text-[#2D6A4F]" />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-line-subtle/20 to-brand-deep/20 flex items-center justify-center flex-shrink-0">
+                        <CalendarIcon className="w-5 h-5 text-brand-deep" />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-medium text-[#F0F7F3] truncate">
+                        <div className="text-sm font-medium text-ink truncate">
                           {apt.lead?.name || "Unknown"}
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-[#9FB0A6] mt-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-ink-soft mt-1">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />{" "}
                             {formatAppointmentDate(apt.visitDate)} {apt.visitTime}
@@ -258,7 +258,7 @@ export default function BookingsPage() {
                           </span>
                         </div>
                         {apt.lead?.phone && (
-                          <span className="text-xs text-gray-600 mt-0.5 block">
+                          <span className="text-xs text-ink-soft mt-0.5 block">
                             {formatPhone(apt.lead.phone)}
                           </span>
                         )}
@@ -271,15 +271,15 @@ export default function BookingsPage() {
                           apt.status === "CONFIRMED" &&
                             "bg-blue-500/10 text-blue-400",
                           apt.status === "REMINDED" &&
-                            "bg-teal-500/10 text-teal-400",
+                            "bg-success/10 text-success",
                           apt.status === "VISITED" &&
-                            "bg-green-500/10 text-green-400",
+                            "bg-success/10 text-success",
                           apt.status === "NO_SHOW" &&
-                            "bg-red-500/10 text-red-400",
+                            "bg-danger/10 text-danger",
                           apt.status === "RESCHEDULED" &&
                             "bg-yellow-500/10 text-yellow-400",
                           apt.status === "CANCELLED" &&
-                            "bg-gray-500/10 text-[#9FB0A6]"
+                            "bg-neutral-soft/10 text-ink-soft"
                         )}
                       >
                         {apt.status.replace(/_/g, " ")}

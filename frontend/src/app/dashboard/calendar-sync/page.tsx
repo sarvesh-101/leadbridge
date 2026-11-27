@@ -84,56 +84,56 @@ export default function CalendarSyncPage() {
     <div className="space-y-6 max-w-2xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-[#F0F7F3]">Calendar Sync</h1>
-        <p className="text-[#9FB0A6] mt-1">Connect Google Calendar to auto-sync bookings and property visits</p>
+        <h1 className="text-2xl font-bold text-ink">Calendar Sync</h1>
+        <p className="text-ink-soft mt-1">Connect Google Calendar to auto-sync bookings and property visits</p>
       </div>
 
       {/* Status Card */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1 }}
         className={cn(
           "p-6 rounded-xl border transition-all",
-          connected ? "bg-green-500/5 border-green-500/20" : "bg-[#101713] border-white/10"
+          connected ? "bg-success/5 border-success/20" : "bg-canvas border-line"
         )}
       >
         <div className="flex items-center gap-4">
           <div className={cn(
             "w-14 h-14 rounded-2xl flex items-center justify-center",
-            connected ? "bg-green-500/10" : "bg-[#101713]"
+            connected ? "bg-success/10" : "bg-canvas"
           )}>
-            <Calendar className={cn("w-7 h-7", connected ? "text-green-400" : "text-[#9FB0A6]")} />
+            <Calendar className={cn("w-7 h-7", connected ? "text-success" : "text-ink-soft")} />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-[#F0F7F3]">
+              <h2 className="text-lg font-semibold text-ink">
                 {loading ? "Checking..." : connected ? "Google Calendar Connected" : "Not Connected"}
               </h2>
               {loading ? (
-                <Loader2 className="w-4 h-4 text-[#9FB0A6] animate-spin" />
+                <Loader2 className="w-4 h-4 text-ink-soft animate-spin" />
               ) : connected ? (
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <CheckCircle2 className="w-5 h-5 text-success" />
               ) : (
-                <XCircle className="w-5 h-5 text-[#9FB0A6]" />
+                <XCircle className="w-5 h-5 text-ink-soft" />
               )}
             </div>
-            <p className="text-sm text-[#9FB0A6] mt-1">
+            <p className="text-sm text-ink-soft mt-1">
               {connected
                 ? "Your bookings will be automatically added to Google Calendar"
                 : "Connect your Google Calendar to automatically sync property visit appointments"
               }
             </p>
             {connected && lastSync && (
-              <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <p className="text-xs text-ink-soft mt-2 flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Last checked: {formatDate(lastSync)}
               </p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-white/10">
+        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-line">
           {connected ? (
             <>
               <button onClick={handleSync} disabled={connecting}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
               >
                 {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                 Sync Now
@@ -142,14 +142,13 @@ export default function CalendarSyncPage() {
                     setConnected(false);
                     toast.success("Calendar disconnected");
                   }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm hover:bg-white/[0.06]"
               >
                 <Unlink className="w-4 h-4" /> Disconnect
               </button>
             </>
           ) : (
-            <button onClick={handleConnect} disabled={connecting}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            <button onClick={handleConnect} disabled={connecting}                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
             >
               {connecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LinkIcon className="w-4 h-4" />}
               {connecting ? "Connecting..." : "Connect Google Calendar"}
@@ -160,7 +159,7 @@ export default function CalendarSyncPage() {
 
       {/* How it works */}
       <div className="p-6 rounded-xl app-card">
-        <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">How Calendar Sync Works</h3>
+        <h3 className="text-sm font-semibold text-ink mb-4">How Calendar Sync Works</h3>
         <div className="space-y-4">
           {[
             { step: "1", title: "Connect", desc: "Authorize Converza to access your Google Calendar. We only read/write calendar events." },
@@ -168,12 +167,12 @@ export default function CalendarSyncPage() {
             { step: "3", title: "Updates", desc: "Rescheduled or cancelled bookings are updated in real-time. Reminders are synced too." },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-[#34D399]/15 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-[#6FE3B0]">{item.step}</span>
+              <div className="w-7 h-7 rounded-full bg-brand/15 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-brand">{item.step}</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-[#F0F7F3]">{item.title}</p>
-                <p className="text-xs text-[#9FB0A6] mt-0.5">{item.desc}</p>
+                <p className="text-sm font-medium text-ink">{item.title}</p>
+                <p className="text-xs text-ink-soft mt-0.5">{item.desc}</p>
               </div>
             </div>
           ))}

@@ -3,49 +3,49 @@ import { Zap, ArrowLeft } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-[#0A0F0C]">
+    <div className="min-h-screen bg-canvas">
       <div className="max-w-3xl mx-auto px-4 py-16">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-[#9FB0A6] hover:text-[#F0F7F3] mb-6">
+          <Link href="/" className="inline-flex items-center gap-2 text-ink-soft hover:text-ink mb-6">
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#1B4332] flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.4)]">
-              <Zap className="w-5 h-5 text-[#0A0F0C]" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand to-line-subtle flex items-center justify-center shadow-[0_0_20px_rgba(242,140,69,0.25)]">
+              <Zap className="w-5 h-5 text-canvas" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-[#F0F7F3]">Privacy Policy</h1>
-              <p className="text-[#9FB0A6] text-sm">Last updated: August 10, 2026</p>
+              <h1 className="text-2xl font-bold text-ink">Privacy Policy</h1>
+              <p className="text-ink-soft text-sm">Last updated: August 10, 2026</p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-8 text-[#9FB0A6] leading-relaxed">
+        <div className="space-y-8 text-ink-soft leading-relaxed">
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">1. Information We Collect</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">1. Information We Collect</h2>
             <p className="mb-3">              We collect information only to provide and improve our services:
 </p>
-            <h3 className="text-[#F0F7F3] font-medium mb-2">Account Information</h3>
+            <h3 className="text-ink font-medium mb-2">Account Information</h3>
             <p className="mb-3">
               When you create an account, we collect your name, email address, phone number, business name, and the billing information needed to run your subscription.
             </p>
-            <h3 className="text-[#F0F7F3] font-medium mb-2">Lead Data</h3>
+            <h3 className="text-ink font-medium mb-2">Lead Data</h3>
             <p className="mb-3">
               We process lead data that you import or collect through the Platform, including names, phone numbers, email addresses, property preferences, and interaction history.
             </p>
-            <h3 className="text-[#F0F7F3] font-medium mb-2">Call Recordings & Transcripts</h3>
+            <h3 className="text-ink font-medium mb-2">Call Recordings & Transcripts</h3>
             <p className="mb-3">
               AI calls made through the Platform may be recorded and transcribed for lead management where the lead has been told the call may be recorded and has a lawful basis to be contacted.
             </p>
-            <h3 className="text-[#F0F7F3] font-medium mb-2">Usage Data</h3>
+            <h3 className="text-ink font-medium mb-2">Usage Data</h3>
             <p>
               We collect information about how you use the Platform, including features accessed, time spent, and interactions with the AI system.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">2. How We Use Your Information</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">2. How We Use Your Information</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>To provide, maintain, and improve the Platform</li>
               <li>To process AI calls, generate transcripts, and schedule appointments</li>
@@ -58,7 +58,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">3. Data Sharing & Third Parties</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">3. Data Sharing & Third Parties</h2>
             <p className="mb-3">We may share your data with the following third-party service providers:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong>AI Processing:</strong> LLM provider for call summarization and qualification extraction</li>
@@ -72,7 +72,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">4. Data Retention</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">4. Data Retention</h2>
             <p className="mb-3">
               We retain your data only as long as your account is active or as needed to provide the Service, and for no longer than the legal minimum where a longer period is required by law.
             </p>
@@ -82,7 +82,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">5. Data Security</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">5. Data Security</h2>
             <p className="mb-3">
               We implement industry-standard security measures to protect your data:
             </p>
@@ -96,7 +96,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">6. Your Rights</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">6. Your Rights</h2>
             <p className="mb-3">You have the right to:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Access your personal data held by us</li>
@@ -109,12 +109,12 @@ export default function PrivacyPolicyPage() {
             <p className="mt-3">
               <strong>Under the Digital Personal Data Protection Act, 2023 (DPDP Act),</strong> you can
               withdraw your consent and request erasure of your personal data.
-              To request erasure, contact us at <a href="mailto:support@converza.tech" className="text-[#6FE3B0] hover:underline">support@converza.tech</a>.
+              To request erasure, contact us at <a href="mailto:support@converza.tech" className="text-brand hover:underline">support@converza.tech</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">7. Cookies</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">7. Cookies</h2>
             <p>
               We use essential cookies for authentication and session management. We do not use tracking
               cookies or third-party analytics cookies. Local storage is used to persist your session token.
@@ -122,15 +122,15 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">8. International Data Transfers</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">8. International Data Transfers</h2>
             <p>
               Your data may be processed in data centers located in India and the United States. Where personal data is transferred internationally, we use appropriate safeguards.
-              If you need details for your own records or compliance review, contact us at <a href="mailto:support@converza.tech" className="text-[#6FE3B0] hover:underline">support@converza.tech</a>.
+              If you need details for your own records or compliance review, contact us at <a href="mailto:support@converza.tech" className="text-brand hover:underline">support@converza.tech</a>.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">9. Changes to This Policy</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">9. Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. We will notify you of material changes
               via email or through the Platform. Your continued use after changes constitutes acceptance
@@ -139,21 +139,21 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#F0F7F3] mb-3">10. Contact</h2>
+            <h2 className="text-lg font-semibold text-ink mb-3">10. Contact</h2>
             <p>
               For privacy-related inquiries, please contact us at{" "}
-              <a href="mailto:support@converza.tech" className="text-[#6FE3B0] hover:underline">
+              <a href="mailto:support@converza.tech" className="text-brand hover:underline">
                 support@converza.tech
               </a>.
             </p>
           </section>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/10 text-center">
-          <Link href="/" className="text-[#9FB0A6] hover:text-[#F0F7F3] text-sm">
+        <div className="mt-12 pt-8 border-t border-line text-center">
+          <Link href="/" className="text-ink-soft hover:text-ink text-sm">
             &copy; {new Date().getFullYear()} Converza · Operated by GS TECHNO. All rights reserved.
           </Link>
-          <div className="mt-3 text-xs text-[#6B7C73] leading-relaxed">
+          <div className="mt-3 text-xs text-ink-muted leading-relaxed">
             <p>GS TECHNO — 1, Hanuman Nagar, Behind BMC Chawl 22, Bhatwadi Hill, Ghatkopar, Mumbai Suburban, Maharashtra 400084</p>
             <p>GSTIN: 27AEGPH7840P1ZX</p>
           </div>

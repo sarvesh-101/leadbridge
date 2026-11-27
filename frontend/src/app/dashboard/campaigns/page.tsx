@@ -75,15 +75,15 @@ export default function CampaignsPage() {
   }>>([]);
 
   const TASK_ACTIONS: { value: TaskAction; label: string; icon: React.ElementType; color: string }[] = [
-    { value: "CALL", label: "AI Call", icon: Phone, color: "text-green-400" },
+    { value: "CALL", label: "AI Call", icon: Phone, color: "text-success" },
     { value: "WHATSAPP", label: "WhatsApp", icon: MessageSquare, color: "text-blue-400" },
     { value: "SMS", label: "SMS", icon: MessageSquare, color: "text-purple-400" },
-    { value: "EMAIL", label: "Email", icon: MessageSquare, color: "text-amber-400" },
+    { value: "EMAIL", label: "Email", icon: MessageSquare, color: "text-warning" },
     { value: "DELAY", label: "Delay", icon: Clock, color: "text-yellow-400" },
-    { value: "CONDITION", label: "Condition", icon: Target, color: "text-red-400" },
+    { value: "CONDITION", label: "Condition", icon: Target, color: "text-danger" },
     { value: "UPDATE_LEAD_STATUS", label: "Update Status", icon: Target, color: "text-indigo-400" },
     { value: "WEBHOOK", label: "Webhook", icon: Target, color: "text-cyan-400" },
-    { value: "CUSTOM", label: "Custom", icon: Target, color: "text-[#9FB0A6]" },
+    { value: "CUSTOM", label: "Custom", icon: Target, color: "text-ink-soft" },
   ];
 
   function getTaskMeta(action: TaskAction) {
@@ -201,12 +201,12 @@ export default function CampaignsPage() {
 
   const statusColor = (status: CampaignStatus) => {
     switch (status) {
-      case "ACTIVE": return "bg-green-500/10 text-green-400";
+      case "ACTIVE": return "bg-success/10 text-success";
       case "PAUSED": return "bg-yellow-500/10 text-yellow-400";
-      case "DRAFT": return "bg-gray-500/10 text-[#9FB0A6]";
+      case "DRAFT": return "bg-neutral-soft/10 text-ink-soft";
       case "COMPLETED": return "bg-blue-500/10 text-blue-400";
-      case "ARCHIVED": return "bg-[#101713] text-[#9FB0A6]";
-      default: return "bg-gray-500/10 text-[#9FB0A6]";
+      case "ARCHIVED": return "bg-canvas text-ink-soft";
+      default: return "bg-neutral-soft/10 text-ink-soft";
     }
   };
 
@@ -301,7 +301,7 @@ export default function CampaignsPage() {
   return (
     <div className="space-y-6">
       {/* Sub-navigation tabs */}
-      <div className="flex items-center border-b border-white/10 gap-0 overflow-x-auto">
+      <div className="flex items-center border-b border-line gap-0 overflow-x-auto">
         {CAMPAIGN_TABS.map((tab) => {
           const isActive = pathname === tab.href;
           return (
@@ -311,8 +311,8 @@ export default function CampaignsPage() {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors shrink-0",
                 isActive
-                  ? "border-[#34D399]/50 text-[#6FE3B0]"
-                  : "border-transparent text-[#9FB0A6] hover:text-[#F0F7F3] hover:border-[#5C6B62]/30"
+                  ? "border-brand/50 text-brand"
+                  : "border-transparent text-ink-soft hover:text-ink hover:border-ink-muted/30"
               )}
             >
               <tab.icon className="w-4 h-4" />
@@ -322,7 +322,7 @@ export default function CampaignsPage() {
         })}
         <div className="ml-auto">
           <button onClick={openCreateModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all"
           >
             <Plus className="w-4 h-4" /> New Campaign
           </button>
@@ -333,8 +333,8 @@ export default function CampaignsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { icon: Users, label: "Total Campaigns", value: loading ? "—" : campaigns.length, color: "text-blue-400" },
-          { icon: Play, label: "Active", value: loading ? "—" : campaigns.filter(c => c.status === "ACTIVE").length, color: "text-green-400" },
-          { icon: BarChart3, label: "Conversions", value: loading ? "—" : analytics?.conversions ?? 0, color: "text-emerald-400" },
+          { icon: Play, label: "Active", value: loading ? "—" : campaigns.filter(c => c.status === "ACTIVE").length, color: "text-success" },
+          { icon: BarChart3, label: "Conversions", value: loading ? "—" : analytics?.conversions ?? 0, color: "text-success" },
           { icon: Target, label: "Conv. Rate", value: loading ? "—" : `${analytics?.conversionRate ?? 0}%`, color: "text-purple-400" },
         ].map((s) => (
           <div key={s.label} className="p-4 rounded-xl app-card">
@@ -343,8 +343,8 @@ export default function CampaignsPage() {
             ) : (
               <>
                 <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                <div className="text-xl font-bold text-ink">{s.value}</div>
+                <div className="text-xs text-ink-soft">{s.label}</div>
               </>
             )}
           </div>
@@ -354,11 +354,11 @@ export default function CampaignsPage() {
       {/* Workflow Visual — dynamic from campaigns with tasks */}
       {campaigns.some(c => c.tasks.length > 0) && (
         <div className="p-6 rounded-xl app-card">
-          <h2 className="text-sm font-semibold text-[#F0F7F3] mb-4">Active Workflows</h2>
+          <h2 className="text-sm font-semibold text-ink mb-4">Active Workflows</h2>
           <div className="space-y-4">
             {campaigns.filter(c => c.tasks.length > 0 && c.status === "ACTIVE").slice(0, 3).map(camp => (
               <div key={camp.id}>
-                <p className="text-xs text-[#9FB0A6] mb-2">{camp.name}</p>
+                <p className="text-xs text-ink-soft mb-2">{camp.name}</p>
                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
                   {camp.tasks.sort((a, b) => a.order - b.order).map((task, i, arr) => {
                     const meta = getTaskMeta(task.action);
@@ -366,12 +366,12 @@ export default function CampaignsPage() {
                       <div key={task.id} className="flex items-center gap-2 flex-shrink-0">
                         <div className="flex items-center gap-2 px-3 py-2 rounded-lg app-card whitespace-nowrap">
                           <meta.icon className={cn("w-4 h-4", meta.color)} />
-                          <span className="text-xs text-[#9FB0A6]">{task.name || meta.label}</span>
+                          <span className="text-xs text-ink-soft">{task.name || meta.label}</span>
                           {task.delayAfterPreviousHours && task.delayAfterPreviousHours > 0 && (
-                            <span className="text-[10px] text-[#9FB0A6]">{task.delayAfterPreviousHours}h</span>
+                            <span className="text-[10px] text-ink-soft">{task.delayAfterPreviousHours}h</span>
                           )}
                         </div>
-                        {i < arr.length - 1 && <div className="w-4 h-px bg-gray-600 flex-shrink-0" />}
+                        {i < arr.length - 1 && <div className="w-4 h-px bg-neutral-soft flex-shrink-0" />}
                       </div>
                     );
                   })}
@@ -391,11 +391,11 @@ export default function CampaignsPage() {
         </div>
       ) : campaigns.length === 0 ? (
         <div className="text-center py-16 rounded-xl app-card">
-          <Target className="w-12 h-12 mx-auto mb-4 text-[#9FB0A6]" />
-          <h3 className="text-lg font-medium text-[#F0F7F3] mb-2">No campaigns yet</h3>
-          <p className="text-sm text-[#9FB0A6] mb-6">Create your first automated follow-up workflow</p>
+          <Target className="w-12 h-12 mx-auto mb-4 text-ink-soft" />
+          <h3 className="text-lg font-medium text-ink mb-2">No campaigns yet</h3>
+          <p className="text-sm text-ink-soft mb-6">Create your first automated follow-up workflow</p>
           <button onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90"
           >
             <Plus className="w-4 h-4" /> Create Campaign
           </button>
@@ -408,18 +408,18 @@ export default function CampaignsPage() {
               onClick={() => openEditModal(camp)}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1B4332]/20 to-[#2D6A4F]/20 flex items-center justify-center flex-shrink-0">
-                  <Target className="w-5 h-5 text-[#2D6A4F]" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-line-subtle/20 to-brand-deep/20 flex items-center justify-center flex-shrink-0">
+                  <Target className="w-5 h-5 text-brand-deep" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium text-[#F0F7F3]">{camp.name}</span>
-                    <span className="text-xs text-[#9FB0A6]">{camp.campaignType.replace(/_/g, " ")}</span>
+                    <span className="text-sm font-medium text-ink">{camp.name}</span>
+                    <span className="text-xs text-ink-soft">{camp.campaignType.replace(/_/g, " ")}</span>
                     <span className={cn("text-xs px-2 py-0.5 rounded-full", statusColor(camp.status))}>
                       {camp.status}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-[#9FB0A6] mt-1">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-ink-soft mt-1">
                     <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {camp.leadsProcessed}/{camp.leadsTargeted}</span>
                     <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {camp.callsMade}</span>
                     <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" /> {camp.messagesSent}</span>
@@ -430,7 +430,7 @@ export default function CampaignsPage() {
                       {camp.tasks.sort((a, b) => a.order - b.order).map(task => {
                         const taskMeta = getTaskMeta(task.action);
                         return (
-                          <div key={task.id} className="group/task inline-flex items-center gap-1 px-2 py-0.5 rounded-md app-card text-[10px] text-[#9FB0A6]">
+                          <div key={task.id} className="group/task inline-flex items-center gap-1 px-2 py-0.5 rounded-md app-card text-[10px] text-ink-soft">
                             <taskMeta.icon className={cn("w-3 h-3", taskMeta.color)} />
                             <span className="truncate max-w-[80px]">{task.name || taskMeta.label}</span>
                             <button
@@ -438,7 +438,7 @@ export default function CampaignsPage() {
                                 e.stopPropagation();
                                 setDeleteTaskConfirm({ campaignId: camp.id, taskId: task.id });
                               }}
-                              className="ml-0.5 opacity-0 group-hover/task:opacity-100 p-0.5 rounded hover:bg-red-500/20 text-red-400 transition-all"
+                              className="ml-0.5 opacity-0 group-hover/task:opacity-100 p-0.5 rounded hover:bg-danger/20 text-danger transition-all"
                               title="Delete task"
                             >
                               <X className="w-2.5 h-2.5" />
@@ -452,22 +452,22 @@ export default function CampaignsPage() {
               </div>
               <div className="flex items-center gap-3 sm:flex-col sm:items-end" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-2 sm:text-right">
-                  <div className="text-sm font-semibold text-green-400">{camp.conversions}</div>
-                  <div className="text-xs text-[#9FB0A6]">
+                  <div className="text-sm font-semibold text-success">{camp.conversions}</div>
+                  <div className="text-xs text-ink-soft">
                     {camp.leadsProcessed > 0 ? Math.round((camp.conversions / camp.leadsProcessed) * 100) : 0}% conv.
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={(e) => { e.stopPropagation(); openEditModal(camp); }}
-                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-[#F0F7F3] hover:bg-white/[0.06] transition-colors"
+                    className="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-white/[0.06] transition-colors"
                     title="Edit campaign"
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setDeleteConfirmId(camp.id); }}
-                    className="p-2 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="p-2 rounded-lg text-ink-soft hover:text-danger hover:bg-danger/10 transition-colors"
                     title="Delete campaign"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -477,9 +477,9 @@ export default function CampaignsPage() {
                     disabled={actionLoading === `pause-${camp.id}` || actionLoading === `activate-${camp.id}` || camp.status === "COMPLETED" || camp.status === "ARCHIVED"}
                     className={cn(
                       "p-2 rounded-lg transition-colors",
-                      camp.status === "ACTIVE" ? "bg-green-500/10 text-green-400 hover:bg-green-500/20" :
-                      camp.status === "PAUSED" || camp.status === "DRAFT" ? "bg-gray-500/10 text-[#9FB0A6] hover:bg-gray-500/20" :
-                      "bg-[#101713] text-gray-600 cursor-not-allowed"
+                      camp.status === "ACTIVE" ? "bg-success/10 text-success hover:bg-success/20" :
+                      camp.status === "PAUSED" || camp.status === "DRAFT" ? "bg-neutral-soft/10 text-ink-soft hover:bg-neutral-soft/20" :
+                      "bg-canvas text-ink-soft cursor-not-allowed"
                     )}
                   >
                     {actionLoading === `pause-${camp.id}` || actionLoading === `activate-${camp.id}` ? (
@@ -507,10 +507,10 @@ export default function CampaignsPage() {
               className="w-full max-w-2xl mx-4 p-6 rounded-2xl app-card max-h-[90vh] flex flex-col"
             >
               <div className="flex items-center justify-between mb-6 shrink-0">
-                <h2 className="text-lg font-semibold text-[#F0F7F3]">
+                <h2 className="text-lg font-semibold text-ink">
                   {editingCampaign ? 'Edit Campaign' : 'Create Campaign'}
                 </h2>
-                <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
+                <button onClick={() => setShowCreate(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -519,17 +519,17 @@ export default function CampaignsPage() {
                 {/* Campaign Details */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-sm text-[#9FB0A6] mb-1.5">Campaign Name</label>
+                    <label className="block text-sm text-ink-soft mb-1.5">Campaign Name</label>
                     <input value={newName} onChange={(e) => setNewName(e.target.value)}
                       placeholder="e.g., No-Show Recovery"
-                      className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                      className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                       autoFocus
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-[#9FB0A6] mb-1.5">Campaign Type</label>
+                    <label className="block text-sm text-ink-soft mb-1.5">Campaign Type</label>
                     <select value={newType} onChange={(e) => setNewType(e.target.value as CampaignType)}
-                      className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+                      className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
                     >
                       {CAMPAIGN_TYPES.map(t => (
                         <option key={t.value} value={t.value}>{t.label}</option>
@@ -537,21 +537,21 @@ export default function CampaignsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-[#9FB0A6] mb-1.5">Description (optional)</label>
+                    <label className="block text-sm text-ink-soft mb-1.5">Description (optional)</label>
                     <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)}
                       placeholder="Describe the campaign goal..."
                       rows={1}
-                      className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60 resize-none"
+                      className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60 resize-none"
                     />
                   </div>
                 </div>
 
                 {/* Task Editor */}
-                <div className="border-t border-white/10 pt-4">
+                <div className="border-t border-line pt-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-[#F0F7F3]">Workflow Tasks</h3>
+                    <h3 className="text-sm font-semibold text-ink">Workflow Tasks</h3>
                     <button onClick={addTask}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399]/15 border border-[#34D399]/40 text-[#2D6A4F] text-xs font-medium hover:bg-[#34D399]/25"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/15 border border-brand/40 text-brand-deep text-xs font-medium hover:bg-brand/25"
                     >
                       <Plus className="w-3.5 h-3.5" /> Add Step
                     </button>
@@ -559,8 +559,8 @@ export default function CampaignsPage() {
 
                   {tasks.length === 0 ? (
                     <div className="py-6 text-center">
-                      <Clock className="w-8 h-8 text-[#9FB0A6] mx-auto mb-2" />
-                      <p className="text-sm text-[#9FB0A6]">No workflow steps yet. Add steps to define your campaign.</p>
+                      <Clock className="w-8 h-8 text-ink-soft mx-auto mb-2" />
+                      <p className="text-sm text-ink-soft">No workflow steps yet. Add steps to define your campaign.</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -572,8 +572,8 @@ export default function CampaignsPage() {
                           <div key={index}>
                             <div className="flex items-center gap-3 p-3 rounded-xl app-card">
                               {/* Order number */}
-                              <div className="w-7 h-7 rounded-full bg-[#101713] flex items-center justify-center shrink-0">
-                                <span className="text-xs font-mono text-[#9FB0A6]">{task.order}</span>
+                              <div className="w-7 h-7 rounded-full bg-canvas flex items-center justify-center shrink-0">
+                                <span className="text-xs font-mono text-ink-soft">{task.order}</span>
                               </div>
 
                               {/* Task content */}
@@ -582,7 +582,7 @@ export default function CampaignsPage() {
                                   <select
                                     value={task.action}
                                     onChange={(e) => updateTask(index, { action: e.target.value as TaskAction })}
-                                    className="px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3]"
+                                    className="px-2 py-1 rounded-lg app-card text-xs text-ink"
                                   >
                                     {TASK_ACTIONS.map(a => (
                                       <option key={a.value} value={a.value}>{a.label}</option>
@@ -592,7 +592,7 @@ export default function CampaignsPage() {
                                   {task.action !== "CONDITION" && (
                                     <input value={task.name} onChange={(e) => updateTask(index, { name: e.target.value })}
                                       placeholder={`${meta.label} name`}
-                                      className="flex-1 px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3] placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60 min-w-0"
+                                      className="flex-1 px-2 py-1 rounded-lg app-card text-xs text-ink placeholder-ink-muted focus:outline-none focus:border-brand/60 min-w-0"
                                     />
                                   )}
                                 </div>
@@ -600,31 +600,31 @@ export default function CampaignsPage() {
                                 {/* Action-specific config */}
                                 {task.action === "DELAY" && (
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs text-[#9FB0A6]">Wait</span>
+                                    <span className="text-xs text-ink-soft">Wait</span>
                                     <input type="number" min={0} value={task.delayHours || 0}
                                       onChange={(e) => updateTask(index, { delayHours: parseInt(e.target.value) || 0 })}
-                                      className="w-16 px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3] text-center"
+                                      className="w-16 px-2 py-1 rounded-lg app-card text-xs text-ink text-center"
                                     />
-                                    <span className="text-xs text-[#9FB0A6]">hours</span>
+                                    <span className="text-xs text-ink-soft">hours</span>
                                     <input type="number" min={0} max={59} value={task.delayMinutes || 0}
                                       onChange={(e) => updateTask(index, { delayMinutes: parseInt(e.target.value) || 0 })}
-                                      className="w-16 px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3] text-center"
+                                      className="w-16 px-2 py-1 rounded-lg app-card text-xs text-ink text-center"
                                     />
-                                    <span className="text-xs text-[#9FB0A6]">min</span>
+                                    <span className="text-xs text-ink-soft">min</span>
                                   </div>
                                 )}
 
                                 {task.action === "CONDITION" && (
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-xs text-[#9FB0A6]">If</span>
+                                    <span className="text-xs text-ink-soft">If</span>
                                     <input value={task.conditionField || ""}
                                       onChange={(e) => updateTask(index, { conditionField: e.target.value })}
                                       placeholder="field"
-                                      className="w-24 px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3] placeholder-[#6B7C73]"
+                                      className="w-24 px-2 py-1 rounded-lg app-card text-xs text-ink placeholder-ink-muted"
                                     />
                                     <select value={task.conditionOperator || "equals"}
                                       onChange={(e) => updateTask(index, { conditionOperator: e.target.value })}
-                                      className="px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3]"
+                                      className="px-2 py-1 rounded-lg app-card text-xs text-ink"
                                     >
                                       <option value="equals">equals</option>
                                       <option value="not_equals">not equals</option>
@@ -635,9 +635,9 @@ export default function CampaignsPage() {
                                     <input value={task.conditionValue || ""}
                                       onChange={(e) => updateTask(index, { conditionValue: e.target.value })}
                                       placeholder="value"
-                                      className="w-24 px-2 py-1 rounded-lg app-card text-xs text-[#F0F7F3] placeholder-[#6B7C73]"
+                                      className="w-24 px-2 py-1 rounded-lg app-card text-xs text-ink placeholder-ink-muted"
                                     />
-                                    <label className="flex items-center gap-1 text-xs text-[#9FB0A6]">
+                                    <label className="flex items-center gap-1 text-xs text-ink-soft">
                                       <input type="checkbox" checked={task.isCondition || false}
                                         onChange={(e) => updateTask(index, { isCondition: e.target.checked })}
                                         className="rounded"
@@ -651,7 +651,7 @@ export default function CampaignsPage() {
                               {/* Actions */}
                               <div className="flex items-center gap-1 shrink-0">
                                 <button onClick={() => moveTask(index, -1)} disabled={isFirst}
-                                  className="p-1 rounded hover:bg-white/[0.06] text-[#9FB0A6] disabled:opacity-30"
+                                  className="p-1 rounded hover:bg-white/[0.06] text-ink-soft disabled:opacity-30"
                                   title="Move up"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -659,7 +659,7 @@ export default function CampaignsPage() {
                                   </svg>
                                 </button>
                                 <button onClick={() => moveTask(index, 1)} disabled={isLast}
-                                  className="p-1 rounded hover:bg-white/[0.06] text-[#9FB0A6] disabled:opacity-30"
+                                  className="p-1 rounded hover:bg-white/[0.06] text-ink-soft disabled:opacity-30"
                                   title="Move down"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -667,7 +667,7 @@ export default function CampaignsPage() {
                                   </svg>
                                 </button>
                                 <button onClick={() => removeTask(index)}
-                                  className="p-1 rounded hover:bg-red-500/10 text-red-400"
+                                  className="p-1 rounded hover:bg-danger/10 text-danger"
                                   title="Remove"
                                 >
                                   <X className="w-3.5 h-3.5" />
@@ -689,23 +689,23 @@ export default function CampaignsPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-white/10 shrink-0">
+              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-line shrink-0">
                 {editingCampaign ? (
                   <>
                     <button
                       onClick={() => { setDeleteConfirmId(editingCampaign.id); }}
-                      className="px-4 py-2.5 rounded-xl border border-red-500/20 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-all"
+                      className="px-4 py-2.5 rounded-xl border border-danger/20 text-danger text-sm font-medium hover:bg-danger/10 transition-all"
                     >
                       <Trash2 className="w-4 h-4 inline-block mr-1.5" />
                       Delete
                     </button>
                     <button onClick={() => setShowCreate(false)}
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                     >
                       Cancel
                     </button>
                     <button onClick={handleSaveEdit} disabled={!newName.trim() || actionLoading === "save-edit"}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
                     >
                       {actionLoading === "save-edit" ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
@@ -717,12 +717,12 @@ export default function CampaignsPage() {
                 ) : (
                   <>
                     <button onClick={() => setShowCreate(false)}
-                      className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                     >
                       Cancel
                     </button>
                     <button onClick={handleCreate} disabled={!newName.trim() || actionLoading === "create"}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
                     >
                       {actionLoading === "create" ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</>
@@ -750,24 +750,24 @@ export default function CampaignsPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                <div className="w-10 h-10 rounded-xl bg-danger/10 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-danger" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">Delete Campaign?</h3>
-                  <p className="text-xs text-[#9FB0A6] mt-0.5">This action cannot be undone.</p>
+                  <h3 className="text-sm font-semibold text-ink">Delete Campaign?</h3>
+                  <p className="text-xs text-ink-soft mt-0.5">This action cannot be undone.</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={() => setDeleteConfirmId(null)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleDeleteCampaign(deleteConfirmId)}
                   disabled={actionLoading === `delete-${deleteConfirmId}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-danger text-white text-sm font-medium hover:bg-danger disabled:opacity-50"
                 >
                   {actionLoading === `delete-${deleteConfirmId}` ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</>
@@ -797,20 +797,20 @@ export default function CampaignsPage() {
                   <AlertTriangle className="w-5 h-5 text-yellow-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">Delete Task?</h3>
-                  <p className="text-xs text-[#9FB0A6] mt-0.5">Remove this step from the workflow.</p>
+                  <h3 className="text-sm font-semibold text-ink">Delete Task?</h3>
+                  <p className="text-xs text-ink-soft mt-0.5">Remove this step from the workflow.</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={() => setDeleteTaskConfirm(null)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleDeleteTaskInline(deleteTaskConfirm.campaignId, deleteTaskConfirm.taskId)}
                   disabled={actionLoading === `delete-task-${deleteTaskConfirm.taskId}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-danger text-white text-sm font-medium hover:bg-danger disabled:opacity-50"
                 >
                   {actionLoading === `delete-task-${deleteTaskConfirm.taskId}` ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</>

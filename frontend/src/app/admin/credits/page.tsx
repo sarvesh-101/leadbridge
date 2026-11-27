@@ -134,18 +134,18 @@ export default function AdminCreditsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Platform Credits & Costs</h1>
-          <p className="text-[#9FB0A6] mt-1">Track OmniDimension credit consumption and broker profitability</p>
+          <h1 className="text-2xl font-bold text-ink">Platform Credits & Costs</h1>
+          <p className="text-ink-soft mt-1">Track OmniDimension credit consumption and broker profitability</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => { loadOverview(); loadBrokers(); }}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl app-card app-card-hover text-[#9FB0A6] text-sm hover:bg-white/[0.06] transition-all"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl app-card app-card-hover text-ink-soft text-sm hover:bg-white/[0.06] transition-all"
           >
             <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
             Refresh
           </button>
           <button onClick={() => setShowTopUp(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 transition-all"
           >
             <Plus className="w-4 h-4" /> Top Up Credits
           </button>
@@ -164,18 +164,18 @@ export default function AdminCreditsPage() {
           {/* Low Credit Warning */}
           {credit.needsAlert && (
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"
+              className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20"
             >
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-amber-300">Credits Running Low</p>
-                <p className="text-xs text-amber-400/80 mt-0.5">
+                <p className="text-sm font-medium text-warning">Credits Running Low</p>
+                <p className="text-xs text-warning/80 mt-0.5">
                   Only {credit.minutesRemaining} min remaining ({credit.remainingPercent}% of {credit.totalMinutesPurchased} min purchased).
                   Consider topping up.
                 </p>
               </div>
               <button onClick={() => setShowTopUp(true)}
-                className="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-all"
+                className="px-3 py-1.5 rounded-lg bg-warning/20 text-warning text-xs font-medium hover:bg-warning/30 transition-all"
               >
                 Top Up Now
               </button>
@@ -187,34 +187,34 @@ export default function AdminCreditsPage() {
             <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
                 <Wallet className="w-4 h-4 text-blue-400" />
-                <span className="text-xs text-[#9FB0A6]">Minutes Purchased</span>
+                <span className="text-xs text-ink-soft">Minutes Purchased</span>
               </div>
-              <div className="text-xl font-bold text-[#F0F7F3]">{credit.totalMinutesPurchased.toLocaleString()}</div>
-              <p className="text-[11px] text-[#9FB0A6] mt-1">
+              <div className="text-xl font-bold text-ink">{credit.totalMinutesPurchased.toLocaleString()}</div>
+              <p className="text-[11px] text-ink-soft mt-1">
                 Month: {credit.billingMonth}
               </p>
             </div>
             <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
-                <Phone className="w-4 h-4 text-amber-400" />
-                <span className="text-xs text-[#9FB0A6]">Minutes Used</span>
+                <Phone className="w-4 h-4 text-warning" />
+                <span className="text-xs text-ink-soft">Minutes Used</span>
               </div>
-              <div className="text-xl font-bold text-[#F0F7F3]">{credit.minutesUsed.toLocaleString()}</div>
+              <div className="text-xl font-bold text-ink">{credit.minutesUsed.toLocaleString()}</div>
               <div className="flex items-center gap-1 mt-1">
                 <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                   <div 
                     className={cn(
                       "h-full rounded-full",
-                      credit.remainingPercent > 50 ? "bg-green-500" : 
-                      credit.remainingPercent > 20 ? "bg-amber-500" : "bg-red-500"
+                      credit.remainingPercent > 50 ? "bg-success" : 
+                      credit.remainingPercent > 20 ? "bg-warning" : "bg-danger"
                     )}
                     style={{ width: `${credit.totalMinutesPurchased > 0 ? (credit.minutesUsed / credit.totalMinutesPurchased) * 100 : 0}%` }}
                   />
                 </div>
                 <span className={cn(
                   "text-[11px] font-medium",
-                  credit.remainingPercent > 50 ? "text-green-400" : 
-                  credit.remainingPercent > 20 ? "text-amber-400" : "text-red-400"
+                  credit.remainingPercent > 50 ? "text-success" : 
+                  credit.remainingPercent > 20 ? "text-warning" : "text-danger"
                 )}>
                   {credit.remainingPercent}% left
                 </span>
@@ -222,58 +222,58 @@ export default function AdminCreditsPage() {
             </div>
             <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4 text-green-400" />
-                <span className="text-xs text-[#9FB0A6]">Total Cost</span>
+                <DollarSign className="w-4 h-4 text-success" />
+                <span className="text-xs text-ink-soft">Total Cost</span>
               </div>
-              <div className="text-xl font-bold text-[#F0F7F3]">₹{fm(credit.totalCost)}</div>
-              <p className="text-[11px] text-[#9FB0A6] mt-1">@ ₹{credit.effectiveCostPerMinute}/min avg</p>
+              <div className="text-xl font-bold text-ink">₹{fm(credit.totalCost)}</div>
+              <p className="text-[11px] text-ink-soft mt-1">@ ₹{credit.effectiveCostPerMinute}/min avg</p>
             </div>
             <div className="p-4 rounded-xl app-card">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="w-4 h-4 text-purple-400" />
-                <span className="text-xs text-[#9FB0A6]">Phone Numbers</span>
+                <span className="text-xs text-ink-soft">Phone Numbers</span>
               </div>
-              <div className="text-xl font-bold text-[#F0F7F3]">{credit.phoneNumbersActive}</div>
-              <p className="text-[11px] text-[#9FB0A6] mt-1">@ ₹{credit.costPerPhoneMonthly}/mo each</p>
+              <div className="text-xl font-bold text-ink">{credit.phoneNumbersActive}</div>
+              <p className="text-[11px] text-ink-soft mt-1">@ ₹{credit.costPerPhoneMonthly}/mo each</p>
             </div>
           </div>
 
           {/* Recent Transactions */}
           {overview.recentTransactions.length > 0 && (
             <div className="p-5 rounded-xl app-card">
-              <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">Recent Transactions</h3>
+              <h3 className="text-sm font-semibold text-ink mb-4">Recent Transactions</h3>
               <div className="space-y-2">
                 {overview.recentTransactions.slice(0, 10).map((tx) => (
-                  <div key={tx.id} className="flex items-center gap-3 p-3 rounded-lg bg-[#101713]">
+                  <div key={tx.id} className="flex items-center gap-3 p-3 rounded-lg bg-canvas">
                     <div className={cn(
                       "w-8 h-8 rounded-lg flex items-center justify-center",
-                      tx.type === "PURCHASE" ? "bg-green-500/20" :
-                      tx.type === "CONSUME" ? "bg-amber-500/20" : "bg-blue-500/20"
+                      tx.type === "PURCHASE" ? "bg-success/20" :
+                      tx.type === "CONSUME" ? "bg-warning/20" : "bg-blue-500/20"
                     )}>
                       {tx.type === "PURCHASE" ? (
-                        <ArrowUp className="w-4 h-4 text-green-400" />
+                        <ArrowUp className="w-4 h-4 text-success" />
                       ) : tx.type === "CONSUME" ? (
-                        <ArrowDown className="w-4 h-4 text-amber-400" />
+                        <ArrowDown className="w-4 h-4 text-warning" />
                       ) : (
                         <RefreshCw className="w-4 h-4 text-blue-400" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-[#F0F7F3] truncate">{tx.description || `${tx.type} transaction`}</p>
-                      <p className="text-[11px] text-[#9FB0A6]">
+                      <p className="text-sm text-ink truncate">{tx.description || `${tx.type} transaction`}</p>
+                      <p className="text-[11px] text-ink-soft">
                         {new Date(tx.createdAt).toLocaleString("en-IN")}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className={cn(
                         "text-sm font-medium",
-                        tx.type === "PURCHASE" ? "text-green-400" :
-                        tx.type === "CONSUME" ? "text-amber-400" : "text-blue-400"
+                        tx.type === "PURCHASE" ? "text-success" :
+                        tx.type === "CONSUME" ? "text-warning" : "text-blue-400"
                       )}>
                         {tx.type === "PURCHASE" ? "+" : tx.type === "CONSUME" ? "-" : "~"}₹{fm(tx.amount)}
                       </p>
                       {tx.minutes > 0 && (
-                        <p className="text-[11px] text-[#9FB0A6]">{tx.minutes} min</p>
+                        <p className="text-[11px] text-ink-soft">{tx.minutes} min</p>
                       )}
                     </div>
                   </div>
@@ -284,11 +284,11 @@ export default function AdminCreditsPage() {
         </>
       ) : (
         <div className="p-8 rounded-xl app-card text-center">
-          <Wallet className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-[#F0F7F3] mb-1">No Credit Data Yet</h3>
-          <p className="text-sm text-[#9FB0A6] mb-4">Top up platform credits to start tracking costs</p>
+          <Wallet className="w-10 h-10 text-ink-soft mx-auto mb-3" />
+          <h3 className="text-base font-semibold text-ink mb-1">No Credit Data Yet</h3>
+          <p className="text-sm text-ink-soft mb-4">Top up platform credits to start tracking costs</p>
           <button onClick={() => setShowTopUp(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium"
           >
             <Plus className="w-4 h-4" /> Add Credits
           </button>
@@ -297,37 +297,37 @@ export default function AdminCreditsPage() {
 
       {/* Broker Profitability */}
       <div className="p-5 rounded-xl app-card">
-        <h3 className="text-sm font-semibold text-[#F0F7F3] mb-4">Broker Profitability</h3>
+        <h3 className="text-sm font-semibold text-ink mb-4">Broker Profitability</h3>
 
         {brokerSummary && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-            <div className="p-3 rounded-lg bg-[#101713]">
-              <p className="text-[11px] text-[#9FB0A6]">Total Revenue</p>
-              <p className="text-lg font-bold text-green-400">₹{fm(brokerSummary.totalRevenue)}</p>
+            <div className="p-3 rounded-lg bg-canvas">
+              <p className="text-[11px] text-ink-soft">Total Revenue</p>
+              <p className="text-lg font-bold text-success">₹{fm(brokerSummary.totalRevenue)}</p>
             </div>
-            <div className="p-3 rounded-lg bg-[#101713]">
-              <p className="text-[11px] text-[#9FB0A6]">Total Cost</p>
-              <p className="text-lg font-bold text-amber-400">₹{fm(brokerSummary.totalCost)}</p>
+            <div className="p-3 rounded-lg bg-canvas">
+              <p className="text-[11px] text-ink-soft">Total Cost</p>
+              <p className="text-lg font-bold text-warning">₹{fm(brokerSummary.totalCost)}</p>
             </div>
-            <div className="p-3 rounded-lg bg-[#101713]">
-              <p className="text-[11px] text-[#9FB0A6]">Total Profit</p>
+            <div className="p-3 rounded-lg bg-canvas">
+              <p className="text-[11px] text-ink-soft">Total Profit</p>
               <p className={cn(
                 "text-lg font-bold",
-                brokerSummary.totalProfit >= 0 ? "text-green-400" : "text-red-400"
+                brokerSummary.totalProfit >= 0 ? "text-success" : "text-danger"
               )}>
                 {brokerSummary.totalProfit >= 0 ? "+" : ""}₹{fm(brokerSummary.totalProfit)}
               </p>
             </div>
-            <div className="p-3 rounded-lg bg-[#101713]">
-              <p className="text-[11px] text-[#9FB0A6]">Margin</p>
+            <div className="p-3 rounded-lg bg-canvas">
+              <p className="text-[11px] text-ink-soft">Margin</p>
               <p className={cn(
                 "text-lg font-bold",
-                brokerSummary.overallMarginPercent >= 50 ? "text-green-400" :
-                brokerSummary.overallMarginPercent >= 20 ? "text-amber-400" : "text-red-400"
+                brokerSummary.overallMarginPercent >= 50 ? "text-success" :
+                brokerSummary.overallMarginPercent >= 20 ? "text-warning" : "text-danger"
               )}>
                 {brokerSummary.overallMarginPercent}%
               </p>
-              <p className="text-[11px] text-[#9FB0A6]">
+              <p className="text-[11px] text-ink-soft">
                 {brokerSummary.brokersInProfit}/{brokerSummary.totalBrokers} in profit
               </p>
             </div>
@@ -337,55 +337,55 @@ export default function AdminCreditsPage() {
         {brokerLoading ? (
           <div className="space-y-3">
             {[1,2,3].map(i => (
-              <div key={i} className="h-16 rounded-lg bg-[#101713] animate-pulse" />
+              <div key={i} className="h-16 rounded-lg bg-canvas animate-pulse" />
             ))}
           </div>
         ) : brokers.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Broker</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Plan</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Calls</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Cost</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Revenue</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Profit</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">Margin</th>
-                  <th className="text-right py-3 px-2 text-[#9FB0A6] font-medium text-[11px] uppercase">₹/Call</th>
+                <tr className="border-b border-line">
+                  <th className="text-left py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Broker</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Plan</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Calls</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Cost</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Revenue</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Profit</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">Margin</th>
+                  <th className="text-right py-3 px-2 text-ink-soft font-medium text-[11px] uppercase">₹/Call</th>
                 </tr>
               </thead>
               <tbody>
                 {brokers.map((b) => (
-                  <tr key={b.id} className="border-b border-white/10 hover:bg-white/[0.06] transition-colors">
+                  <tr key={b.id} className="border-b border-line hover:bg-white/[0.06] transition-colors">
                     <td className="py-3 px-2">
                       <div>
-                        <p className="text-[#F0F7F3] font-medium truncate max-w-[200px]">{b.businessName}</p>
-                        <p className="text-[11px] text-[#9FB0A6]">{b.ownerName}</p>
+                        <p className="text-ink font-medium truncate max-w-[200px]">{b.businessName}</p>
+                        <p className="text-[11px] text-ink-soft">{b.ownerName}</p>
                       </div>
                     </td>
                     <td className="text-right py-3 px-2">
                       <span className={cn(
                         "text-xs px-2 py-0.5 rounded-full font-medium",
-                        b.plan === "PRO" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
+                        b.plan === "PRO" ? "bg-warning/10 text-warning border border-warning/20" :
                         b.plan === "GROWTH" ? "bg-blue-500/10 text-blue-400 border border-blue-500/20" :
-                        "bg-gray-500/10 text-[#9FB0A6] border border-gray-500/20"
+                        "bg-neutral-soft/10 text-ink-soft border border-line/20"
                       )}>
                         {b.plan}
                       </span>
                     </td>
-                    <td className="text-right py-3 px-2 text-[#F0F7F3]">
+                    <td className="text-right py-3 px-2 text-ink">
                       {b.callsUsed}/{b.callsLimit}
                     </td>
-                    <td className="text-right py-3 px-2 text-amber-400">
+                    <td className="text-right py-3 px-2 text-warning">
                       ₹{fm(b.costIncurred)}
                     </td>
-                    <td className="text-right py-3 px-2 text-green-400">
+                    <td className="text-right py-3 px-2 text-success">
                       ₹{fm(b.revenueGenerated)}
                     </td>
                     <td className={cn(
                       "text-right py-3 px-2 font-medium",
-                      b.profit >= 0 ? "text-green-400" : "text-red-400"
+                      b.profit >= 0 ? "text-success" : "text-danger"
                     )}>
                       {b.profit >= 0 ? "+" : ""}₹{fm(b.profit)}
                     </td>
@@ -395,16 +395,16 @@ export default function AdminCreditsPage() {
                           <div 
                             className={cn(
                               "h-full rounded-full",
-                              b.profitMarginPercent >= 50 ? "bg-green-500" :
-                              b.profitMarginPercent >= 20 ? "bg-amber-500" : "bg-red-500"
+                              b.profitMarginPercent >= 50 ? "bg-success" :
+                              b.profitMarginPercent >= 20 ? "bg-warning" : "bg-danger"
                             )}
                             style={{ width: `${Math.max(0, Math.min(100, b.profitMarginPercent))}%` }}
                           />
                         </div>
-                        <span className="text-[#F0F7F3] text-xs font-mono w-10 text-right">{b.profitMarginPercent}%</span>
+                        <span className="text-ink text-xs font-mono w-10 text-right">{b.profitMarginPercent}%</span>
                       </div>
                     </td>
-                    <td className="text-right py-3 px-2 text-[#9FB0A6]">
+                    <td className="text-right py-3 px-2 text-ink-soft">
                       ₹{b.costPerCall}
                     </td>
                   </tr>
@@ -413,7 +413,7 @@ export default function AdminCreditsPage() {
             </table>
           </div>
         ) : (
-          <p className="text-sm text-[#9FB0A6] text-center py-8">No broker data available yet</p>
+          <p className="text-sm text-ink-soft text-center py-8">No broker data available yet</p>
         )}
       </div>
 
@@ -427,47 +427,47 @@ export default function AdminCreditsPage() {
               className="w-full max-w-md mx-4 p-6 rounded-2xl app-card"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-[#F0F7F3]">Top Up Platform Credits</h2>
-                <button onClick={() => setShowTopUp(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
+                <h2 className="text-lg font-semibold text-ink">Top Up Platform Credits</h2>
+                <button onClick={() => setShowTopUp(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Minutes Purchased</label>
+                  <label className="block text-sm text-ink-soft mb-1.5">Minutes Purchased</label>
                   <input value={topUpMinutes} onChange={(e) => setTopUpMinutes(e.target.value)}
                     type="number" min="1" placeholder="e.g., 3571"
-                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                     autoFocus
                   />
-                  <p className="text-[11px] text-[#9FB0A6] mt-1">3571 min = 1 OmniDimension Growth Plan</p>
+                  <p className="text-[11px] text-ink-soft mt-1">3571 min = 1 OmniDimension Growth Plan</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Total Cost (₹)</label>
+                  <label className="block text-sm text-ink-soft mb-1.5">Total Cost (₹)</label>
                   <input value={topUpCost} onChange={(e) => setTopUpCost(e.target.value)}
                     type="number" min="0" step="0.01" placeholder="e.g., 16600"
-                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                   />
-                  <p className="text-[11px] text-[#9FB0A6] mt-1">₹16,600 for OmniDimension Growth Plan</p>
+                  <p className="text-[11px] text-ink-soft mt-1">₹16,600 for OmniDimension Growth Plan</p>
                 </div>
                 <div>
-                  <label className="block text-sm text-[#9FB0A6] mb-1.5">Description (optional)</label>
+                  <label className="block text-sm text-ink-soft mb-1.5">Description (optional)</label>
                   <input value={topUpDesc} onChange={(e) => setTopUpDesc(e.target.value)}
                     placeholder="e.g., OmniDimension Growth - July 2026"
-                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-3 mt-6">
                 <button onClick={() => setShowTopUp(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                 >
                   Cancel
                 </button>
                 <button onClick={handleTopUp} disabled={!topUpMinutes || !topUpCost || topUpLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
                   {topUpLoading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>

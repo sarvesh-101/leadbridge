@@ -29,14 +29,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!mounted || !isAuthenticated || user?.role !== "admin") {
     return (
-      <div className="h-screen bg-[#0A0F0C] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-[#34D399]/50 border-t-transparent rounded-full" />
+      <div className="h-screen bg-canvas flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-brand/50 border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex bg-[#0A0F0C] overflow-hidden aurora-backdrop">
+    <div className="h-screen flex bg-canvas overflow-hidden aurora-backdrop">
       <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar />

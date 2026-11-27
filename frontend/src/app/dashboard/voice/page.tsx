@@ -424,11 +424,11 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Voice AI</h1>
-          <p className="text-[#9FB0A6] mt-1">Manage your AI calling agent, phone numbers, and knowledge base</p>
+          <h1 className="text-2xl font-bold text-ink">Voice AI</h1>
+          <p className="text-ink-soft mt-1">Manage your AI calling agent, phone numbers, and knowledge base</p>
         </div>
         <button onClick={handleRefresh} disabled={refreshing}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/10 text-xs text-[#9FB0A6] hover:bg-white/[0.06]"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-line text-xs text-ink-soft hover:bg-white/[0.06]"
         >
           <RefreshCw className={cn("w-3.5 h-3.5", refreshing && "animate-spin")} />
           Refresh
@@ -438,24 +438,24 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
       {/* Status Banner */}
       <div className={cn(
         "p-4 rounded-xl border flex items-center gap-4",
-        !hasAgent ? "bg-amber-500/10 border-amber-500/20" :
+        !hasAgent ? "bg-warning/10 border-warning/20" :
         !hasPhoneConnected ? "bg-blue-500/10 border-blue-500/20" :
-        "bg-emerald-500/10 border-emerald-500/20"
+        "bg-success/10 border-success/20"
       )}>
         {!hasAgent ? (
-          <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+          <AlertCircle className="w-5 h-5 text-warning shrink-0" />
         ) : !hasPhoneConnected ? (
           <RadioTower className="w-5 h-5 text-blue-400 shrink-0" />
         ) : (
-          <Radio className="w-5 h-5 text-emerald-400 shrink-0" />
+          <Radio className="w-5 h-5 text-success shrink-0" />
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-[#F0F7F3]">
+          <p className="text-sm font-medium text-ink">
             {!hasAgent ? "No AI agent configured" :
              !hasPhoneConnected ? "No phone number connected" :
              "Your AI calling system is live"}
           </p>
-          <p className="text-xs text-[#9FB0A6] mt-0.5">
+          <p className="text-xs text-ink-soft mt-0.5">
             {!hasAgent ? "Create an AI agent below to start handling calls automatically." :
              !hasPhoneConnected ? "Connect a phone number to enable outbound calling." :
              `Agent "${activeAgent?.name}" is ready — ${connectedPhone?.phone_number} connected`}
@@ -468,10 +468,10 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
               onChange={(e) => setTestCallNumber(e.target.value)}
               placeholder="Number to call"
               inputMode="tel"
-              className="w-40 px-3 py-2 rounded-lg bg-[#101713] border border-white/10 text-xs text-[#F0F7F3] placeholder:text-[#9FB0A6] focus:outline-none focus:border-emerald-500/40"
+              className="w-40 px-3 py-2 rounded-lg bg-canvas border border-line text-xs text-ink placeholder:text-ink-soft focus:outline-none focus:border-brand/40"
             />
             <button onClick={handleTestCall} disabled={testCallLoading}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-success/20 text-success text-xs font-medium hover:bg-success/30 disabled:opacity-50 shrink-0"
             >
               {testCallLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
               Test Call
@@ -483,7 +483,7 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
       {/* Loading state */}
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1,2,3].map(i => <div key={i} className="h-32 rounded-xl bg-[#101713] animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-32 rounded-xl bg-canvas animate-pulse" />)}
         </div>
       )}
 
@@ -495,11 +495,11 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             <div className="p-5 rounded-xl app-card">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Bot className="w-5 h-5 text-[#6FE3B0]" />
-                  <h2 className="text-base font-semibold text-[#F0F7F3]">AI Agents</h2>
+                  <Bot className="w-5 h-5 text-brand" />
+                  <h2 className="text-base font-semibold text-ink">AI Agents</h2>
                 </div>
                 <button onClick={() => setShowCreateAgent(!showCreateAgent)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#6FE3B0] text-xs font-medium hover:bg-[#34D399]/25"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs font-medium hover:bg-brand/25"
                 >
                   <Plus className="w-3.5 h-3.5" /> {showCreateAgent ? "Cancel" : "New Agent"}
                 </button>
@@ -511,19 +511,19 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden mb-4"
                   >
-                    <div className="p-4 rounded-xl bg-white/[0.06] border border-white/10 space-y-3">
+                    <div className="p-4 rounded-xl bg-white/[0.06] border border-line space-y-3">
                       <div>
-                        <label className="block text-xs text-[#9FB0A6] mb-1">Agent Name *</label>
+                        <label className="block text-xs text-ink-soft mb-1">Agent Name *</label>
                         <input value={newAgentName} onChange={e => setNewAgentName(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
+                          className="w-full px-3 py-2 rounded-lg app-card text-ink text-sm focus:outline-none focus:border-brand/50/50"
                           placeholder="e.g., Property Assistant" />
                       </div>
                       {/* Languages — Omnidim 100+ (all Indian + international) */}
                       <div>
-                        <label className="block text-xs text-[#9FB0A6] mb-1">
-                          Languages the agent speaks <span className="text-[#9FB0A6]/60">(multi-select — Indian + international)</span>
+                        <label className="block text-xs text-ink-soft mb-1">
+                          Languages the agent speaks <span className="text-ink-soft/60">(multi-select — Indian + international)</span>
                         </label>
-                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 rounded-lg bg-white/[0.03] border border-white/5">
+                        <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-2 rounded-lg bg-white/[0.03] border border-line-subtle">
                           {LANGUAGE_OPTIONS.map(opt => (
                             <button key={opt.value} type="button"
                               onClick={() => setNewAgentLanguages(prev => prev.includes(opt.value)
@@ -531,46 +531,46 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                                 : [...prev, opt.value])}
                               className={cn("px-2 py-1 rounded-full text-xs border transition",
                                 newAgentLanguages.includes(opt.value)
-                                  ? "bg-[#34D399]/20 border-[#34D399]/50 text-[#6FE3B0]"
-                                  : "border-white/10 text-[#9FB0A6] hover:border-white/25")}
+                                  ? "bg-brand/20 border-brand/50 text-brand"
+                                  : "border-line text-ink-soft hover:border-line")}
                             >
                               {opt.label}
                             </button>
                           ))}
                         </div>
-                        <p className="text-[10px] text-gray-600 mt-1">The AI detects and speaks the caller's language. Hinglish + English recommended for most brokers.</p>
+                        <p className="text-[10px] text-ink-soft mt-1">The AI detects and speaks the caller's language. Hinglish + English recommended for most brokers.</p>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs text-[#9FB0A6] mb-1">
-                            Transfer to (human handoff) <span className="text-[#9FB0A6]/60">optional</span>
+                          <label className="block text-xs text-ink-soft mb-1">
+                            Transfer to (human handoff) <span className="text-ink-soft/60">optional</span>
                           </label>
                           <input value={newAgentTransfer} onChange={e => setNewAgentTransfer(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
+                            className="w-full px-3 py-2 rounded-lg app-card text-ink text-sm focus:outline-none focus:border-brand/50/50"
                             placeholder="+919876543210 (E.164)" />
-                          <p className="text-[10px] text-gray-600 mt-1">Call transfers here when the prospect asks for a human or is a hot lead.</p>
+                          <p className="text-[10px] text-ink-soft mt-1">Call transfers here when the prospect asks for a human or is a hot lead.</p>
                         </div>
                         <div>
-                          <label className="block text-xs text-[#9FB0A6] mb-1">Voice ID</label>
+                          <label className="block text-xs text-ink-soft mb-1">Voice ID</label>
                           <input value={newAgentVoice} onChange={e => setNewAgentVoice(e.target.value)}
-                            className="w-full px-3 py-2 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
+                            className="w-full px-3 py-2 rounded-lg app-card text-ink text-sm focus:outline-none focus:border-brand/50/50"
                             placeholder="Default ElevenLabs" />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs text-[#9FB0A6] mb-1">Instructions</label>
+                        <label className="block text-xs text-ink-soft mb-1">Instructions</label>
                         <textarea value={newAgentPrompt} onChange={e => setNewAgentPrompt(e.target.value)}
                           rows={3}
-                          className="w-full px-3 py-2 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50/50"
+                          className="w-full px-3 py-2 rounded-lg app-card text-ink text-sm focus:outline-none focus:border-brand/50/50"
                           placeholder="Tell the agent how to behave and what to ask..."
                         />
                       </div>
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setShowCreateAgent(false)}
-                          className="px-4 py-2 rounded-lg border border-white/10 text-[#9FB0A6] text-xs hover:bg-white/[0.06]"
+                          className="px-4 py-2 rounded-lg border border-line text-ink-soft text-xs hover:bg-white/[0.06]"
                         >Cancel</button>
                         <button onClick={handleCreateAgent} disabled={creatingAgent || !newAgentName.trim()}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1B4332] text-white text-xs font-medium hover:opacity-90 disabled:opacity-50"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-line-subtle text-white text-xs font-medium hover:opacity-90 disabled:opacity-50"
                         >
                           {creatingAgent ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                           Create Agent
@@ -583,9 +583,9 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
 
               {agents.length === 0 ? (
                 <div className="text-center py-10">
-                  <Bot className="w-10 h-10 mx-auto mb-3 text-[#9FB0A6]" />
-                  <p className="text-sm text-[#9FB0A6]">No AI agents yet</p>
-                  <p className="text-xs text-gray-600 mt-1">Create an agent to start handling calls automatically.</p>
+                  <Bot className="w-10 h-10 mx-auto mb-3 text-ink-soft" />
+                  <p className="text-sm text-ink-soft">No AI agents yet</p>
+                  <p className="text-xs text-ink-soft mt-1">Create an agent to start handling calls automatically.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -595,22 +595,22 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                       <div key={agent.id}
                         className={cn(
                           "flex items-center justify-between p-3 rounded-lg border transition-all",
-                          isActive ? "bg-[#34D399]/10 border-[#34D399]/40" : "bg-white/[0.06] border-white/10 hover:border-white/25"
+                          isActive ? "bg-brand/10 border-brand/40" : "bg-white/[0.06] border-line hover:border-line"
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn(
                             "w-9 h-9 rounded-full flex items-center justify-center shrink-0",
-                            isActive ? "bg-[#34D399]/25 text-[#6FE3B0]" : "bg-[#101713] text-[#9FB0A6]"
+                            isActive ? "bg-brand/25 text-brand" : "bg-canvas text-ink-soft"
                           )}>
                             {isActive ? <Radio className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-[#F0F7F3] truncate">{agent.name}</span>
-                              {isActive && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#34D399]/15 text-[#34D399] font-medium">Active</span>}
+                              <span className="text-sm font-medium text-ink truncate">{agent.name}</span>
+                              {isActive && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand/15 text-brand font-medium">Active</span>}
                             </div>
-                            <div className="text-xs text-[#9FB0A6] mt-0.5">
+                            <div className="text-xs text-ink-soft mt-0.5">
                               ID: {agent.id} · {agent.languages?.join(", ") || "Hinglish"} · {agent.status || "active"}
                             </div>
                           </div>
@@ -618,11 +618,11 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                         <div className="flex items-center gap-1.5 shrink-0">
                           {!isActive && (
                             <button onClick={() => handleSelectAgent(agent.id)}
-                              className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#6FE3B0] text-xs hover:bg-[#34D399]/25"
+                              className="px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs hover:bg-brand/25"
                             >Assign</button>
                           )}
                           <button onClick={() => handleDeleteAgent(agent.id)}
-                            className="p-1.5 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10"
+                            className="p-1.5 rounded-lg text-ink-soft hover:text-danger hover:bg-danger/10"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -638,20 +638,20 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             <div className="p-5 rounded-xl app-card">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <Smartphone className="w-5 h-5 text-[#34D399]" />
-                  <h2 className="text-base font-semibold text-[#F0F7F3]">Phone Numbers</h2>
+                  <Smartphone className="w-5 h-5 text-brand" />
+                  <h2 className="text-base font-semibold text-ink">Phone Numbers</h2>
                 </div>
                 {/* SECURITY: Import and Buy mutate/spend the PLATFORM's Omnidim
                     account — server enforces admin-only; hide the buttons for brokers. */}
                 {isAdmin && (
                   <div className="flex items-center gap-2">
                     <button onClick={() => { resetImportForm(); setShowImportModal(true); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.06]"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-canvas text-ink-soft text-xs font-medium hover:bg-white/[0.06]"
                     >
                       <ArrowRight className="w-3.5 h-3.5" /> Import
                     </button>
                     <button onClick={() => setShowBuyModal(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs font-medium hover:bg-brand/25"
                     >
                       <Plus className="w-3.5 h-3.5" /> Buy Number
                     </button>
@@ -661,21 +661,21 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
 
               {phoneNumbers.length === 0 ? (
                 <div className="text-center py-10">
-                  <Phone className="w-10 h-10 mx-auto mb-3 text-[#9FB0A6]" />
-                  <p className="text-sm text-[#9FB0A6]">No phone numbers</p>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <Phone className="w-10 h-10 mx-auto mb-3 text-ink-soft" />
+                  <p className="text-sm text-ink-soft">No phone numbers</p>
+                  <p className="text-xs text-ink-soft mt-1">
                     {isAdmin
                       ? "Buy or import a number to enable outbound calling."
                       : "Available company numbers will appear here — pick one to get started."}
                   </p>
                   {isAdmin ? (
                     <button onClick={() => setShowBuyModal(true)}
-                      className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
+                      className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand/15 text-brand text-xs font-medium hover:bg-brand/25"
                     >
                       <Plus className="w-3.5 h-3.5" /> Buy a Phone Number
                     </button>
                   ) : (
-                    <Link href="/dashboard/settings" className="mt-4 inline-flex items-center px-4 py-2 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-xs font-medium hover:bg-white/[0.1]">
+                    <Link href="/dashboard/settings" className="mt-4 inline-flex items-center px-4 py-2 rounded-lg bg-white/[0.06] text-ink-soft text-xs font-medium hover:bg-white/[0.1]">
                       Contact support
                     </Link>
                   )}
@@ -688,18 +688,18 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                       <div key={pn.id}
                         className={cn(
                           "flex items-center justify-between p-3 rounded-lg border",
-                          isAttached ? "bg-[#34D399]/10 border-[#34D399]/30" : "bg-white/[0.06] border-white/10"
+                          isAttached ? "bg-brand/10 border-brand/30" : "bg-white/[0.06] border-line"
                         )}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className={cn("w-9 h-9 rounded-full flex items-center justify-center shrink-0",
-                            isAttached ? "bg-[#34D399]/25 text-[#34D399]" : "bg-[#101713] text-[#9FB0A6]"
+                            isAttached ? "bg-brand/25 text-brand" : "bg-canvas text-ink-soft"
                           )}>
                             <Phone className="w-4 h-4" />
                           </div>
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-[#F0F7F3]">{pn.phone_number}</div>
-                            <div className="text-xs text-[#9FB0A6] mt-0.5">
+                            <div className="text-sm font-medium text-ink">{pn.phone_number}</div>
+                            <div className="text-xs text-ink-soft mt-0.5">
                               {pn.number_provider} · {pn.name || "Unnamed"}
                               {isAttached && pn.active_bot_name && ` → ${pn.active_bot_name}`}
                             </div>
@@ -709,25 +709,25 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                           {isAdmin ? (
                             isAttached ? (
                               <button onClick={() => handleDetachPhone(pn.id)}
-                                className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs hover:bg-amber-500/20"
+                                className="px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs hover:bg-warning/20"
                               >Detach</button>
                             ) : (
                               agentId && (
                                 <button onClick={() => handleAttachPhone(pn.id, agentId)}
-                                  className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs hover:bg-[#34D399]/25"
+                                  className="px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs hover:bg-brand/25"
                                 >Attach to Agent</button>
                               )
                             )
                           ) : pn.assignedToMe ? (
-                            <span className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium">Your number</span>
+                            <span className="px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs font-medium">Your number</span>
                           ) : pn.assigned ? (
                             <span
-                              className="px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-xs"
+                              className="px-3 py-1.5 rounded-lg bg-white/[0.06] text-ink-soft text-xs"
                               title={pn.assignedClientName ? `Assigned to ${pn.assignedClientName}` : "Already in use"}
                             >Reserved</span>
                           ) : (
                             <button onClick={() => handleChooseNumber(pn.id)}
-                              className="px-3 py-1.5 rounded-lg bg-[#34D399]/15 text-[#34D399] text-xs font-medium hover:bg-[#34D399]/25"
+                              className="px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs font-medium hover:bg-brand/25"
                             >Use this number</button>
                           )}
                         </div>
@@ -742,10 +742,10 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             <div className="p-5 rounded-xl app-card">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <BookOpen className="w-5 h-5 text-[#E8C468]" />
-                  <h2 className="text-base font-semibold text-[#F0F7F3]">Knowledge Base</h2>
+                  <BookOpen className="w-5 h-5 text-brand" />
+                  <h2 className="text-base font-semibold text-ink">Knowledge Base</h2>
                 </div>
-                <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E8C468]/15 text-[#E8C468] text-xs font-medium cursor-pointer hover:bg-[#E8C468]/25">
+                <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/15 text-brand text-xs font-medium cursor-pointer hover:bg-brand/25">
                   <Upload className="w-3.5 h-3.5" />
                   Upload PDF
                   <input type="file" accept=".pdf" onChange={handleUploadDoc} className="hidden" disabled={uploading} />
@@ -753,38 +753,38 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
               </div>
 
               {uploading && (
-                <div className="flex items-center gap-2 p-3 mb-3 rounded-lg bg-white/[0.06] border border-white/10">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#E8C468]" />
-                  <span className="text-sm text-[#9FB0A6]">Uploading document...</span>
+                <div className="flex items-center gap-2 p-3 mb-3 rounded-lg bg-white/[0.06] border border-line">
+                  <Loader2 className="w-4 h-4 animate-spin text-brand" />
+                  <span className="text-sm text-ink-soft">Uploading document...</span>
                 </div>
               )}
 
               {knowledgeDocs.length === 0 ? (
                 <div className="text-center py-8">
-                  <BookOpen className="w-10 h-10 mx-auto mb-3 text-[#9FB0A6]" />
-                  <p className="text-sm text-[#9FB0A6]">No documents uploaded</p>
-                  <p className="text-xs text-gray-600 mt-1">Upload property PDFs to help your AI answer questions.</p>
+                  <BookOpen className="w-10 h-10 mx-auto mb-3 text-ink-soft" />
+                  <p className="text-sm text-ink-soft">No documents uploaded</p>
+                  <p className="text-xs text-ink-soft mt-1">Upload property PDFs to help your AI answer questions.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {knowledgeDocs.map((doc) => (
                     <div key={doc.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10"
+                      className="flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-line"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[#E8C468]/25 flex items-center justify-center shrink-0">
-                          <BookOpen className="w-4 h-4 text-[#E8C468]" />
+                        <div className="w-8 h-8 rounded-full bg-brand/25 flex items-center justify-center shrink-0">
+                          <BookOpen className="w-4 h-4 text-brand" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-medium text-[#F0F7F3] truncate">{doc.name || doc.file_name}</div>
-                          <div className="text-xs text-[#9FB0A6] mt-0.5">
+                          <div className="text-sm font-medium text-ink truncate">{doc.name || doc.file_name}</div>
+                          <div className="text-xs text-ink-soft mt-0.5">
                             ID: {doc.id}{doc.file_size && ` · ${(doc.file_size / 1024).toFixed(0)} KB`}
                             {doc.attached_agent_id && ` · Attached to agent #${doc.attached_agent_id}`}
                           </div>
                         </div>
                       </div>
                       <button onClick={() => handleDeleteDoc(doc.id)}
-                        className="p-1.5 rounded-lg text-[#9FB0A6] hover:text-red-400 hover:bg-red-500/10"
+                        className="p-1.5 rounded-lg text-ink-soft hover:text-danger hover:bg-danger/10"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -800,35 +800,35 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             {/* Agent Status Card */}
             <div className="p-5 rounded-xl app-card">
               <div className="flex items-center gap-3 mb-4">
-                <Activity className="w-5 h-5 text-[#6FE3B0]" />
-                <h2 className="text-base font-semibold text-[#F0F7F3]">Status</h2>
+                <Activity className="w-5 h-5 text-brand" />
+                <h2 className="text-base font-semibold text-ink">Status</h2>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.06]">
-                  <span className="text-xs text-[#9FB0A6]">AI Agent</span>
+                  <span className="text-xs text-ink-soft">AI Agent</span>
                   <span className={cn("text-xs font-medium flex items-center gap-1.5",
-                    hasAgent ? "text-[#34D399]" : "text-amber-400"
+                    hasAgent ? "text-brand" : "text-warning"
                   )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", hasAgent ? "bg-[#34D399]" : "bg-amber-400")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", hasAgent ? "bg-brand" : "bg-warning")} />
                     {hasAgent ? activeAgent?.name || "Ready" : "Not configured"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.06]">
-                  <span className="text-xs text-[#9FB0A6]">Phone Number</span>
+                  <span className="text-xs text-ink-soft">Phone Number</span>
                   <span className={cn("text-xs font-medium flex items-center gap-1.5",
-                    hasPhoneConnected ? "text-[#34D399]" : "text-amber-400"
+                    hasPhoneConnected ? "text-brand" : "text-warning"
                   )}>
-                    <span className={cn("w-1.5 h-1.5 rounded-full", hasPhoneConnected ? "bg-[#34D399]" : "bg-amber-400")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", hasPhoneConnected ? "bg-brand" : "bg-warning")} />
                     {hasPhoneConnected ? "Connected" : "Not connected"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.06]">
-                  <span className="text-xs text-[#9FB0A6]">Phone Setup</span>
-                  <span className="text-xs font-medium text-[#F0F7F3]">{phoneSetupStatus.replace(/_/g, " ")}</span>
+                  <span className="text-xs text-ink-soft">Phone Setup</span>
+                  <span className="text-xs font-medium text-ink">{phoneSetupStatus.replace(/_/g, " ")}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.06]">
-                  <span className="text-xs text-[#9FB0A6]">Knowledge Docs</span>
-                  <span className="text-xs font-medium text-[#F0F7F3]">{knowledgeDocs.length}</span>
+                  <span className="text-xs text-ink-soft">Knowledge Docs</span>
+                  <span className="text-xs font-medium text-ink">{knowledgeDocs.length}</span>
                 </div>
               </div>
             </div>
@@ -836,63 +836,63 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             {/* Quick Actions */}
             <div className="p-5 rounded-xl app-card">
               <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="w-5 h-5 text-[#6FE3B0]" />
-                <h2 className="text-base font-semibold text-[#F0F7F3]">Quick Actions</h2>
+                <BarChart3 className="w-5 h-5 text-brand" />
+                <h2 className="text-base font-semibold text-ink">Quick Actions</h2>
               </div>
               <div className="space-y-2">
                 {!hasAgent && (
                   <button onClick={() => setShowCreateAgent(true)}
-                    className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-[#34D399]/40 text-left group"
+                    className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-line hover:border-brand/40 text-left group"
                   >
                     <div className="flex items-center gap-3">
-                      <Bot className="w-4 h-4 text-[#6FE3B0]" />
-                      <span className="text-xs text-[#F0F7F3]">Create AI Agent</span>
+                      <Bot className="w-4 h-4 text-brand" />
+                      <span className="text-xs text-ink">Create AI Agent</span>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#6FE3B0]" />
+                    <ChevronRight className="w-3.5 h-3.5 text-ink-soft group-hover:text-brand" />
                   </button>
                 )}
                 {isAdmin ? (
                   <button onClick={() => { resetShop(); setBuyResult(null); setShowBuyModal(true); loadShopNumbers(); }}
-                    className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-[#34D399]/40 text-left group"
+                    className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-line hover:border-brand/40 text-left group"
                   >
                     <div className="flex items-center gap-3">
-                      <Phone className="w-4 h-4 text-[#34D399]" />
-                      <span className="text-xs text-[#F0F7F3]">Buy Phone Number</span>
+                      <Phone className="w-4 h-4 text-brand" />
+                      <span className="text-xs text-ink">Buy Phone Number</span>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#34D399]" />
+                    <ChevronRight className="w-3.5 h-3.5 text-ink-soft group-hover:text-brand" />
                   </button>
                 ) : (
-                  <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                    <p className="text-[11px] text-[#9FB0A6]">
-                      Need a phone number? Phone numbers are provisioned by the platform team — <Link href="/dashboard/settings" className="text-[#6FE3B0] hover:underline">contact support</Link>.
+                  <div className="p-3 rounded-lg bg-surface border border-line">
+                    <p className="text-[11px] text-ink-soft">
+                      Need a phone number? Phone numbers are provisioned by the platform team — <Link href="/dashboard/settings" className="text-brand hover:underline">contact support</Link>.
                     </p>
                   </div>
                 )}
                 <button onClick={handleTestCall} disabled={testCallLoading || !hasAgent}
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-emerald-500/30 text-left group disabled:opacity-50"
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-line hover:border-brand/30 text-left group disabled:opacity-50"
                 >
                   <div className="flex items-center gap-3">
-                    <Play className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs text-[#F0F7F3]">Test Call</span>
+                    <Play className="w-4 h-4 text-success" />
+                    <span className="text-xs text-ink">Test Call</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-emerald-400" />
+                  <ChevronRight className="w-3.5 h-3.5 text-ink-soft group-hover:text-brand" />
                 </button>
                 <Link href="/dashboard/settings"
-                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/10 hover:border-white/20 text-left group"
+                  className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-line hover:border-line text-left group"
                 >
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="w-4 h-4 text-[#9FB0A6]" />
-                    <span className="text-xs text-[#F0F7F3]">More Settings</span>
+                    <BarChart3 className="w-4 h-4 text-ink-soft" />
+                    <span className="text-xs text-ink">More Settings</span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#9FB0A6] group-hover:text-[#F0F7F3]" />
+                  <ChevronRight className="w-3.5 h-3.5 text-ink-soft group-hover:text-ink" />
                 </Link>
               </div>
 
               {/* Test Call Result */}
               {testCallResult && (
-                <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <p className="text-xs text-emerald-400">✅ Test call initiated</p>
-                  <p className="text-[11px] text-[#9FB0A6] mt-0.5">Your phone should ring within 30 seconds.</p>
+                <div className="mt-4 p-3 rounded-lg bg-success/10 border border-success/20">
+                  <p className="text-xs text-success">✅ Test call initiated</p>
+                  <p className="text-[11px] text-ink-soft mt-0.5">Your phone should ring within 30 seconds.</p>
                 </div>
               )}
             </div>
@@ -940,18 +940,18 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-[#F0F7F3]">Buy Phone Number</h3>
-                  <button onClick={() => setShowBuyModal(false)} className="text-[#9FB0A6] hover:text-[#F0F7F3]">
+                  <h3 className="text-lg font-semibold text-ink">Buy Phone Number</h3>
+                  <button onClick={() => setShowBuyModal(false)} className="text-ink-soft hover:text-ink">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs text-[#9FB0A6] mb-1.5">Region</label>
+                    <label className="block text-xs text-ink-soft mb-1.5">Region</label>
                     <select value={selectedRegion}
                       onChange={e => { const v = e.target.value; setSelectedRegion(v); resetShop(); setBuyResult(null); loadShopNumbers(undefined, v); }}
-                      className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50"
+                      className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm focus:outline-none focus:border-brand/50"
                     >
                       <option value="india">India (+91)</option>
                       <option value="us">United States (+1)</option>
@@ -961,7 +961,7 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   {/* Carrier pick — India stocks numbers per carrier */}
                   {needsCarrier && shopCarriers.length > 0 && (
                     <div>
-                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Carrier</label>
+                      <label className="block text-xs text-ink-soft mb-1.5">Carrier</label>
                       <div className="flex flex-wrap gap-2">
                         {shopCarriers.map(c => (
                           <button key={c.carrier}
@@ -969,8 +969,8 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                             className={cn(
                               "px-3 py-1.5 rounded-lg text-xs border transition-colors",
                               selectedCarrier === c.carrier
-                                ? "bg-[#34D399]/15 border-[#34D399]/50 text-[#34D399]"
-                                : "bg-white/[0.06] border-white/10 text-[#9FB0A6] hover:border-[#34D399]/30"
+                                ? "bg-brand/15 border-brand/50 text-brand"
+                                : "bg-white/[0.06] border-line text-ink-soft hover:border-brand/30"
                             )}
                           >
                             {c.label}
@@ -982,13 +982,13 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
 
                   {/* Available numbers from the shop */}
                   {shopLoading && (
-                    <div className="flex items-center justify-center gap-2 py-6 text-xs text-[#9FB0A6]">
+                    <div className="flex items-center justify-center gap-2 py-6 text-xs text-ink-soft">
                       <Loader2 className="w-4 h-4 animate-spin" /> Loading available numbers…
                     </div>
                   )}
                   {!shopLoading && shopNumbers.length > 0 && (
                     <div>
-                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Available numbers</label>
+                      <label className="block text-xs text-ink-soft mb-1.5">Available numbers</label>
                       <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1">
                         {shopNumbers.map(n => (
                           <button key={n.phone_number}
@@ -996,12 +996,12 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                             className={cn(
                               "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm border transition-colors text-left",
                               selectedNumber === n.phone_number
-                                ? "bg-[#34D399]/15 border-[#34D399]/50"
-                                : "bg-white/[0.06] border-white/10 hover:border-[#34D399]/30"
+                                ? "bg-brand/15 border-brand/50"
+                                : "bg-white/[0.06] border-line hover:border-brand/30"
                             )}
                           >
-                            <span className="font-mono text-[#F0F7F3]">{n.phone_number}</span>
-                            <span className="text-[11px] text-[#9FB0A6]">
+                            <span className="font-mono text-ink">{n.phone_number}</span>
+                            <span className="text-[11px] text-ink-soft">
                               ${n.monthly_rental_usd?.toFixed(2)}/mo
                             </span>
                           </button>
@@ -1011,7 +1011,7 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   )}
                   {!shopLoading && !needsCarrier && shopNumbers.length === 0 && shopCarriers.length === 0 && (
                     <button onClick={() => loadShopNumbers(selectedCarrier || undefined)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[#34D399]/40 text-[#34D399] text-xs hover:bg-[#34D399]/10"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-brand/40 text-brand text-xs hover:bg-brand/10"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Load available numbers
                     </button>
@@ -1020,9 +1020,9 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   {/* Attach after purchase */}
                   {agents.length > 0 && (
                     <div>
-                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Attach to agent after purchase</label>
+                      <label className="block text-xs text-ink-soft mb-1.5">Attach to agent after purchase</label>
                       <select value={attachAfterBuy} onChange={e => setAttachAfterBuy(e.target.value)}
-                        className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/50"
+                        className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm focus:outline-none focus:border-brand/50"
                       >
                         <option value="">Don&apos;t attach now</option>
                         {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -1033,14 +1033,14 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   {buyResult && (
                     <div className={cn(
                       "p-3 rounded-lg text-xs",
-                      buyResult.success ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                      "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      buyResult.success ? "bg-success/10 text-success border border-success/20" :
+                      "bg-warning/10 text-warning border border-warning/20"
                     )}>
                       <p>{buyResult.message}</p>
                       {!buyResult.success && buyResult.errorCode &&
                         ["kyc_incomplete", "insufficient_balance", "feature_disabled"].includes(buyResult.errorCode) && (
                         <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
-                          className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] text-[#9FB0A6] text-[11px] hover:bg-white/[0.1]"
+                          className="mt-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] text-ink-soft text-[11px] hover:bg-white/[0.1]"
                         >
                           Open Omnidim Dashboard <ExternalLink className="w-3 h-3" />
                         </button>
@@ -1048,7 +1048,7 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                     </div>
                   )}
 
-                  <p className="text-[11px] text-[#9FB0A6] leading-relaxed">
+                  <p className="text-[11px] text-ink-soft leading-relaxed">
                     Numbers are rented from our telephony provider and charged to its wallet
                     (~$5.06/mo for +91). First purchase needs a one-time verification (Aadhaar
                     eKYC for India) — if asked, complete it in the Omnidim dashboard and buy
@@ -1058,32 +1058,32 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
 
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => setShowBuyModal(false)}
-                    className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-line text-ink-soft text-sm hover:bg-white/[0.06]"
                   >Cancel</button>
                   {!buyResult?.success ? (
                     <button onClick={handleBuyNumber} disabled={buyLoading || !selectedNumber}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#34D399] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-brand text-canvas text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                     >
                       {buyLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
                       {buyLoading ? "Purchasing..." : selectedNumber ? `Buy ${selectedNumber}` : "Buy Number"}
                     </button>
                   ) : (
                     <button onClick={() => { setShowBuyModal(false); setBuyResult(null); }}
-                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/[0.06] text-[#F0F7F3] text-sm hover:bg-white/[0.06]"
+                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/[0.06] text-ink text-sm hover:bg-white/[0.06]"
                     >Done</button>
                   )}
                 </div>
 
                 {/* Fallback to provider dashboard */}
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-[11px] text-[#9FB0A6] mb-2">Can&apos;t buy here? Get one from your provider directly:</p>
+                <div className="mt-4 pt-4 border-t border-line">
+                  <p className="text-[11px] text-ink-soft mb-2">Can&apos;t buy here? Get one from your provider directly:</p>
                   <button onClick={() => window.open("https://app.omnidim.io", "_blank")}
-                    className="flex items-center justify-center gap-1.5 w-full px-4 py-2 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs hover:bg-white/[0.06]"
+                    className="flex items-center justify-center gap-1.5 w-full px-4 py-2 rounded-lg bg-canvas text-ink-soft text-xs hover:bg-white/[0.06]"
                   >
                     Open Provider Dashboard <ExternalLink className="w-3 h-3" />
                   </button>
                   <button onClick={() => { resetImportForm(); setShowBuyModal(false); setShowImportModal(true); }}
-                    className="flex items-center justify-center gap-1.5 w-full px-4 py-2 mt-2 rounded-lg bg-[#101713] text-[#9FB0A6] text-xs hover:bg-white/[0.06]"
+                    className="flex items-center justify-center gap-1.5 w-full px-4 py-2 mt-2 rounded-lg bg-canvas text-ink-soft text-xs hover:bg-white/[0.06]"
                   >
                     <ArrowRight className="w-3 h-3" /> Already have a number? Import it
                   </button>
@@ -1113,8 +1113,8 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-[#F0F7F3]">Import Existing Number</h3>
-                  <button onClick={() => { setShowImportModal(false); resetImportForm(); }} className="text-[#9FB0A6] hover:text-[#F0F7F3]">
+                  <h3 className="text-lg font-semibold text-ink">Import Existing Number</h3>
+                  <button onClick={() => { setShowImportModal(false); resetImportForm(); }} className="text-ink-soft hover:text-ink">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -1129,8 +1129,8 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                         className={cn(
                           "p-3 rounded-xl border text-xs text-center font-medium transition-all",
                           importProvider === p
-                            ? "bg-[#34D399]/15 border-[#34D399]/40 text-[#6FE3B0]"
-                            : "bg-white/[0.06] border-white/10 text-[#9FB0A6] hover:border-white/25"
+                            ? "bg-brand/15 border-brand/40 text-brand"
+                            : "bg-white/[0.06] border-line text-ink-soft hover:border-line"
                         )}
                       >
                         {p === "exotel" ? "Exotel" : "Twilio"}
@@ -1139,53 +1139,53 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   </div>
 
                   <div>
-                    <label className="block text-xs text-[#9FB0A6] mb-1.5">Phone Number *</label>
+                    <label className="block text-xs text-ink-soft mb-1.5">Phone Number *</label>
                     <input value={importPhone} onChange={e => setImportPhone(e.target.value)}
                       placeholder="e.g., +919876543210"
-                      className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                      className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs text-[#9FB0A6] mb-1.5">Number SID *</label>
+                    <label className="block text-xs text-ink-soft mb-1.5">Number SID *</label>
                     <input value={importSid} onChange={e => setImportSid(e.target.value)}
                       placeholder="e.g., EX123456 or PNxxxxxxxx"
-                      className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                      className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
                     />
                   </div>
 
                   {importProvider === "exotel" ? (
                     <>
                       <div>
-                        <label className="block text-xs text-[#9FB0A6] mb-1.5">Exotel API Key *</label>
+                        <label className="block text-xs text-ink-soft mb-1.5">Exotel API Key *</label>
                         <input value={importApiKey} onChange={e => setImportApiKey(e.target.value)}
                           placeholder="Exotel API key"
-                          className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                          className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-[#9FB0A6] mb-1.5">Exotel API Token *</label>
+                        <label className="block text-xs text-ink-soft mb-1.5">Exotel API Token *</label>
                         <input value={importApiToken} onChange={e => setImportApiToken(e.target.value)}
                           type="password"
                           placeholder="Exotel API token"
-                          className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                          className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-[#9FB0A6] mb-1.5">Subdomain</label>
+                        <label className="block text-xs text-ink-soft mb-1.5">Subdomain</label>
                         <input value={importSubdomain} onChange={e => setImportSubdomain(e.target.value)}
                           placeholder="api.exotel.com"
-                          className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                          className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
                         />
                       </div>
                     </>
                   ) : (
                     <div>
-                      <label className="block text-xs text-[#9FB0A6] mb-1.5">Twilio Auth Token *</label>
+                      <label className="block text-xs text-ink-soft mb-1.5">Twilio Auth Token *</label>
                       <input value={importApiToken} onChange={e => setImportApiToken(e.target.value)}
                         type="password"
                         placeholder="Twilio auth token"
-                        className="w-full px-3 py-2.5 rounded-lg app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/50/50"
+                        className="w-full px-3 py-2.5 rounded-lg app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/50/50"
                       />
                     </div>
                   )}
@@ -1193,32 +1193,32 @@ const LANGUAGE_OPTIONS: { value: string; label: string; region: "indian" | "inte
                   {importResult && (
                     <div className={cn(
                       "p-3 rounded-lg text-xs",
-                      importResult.success ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                      "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      importResult.success ? "bg-success/10 text-success border border-success/20" :
+                      "bg-warning/10 text-warning border border-warning/20"
                     )}>
                       {importResult.message}
                     </div>
                   )}
 
-                  <p className="text-[11px] text-[#9FB0A6] leading-relaxed">
+                  <p className="text-[11px] text-ink-soft leading-relaxed">
                     Import a number you already own from Exotel or Twilio. After import it will appear in your number list and you can attach it to your AI agent.
                   </p>
                 </div>
 
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { setShowImportModal(false); resetImportForm(); }}
-                    className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 text-[#9FB0A6] text-sm hover:bg-white/[0.06]"
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-line text-ink-soft text-sm hover:bg-white/[0.06]"
                   >Cancel</button>
                   {!importResult || !importResult.success ? (
                     <button onClick={handleImportNumber} disabled={importLoading || !importPhone.trim() || !importSid.trim() || !importApiToken.trim() || (importProvider === "exotel" && !importApiKey.trim())}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1B4332] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-line-subtle text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50"
                     >
                       {importLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                       {importLoading ? "Importing..." : "Import Number"}
                     </button>
                   ) : (
                     <button onClick={() => { setShowImportModal(false); resetImportForm(); }}
-                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/[0.06] text-[#F0F7F3] text-sm hover:bg-white/[0.06]"
+                      className="flex-1 px-4 py-2.5 rounded-lg bg-white/[0.06] text-ink text-sm hover:bg-white/[0.06]"
                     >Done</button>
                   )}
                 </div>

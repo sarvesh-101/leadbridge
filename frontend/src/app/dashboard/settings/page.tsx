@@ -28,8 +28,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#F0F7F3]">Settings</h1>
-        <p className="text-[#9FB0A6] mt-1">Manage your account and platform configuration</p>
+        <h1 className="text-2xl font-bold text-ink">Settings</h1>
+        <p className="text-ink-soft mt-1">Manage your account and platform configuration</p>
       </div>
 
       {/* Tabs */}
@@ -39,8 +39,8 @@ export default function SettingsPage() {
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
               activeTab === tab.id
-                ? "bg-[#34D399]/25 text-[#2D6A4F] border border-[#34D399]/40"
-                : "bg-[#101713] text-[#9FB0A6] border border-white/10 hover:bg-white/[0.06]"
+                ? "bg-brand/25 text-brand-deep border border-brand/40"
+                : "bg-canvas text-ink-soft border border-line hover:bg-white/[0.06]"
             )}
           >
             <tab.icon className="w-4 h-4" /> {tab.label}
@@ -111,8 +111,8 @@ function PrivacyTab() {
   if (loading) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-32 bg-[#101713] rounded-xl" />
-        <div className="h-32 bg-[#101713] rounded-xl" />
+        <div className="h-32 bg-canvas rounded-xl" />
+        <div className="h-32 bg-canvas rounded-xl" />
       </div>
     );
   }
@@ -122,20 +122,20 @@ function PrivacyTab() {
       {/* Consent status */}
       <div className="p-6 rounded-xl app-card space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#34D399]/25 flex items-center justify-center">
-            <ShieldCheck className="w-5 h-5 text-[#6FE3B0]" />
+          <div className="w-10 h-10 rounded-xl bg-brand/25 flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-brand" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-[#F0F7F3]">Privacy & Consent</h2>
-            <p className="text-xs text-[#9FB0A6]">India DPDP Act 2023 — your data, your control</p>
+            <h2 className="text-lg font-semibold text-ink">Privacy & Consent</h2>
+            <p className="text-xs text-ink-soft">India DPDP Act 2023 — your data, your control</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <span className={cn(
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
             privacy?.consentActive
-              ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-              : "bg-amber-500/10 border border-amber-500/20 text-amber-400"
+              ? "bg-success/10 border border-success/20 text-success"
+              : "bg-warning/10 border border-warning/20 text-warning"
           )}>
             <Check className="w-3.5 h-3.5" />
             {privacy?.consentActive
@@ -143,11 +143,11 @@ function PrivacyTab() {
               : "No consent recorded"}
           </span>
           <Link href="/legal/privacy" target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full app-card app-card-hover text-xs text-[#9FB0A6] hover:bg-white/[0.06] transition-colors">
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full app-card app-card-hover text-xs text-ink-soft hover:bg-white/[0.06] transition-colors">
             <FileText className="w-3.5 h-3.5" /> Read the Privacy Policy
           </Link>
         </div>
-        <p className="text-xs text-[#9FB0A6] leading-relaxed">
+        <p className="text-xs text-ink-soft leading-relaxed">
           We process your account, lead, call-recording and billing data only as described in the
           Privacy Policy. You can withdraw consent at any time by requesting full data erasure below.
         </p>
@@ -160,33 +160,32 @@ function PrivacyTab() {
             <Trash2 className="w-5 h-5 text-rose-400" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-[#F0F7F3]">Delete my account & data</h2>
-            <p className="text-xs text-[#9FB0A6]">Withdraw consent and erase all personal data (DPDP right to erasure)</p>
+            <h2 className="text-lg font-semibold text-ink">Delete my account & data</h2>
+            <p className="text-xs text-ink-soft">Withdraw consent and erase all personal data (DPDP right to erasure)</p>
           </div>
         </div>
 
         {privacy?.erasureProcessedAt ? (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <p className="text-sm text-emerald-400">
+          <div className="p-4 rounded-xl bg-success/10 border border-success/20">
+            <p className="text-sm text-success">
               ✓ Your account and data have been erased. Thank you for using Converza.
             </p>
           </div>
         ) : privacy?.erasureRequested ? (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <p className="text-sm text-amber-400 font-medium">Erasure request received{requestedDate ? ` on ${requestedDate}` : ""}</p>
-            <p className="text-xs text-amber-200/80 mt-1 leading-relaxed">
+          <div className="p-4 rounded-xl bg-warning/10 border border-warning/20">
+            <p className="text-sm text-warning font-medium">Erasure request received{requestedDate ? ` on ${requestedDate}` : ""}</p>
+            <p className="text-xs text-warning/80 mt-1 leading-relaxed">
               We will delete your account and personal data within {privacy.slaDays ?? 30} days, as
               stated in our Privacy Policy. Your account remains accessible until then.
             </p>
           </div>
         ) : (
           <>
-            <p className="text-xs text-[#9FB0A6] leading-relaxed">
+            <p className="text-xs text-ink-soft leading-relaxed">
               This permanently deletes your account, leads, call recordings, invoices and all related
               data after the processing window. This cannot be undone.
-            </p>
-            <button onClick={() => setConfirmOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-sm font-medium hover:bg-rose-500/25 transition-colors">
+            </p>              <button onClick={() => setConfirmOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-danger/15 border border-danger/30 text-danger text-sm font-medium hover:bg-danger/25 transition-colors">
               <Trash2 className="w-4 h-4" /> Request data erasure
             </button>
           </>
@@ -203,19 +202,18 @@ function PrivacyTab() {
                   <div className="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center">
                     <AlertTriangle className="w-5 h-5 text-rose-400" />
                   </div>
-                  <h3 className="text-base font-semibold text-[#F0F7F3]">Permanently delete everything?</h3>
+                  <h3 className="text-base font-semibold text-ink">Permanently delete everything?</h3>
                 </div>
-                <p className="text-sm text-[#9FB0A6] leading-relaxed">
+                <p className="text-sm text-ink-soft leading-relaxed">
                   Your account, leads, call recordings, invoices and all personal data will be erased
                   within {privacy?.slaDays ?? 30} days of this request. This action cannot be undone.
                 </p>
                 <div className="flex items-center justify-end gap-3 pt-2">
                   <button onClick={() => setConfirmOpen(false)} disabled={requesting}
-                    className="px-4 py-2.5 rounded-xl app-card app-card-hover text-sm text-[#9FB0A6] hover:bg-white/[0.06] transition-colors">
+                    className="px-4 py-2.5 rounded-xl app-card app-card-hover text-sm text-ink-soft hover:bg-white/[0.06] transition-colors">
                     Cancel
-                  </button>
-                  <button onClick={requestErasure} disabled={requesting}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500 text-white text-sm font-medium hover:bg-rose-600 disabled:opacity-50 transition-colors">
+                  </button>                    <button onClick={requestErasure} disabled={requesting}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-danger text-canvas-deep text-sm font-medium hover:bg-danger/90 disabled:opacity-50 transition-colors">
                     {requesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     {requesting ? "Submitting…" : "Yes, delete my data"}
                   </button>
@@ -274,7 +272,7 @@ function ProfileTab() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 rounded-xl app-card space-y-5">
-      <h2 className="text-lg font-semibold text-[#F0F7F3]">Profile Information</h2>
+      <h2 className="text-lg font-semibold text-ink">Profile Information</h2>
       {loadingProfile ? (
         <div className="animate-pulse space-y-4">
           <div className="flex items-center gap-4 mb-6">
@@ -287,41 +285,40 @@ function ProfileTab() {
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] flex items-center justify-center text-xl font-bold text-white">
+          <div className="flex items-center gap-4 mb-6">                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-line-subtle to-brand-deep flex items-center justify-center text-xl font-bold text-canvas-deep">
               {initials}
             </div>
-            <div className="text-sm text-[#9FB0A6]">{user?.email || ""}</div>
+            <div className="text-sm text-ink-soft">{user?.email || ""}</div>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-[#9FB0A6] mb-1.5">Name</label>
+              <label className="block text-sm text-ink-soft mb-1.5">Name</label>
               <input value={name} onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+                className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
               />
             </div>
             <div>
-              <label className="block text-sm text-[#9FB0A6] mb-1.5">Email</label>
+              <label className="block text-sm text-ink-soft mb-1.5">Email</label>
               <input value={user?.email || ""} disabled
-                className="w-full px-4 py-2.5 rounded-xl app-card text-[#9FB0A6] text-sm cursor-not-allowed"
+                className="w-full px-4 py-2.5 rounded-xl app-card text-ink-soft text-sm cursor-not-allowed"
               />
             </div>
             <div>
-              <label className="block text-sm text-[#9FB0A6] mb-1.5">Phone</label>
+              <label className="block text-sm text-ink-soft mb-1.5">Phone</label>
               <input value={phone} onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+                className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
               />
             </div>
             <div>
-              <label className="block text-sm text-[#9FB0A6] mb-1.5">Business</label>
+              <label className="block text-sm text-ink-soft mb-1.5">Business</label>
               <input value={businessName} onChange={(e) => setBusinessName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm focus:outline-none focus:border-[#34D399]/60"
+                className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm focus:outline-none focus:border-brand/60"
               />
             </div>
           </div>
           <div className="flex items-center gap-4 pt-2">
             <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
             >
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Changes</>}
             </button>
@@ -381,38 +378,37 @@ function IntegrationsTab() {
 
       {/* Voice AI quick settings card */}
       <Link href="/dashboard/voice"
-        className="flex items-center justify-between p-5 rounded-xl bg-gradient-to-r from-[#1B4332]/10 to-[#2D6A4F]/5 border border-[#34D399]/30 hover:border-[#34D399]/40 transition-all group"
+        className="flex items-center justify-between p-5 rounded-xl bg-gradient-to-r from-line-subtle/10 to-brand-deep/5 border border-brand/30 hover:border-brand/40 transition-all group"
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#34D399]/25 flex items-center justify-center">
-            <Phone className="w-6 h-6 text-[#6FE3B0]" />
+          <div className="w-12 h-12 rounded-xl bg-brand/25 flex items-center justify-center">
+            <Phone className="w-6 h-6 text-brand" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-[#F0F7F3] group-hover:text-[#6FE3B0] transition-colors">Voice AI Agent</h3>
-            <p className="text-xs text-[#9FB0A6] mt-0.5">
+            <h3 className="text-sm font-semibold text-ink group-hover:text-brand transition-colors">Voice AI Agent</h3>
+            <p className="text-xs text-ink-soft mt-0.5">
               Configure your AI calling agent, phone numbers, and knowledge base
             </p>
           </div>
         </div>
-        <ArrowRight className="w-5 h-5 text-[#9FB0A6] group-hover:text-[#6FE3B0] transition-colors" />
+        <ArrowRight className="w-5 h-5 text-ink-soft group-hover:text-brand transition-colors" />
       </Link>
 
       {/* Other integrations */}
       {[
-        { name: "WhatsApp Cloud API", status: whatsappConnected ? "Connected" : "Disconnected", icon: "💬", color: whatsappConnected ? "text-green-400" : "text-[#9FB0A6]" },
-        { name: "AI Voice", status: omnidimensionConnected ? "Active" : "Not configured", icon: "🎙️", color: omnidimensionConnected ? "text-blue-400" : "text-[#9FB0A6]" },
-        { name: "Google Ads", status: "Available", icon: "🔍", color: "text-[#9FB0A6]" },
-        { name: "Facebook Leads", status: "Available", icon: "📘", color: "text-[#9FB0A6]" },
+        { name: "WhatsApp Cloud API", status: whatsappConnected ? "Connected" : "Disconnected", icon: "💬", color: whatsappConnected ? "text-success" : "text-ink-soft" },
+        { name: "AI Voice", status: omnidimensionConnected ? "Active" : "Not configured", icon: "🎙️", color: omnidimensionConnected ? "text-blue-400" : "text-ink-soft" },
+        { name: "Google Ads", status: "Available", icon: "🔍", color: "text-ink-soft" },
+        { name: "Facebook Leads", status: "Available", icon: "📘", color: "text-ink-soft" },
       ].map((int) => (
-        <div key={int.name} className="flex items-center justify-between p-4 rounded-xl app-card">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">{int.icon}</span>
-            <div>
-              <div className="text-sm font-medium text-[#F0F7F3]">{int.name}</div>
-              <div className={cn("text-xs", int.color)}>{int.status}</div>
-            </div>
+        <div key={int.name} className="flex items-center justify-between p-4 rounded-xl app-card">              <div className="flex items-center gap-3">
+              <span className="text-2xl">{int.icon}</span>
+              <div>
+                <div className="text-sm font-medium text-ink">{int.name}</div>
+                <div className={cn("text-xs", int.color)}>{int.status}</div>
+              </div>
           </div>
-          <button className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-[#9FB0A6] hover:bg-white/[0.06]">Configure</button>
+          <button className="px-3 py-1.5 rounded-lg border border-line text-xs text-ink-soft hover:bg-white/[0.06]">Configure</button>
         </div>
       ))}
     </motion.div>
@@ -466,32 +462,32 @@ function SecurityTab() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {/* API Key Section */}
       <div className="p-6 rounded-xl app-card space-y-4">
-        <h2 className="text-lg font-semibold text-[#F0F7F3]">Security Settings</h2>
+        <h2 className="text-lg font-semibold text-ink">Security Settings</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 rounded-xl app-card">
             <div className="flex items-center gap-3">
-              <Key className="w-5 h-5 text-[#9FB0A6]" />
+              <Key className="w-5 h-5 text-ink-soft" />
               <div>
-                <div className="text-sm text-[#F0F7F3]">API Keys</div>
-                <div className="text-xs text-[#9FB0A6]">Manage your API access keys for integrations</div>
+                <div className="text-sm text-ink">API Keys</div>
+                <div className="text-xs text-ink-soft">Manage your API access keys for integrations</div>
               </div>
             </div>
             <button onClick={generateApiKey}
-              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-xs font-medium hover:opacity-90"
+              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-brand to-brand-soft text-canvas text-xs font-medium hover:opacity-90"
             >
               Generate Key
             </button>
           </div>
 
           {showApiKey && apiKeyValue && (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <p className="text-xs text-amber-400 font-medium mb-2">Your API Key (copy it now — won&apos;t be shown again)</p>
+            <div className="p-4 rounded-xl bg-warning/10 border border-warning/20">
+              <p className="text-xs text-warning font-medium mb-2">Your API Key (copy it now — won&apos;t be shown again)</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs text-amber-200 bg-amber-500/10 px-3 py-2 rounded-lg break-all font-mono">
+                <code className="flex-1 text-xs text-warning/90 bg-warning/10 px-3 py-2 rounded-lg break-all font-mono">
                   {apiKeyValue}
                 </code>
                 <button onClick={() => { navigator.clipboard.writeText(apiKeyValue); toast.success("Copied!"); }}
-                  className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs hover:bg-amber-500/30"
+                  className="shrink-0 px-3 py-1.5 rounded-lg bg-warning/20 text-warning text-xs hover:bg-warning/30"
                 >
                   <Copy className="w-3.5 h-3.5" />
                 </button>
@@ -505,33 +501,33 @@ function SecurityTab() {
       <div className="p-6 rounded-xl app-card space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-[#9FB0A6]" />
+            <Bell className="w-5 h-5 text-ink-soft" />
             <div>
-              <h3 className="text-sm font-medium text-[#F0F7F3]">Webhook Sources</h3>
-              <p className="text-xs text-[#9FB0A6]">Incoming webhook endpoints for lead ingestion</p>
+              <h3 className="text-sm font-medium text-ink">Webhook Sources</h3>
+              <p className="text-xs text-ink-soft">Incoming webhook endpoints for lead ingestion</p>
             </div>
           </div>
         </div>
 
         {loadingSecurity ? (
           <div className="animate-pulse space-y-3">
-            {[1,2].map(i => <div key={i} className="h-16 bg-[#101713] rounded-xl" />)}
+            {[1,2].map(i => <div key={i} className="h-16 bg-canvas rounded-xl" />)}
           </div>
         ) : webhooks.length === 0 ? (
           <div className="text-center py-6">
-            <p className="text-sm text-[#9FB0A6]">No webhook sources configured yet.</p>
-            <p className="text-xs text-gray-600 mt-1">Configure webhook sources in the Integrations section.</p>
+            <p className="text-sm text-ink-soft">No webhook sources configured yet.</p>
+            <p className="text-xs text-ink-soft mt-1">Configure webhook sources in the Integrations section.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {webhooks.map((wh: any) => (
               <div key={wh.id} className="flex items-center justify-between p-3 rounded-xl app-card">
                 <div>
-                  <div className="text-sm text-[#F0F7F3]">{wh.name}</div>
-                  <div className="text-xs text-[#9FB0A6]">{wh.type} · {wh.active ? "Active" : "Inactive"}</div>
+                  <div className="text-sm text-ink">{wh.name}</div>
+                  <div className="text-xs text-ink-soft">{wh.type} · {wh.active ? "Active" : "Inactive"}</div>
                 </div>
                 <button onClick={() => { navigator.clipboard.writeText(`/api/v1/webhooks/ingest/${wh.token}`); toast.success("Webhook URL copied!"); }}
-                  className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-[#9FB0A6] hover:bg-white/[0.06] flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-lg border border-line text-xs text-ink-soft hover:bg-white/[0.06] flex items-center gap-1"
                 >
                   <Copy className="w-3 h-3" /> Copy URL
                 </button>

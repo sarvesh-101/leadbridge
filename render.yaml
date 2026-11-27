@@ -115,6 +115,15 @@ services:
         value: call-recordings
       - key: FORWARDING_EMAIL
         value: forward@converza.tech
+      # Domain for per-broker addresses (<mailbox>+<token>@<domain>). Unset means
+      # plus-addressing on the polled mailbox, which needs no DNS work.
+      - key: FORWARDING_DOMAIN
+        sync: false
+      # Shared secret for POST /webhooks/email/incoming. When set, the provider
+      # must present it (header or basic auth) or the request is rejected with 401.
+      # Unset = open, which is only acceptable before a provider is configured.
+      - key: EMAIL_WEBHOOK_SECRET
+        sync: false
       - key: FORWARDING_SMS_NUMBER
         sync: false
       - key: IMAP_HOST

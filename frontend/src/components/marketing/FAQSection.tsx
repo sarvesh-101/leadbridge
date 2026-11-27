@@ -82,28 +82,28 @@ export default function FAQSection() {
   void setRefundOpen;
 
   return (
-    <section className="relative py-20 lg:py-32 bg-[#0A0F0C] overflow-hidden" id="faq">
+    <section className="relative py-20 lg:py-32 bg-canvas overflow-hidden" id="faq">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
-          <span className="caption text-gradient-emerald mb-4 block">QUESTIONS?</span>
+          <span className="caption mb-4 block">QUESTIONS?</span>
           <h2 className="h1-text mb-4">Everything you need to know</h2>
-          <p className="text-[16px] text-[#9FB0A6] max-w-[480px] mx-auto">
+          <p className="body-text max-w-[480px] mx-auto">
             Can&apos;t find what you&apos;re looking for? Reach out to our team.
           </p>
         </div>
 
         <div className="space-y-2">
           {faqs.map((faq, i) => (
-            <div key={faq.q} className="rounded-xl glass-card overflow-hidden transition-colors duration-200 hover:border-[#34D399]/30">
+            <div key={faq.q} className="rounded-xl surface-card overflow-hidden transition-colors duration-200 hover:border-brand-deep">
               <button
                 onClick={() => toggle(i)}
                 className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
                 aria-expanded={openIndex === i}
               >
-                <span className="text-[14px] font-medium text-[#D5E0D9] flex-1">{faq.q}</span>
+                <span className="text-[14px] font-medium text-ink flex-1">{faq.q}</span>
                 <ChevronDown
-                  className={`w-4 h-4 text-[#9FB0A6] shrink-0 transition-transform duration-200 ${
-                    openIndex === i ? "rotate-180 text-[#34D399]" : ""
+                  className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                    openIndex === i ? "rotate-180 text-brand" : "text-ink-soft"
                   }`}
                 />
               </button>
@@ -116,7 +116,7 @@ export default function FAQSection() {
                     transition={{ duration: 0.2, ease: "easeInOut" }}
                   >
                     <div className="px-6 pb-4 pt-0">
-                      <p className="text-[13px] text-[#9FB0A6] leading-relaxed">{faq.a}</p>
+                      <p className="text-[13px] text-ink-soft leading-relaxed">{faq.a}</p>
                     </div>
                   </motion.div>
                 )}
@@ -126,10 +126,10 @@ export default function FAQSection() {
         </div>
 
         <div className="text-center mt-10">
-          <p className="text-[13px] text-[#9FB0A6] mb-3">Still have questions?</p>
+          <p className="text-[13px] text-ink-soft mb-3">Still have questions?</p>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="inline-flex items-center gap-2 text-[14px] text-[#6FE3B0] hover:text-[#34D399] font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-[14px] text-brand hover:text-brand-soft font-medium transition-colors"
           >
             Contact our team →
           </a>

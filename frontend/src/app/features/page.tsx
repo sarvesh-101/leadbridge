@@ -57,11 +57,11 @@ const GROUPS = [
 
 export default function FeaturesPage() {
   return (
-    <main className="min-h-screen bg-[#0A0F0C] text-[#F0F7F3] px-4 py-16">
+    <main className="min-h-screen bg-canvas text-ink px-4 py-16">
       <div className="max-w-4xl mx-auto">
-        <Link href="/" className="text-[13px] text-[#9FB0A6] hover:text-[#F0F7F3]">← Back to Converza</Link>
+        <Link href="/" className="text-[13px] text-ink-soft hover:text-ink">← Back to Converza</Link>
         <h1 className="text-[36px] font-display font-bold mt-6 mb-3">Everything Converza does</h1>
-        <p className="text-[15px] text-[#9FB0A6] mb-12 max-w-[640px]">
+        <p className="text-[15px] text-ink-soft mb-12 max-w-[640px]">
           Grouped by what it changes in your day. Nothing here is a promise of results — the trial shows
           your own numbers on your own leads.
         </p>
@@ -69,11 +69,11 @@ export default function FeaturesPage() {
         <div className="space-y-10">
           {GROUPS.map((group) => (
             <section key={group.title}>
-              <h2 className="text-[18px] font-semibold text-[#6FE3B0] mb-4">{group.title}</h2>
+              <h2 className="text-[18px] font-semibold text-brand mb-4">{group.title}</h2>
               <ul className="grid sm:grid-cols-2 gap-2">
                 {group.items.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-[14px] text-[#C9D6CF]">
-                    <span className="text-[#34D399] mt-0.5">✓</span>
+                  <li key={item} className="flex items-start gap-2 text-[14px] text-ink-soft">
+                    <span className="text-brand mt-0.5">✓</span>
                     {item}
                   </li>
                 ))}
@@ -83,7 +83,7 @@ export default function FeaturesPage() {
         </div>
 
         <div className="mt-14 flex flex-wrap gap-3">
-          <Link href="/auth/register" className="rounded-lg border border-white/15 px-6 py-3 text-[14px] text-[#F0F7F3]">
+          <Link href="/auth/register" className="rounded-lg border border-line px-6 py-3 text-[14px] text-ink">
             Start free trial
           </Link>
         </div>

@@ -185,11 +185,10 @@ export default function EmailCampaignsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">Email Campaigns</h1>
-          <p className="text-[#9FB0A6] mt-1">Send marketing emails to your leads</p>
+          <h1 className="text-2xl font-bold text-ink">Email Campaigns</h1>
+          <p className="text-ink-soft mt-1">Send marketing emails to your leads</p>
         </div>
-        <button onClick={() => { setShowCompose(true); setSelectedLeadIds(new Set()); setComposeStep("compose"); setLeadSearch(""); setEnableScheduling(false); setScheduledAt(""); setAbTestEnabled(false); setVariantSubject(""); setVariantBody(""); setSamplePercent(20); }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90"
+        <button onClick={() => { setShowCompose(true); setSelectedLeadIds(new Set()); setComposeStep("compose"); setLeadSearch(""); setEnableScheduling(false); setScheduledAt(""); setAbTestEnabled(false); setVariantSubject(""); setVariantBody(""); setSamplePercent(20); }}            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90"
         >
           <Plus className="w-4 h-4" /> Compose Campaign
         </button>
@@ -203,16 +202,16 @@ export default function EmailCampaignsPage() {
           <>
             {[
               { icon: Mail, label: "Campaigns", value: analytics?.total ?? 0, color: "text-blue-400" },
-              { icon: Send, label: "Sent", value: analytics?.summary?.totalSent ?? 0, color: "text-green-400" },
-              { icon: BarChart3, label: "Delivery", value: `${analytics?.summary?.avgDeliveryRate ?? 0}%`, color: "text-emerald-400" },
+              { icon: Send, label: "Sent", value: analytics?.summary?.totalSent ?? 0, color: "text-success" },
+              { icon: BarChart3, label: "Delivery", value: `${analytics?.summary?.avgDeliveryRate ?? 0}%`, color: "text-success" },
               { icon: Eye, label: "Opens", value: `${analytics?.summary?.avgOpenRate ?? 0}%`, color: "text-violet-400" },
-              { icon: MousePointerClick, label: "Clicks", value: `${analytics?.summary?.avgClickRate ?? 0}%`, color: "text-amber-400" },
-              { icon: Clock, label: "Failed", value: analytics?.summary?.totalFailed ?? 0, color: "text-red-400" },
+              { icon: MousePointerClick, label: "Clicks", value: `${analytics?.summary?.avgClickRate ?? 0}%`, color: "text-warning" },
+              { icon: Clock, label: "Failed", value: analytics?.summary?.totalFailed ?? 0, color: "text-danger" },
             ].map((s) => (
               <div key={s.label} className="p-4 rounded-xl app-card">
                 <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-                <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-                <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+                <div className="text-xl font-bold text-ink">{s.value}</div>
+                <div className="text-xs text-ink-soft">{s.label}</div>
               </div>
             ))}
           </>
@@ -222,7 +221,7 @@ export default function EmailCampaignsPage() {
       {/* Templates */}
       {!loading && templates.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-[#F0F7F3]">Templates</h2>
+          <h2 className="text-sm font-semibold text-ink">Templates</h2>
           <div className="grid sm:grid-cols-3 gap-3">
             {templates.map((t: any, i: number) => (
               <motion.div key={t.name} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
@@ -230,11 +229,11 @@ export default function EmailCampaignsPage() {
                 onClick={() => applyTemplate(t)}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <FileText className="w-4 h-4 text-[#2D6A4F]" />
-                  <h3 className="text-sm font-medium text-[#F0F7F3]">{t.name}</h3>
+                  <FileText className="w-4 h-4 text-brand-deep" />
+                  <h3 className="text-sm font-medium text-ink">{t.name}</h3>
                 </div>
-                <p className="text-xs text-[#9FB0A6] mb-2 truncate">{t.subject}</p>
-                <div className="flex items-center gap-2 text-xs text-[#9FB0A6]">
+                <p className="text-xs text-ink-soft mb-2 truncate">{t.subject}</p>
+                <div className="flex items-center gap-2 text-xs text-ink-soft">
                   <Eye className="w-3 h-3" /> Click to apply
                 </div>
               </motion.div>
@@ -247,15 +246,15 @@ export default function EmailCampaignsPage() {
       {!loading && analytics && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#F0F7F3]">Campaign History</h2>
+            <h2 className="text-sm font-semibold text-ink">Campaign History</h2>
             {analytics.campaigns?.length > 0 && (
-              <span className="text-xs text-[#9FB0A6]">{analytics.campaigns.length} campaigns</span>
+              <span className="text-xs text-ink-soft">{analytics.campaigns.length} campaigns</span>
             )}
           </div>
           {analytics.campaigns?.length === 0 ? (
             <div className="text-center py-8 rounded-xl app-card">
-              <Mail className="w-8 h-8 text-[#9FB0A6] mx-auto mb-2" />
-              <p className="text-sm text-[#9FB0A6]">No campaigns sent yet</p>
+              <Mail className="w-8 h-8 text-ink-soft mx-auto mb-2" />
+              <p className="text-sm text-ink-soft">No campaigns sent yet</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -266,36 +265,36 @@ export default function EmailCampaignsPage() {
                   <div key={camp.id} className="p-3 rounded-xl app-card app-card-hover hover:bg-white/[0.06] transition-all">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 flex items-center justify-center shrink-0">
-                          <Mail className="w-4 h-4 text-[#2D6A4F]" />
+                        <div className="w-8 h-8 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
+                          <Mail className="w-4 h-4 text-brand-deep" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm text-[#F0F7F3] truncate">{camp.name}</p>
-                          <p className="text-xs text-[#9FB0A6] truncate">{camp.subject} · {camp.totalRecipients} recipients</p>
+                          <p className="text-sm text-ink truncate">{camp.name}</p>
+                          <p className="text-xs text-ink-soft truncate">{camp.subject} · {camp.totalRecipients} recipients</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-xs shrink-0">
                         <span className={cn(
                           "px-2 py-0.5 rounded-full",
-                          camp.status === "SENT" ? "bg-green-500/10 text-green-400" :
+                          camp.status === "SENT" ? "bg-success/10 text-success" :
                           camp.status === "SENDING" ? "bg-blue-500/10 text-blue-400" :
                           camp.status === "SCHEDULED" ? "bg-yellow-500/10 text-yellow-400" :
-                          "bg-gray-500/10 text-[#9FB0A6]"
+                          "bg-neutral-soft/10 text-ink-soft"
                         )}>{camp.status}</span>
-                        <span className="text-[#9FB0A6]">{camp.deliveredCount}/{camp.totalRecipients}</span>
+                        <span className="text-ink-soft">{camp.deliveredCount}/{camp.totalRecipients}</span>
                       </div>
                     </div>
                     {/* Tracking metrics bar */}
                     <div className="flex items-center gap-4 text-xs ml-11">
                       <div className="flex items-center gap-1.5">
                         <Eye className="w-3.5 h-3.5 text-violet-400" />
-                        <span className="text-[#9FB0A6]">{camp.openedCount} opens</span>
-                        <span className={cn("font-medium", openRate > 20 ? "text-green-400" : "text-[#9FB0A6]")}>({openRate}%)</span>
+                        <span className="text-ink-soft">{camp.openedCount} opens</span>
+                        <span className={cn("font-medium", openRate > 20 ? "text-success" : "text-ink-soft")}>({openRate}%)</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <MousePointerClick className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-[#9FB0A6]">{camp.clickedCount} clicks</span>
-                        <span className={cn("font-medium", clickRate > 10 ? "text-green-400" : "text-[#9FB0A6]")}>({clickRate}%)</span>
+                        <MousePointerClick className="w-3.5 h-3.5 text-warning" />
+                        <span className="text-ink-soft">{camp.clickedCount} clicks</span>
+                        <span className={cn("font-medium", clickRate > 10 ? "text-success" : "text-ink-soft")}>({clickRate}%)</span>
                       </div>
                       {camp.status === "SENDING" && (
                         <span className="flex items-center gap-1 text-blue-400">
@@ -320,8 +319,8 @@ export default function EmailCampaignsPage() {
             className="w-full max-w-2xl mx-4 p-6 rounded-2xl app-card max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-[#F0F7F3]">Compose Email Campaign</h2>
-              <button onClick={() => setShowCompose(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#9FB0A6]">
+              <h2 className="text-lg font-semibold text-ink">Compose Email Campaign</h2>
+              <button onClick={() => setShowCompose(false)} className="p-1.5 rounded-lg hover:bg-white/[0.06] text-ink-soft">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -330,28 +329,26 @@ export default function EmailCampaignsPage() {
               // Lead Selection Step
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-[#F0F7F3]">
+                  <h3 className="text-sm font-semibold text-ink">
                     Select Leads ({selectedLeadIds.size} selected)
                   </h3>
-                  <button onClick={() => setComposeStep("compose")}
-                    className="text-xs text-[#2D6A4F] hover:underline"
+                  <button onClick={() => setComposeStep("compose")}                      className="text-xs text-brand-deep hover:underline"
                   >
                     Back to compose
                   </button>
                 </div>
 
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9FB0A6]" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
                   <input value={leadSearch} onChange={(e) => { setLeadSearch(e.target.value); loadLeads(e.target.value, 1); }}
                     placeholder="Search leads..."
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-[#9FB0A6]">
-                  <button onClick={selectAllLeads} className="flex items-center gap-1.5 hover:text-[#F0F7F3] transition-colors">
-                    {leads.every((l) => selectedLeadIds.has(l.id)) ? (
-                      <CheckSquare className="w-4 h-4 text-[#2D6A4F]" />
+                <div className="flex items-center justify-between text-xs text-ink-soft">
+                  <button onClick={selectAllLeads} className="flex items-center gap-1.5 hover:text-ink transition-colors">
+                    {leads.every((l) => selectedLeadIds.has(l.id)) ? (                        <CheckSquare className="w-4 h-4 text-brand-deep" />
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
@@ -366,7 +363,7 @@ export default function EmailCampaignsPage() {
                       <div key={i} className="h-12 rounded-lg app-card animate-pulse" />
                     ))
                   ) : leads.length === 0 ? (
-                    <div className="text-center py-8 text-[#9FB0A6] text-sm">No leads found</div>
+                    <div className="text-center py-8 text-ink-soft text-sm">No leads found</div>
                   ) : (
                     leads.map((lead) => {
                       const isSelected = selectedLeadIds.has(lead.id);
@@ -375,27 +372,26 @@ export default function EmailCampaignsPage() {
                           className={cn(
                             "w-full flex items-center gap-3 p-2.5 rounded-lg text-left transition-all",
                             isSelected
-                              ? "bg-[#34D399]/15 border border-[#34D399]/40"
+                              ? "bg-brand/15 border border-brand/40"
                               : "app-card app-card-hover hover:bg-white/[0.06]"
                           )}
                         >
-                          {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-[#2D6A4F] shrink-0" />
+                          {isSelected ? (                              <CheckSquare className="w-4 h-4 text-brand-deep shrink-0" />
                           ) : (
-                            <Square className="w-4 h-4 text-[#9FB0A6] shrink-0" />
+                            <Square className="w-4 h-4 text-ink-soft shrink-0" />
                           )}
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm text-[#F0F7F3] truncate">{lead.name}</div>
-                            <div className="text-xs text-[#9FB0A6] truncate">
+                            <div className="text-sm text-ink truncate">{lead.name}</div>
+                            <div className="text-xs text-ink-soft truncate">
                               {lead.phone} · {lead.source} · {lead.email || "no email"}
                             </div>
                           </div>
                           {lead.score > 0 && (
                             <span className={cn(
                               "text-xs font-medium px-1.5 py-0.5 rounded shrink-0",
-                              lead.score >= 70 ? "text-green-400 bg-green-500/10" :
+                              lead.score >= 70 ? "text-success bg-success/10" :
                               lead.score >= 40 ? "text-yellow-400 bg-yellow-500/10" :
-                              "text-[#9FB0A6] bg-gray-500/10"
+                              "text-ink-soft bg-neutral-soft/10"
                             )}>{lead.score}</span>
                           )}
                         </button>
@@ -413,7 +409,7 @@ export default function EmailCampaignsPage() {
                         <button key={p} onClick={() => { setLeadPage(p); loadLeads(leadSearch, p); }}
                           className={cn(
                             "px-3 py-1 rounded-lg text-xs",
-                            leadPage === p ? "bg-[#1B4332] text-white" : "bg-[#101713] text-[#9FB0A6] hover:bg-white/[0.06]"
+                            leadPage === p ? "bg-line-subtle text-white" : "bg-canvas text-ink-soft hover:bg-white/[0.06]"
                           )}
                         >{p}</button>
                       );
@@ -423,10 +419,10 @@ export default function EmailCampaignsPage() {
 
                 <div className="flex items-center gap-3 pt-2">
                   <button onClick={() => { setComposeStep("compose"); }}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                   >Back</button>
                   <button onClick={handleSend} disabled={selectedLeadIds.size === 0 || actionLoading === "send"}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
                   >
                     {actionLoading === "send" ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Sending to {selectedLeadIds.size}...</>
@@ -441,23 +437,23 @@ export default function EmailCampaignsPage() {
               <div className="space-y-4">
                 <input value={name} onChange={(e) => setName(e.target.value)}
                   placeholder="Campaign name"
-                  className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                  className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                 />
                 <input value={subject} onChange={(e) => setSubject(e.target.value)}
                   placeholder="Email subject"
-                  className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60"
+                  className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60"
                 />
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs text-[#9FB0A6]">Email Body (HTML)</label>
+                    <label className="text-xs text-ink-soft">Email Body (HTML)</label>
                     {selectedTemplate && (
-                      <span className="text-xs text-[#2D6A4F]">Template: {selectedTemplate}</span>
+                      <span className="text-xs text-brand-deep">Template: {selectedTemplate}</span>
                     )}
                   </div>
                   <textarea value={body} onChange={(e) => setBody(e.target.value)}
                     placeholder="<h1>Your HTML email here</h1><p>Use {{leadName}}, {{location}}, {{businessName}} as placeholders</p>"
                     rows={10}
-                    className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-[#34D399]/60 font-mono"
+                    className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-brand/60 font-mono"
                   />
                 </div>
 
@@ -465,41 +461,41 @@ export default function EmailCampaignsPage() {
                 {previewHtml && (
                   <div className="p-4 rounded-xl app-card">
                     <div className="flex items-center gap-2 mb-2">
-                      <Eye className="w-4 h-4 text-[#9FB0A6]" />
-                      <span className="text-xs text-[#9FB0A6]">Preview</span>
+                      <Eye className="w-4 h-4 text-ink-soft" />
+                      <span className="text-xs text-ink-soft">Preview</span>
                     </div>
-                    <div className="bg-[#101713] rounded-lg p-4 max-h-48 overflow-y-auto" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+                    <div className="bg-canvas rounded-lg p-4 max-h-48 overflow-y-auto" dangerouslySetInnerHTML={{ __html: previewHtml }} />
                   </div>
                 )}
 
-                <p className="text-xs text-[#9FB0A6]">
-                  Available variables: <code className="text-[#2D6A4F] bg-[#34D399]/15 px-1 rounded">{`{{leadName}}`}</code>, <code className="text-[#2D6A4F] bg-[#34D399]/15 px-1 rounded">{`{{location}}`}</code>, <code className="text-[#2D6A4F] bg-[#34D399]/15 px-1 rounded">{`{{businessName}}`}</code>, <code className="text-[#2D6A4F] bg-[#34D399]/15 px-1 rounded">{`{{dashboardUrl}}`}</code>
+                <p className="text-xs text-ink-soft">
+                  Available variables: <code className="text-brand-deep bg-brand/15 px-1 rounded">{`{{leadName}}`}</code>, <code className="text-brand-deep bg-brand/15 px-1 rounded">{`{{location}}`}</code>, <code className="text-brand-deep bg-brand/15 px-1 rounded">{`{{businessName}}`}</code>, <code className="text-brand-deep bg-brand/15 px-1 rounded">{`{{dashboardUrl}}`}</code>
                 </p>
 
                 {/* Scheduling Toggle */}
-                <div className="border-t border-white/10 pt-4">
+                <div className="border-t border-line pt-4">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" checked={enableScheduling} onChange={(e) => setEnableScheduling(e.target.checked)}
-                      className="rounded border-white/10 bg-white/[0.06] text-[#2D6A4F]"
+                      className="rounded border-line bg-white/[0.06] text-brand-deep"
                     />
-                    <Calendar className="w-4 h-4 text-[#9FB0A6]" />
-                    <span className="text-sm text-[#9FB0A6]">Schedule for later</span>
+                    <Calendar className="w-4 h-4 text-ink-soft" />
+                    <span className="text-sm text-ink-soft">Schedule for later</span>
                   </label>
                   {enableScheduling && (
                     <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)}
-                      className="mt-2 w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm"
+                      className="mt-2 w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm"
                     />
                   )}
                 </div>
 
                 {/* A/B Testing Toggle */}
-                <div className="border-t border-white/10 pt-4">
+                <div className="border-t border-line pt-4">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" checked={abTestEnabled} onChange={(e) => setAbTestEnabled(e.target.checked)}
-                      className="rounded border-white/10 bg-white/[0.06] text-[#2D6A4F]"
+                      className="rounded border-line bg-white/[0.06] text-brand-deep"
                     />
                     <FlaskConical className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm text-[#9FB0A6]">A/B Test — send two variants</span>
+                    <span className="text-sm text-ink-soft">A/B Test — send two variants</span>
                   </label>
                   {abTestEnabled && (
                     <div className="mt-3 space-y-3 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20">
@@ -509,22 +505,22 @@ export default function EmailCampaignsPage() {
                       </div>
                       <input value={variantSubject} onChange={(e) => setVariantSubject(e.target.value)}
                         placeholder="Variant B subject line"
-                        className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-purple-500/50"
+                        className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-purple-500/50"
                       />
                       <textarea value={variantBody} onChange={(e) => setVariantBody(e.target.value)}
                         placeholder="<h1>Variant B HTML email here</h1>"
                         rows={6}
-                        className="w-full px-4 py-2.5 rounded-xl app-card text-[#F0F7F3] text-sm placeholder-[#6B7C73] focus:outline-none focus:border-purple-500/50 font-mono"
+                        className="w-full px-4 py-2.5 rounded-xl app-card text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-purple-500/50 font-mono"
                       />
-                      <div className="flex items-center gap-2 text-xs text-[#9FB0A6]">
+                      <div className="flex items-center gap-2 text-xs text-ink-soft">
                         <span>Sample size per variant:</span>
                         <input type="number" min={5} max={50} value={samplePercent}
                           onChange={(e) => setSamplePercent(parseInt(e.target.value) || 20)}
-                          className="w-16 px-2 py-1 rounded-lg app-card text-[#F0F7F3] text-center"
+                          className="w-16 px-2 py-1 rounded-lg app-card text-ink text-center"
                         />
                         <span>% of total leads each</span>
                       </div>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-ink-soft">
                         After 24 hours, the variant with higher open rate automatically goes to the remaining leads.
                       </p>
                     </div>
@@ -541,18 +537,18 @@ export default function EmailCampaignsPage() {
                   setShowCompose(false);
                 }
               }}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
               >{composeStep === "leads" ? "Back" : "Cancel"}</button>
               {composeStep === "compose" && (
                 <>
                   <button onClick={openLeadSelector}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-[#9FB0A6] text-sm font-medium hover:bg-white/[0.06]"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-line text-ink-soft text-sm font-medium hover:bg-white/[0.06]"
                   >
                     <Users className="w-4 h-4" />
                     Select Leads{selectedLeadIds.size > 0 ? ` (${selectedLeadIds.size})` : ""}
                   </button>
                   <button onClick={openLeadSelector} disabled={!name.trim() || !subject.trim() || !body.trim()}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#34D399] to-[#2D6A4F] text-[#0A0F0C] text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand to-brand-soft text-canvas text-sm font-medium hover:opacity-90 disabled:opacity-50"
                   >
                     <Users className="w-4 h-4" /> Next: Select Leads
                   </button>

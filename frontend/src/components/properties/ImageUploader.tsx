@@ -107,14 +107,14 @@ export default function ImageUploader({
     <div className="space-y-3">
       {/* Label */}
       <div className="flex items-center justify-between">
-        <label className="text-xs text-[#7C8781] flex items-center gap-1.5">
+        <label className="text-xs text-ink-muted flex items-center gap-1.5">
           <ImageIcon className="w-3 h-3" />
           Property Images ({images.length}/{maxImages})
         </label>
         {images.length > 0 && (
           <button
             onClick={() => onChange([])}
-            className="text-[11px] text-red-400 hover:text-red-300 transition-colors"
+            className="text-[11px] text-danger hover:text-danger transition-colors"
           >
             Clear all
           </button>
@@ -131,22 +131,22 @@ export default function ImageUploader({
           className={cn(
             "relative flex flex-col items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer",
             isDragging
-              ? "border-leadflow-500 bg-[#1B4332]/10 scale-[1.02]"
-              : "border-[#E4E7DF] bg-[#F7F8F4] hover:border-[#D8DDD3] hover:bg-[#F1F3EE]",
+              ? "border-leadflow-500 bg-line-subtle/10 scale-[1.02]"
+              : "border-line bg-surface hover:border-line hover:bg-surface",
             uploading && "pointer-events-none opacity-60"
           )}
         >
           {uploading ? (
             <>
-              <Loader2 className="w-8 h-8 text-[#2D6A4F] animate-spin" />
+              <Loader2 className="w-8 h-8 text-brand-deep animate-spin" />
               <div className="text-center">
-                <p className="text-sm text-[#7C8781]">Uploading...</p>
-                <p className="text-xs text-gray-600 mt-0.5">{uploadProgress}</p>
+                <p className="text-sm text-ink-muted">Uploading...</p>
+                <p className="text-xs text-ink-soft mt-0.5">{uploadProgress}</p>
               </div>
               {/* Progress bar */}
-              <div className="w-full max-w-[200px] h-1 rounded-full bg-[#F1F3EE] overflow-hidden">
+              <div className="w-full max-w-[200px] h-1 rounded-full bg-surface overflow-hidden">
                 <motion.div
-                  className="h-full bg-[#2D6A4F] rounded-full"
+                  className="h-full bg-brand-deep rounded-full"
                   initial={{ width: "0%" }}
                   animate={{ width: "100%" }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -155,18 +155,18 @@ export default function ImageUploader({
             </>
           ) : (
             <>
-              <div className="w-12 h-12 rounded-full bg-[#1B4332]/10 flex items-center justify-center">
-                <Upload className="w-5 h-5 text-[#2D6A4F]" />
+              <div className="w-12 h-12 rounded-full bg-line-subtle/10 flex items-center justify-center">
+                <Upload className="w-5 h-5 text-brand-deep" />
               </div>
               <div className="text-center">
-                <p className="text-sm text-[#5C6B62] font-medium">
+                <p className="text-sm text-ink-muted font-medium">
                   Drop images here or click to browse
                 </p>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-ink-soft mt-1">
                   JPEG, PNG, WebP, GIF, AVIF — max 5MB each
                 </p>
               </div>
-              <span className="text-[11px] text-gray-600 mt-1">
+              <span className="text-[11px] text-ink-soft mt-1">
                 {remaining} slot{remaining !== 1 ? "s" : ""} remaining
               </span>
             </>
@@ -192,7 +192,7 @@ export default function ImageUploader({
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="group relative aspect-square rounded-lg overflow-hidden border border-[#E4E7DF] bg-white"
+                className="group relative aspect-square rounded-lg overflow-hidden border border-line bg-surface-raised"
               >
                 {/* Image */}
                 <img
@@ -207,7 +207,7 @@ export default function ImageUploader({
                       parent.classList.add("flex", "items-center", "justify-center");
                       const fallback = document.createElement("div");
                       fallback.className = "text-center";
-                      fallback.innerHTML = `<svg class="w-6 h-6 text-gray-600 mx-auto" ...></svg><p class="text-xs text-gray-600 mt-1">Failed to load</p>`;
+                      fallback.innerHTML = `<svg class="w-6 h-6 text-ink-soft mx-auto" ...></svg><p class="text-xs text-ink-soft mt-1">Failed to load</p>`;
                       parent.appendChild(fallback);
                     }
                   }}
@@ -217,7 +217,7 @@ export default function ImageUploader({
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <button
                     onClick={() => removeImage(index)}
-                    className="p-2 rounded-full bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+                    className="p-2 rounded-full bg-danger/80 hover:bg-danger text-white transition-colors"
                     title="Remove image"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -232,11 +232,11 @@ export default function ImageUploader({
                 {/* Status icons */}
                 {url.startsWith("blob:") ? (
                   <div className="absolute bottom-1 right-1">
-                    <Loader2 className="w-3 h-3 text-amber-400 animate-spin" />
+                    <Loader2 className="w-3 h-3 text-warning animate-spin" />
                   </div>
                 ) : (
                   <div className="absolute bottom-1 right-1">
-                    <CheckCircle2 className="w-3 h-3 text-green-400" />
+                    <CheckCircle2 className="w-3 h-3 text-success" />
                   </div>
                 )}
               </motion.div>
@@ -247,7 +247,7 @@ export default function ImageUploader({
 
       {/* Empty state */}
       {images.length === 0 && !uploading && (
-        <div className="text-center py-4 text-gray-600">
+        <div className="text-center py-4 text-ink-soft">
           <p className="text-xs">No images yet. Photos help leads visualize the property.</p>
         </div>
       )}

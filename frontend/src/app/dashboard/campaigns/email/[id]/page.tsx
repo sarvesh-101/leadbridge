@@ -38,8 +38,8 @@ export default function CampaignDetailPage() {
     finally { setRunningAbCheck(false); }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-[#9FB0A6]" /></div>;
-  if (!campaign) return <div className="text-center py-16 text-[#9FB0A6]">Campaign not found</div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-ink-soft" /></div>;
+  if (!campaign) return <div className="text-center py-16 text-ink-soft">Campaign not found</div>;
 
   const { campaign: c, recentEvents } = campaign;
   const openRate = c.deliveredCount > 0 ? Math.round((c.openedCount / c.deliveredCount) * 100) : 0;
@@ -60,37 +60,37 @@ export default function CampaignDetailPage() {
 
   return (
     <div className="space-y-6">
-      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-[#9FB0A6] hover:text-[#F0F7F3] transition-colors">
+      <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-ink-soft hover:text-ink transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to campaigns
       </button>
 
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F0F7F3]">{c.name}</h1>
-          <p className="text-[#9FB0A6] mt-1">{c.subject} · {c.totalRecipients} recipients</p>
+          <h1 className="text-2xl font-bold text-ink">{c.name}</h1>
+          <p className="text-ink-soft mt-1">{c.subject} · {c.totalRecipients} recipients</p>
         </div>
         <span className={cn("px-3 py-1 rounded-full text-xs font-medium",
-          c.status === "SENT" ? "bg-green-500/10 text-green-400" :
+          c.status === "SENT" ? "bg-success/10 text-success" :
           c.status === "SENDING" ? "bg-blue-500/10 text-blue-400" :
           c.status === "SCHEDULED" ? "bg-yellow-500/10 text-yellow-400" :
-          "bg-gray-500/10 text-[#9FB0A6]"
+          "bg-neutral-soft/10 text-ink-soft"
         )}>{c.status}</span>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         {[
-          { icon: Mail, label: "Delivered", value: `${c.deliveredCount}/${c.totalRecipients}`, color: "text-green-400" },
+          { icon: Mail, label: "Delivered", value: `${c.deliveredCount}/${c.totalRecipients}`, color: "text-success" },
           { icon: Eye, label: "Open Rate", value: `${openRate}%`, color: "text-violet-400" },
-          { icon: MousePointerClick, label: "Click Rate", value: `${clickRate}%`, color: "text-amber-400" },
-          { icon: Clock, label: "Failed", value: c.failedCount, color: "text-red-400" },
+          { icon: MousePointerClick, label: "Click Rate", value: `${clickRate}%`, color: "text-warning" },
+          { icon: Clock, label: "Failed", value: c.failedCount, color: "text-danger" },
           { icon: BarChart3, label: "Total Events", value: recentEvents?.length || 0, color: "text-blue-400" },
         ].map((s) => (
           <div key={s.label} className="p-4 rounded-xl app-card">
             <s.icon className={cn("w-5 h-5 mb-2", s.color)} />
-            <div className="text-xl font-bold text-[#F0F7F3]">{s.value}</div>
-            <div className="text-xs text-[#9FB0A6]">{s.label}</div>
+            <div className="text-xl font-bold text-ink">{s.value}</div>
+            <div className="text-xs text-ink-soft">{s.label}</div>
           </div>
         ))}
       </div>
@@ -98,20 +98,20 @@ export default function CampaignDetailPage() {
       {/* Time-Series Chart */}
       {timeline.length > 0 && (
         <div className="p-4 rounded-xl app-card">
-          <h3 className="text-sm font-semibold text-[#F0F7F3] mb-3">Engagement Timeline</h3>
+          <h3 className="text-sm font-semibold text-ink mb-3">Engagement Timeline</h3>
           <div className="flex items-end gap-1.5 h-32">
             {timeline.map(([hour, counts]) => (
               <div key={hour} className="flex-1 flex flex-col items-center justify-end gap-0.5">
                 <div className="w-full flex flex-col items-center gap-0.5">
                   <div className="w-full rounded-t bg-violet-500/60 transition-all" style={{ height: `${(counts.opens / maxCount) * 100}%` }} title={`${hour}: ${counts.opens} opens`} />
-                  <div className="w-full rounded-t bg-amber-500/60 transition-all" style={{ height: `${(counts.clicks / maxCount) * 100}%` }} title={`${hour}: ${counts.clicks} clicks`} />
+                  <div className="w-full rounded-t bg-warning/60 transition-all" style={{ height: `${(counts.clicks / maxCount) * 100}%` }} title={`${hour}: ${counts.clicks} clicks`} />
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex items-center gap-4 mt-2 text-xs text-[#9FB0A6]">
+          <div className="flex items-center gap-4 mt-2 text-xs text-ink-soft">
             <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-violet-500/60" /> Opens</span>
-            <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-amber-500/60" /> Clicks</span>
+            <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-warning/60" /> Clicks</span>
           </div>
         </div>
       )}
@@ -122,7 +122,7 @@ export default function CampaignDetailPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <FlaskConical className="w-5 h-5 text-purple-400" />
-              <h3 className="text-sm font-semibold text-[#F0F7F3]">A/B Test Results</h3>
+              <h3 className="text-sm font-semibold text-ink">A/B Test Results</h3>
             </div>
             {(abData.status === "TESTING" || abData.status === "PENDING") && (
               <button onClick={triggerAbCheck} disabled={runningAbCheck}
@@ -134,46 +134,46 @@ export default function CampaignDetailPage() {
             )}
           </div>
           {abData.winner && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 mb-3">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 border border-success/20 mb-3">
               <Trophy className="w-5 h-5 text-yellow-400" />
-              <span className="text-sm text-[#F0F7F3] font-medium">Winner: Variant {abData.winner}</span>
-              <span className="text-xs text-[#9FB0A6]">({abData.aOpens} opens A · {abData.bOpens} opens B)</span>
+              <span className="text-sm text-ink font-medium">Winner: Variant {abData.winner}</span>
+              <span className="text-xs text-ink-soft">({abData.aOpens} opens A · {abData.bOpens} opens B)</span>
             </div>
           )}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="p-3 rounded-lg app-card">
-              <p className="text-xs text-[#9FB0A6] mb-1">Variant A Opens</p>
-              <p className="text-lg font-bold text-[#F0F7F3]">{abData.aOpens} <span className="text-xs text-[#9FB0A6]">/ {abData.aSent}</span></p>
-              <p className="text-xs text-[#9FB0A6]">{abData.aSent > 0 ? Math.round((abData.aOpens / abData.aSent) * 100) : 0}%</p>
+              <p className="text-xs text-ink-soft mb-1">Variant A Opens</p>
+              <p className="text-lg font-bold text-ink">{abData.aOpens} <span className="text-xs text-ink-soft">/ {abData.aSent}</span></p>
+              <p className="text-xs text-ink-soft">{abData.aSent > 0 ? Math.round((abData.aOpens / abData.aSent) * 100) : 0}%</p>
             </div>
             <div className="p-3 rounded-lg app-card">
-              <p className="text-xs text-[#9FB0A6] mb-1">Variant B Opens</p>
-              <p className="text-lg font-bold text-[#F0F7F3]">{abData.bOpens} <span className="text-xs text-[#9FB0A6]">/ {abData.bSent}</span></p>
-              <p className="text-xs text-[#9FB0A6]">{abData.bSent > 0 ? Math.round((abData.bOpens / abData.bSent) * 100) : 0}%</p>
+              <p className="text-xs text-ink-soft mb-1">Variant B Opens</p>
+              <p className="text-lg font-bold text-ink">{abData.bOpens} <span className="text-xs text-ink-soft">/ {abData.bSent}</span></p>
+              <p className="text-xs text-ink-soft">{abData.bSent > 0 ? Math.round((abData.bOpens / abData.bSent) * 100) : 0}%</p>
             </div>
           </div>
           {abData.holdoutLeadIds?.length > 0 && (
-            <p className="text-xs text-[#9FB0A6] mt-2">{abData.holdoutLeadIds.length} leads in holdout</p>
+            <p className="text-xs text-ink-soft mt-2">{abData.holdoutLeadIds.length} leads in holdout</p>
           )}
         </div>
       )}
 
       {/* Recent Events */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[#F0F7F3]">Recent Events ({recentEvents?.length || 0})</h3>
+        <h3 className="text-sm font-semibold text-ink">Recent Events ({recentEvents?.length || 0})</h3>
         {(!recentEvents || recentEvents.length === 0) ? (
           <div className="text-center py-8 rounded-xl app-card">
-            <Eye className="w-8 h-8 text-[#9FB0A6] mx-auto mb-2" />
-            <p className="text-sm text-[#9FB0A6]">No tracking events yet</p>
+            <Eye className="w-8 h-8 text-ink-soft mx-auto mb-2" />
+            <p className="text-sm text-ink-soft">No tracking events yet</p>
           </div>
         ) : (
           <div className="space-y-1 max-h-64 overflow-y-auto">
             {recentEvents.slice(0, 50).map((e: any) => (
               <div key={e.id} className="flex items-center gap-3 p-2 rounded-lg app-card">
-                {e.event === "open" ? <Eye className="w-3.5 h-3.5 text-violet-400" /> : <MousePointerClick className="w-3.5 h-3.5 text-amber-400" />}
-                <span className="text-xs text-[#9FB0A6]">{e.event === "open" ? "Opened" : "Clicked"}</span>
-                {e.url && <span className="text-xs text-[#9FB0A6] truncate max-w-[200px]">{e.url}</span>}
-                <span className="text-xs text-[#9FB0A6] ml-auto">{new Date(e.createdAt).toLocaleString()}</span>
+                {e.event === "open" ? <Eye className="w-3.5 h-3.5 text-violet-400" /> : <MousePointerClick className="w-3.5 h-3.5 text-warning" />}
+                <span className="text-xs text-ink-soft">{e.event === "open" ? "Opened" : "Clicked"}</span>
+                {e.url && <span className="text-xs text-ink-soft truncate max-w-[200px]">{e.url}</span>}
+                <span className="text-xs text-ink-soft ml-auto">{new Date(e.createdAt).toLocaleString()}</span>
               </div>
             ))}
           </div>
